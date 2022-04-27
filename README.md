@@ -6,7 +6,8 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of morphospace is to …
+A package for people who can't plot morphospaces good and wanna learn to do other geometric morphometrics suff good too.
+
 
 ## Installation
 
