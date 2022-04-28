@@ -81,7 +81,9 @@ mspace <- function(shapes,
   gridcoords <- data.matrix(expand.grid(scores1, scores2))
   gridcoords_mag <- gridcoords * mag
 
-  sh_arr <- sample_ax(gridcoords_mag, vectors, center, p, k) * size.models
+  #sh_arr <- sample_ax(gridcoords_mag, vectors, center, p, k) * size.models
+  sh_mat <- rev_eigen(gridcoords_mag, vectors, center)
+  sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k) * size.models
   sh_arr[,2,] <- sh_arr[,2,] * asp.models
 
 
@@ -110,6 +112,7 @@ mspace <- function(shapes,
   results <- list(p = p, k = k, plotax = axes, x = pca$x, rotation = pca$rotation, center = pca$center)
   class(results) <- "mspace"
   return(invisible(results))
+
 }
 
 
@@ -119,13 +122,31 @@ mspace <- function(shapes,
 #'
 #' @param shapes
 #' @param mspace
+#' @param pipe
 #' @param ...
 #'
 #' @return
 #' @export
 #'
 #' @examples
-proj_shapes <- function(shapes, mspace, ...) {
+# proj_shapes <- function(shapes, mspace, ...) {
+#
+#   if(length(dim(shapes)) == 2) {
+#     data2d <- shapes
+#   } else {
+#     data2d <- geomorph::two.d.array(shapes)
+#   }
+#
+#   scores <- proj_eigen(data2d, mspace$rotation)
+#
+#   if(.Device != "null device") {
+#     points(scores[, mspace$plotax], ...)
+#     return(invisible(scores))
+#   } else {
+#     return(scores)
+#   }
+# }
+proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 
   if(length(dim(shapes)) == 2) {
     data2d <- shapes
@@ -135,14 +156,12 @@ proj_shapes <- function(shapes, mspace, ...) {
 
   scores <- proj_eigen(data2d, mspace$rotation)
 
-  if(.Device != "null device") {
-    points(scores[, mspace$plotax], ...)
-    return(invisible(scores))
-  } else {
-    return(scores)
-  }
-}
+  if(.Device != "null device") points(scores[, mspace$plotax], ...)
 
+  if(pipe == FALSE) return(scores)
+  if(pipe == TRUE) return(invisible(mspace))
+
+}
 
 ###############################################################################################
 
@@ -150,26 +169,86 @@ proj_shapes <- function(shapes, mspace, ...) {
 #'
 #' @param consensus
 #' @param mspace
-#' @param add
+#' @param pipe
 #' @param ...
 #'
 #' @return
 #' @export
 #'
 #' @examples
-proj_consensus <- function(consensus, mspace, add = FALSE, ...) {
+# proj_consensus <- function(consensus, mspace, add = FALSE, ...) {
+#
+#   name_mspace <- as.character(match.call()$mspace)
+#
+#   gr_centroids <- proj_shapes(consensus, mspace)
+#
+#   if(.Device != "null device") points(gr_centroids[, mspace$plotax], ...)
+#   if(add == TRUE) {
+#     mspace$gr_centroids <- gr_centroids
+#     assign(x = name_mspace, value = mspace, envir = globalenv())
+#   } else {
+#     return(gr_centroids)
+#   }
+# }
+proj_consensus <- function(consensus, mspace, pipe = TRUE, ...) {
 
-  name_mspace <- as.character(match.call()$mspace)
-
-  gr_centroids <- proj_shapes(consensus, mspace)
-
-  if(.Device != "null device") points(gr_centroids[, mspace$plotax], ...)
-  if(add == TRUE) {
-    mspace$gr_centroids <- gr_centroids
-    assign(x = name_mspace, value = mspace, envir = globalenv())
+  if(length(dim(consensus)) == 2) {
+    data2d <- consensus
   } else {
-    return(gr_centroids)
+    data2d <- geomorph::two.d.array(consensus)
   }
+
+  gr_centroids <- proj_eigen(data2d, mspace$rotation)
+
+  # gr_centroids <- proj_shapes(consensus, mspace)
+  # if(class(gr_centroids) == "mspace") gr_centroids <- gr_centroids$x
+  if(.Device != "null device") points(gr_centroids[, mspace$plotax], ...)
+
+  mspace$gr_centroids <- gr_centroids
+
+  if(pipe == FALSE) return(gr_centroids)
+  if(pipe == TRUE) return(invisible(mspace))
+
+}
+
+
+###############################################################################################
+
+#' Project morphometric axis/axes into morphospace
+#'
+#' @param neword
+#' @param mspace
+#' @param ax
+#' @param p
+#' @param k
+#' @param pipe
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+proj_axes <- function(neword, mspace, ax = 1, p = NULL, k = NULL, pipe = TRUE, ...) {
+
+  ext_shapes <- vector(mode = "list", length = length(ax))
+  names(ext_shapes) <- paste0("axis_", ax)
+  for(i in 1:length(ax)){
+
+    coeffs <- neword$rotation[, ax[i]]
+    scores <- apply(matrix(neword$x[, ax[i]]), 2, range)
+    center <- neword$center
+
+    ext_shapes2d <- rev_eigen(scores = scores, vector = coeffs, center = center)
+    ext_scores <- proj_eigen(ext_shapes2d, mspace$rotation[, mspace$plotax])
+    if(pipe == FALSE) ext_shapes[[i]] <- arrayspecs(ext_shapes2d, k, p)
+
+    lines(ext_scores, ...)
+
+  }
+
+  if(pipe == FALSE) return(ext_shapes)
+  if(pipe == TRUE) return(invisible(mspace))
+
 }
 
 
@@ -179,35 +258,56 @@ proj_consensus <- function(consensus, mspace, add = FALSE, ...) {
 #'
 #' @param tree
 #' @param mspace
-#' @param add
+#' @param pipe
 #' @param ...
 #'
 #' @return
 #' @export
 #'
 #' @examples
-proj_phylogeny <- function(tree, mspace, add = TRUE, ...) {
+# proj_phylogeny <- function(tree, mspace, add = TRUE, ...) {
+#
+#   name_mspace <- as.character(match.call()$mspace)
+#
+#   if(is.null(mspace$gr_centroids)) stop("Group centroids have not been provided; try with proj_consensus(..., add = TRUE)")
+#
+#   nodes_scores <- apply(mspace$gr_centroids[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
+#   phylo_scores <- rbind(mspace$gr_centroids[tree$tip.label,], nodes_scores)
+#
+#   if(.Device != "null device") {
+#     for(i in 1:nrow(tree$edge)) {
+#       lines(rbind(phylo_scores[tree$edge[i, 1], mspace$plotax], phylo_scores[tree$edge[i, 2], mspace$plotax]))
+#     }
+#   }
+#
+#   if(add == TRUE) {
+#     mspace$phylo_scores <- phylo_scores
+#     mspace$phylo <- tree
+#     assign(x = name_mspace, value = mspace, envir = globalenv())
+#   } else {return(phylo_scores)}
+#
+# }
+proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 
-  name_mspace <- as.character(match.call()$mspace)
-
-  if(is.null(mspace$gr_centroids)) stop("Group centroids have not been provided; try with proj_consensus(..., add = TRUE)")
+  if(is.null(mspace$gr_centroids)) stop("Group centroids have not been provided; add proj_consensus() before")
 
   nodes_scores <- apply(mspace$gr_centroids[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
   phylo_scores <- rbind(mspace$gr_centroids[tree$tip.label,], nodes_scores)
 
   if(.Device != "null device") {
     for(i in 1:nrow(tree$edge)) {
-      lines(rbind(phylo_scores[tree$edge[i, 1], mspace$plotax], phylo_scores[tree$edge[i, 2], mspace$plotax]))
+      lines(rbind(phylo_scores[tree$edge[i, 1], mspace$plotax], phylo_scores[tree$edge[i, 2], mspace$plotax]), ...)
     }
   }
 
-  if(add == TRUE) {
-    mspace$phylo_scores <- phylo_scores
-    mspace$phylo <- tree
-    assign(x = name_mspace, value = mspace, envir = globalenv())
-  } else {return(phylo_scores)}
+  mspace$phylo_scores <- phylo_scores
+  mspace$phylo <- tree
+
+  if(pipe == FALSE) return(phylo_scores)
+  if(pipe == TRUE) return(invisible(mspace))
 
 }
+
 
 ###############################################################################################
 
@@ -215,13 +315,20 @@ proj_phylogeny <- function(tree, mspace, add = TRUE, ...) {
 #'
 #' @param mspace
 #' @param groups
+#' @param pipe
 #' @param ...
 #'
 #' @return
 #' @export
 #'
 #' @examples
-proj_groups <- function(mspace, groups, ...) { hulls_by_group_2D(mspace$x[, mspace$plotax], fac = groups, ...) }
+proj_groups <- function(mspace, groups, pipe = TRUE, ...) {
+
+  hulls_by_group_2D(mspace$x[, mspace$plotax], fac = groups, ...)
+
+  if(pipe == TRUE) return(invisible(mspace))
+
+  }
 
 
 ###############################################################################################

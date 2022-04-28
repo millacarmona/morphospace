@@ -4,7 +4,7 @@
 \alias{proj_phylogeny}
 \title{Project phylogenetic structure into morphospace}
 \usage{
-proj_phylogeny(tree, mspace, add = TRUE, ...)
+proj_phylogeny(tree, mspace, pipe = TRUE, ...)
 }
 \arguments{
 \item{...}{}

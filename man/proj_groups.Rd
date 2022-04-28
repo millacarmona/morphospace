@@ -4,7 +4,7 @@
 \alias{proj_groups}
 \title{Delimit groups in morphospace}
 \usage{
-proj_groups(mspace, groups, ...)
+proj_groups(mspace, groups, pipe = TRUE, ...)
 }
 \arguments{
 \item{...}{}

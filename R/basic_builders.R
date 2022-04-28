@@ -40,11 +40,11 @@ proj_eigen <- function(x, vectors) { x %*% vectors }
 #' @export
 #'
 #' @examples
-sample_ax <- function(scores, vector, center, p, k) {
-
-  sh_mat <- rev_eigen(scores, vector, center)
-  sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k)
-  return(sh_arr)
-
-}
+# sample_ax <- function(scores, vector, center, p, k) {
+#
+#   sh_mat <- rev_eigen(scores, vector, center)
+#   sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k)
+#   return(sh_arr)
+#
+# }
 

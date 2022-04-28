@@ -4,7 +4,7 @@
 \alias{proj_shapes}
 \title{Project shapes into morphospace}
 \usage{
-proj_shapes(shapes, mspace, ...)
+proj_shapes(shapes, mspace, pipe = TRUE, ...)
 }
 \arguments{
 \item{...}{}

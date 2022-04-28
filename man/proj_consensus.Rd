@@ -4,7 +4,7 @@
 \alias{proj_consensus}
 \title{Project consensus shape(s) into morphospace}
 \usage{
-proj_consensus(consensus, mspace, add = FALSE, ...)
+proj_consensus(consensus, mspace, pipe = TRUE, ...)
 }
 \arguments{
 \item{...}{}
