@@ -240,10 +240,15 @@ proj_axes <- function(neword, mspace, ax = 1, p = NULL, k = NULL, pipe = TRUE, .
 
     ext_shapes2d <- rev_eigen(scores = scores, vector = coeffs, center = center)
     ext_scores <- proj_eigen(ext_shapes2d, mspace$rotation[, mspace$plotax])
-    if(pipe == FALSE) ext_shapes[[i]] <- arrayspecs(ext_shapes2d, k, p)
+    if(pipe == FALSE) {
+      if(is.null(p) | is.null(k)) {
+        stop("Please provide values for both p and k")
+      } else {
+        ext_shapes[[i]] <- arrayspecs(ext_shapes2d, k, p)
+      }
 
-    lines(ext_scores, ...)
-
+      lines(ext_scores, ...)
+    }
   }
 
   if(pipe == FALSE) return(ext_shapes)
