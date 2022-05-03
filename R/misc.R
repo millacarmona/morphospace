@@ -15,7 +15,7 @@
 #' @export
 #'
 #' @examples
-stack <- function(shapes, links = NULL, mshape = TRUE, ...) {
+pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 
   dat <- shapes_mat(shapes)
 
