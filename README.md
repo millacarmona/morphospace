@@ -128,7 +128,8 @@ morphospace3 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
 ``` r
 
 # Plot morphospace, project species' meanshapes and phylogenetic structure
-#(requires a phy object)
+# (requires a phy object and the previous addition of mean shapes corresponding
+# to the tips)
 morphospace4 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
@@ -138,6 +139,9 @@ morphospace4 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
 
 ``` r
 
+# Check the elements of each mspace object, note the slots corresponding to groups 
+# mean shapes and classification, the phylogenetic structure and scores for nodes
+# and tips.
 names(morphospace1)
 #> [1] "x"        "rotation" "center"   "datype"   "ordtype"  "plotinfo"
 names(morphospace2)
@@ -153,7 +157,7 @@ names(morphospace4)
 Another element that can be projected and visualized in morphospaces are
 morphometric axes, i.e. a synthetic axis built as a linear combination
 of shape variables. The following chunk illustrates how to combine the
-pipe workflow with the `proj_axis` function called outside the pipe to
+pipe workflow with the `proj_axis` function called outside the pipe, to
 compute and project the first PC of each species (i.e. the morphometric
 axis of maximum intraspecific variation within each species).
 
