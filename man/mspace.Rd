@@ -8,8 +8,8 @@ mspace(
   shapes,
   axes = c(1, 2),
   links,
-  p = NA,
-  k = NA,
+  p = NULL,
+  k = NULL,
   FUN = prcomp,
   nh = 5,
   nv = 4,
@@ -22,8 +22,9 @@ mspace(
   rot.models = 0,
   size.models = 1,
   asp.models = 1,
-  col.model = "#708095",
-  lwd.model = 1,
+  col.models = "#708095",
+  bg.models = NULL,
+  lwd.models = 1,
   points = FALSE,
   cex.ldm = 1,
   col.ldm = "black",
@@ -31,11 +32,58 @@ mspace(
 )
 }
 \arguments{
-\item{...}{}
+\item{shapes}{Shapes data.}
+
+\item{axes}{Numeric of length 2, indicating the axes to be plotted.}
+
+\item{links}{A list with the indices of the coordinates defining the
+wireframe (following the format used in \code{Morpho}).}
+
+\item{p}{Numeric, indicating the number of landmarks/semilandmarks used (for
+landmark data only).}
+
+\item{k}{Numeric, indicating the number of cartesian dimensions of
+landmarks/semilandmarks (for landmark data only).}
+
+\item{FUN}{The function to be used for synthesizing geometric morphometric
+variation. The options include \code{prcomp}, \code{bg_prcomp} and
+\code{phy_prcomp}.}
+
+\item{nh}{Numeric; the number of shape models along the x axis.}
+
+\item{nv}{Numeric; the number of shape models along the y axis.}
+
+\item{mag}{Numeric; magnifying factor for shape models.}
+
+\item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic plot
+function}
+
+\item{rot.models}{Numeric; angle (in degrees) to rotate shape models.}
+
+\item{size.models}{Numeric; size factor for shape models.}
+
+\item{asp.models}{Numeric; the y/x aspect ratio of shape models.}
+
+\item{col.models}{The color for wireframes/outlines.}
+
+\item{bg.models}{Background color for outlines.}
+
+\item{lwd.models}{Numeric; the width of the lines in wireframes/outlines.}
+
+\item{points}{Logical; whether to plot the scatter points.}
+
+\item{cex.ldm}{Numeric; size of landmarks/semilandmarks in the background
+models.}
+
+\item{col.ldm}{The color of landmarks/semilandmarks in the background models.}
+
+\item{...}{Further arguments passed to \link{FUN}.}
 }
 \value{
 
 }
 \description{
-Create morphospace
+Create a morphospace as an ordination comprising set of axes
+synthesizing shape variation. Allows a variety of multivariate methods for
+building the ordination.
 }

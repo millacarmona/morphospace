@@ -2,16 +2,26 @@
 % Please edit documentation in R/mspace_workflow.R
 \name{proj_axes}
 \alias{proj_axes}
-\title{Project morphometric axis/axes into morphospace}
+\title{Project morphometric axes into morphospace}
 \usage{
-proj_axes(neword, mspace, ax = 1, p = NULL, k = NULL, pipe = TRUE, ...)
+proj_axes(neword, mspace, ax = 1, pipe = TRUE, ...)
 }
 \arguments{
-\item{...}{}
+\item{neword}{An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
+\code{"phy_prcomp"} or \code{"pls"} object).}
+
+\item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
+
+\item{ax}{A vector indicating the axes from \code{neword} to be projected.}
+
+\item{pipe}{Logical; is the function being included in a pipe?}
+
+\item{...}{Further arguments passed to \code{\link[=lines]{lines()}}.}
 }
 \value{
 
 }
 \description{
-Project morphometric axis/axes into morphospace
+Project one or more morphometric axes (i.e., linear combinations
+of shape variables) into an existing morphospace.
 }

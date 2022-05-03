@@ -20,5 +20,6 @@ for each group.}
 
 }
 \description{
-Plot convex hulls for different groups in 2D scatterplots.
+Plot convex hulls for different groups in 2D scatterplots
+created using the generic \code{\link[=plot]{plot()}} function.
 }

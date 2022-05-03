@@ -6,7 +6,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-A package for people who can't plot morphospaces good and wanna learn to do other geometric morphometrics suff good too.
+A package for people who can't visualize morphospaces good and wanna learn to do other geometric morphometrics stuff good too.
 
 
 ## Installation

@@ -21,5 +21,6 @@ for each group.}
 
 }
 \description{
-Plot 3D convex hulls for a series of groups
+Plot convex hulls for different groups in 3D scatterplots
+created using \code{rgl}.
 }

@@ -21,8 +21,7 @@ the new data to predict shapes at the desired \code{xvalue}.}
 
 }
 \description{
-A function to detrend (i.e. standardize) shape data using the
-functional relationship between shape data and some external explanatory
-variable(s) (works for both factors and numerics), estimated using a linear
-model.
+Detrend (i.e. standardize) shape data using the functional
+relationship between shape data and some external explanatory variable(s)
+(works for both factors and numerics), estimated using a linear model.
 }

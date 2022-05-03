@@ -3,9 +3,11 @@
 
 #' Pile shapes
 #'
-#' @param shapes A \code{k x p x n} array of superimposed landmarks.
-#' @param links An optional list containing the indices of the coordinates
-#'   defining the wireframe in Morpho format.
+#' @description Superimpose all the shapes in the sample.
+#'
+#' @param shapes Shape data.
+#' @param links An optional list with the indices of the coordinates defining
+#'   the wireframe (following the format used in \code{Morpho}).
 #' @param mshape Logical; whether to plot the mean configuration.
 #' @param ... Additional arguments passed to [plot()].
 #'
@@ -13,16 +15,41 @@
 #' @export
 #'
 #' @examples
-stack <- function(shapes, links = NULL, mshape = TRUE, ...){
+stack <- function(shapes, links = NULL, mshape = TRUE, ...) {
+
+  dat <- shapes_mat(shapes)
+
+  if(dat$datype == "fcoef") {
+    coords_l <- lapply(1:nrow(dat$data2d), function(i){
+      inv_efourier(coe = dat$data2d[i,], nb.p = 300)
+    })
+    shapes_coord <- abind::abind(coords_l, along = 3)
+  } else {
+    shapes_coord <- shapes
+  }
 
   longlist <- c()
-  for(i in 1:dim(shapes)[3]) longlist <- rbind(longlist, shapes[,,i])
+  for(i in 1:dim(shapes_coord)[3]) longlist <- rbind(longlist, shapes_coord[,,i])
 
-  plot(longlist, col = "#708095", axes = FALSE, xlab = "", ylab = "", ...)
-  if(mshape == TRUE) {
-    points(consensus(shapes), pch = 16, ...)
-    if(!is.null(links)) { for(l in 1:length(links)) lines(consensus(shapes)[links[[l]],]) }
+  if(dat$datype == "landm") {
+    plot(longlist, col = "#708095", axes = FALSE, xlab = "", ylab = "", ...)
+
+    if(mshape == TRUE) {
+      points(consensus(shapes_coord), pch = 16, ...)
+      if(!is.null(links)) {
+        for(l in 1:length(links)) lines(consensus(shapes_coord)[links[[l]],])
+      }
+    }
+  } else {
+    plot(longlist, axes = FALSE, xlab = "", ylab = "", type = "n")
+
+    for(i in 1:dim(shapes_coord)[3]) lines(shapes_coord[,,i], col = "#708095")
+
+    if(mshape == TRUE) {
+      lines(consensus(shapes_coord), lwd = 4)
+    }
   }
+
 }
 
 
@@ -30,7 +57,8 @@ stack <- function(shapes, links = NULL, mshape = TRUE, ...){
 
 #' Plot 2D convex hulls for a series of groups
 #'
-#' @description Plot convex hulls for different groups in 2D scatterplots.
+#' @description Plot convex hulls for different groups in 2D scatterplots
+#'   created using the generic [plot()] function.
 #'
 #' @param xy Coordinates of the scatterplot.
 #' @param fac A factor grouping data points.
@@ -58,6 +86,9 @@ hulls_by_group_2D <- function(xy, fac, col = 1:nlevels(fac), ...) {
 #############################################################################################
 
 #' Plot 3D convex hulls for a series of groups
+#'
+#' @description Plot convex hulls for different groups in 3D scatterplots
+#'   created using \code{rgl}.
 #'
 #' @param xyz Coordinates for the scatterplot
 #' @param fac A factor grouping data points.

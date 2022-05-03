@@ -2,12 +2,12 @@
 % Please edit documentation in R/shapes_operations.R
 \name{consensus}
 \alias{consensus}
-\title{Obtain consensus shape(s)}
+\title{Compute consensus shape(s)}
 \usage{
-consensus(shapes, index = 1:dim(shapes)[3])
+consensus(shapes, index = NULL)
 }
 \arguments{
-\item{shapes}{A \code{k x p x n} array of superimposed landmarks.}
+\item{shapes}{Shape data.}
 
 \item{index}{Either a numeric vector indicating the configurations to be
 averaged or a factor whose levels are used to average groups of

@@ -3,29 +3,37 @@
 
 #' Create morphospace
 #'
-#' @param shapes
-#' @param axes
-#' @param links
-#' @param p
-#' @param k
-#' @param FUN
-#' @param nh
-#' @param nv
-#' @param mag
-#' @param asp
-#' @param xlim
-#' @param ylim
-#' @param xlab
-#' @param ylab
-#' @param rot.models
-#' @param size.models
-#' @param asp.models
-#' @param col.model
-#' @param lwd.model
-#' @param points
-#' @param cex.ldm
-#' @param col.ldm
-#' @param ...
+#' @description Create a morphospace as an ordination comprising set of axes
+#'   synthesizing shape variation. Allows a variety of multivariate methods for
+#'   building the ordination.
+#'
+#' @param shapes Shapes data.
+#' @param axes Numeric of length 2, indicating the axes to be plotted.
+#' @param links A list with the indices of the coordinates defining the
+#'   wireframe (following the format used in \code{Morpho}).
+#' @param p Numeric, indicating the number of landmarks/semilandmarks used (for
+#'   landmark data only).
+#' @param k Numeric, indicating the number of cartesian dimensions of
+#'   landmarks/semilandmarks (for landmark data only).
+#' @param FUN The function to be used for synthesizing geometric morphometric
+#'   variation. The options include \code{prcomp}, \code{bg_prcomp} and
+#'   \code{phy_prcomp}.
+#' @param nh Numeric; the number of shape models along the x axis.
+#' @param nv Numeric; the number of shape models along the y axis.
+#' @param mag Numeric; magnifying factor for shape models.
+#' @param rot.models  Numeric; angle (in degrees) to rotate shape models.
+#' @param size.models Numeric; size factor for shape models.
+#' @param asp.models Numeric; the y/x aspect ratio of shape models.
+#' @param col.models The color for wireframes/outlines.
+#' @param bg.models Background color for outlines.
+#' @param lwd.models Numeric; the width of the lines in wireframes/outlines.
+#' @param points Logical; whether to plot the scatter points.
+#' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
+#'   models.
+#' @param col.ldm The color of landmarks/semilandmarks in the background models.
+#' @param xlim,ylim,xlab,ylab,asp Standard arguments passed to the generic plot
+#'   function
+#' @param ... Further arguments passed to [FUN].
 #'
 #' @return
 #' @export
@@ -34,8 +42,8 @@
 mspace <- function(shapes,
                    axes = c(1,2),
                    links,
-                   p = NA,
-                   k = NA,
+                   p = NULL,
+                   k = NULL,
                    FUN = prcomp,
                    nh = 5,
                    nv = 4,
@@ -48,69 +56,87 @@ mspace <- function(shapes,
                    rot.models = 0,
                    size.models = 1,
                    asp.models = 1,
-                   col.model = "#708095",
-                   lwd.model = 1,
+                   col.models = "#708095",
+                   bg.models = NULL,
+                   lwd.models = 1,
                    points = FALSE,
                    cex.ldm = 1,
                    col.ldm = "black",
                    ...) {
 
+  dat <- shapes_mat(shapes)
+  data2d <- dat$data2d
+  datype <- dat$datype
 
-  if(is.na(p) | is.na(k)) {
-    if(length(dim(shapes)) == 3){
-      p <- nrow(shapes)
-      k <- ncol(shapes)
-    } else {stop("Provide values for p and/or k, or deliver shapes as an array")}
+  if(datype == "landm") {
+    if(is.null(p) | is.null(k)) {
+      if(length(dim(shapes)) == 3){
+        p <- nrow(shapes)
+        k <- ncol(shapes)
+      } else {stop("Provide values for p and k, or provide shapes as an array")}
+    }
+  } else {
+    links <- NULL
+    p <- 300
+    k <- 2
   }
 
-  if(length(dim(shapes)) == 3) shapes <- geomorph::two.d.array(shapes)
+  ordtype <- match.call()$FUN
+  if(is.null(ordtype)) ordtype <- "prcomp"
 
   FUN <- match.fun(FUN)
-  pca <- FUN(shapes, ...)
+  ordination <- FUN(data2d, ...)
 
-  scores1 = seq(from = min(pca$x[,axes[1]]),
-                to   = max(pca$x[,axes[1]]),
-                length.out = nh)
-  scores2 = seq(from = min(pca$x[,axes[2]]),
-                to   = max(pca$x[,axes[2]]),
-                length.out = nv)
-  vectors = pca$rotation[,axes]
-  center = pca$center
+  shapemodels <- morphogrid(ordination = ordination, axes = axes, datype = datype,
+                            x = NULL, y = NULL, p = p, k = k, nh = nh, nv = nv, mag = mag,
+                            asp = asp, xlim = xlim, ylim = ylim, rot.models = rot.models,
+                            size.models = size.models, asp.models = asp.models)
+  models_mat <- shapemodels$models_mat
+  models_arr <- shapemodels$models_arr
+  plotframe_x <- shapemodels$plotframe[,1]
+  plotframe_y <- shapemodels$plotframe[,2]
 
+  if(!is.null(xlim)) xlim <- range(c(plotframe_x, models_mat[,1]))
+  if(!is.null(ylim)) ylim <- range(c(plotframe_y, models_mat[,2]))
 
-  gridcoords <- data.matrix(expand.grid(scores1, scores2))
-  gridcoords_mag <- gridcoords * mag
+  if(is.null(xlab)) xlab <- paste0("PC", axes[1])
+  if(is.null(ylab)) ylab <- paste0("PC", axes[2])
 
-  #sh_arr <- sample_ax(gridcoords_mag, vectors, center, p, k) * size.models
-  sh_mat <- rev_eigen(gridcoords_mag, vectors, center)
-  sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k) * size.models
-  sh_arr[,2,] <- sh_arr[,2,] * asp.models
-
-
-  if(rot.models!=0) for(i in 1:dim(sh_arr)[3]) {
-    sh_arr[,,i] <- spdep::Rotation(sh_arr[,,i], rot.models*0.0174532925199)
+  if(ordtype == "bg_prcomp") {
+    xlab <- paste0("bg", xlab)
+    ylab <- paste0("bg", ylab)
+  }
+  if(ordtype == "phy_prcomp") {
+    xlab <- paste0("phy", xlab)
+    ylab <- paste0("phy", ylab)
   }
 
-  models_coords<-c()
-  models_arr<-sh_arr * 0
-  for(i in 1:nrow(gridcoords)) {
-    descentmat <- matrix(rep(gridcoords[i,], p), p, k, byrow = TRUE)
-    models_coords <- rbind(models_coords, (sh_arr[,,i] * 0.07) + descentmat)
-    models_arr[,,i] <- (sh_arr[,,i] * 0.07) + descentmat
-  }
-
-  plot(models_coords, type="n", asp=asp,
+  plot(models_mat, type = "n", asp = asp,
        xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
 
-  for(i in 1:nrow(gridcoords)) {
-    points(models_arr[,,i], pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
-    for(l in 1:length(links)) lines(models_arr[,,i][links[[l]],], col = col.model, lwd = lwd.model)
+  for(i in 1:dim(models_arr)[3]) {
+    if(datype == "landm") {
+      points(models_arr[,,i], pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
+      for(l in 1:length(links)) lines(models_arr[,,i][links[[l]],],
+                                      col = col.models, lwd = lwd.models)
+    } else {
+      graphics::polygon(models_arr[,,i], pch = 16,
+                        col = bg.models, border = col.models, lwd = lwd.models)
+    }
   }
 
-  if(points == TRUE) points(pca$x)
+  if(points == TRUE) points(ordination$x)
 
-  results <- list(p = p, k = k, plotax = axes, x = pca$x, rotation = pca$rotation, center = pca$center)
+
+  plotinfo <- list(p = p, k = k, links = links, axes = axes, nh = nh, nv = nv, mag = mag, asp = asp,
+                   asp.models = asp.models, rot.models = rot.models, size.models = size.models,
+                   lwd.models = lwd.models, bg.models = bg.models, col.models = col.models,
+                   cex.ldm = cex.ldm, col.ldm = col.ldm)
+
+  results <- list(x = ordination$x, rotation = ordination$rotation, center = ordination$center,
+                  datype = datype, ordtype = ordtype, plotinfo = plotinfo)
   class(results) <- "mspace"
+
   return(invisible(results))
 
 }
@@ -120,43 +146,29 @@ mspace <- function(shapes,
 
 #' Project shapes into morphospace
 #'
-#' @param shapes
-#' @param mspace
-#' @param pipe
-#' @param ...
+#' @description Project a set of shapes into an existing morphospace.
+#'
+#' @param shapes Shape data.
+#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param pipe Logical; is the function being included in a pipe?
+#' @param ... Further arguments passed to [points()].
 #'
 #' @return
 #' @export
 #'
 #' @examples
-# proj_shapes <- function(shapes, mspace, ...) {
-#
-#   if(length(dim(shapes)) == 2) {
-#     data2d <- shapes
-#   } else {
-#     data2d <- geomorph::two.d.array(shapes)
-#   }
-#
-#   scores <- proj_eigen(data2d, mspace$rotation)
-#
-#   if(.Device != "null device") {
-#     points(scores[, mspace$plotax], ...)
-#     return(invisible(scores))
-#   } else {
-#     return(scores)
-#   }
-# }
 proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 
-  if(length(dim(shapes)) == 2) {
-    data2d <- shapes
-  } else {
-    data2d <- geomorph::two.d.array(shapes)
-  }
+  dat <- shapes_mat(shapes)
+  data2d <- dat$data2d
+  datype <- dat$datype
 
-  scores <- proj_eigen(data2d, mspace$rotation)
+  if(mspace$datype != datype) stop("shapes and mspace types are not compatible")
 
-  if(.Device != "null device") points(scores[, mspace$plotax], ...)
+  scores <- proj_eigen(x = data2d, vectors = mspace$rotation,
+                       center = mspace$center)
+
+  if(.Device != "null device") points(scores[, mspace$plotinfo$axes], ...)
 
   if(pipe == FALSE) return(scores)
   if(pipe == TRUE) return(invisible(mspace))
@@ -167,42 +179,29 @@ proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 
 #' Project consensus shape(s) into morphospace
 #'
-#' @param consensus
-#' @param mspace
-#' @param pipe
-#' @param ...
+#' @description Project one or more mean shapes into an existing morphospace.
+#'
+#' @param shapes Shapes data.
+#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param pipe Logical; is the function being included in a pipe?
+#' @param ... Further arguments passed to [points()].
 #'
 #' @return
 #' @export
 #'
 #' @examples
-# proj_consensus <- function(consensus, mspace, add = FALSE, ...) {
-#
-#   name_mspace <- as.character(match.call()$mspace)
-#
-#   gr_centroids <- proj_shapes(consensus, mspace)
-#
-#   if(.Device != "null device") points(gr_centroids[, mspace$plotax], ...)
-#   if(add == TRUE) {
-#     mspace$gr_centroids <- gr_centroids
-#     assign(x = name_mspace, value = mspace, envir = globalenv())
-#   } else {
-#     return(gr_centroids)
-#   }
-# }
-proj_consensus <- function(consensus, mspace, pipe = TRUE, ...) {
+proj_consensus <- function(shapes, mspace, pipe = TRUE, ...) {
 
-  if(length(dim(consensus)) == 2) {
-    data2d <- consensus
-  } else {
-    data2d <- geomorph::two.d.array(consensus)
-  }
+  dat <- shapes_mat(shapes)
+  data2d <- dat$data2d
+  datype <- dat$datype
 
-  gr_centroids <- proj_eigen(data2d, mspace$rotation)
+  if(mspace$datype != datype) stop("shapes and mspace types are not compatible")
 
-  # gr_centroids <- proj_shapes(consensus, mspace)
-  # if(class(gr_centroids) == "mspace") gr_centroids <- gr_centroids$x
-  if(.Device != "null device") points(gr_centroids[, mspace$plotax], ...)
+  gr_centroids <- proj_eigen(x = data2d, vectors = mspace$rotation,
+                             center = mspace$center)
+
+  if(.Device != "null device") points(gr_centroids[, mspace$plotinfo$axes], ...)
 
   mspace$gr_centroids <- gr_centroids
 
@@ -214,21 +213,64 @@ proj_consensus <- function(consensus, mspace, pipe = TRUE, ...) {
 
 ###############################################################################################
 
-#' Project morphometric axis/axes into morphospace
+#' Delimit groups in morphospace
 #'
-#' @param neword
-#' @param mspace
-#' @param ax
-#' @param p
-#' @param k
-#' @param pipe
-#' @param ...
+#' @description Project convex hulls ennclosing a priori groups in an existing
+#'   morphospace.
+#'
+#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param shapes Optional shapes data.
+#' @param groups Factor; classification of observations into groups.
+#' @param pipe Logical; is the function being included in a pipe?
+#' @param ... Further arguments passed to [hulls_by_group_2D()].
 #'
 #' @return
 #' @export
 #'
 #' @examples
-proj_axes <- function(neword, mspace, ax = 1, p = NULL, k = NULL, pipe = TRUE, ...) {
+proj_groups <- function(mspace, shapes = NULL, groups, pipe = TRUE, ...) {
+
+  if(is.null(shapes)) {
+    data2d <- mspace$x
+  } else {
+    dat <- shapes_mat(shapes)
+    datype <- dat$datype
+    data2d <- proj_eigen(x = dat$data2d, vectors = mspace$rotation,
+                         center = mspace$center)
+
+    if(mspace$datype != datype) stop("shapes and mspace types are not compatible")
+
+  }
+
+  hulls_by_group_2D(data2d[, mspace$plotinfo$axes], fac = groups, ...)
+
+  mspace$gr_class <- groups
+
+  if(pipe == TRUE) return(invisible(mspace))
+  #if(pipe == FALSE) return(  volume_of_hulls  )
+
+}
+
+
+###############################################################################################
+
+#' Project morphometric axes into morphospace
+#'
+#' @description Project one or more morphometric axes (i.e., linear combinations
+#'   of shape variables) into an existing morphospace.
+#'
+#' @param neword An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
+#'   \code{"phy_prcomp"} or \code{"pls"} object).
+#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param ax A vector indicating the axes from \code{neword} to be projected.
+#' @param pipe Logical; is the function being included in a pipe?
+#' @param ... Further arguments passed to [lines()].
+#'
+#' @return
+#' @export
+#'
+#' @examples
+proj_axes <- function(neword, mspace, ax = 1, pipe = TRUE, ...) {
 
   ext_shapes <- vector(mode = "list", length = length(ax))
   names(ext_shapes) <- paste0("axis_", ax)
@@ -239,16 +281,22 @@ proj_axes <- function(neword, mspace, ax = 1, p = NULL, k = NULL, pipe = TRUE, .
     center <- neword$center
 
     ext_shapes2d <- rev_eigen(scores = scores, vector = coeffs, center = center)
-    ext_scores <- proj_eigen(ext_shapes2d, mspace$rotation[, mspace$plotax])
-    if(pipe == FALSE) {
-      if(is.null(p) | is.null(k)) {
-        stop("Please provide values for both p and k")
-      } else {
-        ext_shapes[[i]] <- arrayspecs(ext_shapes2d, k, p)
-      }
+    ext_scores <- proj_eigen(x = ext_shapes2d, vectors = mspace$rotation,
+                             center = mspace$center)
 
-      lines(ext_scores, ...)
+    lines(ext_scores)
+
+    if(.Device != "null device") lines(ext_scores[, mspace$plotinfo$axes], ...)
+
+    if(pipe == FALSE) {
+      if(mspace$datype == "fcoef") {
+        ext_shapes[[i]] <- ext_shapes2d
+      } else {
+        ext_shapes[[i]] <- geomorph::arrayspecs(ext_shapes2d,
+                                                k = mspace$plotinfo$k, p = mspace$plotinfo$p)
+      }
     }
+
   }
 
   if(pipe == FALSE) return(ext_shapes)
@@ -261,37 +309,19 @@ proj_axes <- function(neword, mspace, ax = 1, p = NULL, k = NULL, pipe = TRUE, .
 
 #' Project phylogenetic structure into morphospace
 #'
-#' @param tree
-#' @param mspace
-#' @param pipe
-#' @param ...
+#' @description Project phylogenetic relationships among a set of shapes
+#'   (representing the consensuses of phhylogenetic terminals) into an existing
+#'   morphospace.
+#'
+#' @param tree A \code{"phy"} object containing a phylogenetic tree.
+#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param pipe Logical; is the function being included in a pipe?
+#' @param ... Further arguments passed to [lines()].
 #'
 #' @return
 #' @export
 #'
 #' @examples
-# proj_phylogeny <- function(tree, mspace, add = TRUE, ...) {
-#
-#   name_mspace <- as.character(match.call()$mspace)
-#
-#   if(is.null(mspace$gr_centroids)) stop("Group centroids have not been provided; try with proj_consensus(..., add = TRUE)")
-#
-#   nodes_scores <- apply(mspace$gr_centroids[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
-#   phylo_scores <- rbind(mspace$gr_centroids[tree$tip.label,], nodes_scores)
-#
-#   if(.Device != "null device") {
-#     for(i in 1:nrow(tree$edge)) {
-#       lines(rbind(phylo_scores[tree$edge[i, 1], mspace$plotax], phylo_scores[tree$edge[i, 2], mspace$plotax]))
-#     }
-#   }
-#
-#   if(add == TRUE) {
-#     mspace$phylo_scores <- phylo_scores
-#     mspace$phylo <- tree
-#     assign(x = name_mspace, value = mspace, envir = globalenv())
-#   } else {return(phylo_scores)}
-#
-# }
 proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 
   if(is.null(mspace$gr_centroids)) stop("Group centroids have not been provided; add proj_consensus() before")
@@ -299,52 +329,370 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
   nodes_scores <- apply(mspace$gr_centroids[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
   phylo_scores <- rbind(mspace$gr_centroids[tree$tip.label,], nodes_scores)
 
+
   if(.Device != "null device") {
     for(i in 1:nrow(tree$edge)) {
-      lines(rbind(phylo_scores[tree$edge[i, 1], mspace$plotax], phylo_scores[tree$edge[i, 2], mspace$plotax]), ...)
+      lines(rbind(phylo_scores[tree$edge[i, 1], mspace$plotinfo$axes],
+                  phylo_scores[tree$edge[i, 2], mspace$plotinfo$axes]), ...)
     }
   }
 
   mspace$phylo_scores <- phylo_scores
   mspace$phylo <- tree
 
-  if(pipe == FALSE) return(phylo_scores)
-  if(pipe == TRUE) return(invisible(mspace))
+  if(pipe == FALSE) {
+    phylo_shapes <- rev_eigen(scores = phylo_scores, vectors = mspace$rotation,
+                              center = mspace$center)
+    return(phylo_shapes)
+  } else {
+    return(invisible(mspace))
+  }
 
 }
 
 
-###############################################################################################
+#########################################################################################
 
-#' Delimit groups in morphospace
+
+#' Plot morphospaces
 #'
-#' @param mspace
-#' @param groups
-#' @param pipe
-#' @param ...
+#' @description Flexible deployment of morphospaces, including their combination
+#'   with other variables or a phylogeny.
+#'
+#'
+#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param axes Numeric of length 1 or 2, indicating the axes to be plotted.
+#' @param x Optional vector with a non-morphometric variable to be plotted in
+#'   the x axis. Alternatively, a \code{"phy"} object can be provided.
+#' @param y Optional vector with a non-morphometric variable to be plotted in
+#'   the y axis. Alternatively, a \code{"phy"} object can be provided.
+#' @param nh Numeric; the number of shape models along the x axis.
+#' @param nv Numeric; the number of shape models along the y axis.
+#' @param mag Numeric; magnifying factor for shape models.
+#' @param points Logical; whether to plot the scatter points corresponding to
+#'   the sampled shapes stored in \code{mspace$x}.
+#' @param mshapes Logical; whether to plot the scatter points corresponding to
+#'   groups' mean shapes stored in \code{mspace$gr_centroids}.
+#' @param groups Logical; whether to plot the convex hulls enclosing the groups
+#'   stored in \code{mspace$gr_class}
+#' @param phylo  Logical; whether to plot the phylogenetic relationships stored
+#'   in \code{mspace$phylo}
+#' @param size.models Numeric; size factor for shape models.
+#' @param asp.models Numeric; the y/x aspect ratio of shape models.
+#' @param rot.models  Numeric; angle (in degrees) to rotate shape models.
+#' @param col.models The color for wireframes/outlines.
+#' @param bg.models Background color for outlines.
+#' @param lwd.models Numeric; the width of the lines in wireframes/outlines.
+#' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
+#'   models.
+#' @param col.ldm The color of landmarks/semilandmarks in the background models.
+#' @param pch.points Numeric; the symbol of the scatter points corresponding to
+#'   sampled shapes.
+#' @param col.points The color of the scatter points corresponding to sampled
+#'   shapes.
+#' @param cex.points Numeric; the size of the scatter points corresponding to
+#'   sampled shapes.
+#' @param col.groups The color of the scatter points corresponding to groups
+#'   mean shapes.
+#' @param pch.groups Numeric; the symbol of the scatter points corresponding to
+#'   groups mean shapes.
+#' @param cex.groups Numeric; the size of the scatter points corresponding to
+#'   groups mean shapes.
+#' @param lwd.branches Numeric; the width of the lines depicting phylogenetic
+#'   branches.
+#' @param xlim,ylim,xlab,ylab,asp Standard arguments passed to the generic plot
+#'   function
 #'
 #' @return
 #' @export
 #'
 #' @examples
-proj_groups <- function(mspace, groups, pipe = TRUE, ...) {
+plot_mspace <- function(mspace,
+                        axes,
+                        x = NULL,
+                        y = NULL,
+                        nh,
+                        nv,
+                        mag,
+                        points = TRUE,
+                        mshapes = TRUE,
+                        groups = TRUE,
+                        phylo = TRUE,
+                        asp,
+                        xlab,
+                        ylab,
+                        xlim = NULL,
+                        ylim = NULL,
+                        size.models,
+                        asp.models,
+                        rot.models,
+                        col.models ,
+                        bg.models,
+                        lwd.models,
+                        cex.ldm,
+                        col.ldm,
+                        pch.points = 1,
+                        col.points = 1,
+                        cex.points = 1,
+                        col.groups = 1,
+                        pch.groups = 16,
+                        cex.groups = 1,
+                        lwd.branches = 1) {
 
-  hulls_by_group_2D(mspace$x[, mspace$plotax], fac = groups, ...)
 
-  if(pipe == TRUE) return(invisible(mspace))
+  inh_args <- mspace$plotinfo
+  new_args <- as.list(match.call())
+  merged_args <- modifyList(inh_args, new_args)
 
+  args <- lapply(1:length(merged_args), function(i) {eval(merged_args[[i]])})
+  names(args) <- names(merged_args)
+
+  ordination <- list(x = mspace$x, rotation = mspace$rotation, center = mspace$center)
+
+  if(!is.null(x) & !is.null(y)) stop("Only one of x or y can be specified")
+
+
+
+  if(is.null(x) & is.null(y)) { #if neither x nor y have been provided, plot pure morphospace
+
+    shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
+                              x = NULL, y = NULL, p = mspace$plotinfo$p, k = mspace$plotinfo$k,
+                              nh = args$nh, nv = args$nv, mag = args$mag, asp = args$asp,
+                              xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
+                              size.models = args$size.models, asp.models = args$asp.models)
+
+    models_mat <- shapemodels$models_mat
+    models_arr <- shapemodels$models_arr
+    plotframe_x <- shapemodels$plotframe[,1]
+    plotframe_y <- shapemodels$plotframe[,2]
+
+    if(!is.null(args$xlim)) xlim <- range(plotframe_x)
+    if(!is.null(args$ylim)) ylim <- range(plotframe_y)
+
+    if(is.null(args$xlab)) xlab <- paste0("PC", args$axes[1])
+    if(is.null(args$ylab)) ylab <- paste0("PC", args$axes[2])
+
+    if(mspace$ordtype == "bg_prcomp") {
+      xlab <- paste0("bg", xlab)
+      ylab <- paste0("bg", ylab)
+    }
+    if(mspace$ordtype == "phy_prcomp") {
+      xlab <- paste0("phy", xlab)
+      ylab <- paste0("phy", ylab)
+    }
+
+    plot(models_mat, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
+    for(i in 1:dim(models_arr)[3]) {
+      if(mspace$datype == "landm") {
+        points(models_arr[,,i], pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
+
+        for(l in 1:length(args$links)) lines(models_arr[,,i][args$links[[l]],],
+                                        col = args$col.models, lwd = args$lwd.models)
+      } else {
+        graphics::polygon(models_arr[,,i], pch = 16,
+                          col = args$bg.models, border = args$col.models, lwd = args$lwd.models)
+      }
+    }
+
+
+    #add points, hulls, phylogeny, and/or consensus
+    if(points == TRUE) points(mspace$x[, args$axes],
+                              pch = pch.points, col = col.points, cex = cex.points)
+    if(groups == TRUE) {
+      if(is.null(mspace$gr_class)) {
+        stop("groups classification has not been added to mspace object")
+      } else {
+        hulls_by_group_2D(mspace$x[, args$axes], fac = mspace$gr_class,
+                          col = col.groups)
+      }
+    }
+    if(phylo == TRUE) {
+      if(is.null(mspace$phylo)) {
+        stop("phylogenetic relationships have not been added to mspace object")
+      } else {
+        for(i in 1:nrow(mspace$phylo$edge)) {
+          lines(rbind(mspace$phylo_scores[mspace$phylo$edge[i, 1], args$axes],
+                      mspace$phylo_scores[mspace$phylo$edge[i, 2], args$axes]),
+                lwd = lwd.branches)
+        }
+      }
+    }
+    if(mshapes == TRUE) {
+      if(is.null(mspace$gr_class)) {
+        stop("groups centroids have not been added to mspace object")
+      } else {
+        points(mspace$gr_centroids[, args$axes],
+               col = col.groups, pch = pch.groups, cex = cex.groups)
+      }
+    }
+
+
+
+  } else { #if x or y have been provided, show hybrid morphospace
+
+    #if x/y is a phy object, prepare the ground for a phenogram
+    if(any(class(x) == "phy", class(y) == "phy")) {
+      phenogr <- TRUE
+    } else {
+      phenogr <- FALSE
+    }
+
+    if(!is.null(x)) {
+      if(class(x) == "phylo") {
+        tree <- x
+        heights <- phytools::nodeHeights(tree)
+        x <- c(rep(max(heights), length(tree$tip.label)),
+               unique(heights[,1]))
+        args$xlim <- range(x)
+      }
+    } else {
+      if(class(y) == "phylo") {
+        tree <- y
+        heights <- phytools::nodeHeights(tree)
+        y <- c(rep(max(heights), length(tree$tip.label)),
+               unique(heights[,1]))
+        args$ylim <- range(y)
+      }
+    }
+
+
+    shapemodels <- morphogrid(ordination = ordination, x = x, y = y, axes = args$axes,
+                              datype = mspace$datype, p = mspace$plotinfo$p, k = mspace$plotinfo$k, nh = args$nh,
+                              nv = args$nv, mag = args$mag, asp = args$asp, xlim = args$xlim, ylim = args$ylim,
+                              rot.models = args$rot.models, size.models = args$size.models,
+                              asp.models = args$asp.models)
+
+    models_mat <- shapemodels$models_mat
+    models_arr <- shapemodels$models_arr
+    plotframe_x <- shapemodels$plotframe[,1]
+    plotframe_y <- shapemodels$plotframe[,2]
+
+    if(!is.null(args$xlim)) xlim <- range(plotframe_x)
+    if(!is.null(args$ylim)) ylim <- range(plotframe_y)
+
+    if(is.null(args$xlab)) {
+      if(!is.null(x)) {
+        xlab <- "x"
+      } else {
+        xlab <- paste0("PC", args$axes[1])
+        if(mspace$ordtype == "bg_prcomp") {
+          xlab <- paste0("bg", xlab)
+        }
+        if(mspace$ordtype == "phy_prcomp") {
+          xlab <- paste0("phy", xlab)
+        }
+      }
+    }
+    if(is.null(args$ylab)) {
+      if(!is.null(y)) {
+        ylab <- "y"
+      } else {
+        ylab <- paste0("PC", args$axes[1])
+        if(mspace$ordtype == "bg_prcomp") {
+          ylab <- paste0("bg", ylab)
+        }
+        if(mspace$ordtype == "phy_prcomp") {
+          ylab <- paste0("phy", ylab)
+        }
+      }
+    }
+
+
+    plot(models_mat, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
+
+    for(i in 1:dim(models_arr)[3]) {
+      if(mspace$datype == "landm") {
+        points(models_arr[,,i], pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
+
+        for(l in 1:length(args$links)) lines(models_arr[,,i][args$links[[l]],],
+                                        col = args$col.models, lwd = args$lwd.models)
+      } else {
+        graphics::polygon(models_arr[,,i], pch = 16,
+                          col = args$bg.models, border = args$col.models, lwd = args$lwd.models)
+      }
+    }
+
+
+    if(phenogr == TRUE) { #if x/y is a phy object, plot a phenogram
+      for(i in 1:nrow(tree$edge)) {
+        phyloxy <- cbind(x, mspace$phylo_scores[,args$axes[1]], y)
+        lines(rbind(phyloxy[tree$edge[i, 1],],
+                    phyloxy[tree$edge[i, 2],]), lwd = lwd.branches)
+      }
+      if(points == TRUE) {
+        points(phyloxy[-c(1:length(tree$tip.label)),], pch = 16)
+        points(phyloxy[c(1:length(tree$tip.label)),][rownames(mspace$gr_centroids),],
+               col = col.groups, pch = pch.groups, cex = cex.groups)
+
+        }
+    } else { #else, go for a generic hybrid morphospace
+
+      xy <- cbind(x, mspace$x[,args$axes[1]], y)
+
+      #add points, hulls, phylogeny, and/or consensus
+      if(points == TRUE) points(xy, pch = pch.points,
+                                col = col.points, cex = cex.points)
+      if(groups == TRUE) {
+        if(is.null(mspace$gr_class)) {
+          stop("groups classification has not been added to mspace object")
+        } else {
+          hulls_by_group_2D(xy, fac = mspace$gr_class, col = col.groups)
+        }
+      }
+      if(phylo == TRUE) {
+        if(is.null(mspace$phylo)) {
+          stop("phylogenetic relationships have not been added to mspace object")
+        } else {
+          if(is.null(mspace$gr_class)) {
+            stop("groups classification has not been added to mspace object")
+          } else {
+            if(!is.null(x)) {
+              meanx <- tapply(x, mspace$gr_class, mean)
+            } else {
+              meanx <- NULL
+            }
+            if(!is.null(y)) {
+              meany <- tapply(y, mspace$gr_class, mean)
+            } else {
+              meany <- NULL
+            }
+
+            meanxy <- cbind(meanx, mspace$gr_centroids[,args$axes[1]], meany)
+            nodesxy <- apply(meanxy[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
+            phyloxy <- rbind(meanxy, nodesxy)
+
+          }
+
+          for(i in 1:nrow(mspace$phylo$edge)) {
+            lines(rbind(phyloxy[mspace$phylo$edge[i, 1],],
+                        phyloxy[mspace$phylo$edge[i, 2],]),
+                  lwd = lwd.branches)
+          }
+        }
+      }
+      if(mshapes == TRUE) {
+        if(is.null(mspace$gr_class)) {
+          stop("groups centroids have not been added to mspace object")
+        } else {
+
+          if(!is.null(x)) {
+            meanx <- tapply(x, mspace$gr_class, mean)
+          } else {
+            meanx <- NULL
+          }
+          if(!is.null(y)) {
+            meany <- tapply(y, mspace$gr_class, mean)
+          } else {
+            meany <- NULL
+          }
+
+          meanxy <- cbind(meanx, mspace$gr_centroids[,args$axes[1]], meany)
+
+          points(meanxy, col = col.groups,
+                 pch = pch.groups, cex = cex.groups)
+        }
+      }
+    }
   }
+}
 
-
-###############################################################################################
-
-#' Plot points for mspace objects
-#'
-#' @param mspace
-#' @param ...
-#'
-#' @return
-#' @export
-#'
-#' @examples
-points.mspace <- function(mspace, ...) {points(mspace$x[, mspace$plotax], ...)}

@@ -1,13 +1,13 @@
 
 ###########################################################################
 
-#' Obtain consensus shape(s)
+#' Compute consensus shape(s)
 #'
 #' @description Compute the mean shape from the entire sample, the mean shape of
 #'   a subset of samples, or the mean shape of the levels of a factor (for
 #'   landmark configurations).
 #'
-#' @param shapes A \code{k x p x n} array of superimposed landmarks.
+#' @param shapes Shape data.
 #' @param index Either a numeric vector indicating the configurations to be
 #'   averaged or a factor whose levels are used to average groups of
 #'   configurations.
@@ -18,24 +18,35 @@
 #' @export
 #'
 #' @examples
-consensus <- function(shapes, index = 1:dim(shapes)[3]) {
+consensus <- function(shapes, index = NULL) {
 
-  p <- nrow(shapes)
-  data2d <- geomorph::two.d.array(shapes)
+  dat <- shapes_mat(shapes)
+  data2d <- dat$data2d
+  datype <- dat$datype
+
+  if(is.null(index)) index <- 1:nrow(data2d)
 
   if(is.numeric(index)) {
-    colmeans <- colMeans(data2d[index,])
-    consensus <- matrix(colmeans, nrow = p, byrow = TRUE)
+    cons <- rbind(colMeans(data2d[index,]))
   } else {
     if(is.character(index)) index <- factor(index)
     if(is.factor(index)) {
-      colmeans <- apply(X = data2d, MARGIN = 2, FUN = tapply, index, mean)
-      consensus <- geomorph::arrayspecs(A = colmeans, p = p, k = ncol(shapes))
-      dimnames(consensus)[[3]] <- levels(index)
+      cons <- apply(X = data2d, MARGIN = 2, FUN = tapply, index, mean)
+      rownames(cons) <- levels(index)
     }
   }
 
-  return(consensus)
+  if(datype == "landm") {
+    p <- nrow(shapes)
+    k <- ncol(shapes)
+    if(nrow(cons) == 1) {
+      cons <- matrix(cons, nrow = p, byrow = TRUE)
+    } else {
+      cons <- geomorph::arrayspecs(cons, p = p, k = k)
+    }
+  }
+
+  return(cons)
 }
 
 
@@ -43,10 +54,9 @@ consensus <- function(shapes, index = 1:dim(shapes)[3]) {
 
 #' Remove shape variation associated to external variables
 #'
-#' @description A function to detrend (i.e. standardize) shape data using the
-#'   functional relationship between shape data and some external explanatory
-#'   variable(s) (works for both factors and numerics), estimated using a linear
-#'   model.
+#' @description Detrend (i.e. standardize) shape data using the functional
+#'   relationship between shape data and some external explanatory variable(s)
+#'   (works for both factors and numerics), estimated using a linear model.
 #'
 #' @param model A \code{mlm} object created using [lm()].
 #' @param xvalue A value (numeric) or level (character) at which shape data is
@@ -100,3 +110,12 @@ detrend_shapes <- function(model, xvalue = NULL, newx = NULL, newy = NULL){
   return(predicted_mat)
 
 }
+
+
+
+
+
+
+
+
+

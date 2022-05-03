@@ -4,14 +4,20 @@
 \alias{proj_consensus}
 \title{Project consensus shape(s) into morphospace}
 \usage{
-proj_consensus(consensus, mspace, pipe = TRUE, ...)
+proj_consensus(shapes, mspace, pipe = TRUE, ...)
 }
 \arguments{
-\item{...}{}
+\item{shapes}{Shapes data.}
+
+\item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
+
+\item{pipe}{Logical; is the function being included in a pipe?}
+
+\item{...}{Further arguments passed to \code{\link[=points]{points()}}.}
 }
 \value{
 
 }
 \description{
-Project consensus shape(s) into morphospace
+Project one or more mean shapes into an existing morphospace.
 }
