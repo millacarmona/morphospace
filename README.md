@@ -72,7 +72,7 @@ pile_shapes(shapes, links = links)
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
-## Shapes operations
+## Shape operations
 
 This package provide some functions that perform basic operations with
 shape variables, such as the calculation of mean shapes or the
@@ -90,8 +90,8 @@ detr_cons_shapes <- consensus(shapes = detr_shapes, index = species)
 ## Workflow
 
 The basic idea behind the `morphospace` workflow is to build (empiric)
-morphospaces using multivariate methods (PCA and the likes), then use
-the resulting synthesis as a reference in which to project different
+morphospaces using multivariate methods (PCA and the like), then use the
+resulting synthesis as a reference in which to project different
 elements. These elements are added both to the plot and the `"mspace"`
 object as succesive ‘layers’ or list slots, respectively, using the
 `%>%` pipe operator from `magrittr`.
@@ -149,6 +149,28 @@ names(morphospace4)
 #> [1] "x"            "rotation"     "center"       "datype"       "ordtype"     
 #> [6] "plotinfo"     "gr_centroids" "phylo_scores" "phylo"
 ```
+
+Another element that can be projected and visualized in morphospaces are
+morphometric axes, i.e. a synthetic axis built as a linear combination
+of shape variables. The following chunk illustrates how to combine the
+pipe workflow with the `proj_axis` function called outside the pipe to
+compute and project the first PC of each species (i.e. the morphometric
+axis of maximum intraspecific variation within each species).
+
+``` r
+# Plot morphospace, project species' meanshapes, phylogenetic structure, and the
+# first component calculated separatedly for each species
+morphospace <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+  proj_consensus(shapes = cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
+  proj_phylogeny(tree = tree, pch = 16)
+for(i in 1:nlevels(species)){
+  subshapes <- shapes[,,species==levels(species)[i]]
+  pca <- prcomp(x = two.d.array(subshapes))
+  proj_axes(neword = pca, morphospace, ax = 1, pipe = FALSE, col = "black", lwd = 2)
+}
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
 
 You’ll still need to render `README.Rmd` regularly, to keep `README.md`
 up-to-date. `devtools::build_readme()` is handy for this. You could also
