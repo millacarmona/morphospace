@@ -6,8 +6,8 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-A package for people who can't visualize morphospaces good and wanna learn to do other geometric morphometrics stuff good too.
-
+A package for people who can’t visualize morphospaces good and wanna
+learn to do other geometric morphometrics stuff good too.
 
 ## Installation
 
@@ -19,13 +19,26 @@ You can install the development version of morphospace from
 devtools::install_github("millacarmona/morphospace")
 ```
 
-## Example
+## A sample of stuff
 
-This is a basic example which shows you how to solve a common problem:
+Load tail data and extract shapes, centroid sizes, classification of sex
+and species, links between landmarks, and phylogenetic tree
 
 ``` r
 library(morphospace)
-## basic example code
+#> 
+#> Attaching package: 'morphospace'
+#> The following object is masked from 'package:utils':
+#> 
+#>     stack
+
+data("tails")
+shapes <- tails$shapes
+species <- tails$data$species
+sizes <- tails$sizes
+sex <- tails$data$sex
+links <- tails$links
+tree <- tails$tree
 ```
 
 What is special about using `README.Rmd` instead of just `README.md`?
