@@ -13,6 +13,10 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi=300)
+```
+
 # morphospace
 
 <!-- badges: start -->
