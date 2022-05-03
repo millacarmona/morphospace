@@ -74,9 +74,6 @@ detr_cons_shapes <- consensus(shapes = detr_shapes, index = species)
 
 ## Workflow
 
-The besic idea behind `morphospace` is to build a reference ordination by synthesizing morphometric variation with multivariate methods, and then use the resulting 
-
-
 
 The basic idea behind the `morphospace` workflow is to build (empiric) morphospaces using multivariate methods, then use the resulting synthesis as a reference in which to project different elements. These elements are added both to the plot and the `"mspace"` object as succesive 'layers' or list slots, respectively, using the `%>%` pipe operator from `magrittr`.
 
