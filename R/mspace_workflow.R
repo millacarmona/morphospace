@@ -416,7 +416,7 @@ plot_mspace <- function(mspace,
                         mshapes = TRUE,
                         groups = TRUE,
                         phylo = TRUE,
-                        asp,
+                        asp = NA,
                         xlab,
                         ylab,
                         xlim = NULL,
@@ -438,12 +438,20 @@ plot_mspace <- function(mspace,
                         lwd.branches = 1) {
 
 
-  inh_args <- mspace$plotinfo
-  new_args <- as.list(match.call())
-  merged_args <- utils::modifyList(inh_args, new_args)
+  # inh_args <- mspace$plotinfo
+  # new_args <- as.list(match.call())
+  # merged_args <- modifyList(inh_args, new_args)
+  #
+  # args <- lapply(1:length(merged_args), function(i) {eval(merged_args[[i]])})
+  # names(args) <- names(merged_args)
 
-  args <- lapply(1:length(merged_args), function(i) {eval(merged_args[[i]])})
-  names(args) <- names(merged_args)
+  supplied <- names(as.list(match.call()))[-1]
+  new_args <- lapply(1:length(supplied), function(i) {get(supplied[i])})
+  names(new_args) <- supplied
+  inh_args <- mspace$plotinfo
+  merged_args <- utils::modifyList(inh_args, new_args)
+  args <- merged_args
+
 
   ordination <- list(x = mspace$x, rotation = mspace$rotation, center = mspace$center)
 
@@ -516,7 +524,7 @@ plot_mspace <- function(mspace,
       }
     }
     if(mshapes == TRUE) {
-      if(is.null(mspace$gr_class)) {
+      if(is.null(mspace$gr_centroids)) {
         stop("groups centroids have not been added to mspace object")
       } else {
         points(mspace$gr_centroids[, args$axes],
@@ -529,7 +537,7 @@ plot_mspace <- function(mspace,
   } else { #if x or y have been provided, show hybrid morphospace
 
     #if x/y is a phy object, prepare the ground for a phenogram
-    if(any(class(x) == "phy", class(y) == "phy")) {
+    if(any(class(x) == "phylo", class(y) == "phylo")) {
       phenogr <- TRUE
     } else {
       phenogr <- FALSE
@@ -637,6 +645,7 @@ plot_mspace <- function(mspace,
           hulls_by_group_2D(xy, fac = mspace$gr_class, col = col.groups)
         }
       }
+
       if(phylo == TRUE) {
         if(is.null(mspace$phylo)) {
           stop("phylogenetic relationships have not been added to mspace object")
@@ -692,5 +701,6 @@ plot_mspace <- function(mspace,
       }
     }
   }
+
 }
 

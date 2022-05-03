@@ -97,64 +97,6 @@ elements. These elements are added both to the plot and the `"mspace"`
 object as succesive ‘layers’ or list slots, respectively, using the
 `%>%` pipe operator from `magrittr` (Bache & Wickham 2022).
 
-``` r
-# Create and plot morphospace using detrended shapes, and project specimens
-morphospace1 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
-  proj_shapes(shapes = detr_shapes)
-```
-
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
-
-``` r
-
-# Plot morphospace, project specimens and delimit species' range of variation
-#using convex hulls
-morphospace2 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
-  proj_shapes(shapes = detr_shapes, col = species) %>%
-  proj_groups(shapes = detr_shapes, groups = species)
-```
-
-<img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" />
-
-``` r
-
-# Plot morphospace, project each species' mean shape and range of variation
-morphospace3 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
-  proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
-  proj_groups(shapes = detr_shapes, groups = species)
-```
-
-<img src="man/figures/README-unnamed-chunk-5-3.png" width="100%" />
-
-``` r
-
-# Plot morphospace, project species' meanshapes and phylogenetic structure
-# (requires a phy object and the previous addition of mean shapes corresponding
-# to the tips)
-morphospace4 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
-  proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
-  proj_phylogeny(tree = tree, pch = 16)
-```
-
-<img src="man/figures/README-unnamed-chunk-5-4.png" width="100%" />
-
-``` r
-
-# Check the elements of each mspace object, note the slots corresponding to groups 
-# mean shapes and classification, the phylogenetic structure and scores for nodes
-# and tips.
-names(morphospace1)
-#> [1] "x"        "rotation" "center"   "datype"   "ordtype"  "plotinfo"
-names(morphospace2)
-#> [1] "x"        "rotation" "center"   "datype"   "ordtype"  "plotinfo" "gr_class"
-names(morphospace3)
-#> [1] "x"            "rotation"     "center"       "datype"       "ordtype"     
-#> [6] "plotinfo"     "gr_centroids" "gr_class"
-names(morphospace4)
-#> [1] "x"            "rotation"     "center"       "datype"       "ordtype"     
-#> [6] "plotinfo"     "gr_centroids" "phylo_scores" "phylo"
-```
-
 Another potentially interesting element that can be projected and
 visualized in morphospaces are morphometric axes, i.e. synthetic axes
 built as linear combinations of shape variables. For example, we can
@@ -173,7 +115,7 @@ mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_axes(neword = pca, ax = c(1,2), col = "black", lwd = 2, lty = 2)
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 ## Ordination methods
 
@@ -210,7 +152,7 @@ hulls_by_group_2D(bgpca2$x, class)
 title("with LOOCV")
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
 
 ``` r
 # Perform PLS on the set of random variables to look for the PLS axis maximzing covariation
@@ -227,7 +169,7 @@ abline(lm(pls2$yscores ~ pls2$xscores), col = "red")
 title("with LOOCV")
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-2.png" width="100%" />
 
 ``` r
 dev.off()
@@ -249,7 +191,7 @@ mspace(detr_cons_shapes, FUN = phy_prcomp, tree = tree, links = links,
   proj_phylogeny(tree = tree, pch = 16)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
 ``` r
 # Phylogenetic PCA for all species, adding projection of intrapspecific variation
@@ -261,7 +203,7 @@ mspace(detr_cons_shapes, FUN = phy_prcomp, tree = tree, links = links,
   proj_phylogeny(tree = tree, pch = 16)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-2.png" width="100%" />
 
 ``` r
 # Between group PCA - all species
@@ -271,7 +213,7 @@ mspace(shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = species,
   proj_groups(shapes = shapes, groups = species)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-3.png" width="100%" />
 
 The rationale of defining a reference ordination using a given sample of
 shapes and then projecting other elements into it (computed from either
@@ -302,7 +244,7 @@ morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
   proj_groups(shapes = shapes, groups = species)
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 Finally, let’s say we want to project the axis representing the
 allometric variation (e.g. a PLS of shape vs centroid size) of each
@@ -406,7 +348,7 @@ proj_consensus(mspace = morphospace, shapes = consensus(detr_shapes, species), p
 proj_phylogeny(mspace = morphospace, tree = tree, pch = 16, pipe = FALSE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
     #>                        [,1]        [,2]      [,3]       [,4]      [,5]
     #> T. melancholicus  0.3269662 -0.08996052 0.3269662 0.08996056 0.2659204
@@ -523,33 +465,43 @@ colors and symbols for points, groups, etc.
 
 ``` r
 # Generate a mspace object, then erase the plot
-morphospace2 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2))  %>%
+morphospace <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2))  %>%
   proj_shapes(shapes = detr_shapes, col = species) %>%
   proj_groups(shapes = detr_shapes, groups = species) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 
 ``` r
 
-# # The funcion plot_mspace can take an object created with mspace + projections
-# # and plot it.
-# plot_mspace(mspace = morphospace2, points = TRUE, mshapes = FALSE, groups = FALSE, phylo = FALSE)
-# 
-# 
-# # The elements added through mspace pipes can be added using the corresponding arguments
-# plot_mspace(mspace = morphospace2, axes = c(1,2), groups = TRUE, points = TRUE,
-#             col.points = species, col.groups = 1:nlevels(species),
-#             mshapes = FALSE, phylo = FALSE)
-# 
-# # The function allows modification different aspects of the plot, such as the axes
-# # to be plotted, the number of shape models in the background or the size of their landmarks
-# plot_mspace(mspace = morphospace2, axes = c(1,3), nh = 3, groups = TRUE, points = TRUE,
-#             col.points = species, col.groups = 1:nlevels(species), cex.ldm = 0,
-#             mshapes = FALSE, phylo = FALSE)
+# The funcion plot_mspace can take an object created with mspace + projections
+# and plot it.
+plot_mspace(mspace = morphospace, points = TRUE, mshapes = FALSE, groups = FALSE, phylo = FALSE)
 ```
+
+<img src="man/figures/README-unnamed-chunk-10-2.png" width="100%" />
+
+``` r
+
+# The elements added through mspace pipes can be added using the corresponding arguments
+plot_mspace(mspace = morphospace, axes = c(1,2), groups = TRUE, points = TRUE,
+            col.points = species, col.groups = 1:nlevels(species),
+            mshapes = FALSE, phylo = FALSE)
+```
+
+<img src="man/figures/README-unnamed-chunk-10-3.png" width="100%" />
+
+``` r
+# The function allows modification different aspects of the plot, such as the axes
+# to be plotted, the number of shape models in the background or the size of their landmarks
+plot_mspace(mspace = morphospace, axes = c(1,3), nh = 3, groups = TRUE, points = TRUE,
+            col.points = species, col.groups = 1:nlevels(species), cex.ldm = 0,
+            mshapes = FALSE, phylo = FALSE)
+```
+
+<img src="man/figures/README-unnamed-chunk-10-4.png" width="100%" />
 
 In addition, `plot_mspace` allows specification of an external,
 non-shape variable (or, alternatively, a phylogenetic tree) to be
@@ -559,12 +511,18 @@ argument of `plot_mspace`, we get a phenogram:
 
 ``` r
 # A phylogenetic tree can be included to produce a phenogram
-# phylomorphospace <- mspace(cons_shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0, asp.models = 2, size.models = 0.5)  %>%
-#   proj_consensus(shapes = cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
-#   proj_phylogeny(tree = tree, pch = 16)
-# 
-# plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 0.7, size.models = 3, col.groups = 1:13)
+phylomorphospace <- mspace(cons_shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0, asp.models = 2, size.models = 0.5)  %>%
+  proj_consensus(shapes = cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
+  proj_phylogeny(tree = tree, pch = 16)
 ```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+
+``` r
+plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 0.7, size.models = 3, col.groups = 1:13)
+```
+
+<img src="man/figures/README-unnamed-chunk-11-2.png" width="100%" />
 
 ## Closed outlines
 

@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(dpi=400)
+
 ```
 
 # morphospace
@@ -38,7 +39,6 @@ devtools::install_github("millacarmona/morphospace")
 This package is intended to aid exploration and depiction of multivariate ordinations of shape data obtained through geometric morphometrics analyses. The functions from `morphospace` have been designed to work in intergration with other widely used geometric morphometrics R packages such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), and `Momocs` (Bonhome et al. 2014), whose functions cover other more essential steps in geometric morphometrics analysis (e.g. import, normalization, and statistical analysis).
 
 Below, the general concept and capabilities of  `morphospace` are displayed using two data sets representing different types of geometric morphometric data. The first data set, taken from from Fasanelli et al. (2022), contains a sample of tail shapes from the 13 species of the genus *Tyrannus*, two of which (*T. savana* and *T. forficatus*) display exaggeratedly elongated tails, as well as a considerable allometric variation and sexual dimorphism in tail shape. The `tails` data set contains landmark data and centroid sizes from the tails of 281 specimens, their classification to species and sex, and the phylogenetic relationships between *Tyrannus* species (see Fasanelli et al. 2022 and references therein). Also included are the links between landmarks to aid visualization of landmark configurations.
-
 
 ```{r}
 library(morphospace)
@@ -83,7 +83,8 @@ detr_cons_shapes <- consensus(shapes = detr_shapes, index = species)
 
 The basic idea behind the `morphospace` workflow is to build (empiric) morphospaces using multivariate methods (PCA and the like), then use the resulting synthesis as a reference in which to project different elements. These elements are added both to the plot and the `"mspace"` object as succesive 'layers' or list slots, respectively, using the `%>%` pipe operator from `magrittr` (Bache & Wickham 2022).
 
-```{r}
+
+```{r ini, include=F}
 # Create and plot morphospace using detrended shapes, and project specimens
 morphospace1 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_shapes(shapes = detr_shapes)
@@ -262,28 +263,28 @@ The `mspace` objects created using the `mspace` and `proj_*` functions in pipeli
 
 ```{r}
 # Generate a mspace object, then erase the plot
-morphospace2 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2))  %>%
+morphospace <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2))  %>%
   proj_shapes(shapes = detr_shapes, col = species) %>%
   proj_groups(shapes = detr_shapes, groups = species) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
 
 
-# # The funcion plot_mspace can take an object created with mspace + projections
-# # and plot it.
-# plot_mspace(mspace = morphospace2, points = TRUE, mshapes = FALSE, groups = FALSE, phylo = FALSE)
-# 
-# 
-# # The elements added through mspace pipes can be added using the corresponding arguments
-# plot_mspace(mspace = morphospace2, axes = c(1,2), groups = TRUE, points = TRUE,
-#             col.points = species, col.groups = 1:nlevels(species),
-#             mshapes = FALSE, phylo = FALSE)
-# 
-# # The function allows modification different aspects of the plot, such as the axes
-# # to be plotted, the number of shape models in the background or the size of their landmarks
-# plot_mspace(mspace = morphospace2, axes = c(1,3), nh = 3, groups = TRUE, points = TRUE,
-#             col.points = species, col.groups = 1:nlevels(species), cex.ldm = 0,
-#             mshapes = FALSE, phylo = FALSE)
+# The funcion plot_mspace can take an object created with mspace + projections
+# and plot it.
+plot_mspace(mspace = morphospace, points = TRUE, mshapes = FALSE, groups = FALSE, phylo = FALSE)
+
+
+# The elements added through mspace pipes can be added using the corresponding arguments
+plot_mspace(mspace = morphospace, axes = c(1,2), groups = TRUE, points = TRUE,
+            col.points = species, col.groups = 1:nlevels(species),
+            mshapes = FALSE, phylo = FALSE)
+
+# The function allows modification different aspects of the plot, such as the axes
+# to be plotted, the number of shape models in the background or the size of their landmarks
+plot_mspace(mspace = morphospace, axes = c(1,3), nh = 3, groups = TRUE, points = TRUE,
+            col.points = species, col.groups = 1:nlevels(species), cex.ldm = 0,
+            mshapes = FALSE, phylo = FALSE)
 
 ```
 
@@ -292,11 +293,11 @@ In addition, `plot_mspace` allows specification of an external, non-shape variab
 
 ```{r}
 # A phylogenetic tree can be included to produce a phenogram
-# phylomorphospace <- mspace(cons_shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0, asp.models = 2, size.models = 0.5)  %>%
-#   proj_consensus(shapes = cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
-#   proj_phylogeny(tree = tree, pch = 16)
-# 
-# plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 0.7, size.models = 3, col.groups = 1:13)
+phylomorphospace <- mspace(cons_shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0, asp.models = 2, size.models = 0.5)  %>%
+  proj_consensus(shapes = cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
+  proj_phylogeny(tree = tree, pch = 16)
+
+plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 0.7, size.models = 3, col.groups = 1:13)
 
 ```
 

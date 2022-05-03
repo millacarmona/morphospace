@@ -16,7 +16,7 @@ plot_mspace(
   mshapes = TRUE,
   groups = TRUE,
   phylo = TRUE,
-  asp,
+  asp = NA,
   xlab,
   ylab,
   xlim = NULL,
