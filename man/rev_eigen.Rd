@@ -7,11 +7,18 @@
 rev_eigen(scores, vectors, center)
 }
 \arguments{
-\item{center}{}
+\item{scores}{A matrix of scores resulting from an ordination.}
+
+\item{vectors}{A matrix of eigenvector coefficients used to build the
+ordination.}
+
+\item{center}{A vector with the mean values of the original variables used in
+the ordination.}
 }
 \value{
 
 }
 \description{
-Reverse eigenanalysis-based ordination
+Back-calculate variables in their original scale from existing
+ordination data. Used internally.
 }

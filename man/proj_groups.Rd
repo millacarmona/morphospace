@@ -4,14 +4,23 @@
 \alias{proj_groups}
 \title{Delimit groups in morphospace}
 \usage{
-proj_groups(mspace, groups, pipe = TRUE, ...)
+proj_groups(mspace, shapes = NULL, groups, pipe = TRUE, ...)
 }
 \arguments{
-\item{...}{}
+\item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
+
+\item{shapes}{Optional shapes data.}
+
+\item{groups}{Factor; classification of observations into groups.}
+
+\item{pipe}{Logical; is the function being included in a pipe?}
+
+\item{...}{Further arguments passed to \code{\link[=hulls_by_group_2D]{hulls_by_group_2D()}}.}
 }
 \value{
 
 }
 \description{
-Delimit groups in morphospace
+Project convex hulls ennclosing a priori groups in an existing
+morphospace.
 }

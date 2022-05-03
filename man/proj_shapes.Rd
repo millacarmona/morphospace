@@ -7,11 +7,17 @@
 proj_shapes(shapes, mspace, pipe = TRUE, ...)
 }
 \arguments{
-\item{...}{}
+\item{shapes}{Shape data.}
+
+\item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
+
+\item{pipe}{Logical; is the function being included in a pipe?}
+
+\item{...}{Further arguments passed to \code{\link[=points]{points()}}.}
 }
 \value{
 
 }
 \description{
-Project shapes into morphospace
+Project a set of shapes into an existing morphospace.
 }

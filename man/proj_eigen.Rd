@@ -4,14 +4,22 @@
 \alias{proj_eigen}
 \title{Project cases into existing eigenanalysis-based ordination}
 \usage{
-proj_eigen(x, vectors)
+proj_eigen(x, vectors, center)
 }
 \arguments{
-\item{vectors}{}
+\item{x}{A matrix with the original variables used for the ordination as
+columns, and observations as rows.}
+
+\item{vectors}{A matrix of eigenvector coefficients used to build the
+ordination.}
+
+\item{center}{A vector with the mean values of the original variables used in
+the ordination.}
 }
 \value{
 
 }
 \description{
-Project cases into existing eigenanalysis-based ordination
+Project variables in their original scale into an existing
+ordination. Used internally.
 }

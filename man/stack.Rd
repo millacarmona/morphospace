@@ -7,10 +7,10 @@
 stack(shapes, links = NULL, mshape = TRUE, ...)
 }
 \arguments{
-\item{shapes}{A \code{k x p x n} array of superimposed landmarks.}
+\item{shapes}{Shape data.}
 
-\item{links}{An optional list containing the indices of the coordinates
-defining the wireframe in Morpho format.}
+\item{links}{An optional list with the indices of the coordinates defining
+the wireframe (following the format used in \code{Morpho}).}
 
 \item{mshape}{Logical; whether to plot the mean configuration.}
 
@@ -20,5 +20,5 @@ defining the wireframe in Morpho format.}
 
 }
 \description{
-Pile shapes
+Superimpose all the shapes in the sample.
 }

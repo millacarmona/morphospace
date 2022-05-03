@@ -7,11 +7,19 @@
 proj_phylogeny(tree, mspace, pipe = TRUE, ...)
 }
 \arguments{
-\item{...}{}
+\item{tree}{A \code{"phy"} object containing a phylogenetic tree.}
+
+\item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
+
+\item{pipe}{Logical; is the function being included in a pipe?}
+
+\item{...}{Further arguments passed to \code{\link[=lines]{lines()}}.}
 }
 \value{
 
 }
 \description{
-Project phylogenetic structure into morphospace
+Project phylogenetic relationships among a set of shapes
+(representing the consensuses of phhylogenetic terminals) into an existing
+morphospace.
 }
