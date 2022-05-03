@@ -29,11 +29,17 @@ You can install the development version of morphospace from [GitHub](https://git
 devtools::install_github("millacarmona/morphospace")
 ```
 
-Load tail data and extract shapes, centroid sizes, classification of sex and species,
-links between landmarks, and phylogenetic tree
+This package is intended to aid exploration and depiction of multivariate ordinations of shape data obtained through geometric morphometrics analyses. The functions from `morphospace` have been designed to work in an integrated workflow along other widely used geometric morphometrics R packages such as `Morpho`, `geomorph`, and `Momocs`, whose functions cover more essential steps of morphometric analysis (e.g. import, normalization, and statistical analysis).
+
+Below, the general concept and capabilities of  `morphospace` are displayed using two data sets representing different types of geometric morphometric data. The first data set, taken from from Fasanelli et al. (2022), contains a sample of tail shapes from the 13 species of the genus *Tyrannus*, two of which (*T. savana* and *T. forficatus*) display exaggeratedly tails, as well as a considerable allometric variation and sexual dimorphism in tail shape. The `tails` data set contains landmark data and centroid sizes from the tails of 281 specimens, the classification fo each specimen to species and sex, and the phylogenetic relationships between *Tyrannus* species (Harvey et al. 2020). Also included are the links between landmarks to aid visualization.
+
 
 ```{r}
 library(morphospace)
+library(geomorph)
+
+# Load tail data and extract shapes, centroid sizes, classification of sex and species,
+# links between landmarks, and phylogenetic tree
 
 data("tails")
 shapes <- tails$shapes
@@ -44,7 +50,7 @@ links <- tails$links
 tree <- tails$tree
 ```
 
-Morphometric variation is assumed to be already free of differences of orientation, position and scale. This standardization can be readily performed using the capabilities of `R` packages such as `Morpho`, `geomorph`, and `Momocs`.
+Morphometric variation is assumed to be already free of differences of orientation, position and scale. This standardization can be readily performed using functions from the aforementioned R packages.
 
 ```{r pressure, echo = FALSE}
 # Inspect shapes
@@ -52,9 +58,58 @@ pile_shapes(shapes, links = links)
 ```
 
 
+## Shapes operations
 
-```{r cars}
-summary(cars)
+This package provide some functions that perform basic operations with shape variables, such as the calculation of mean shapes or the analytical removal of undesired sources of variation.
+
+```{r}
+# Remove variation associated to sexual dimorphism and compute the consensus shape
+# of each species
+cons_shapes <- consensus(shapes = shapes, index = species)
+detr_shapes <- arrayspecs(detrend_shapes(model = lm(two.d.array(shapes) ~ sex)),
+                          p = nrow(shapes), k = ncol(shapes))
+detr_cons_shapes <- consensus(shapes = detr_shapes, index = species)
+```
+
+
+## Workflow
+
+The besic idea behind `morphospace` is to build a reference ordination by synthesizing morphometric variation with multivariate methods, and then use the resulting 
+
+
+
+The basic idea behind the `morphospace` workflow is to build (empiric) morphospaces using multivariate methods, then use the resulting synthesis as a reference in which to project different elements. These elements are added both to the plot and the `"mspace"` object as succesive 'layers' or list slots, respectively, using the `%>%` pipe operator from `magrittr`.
+
+```{r}
+# Create and plot morphospace using detrended shapes, and project specimens
+morphospace1 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+  proj_shapes(shapes = detr_shapes)
+
+names(morphospace1)
+
+# Plot morphospace, project specimens and delimit species' range of variation
+#using convex hulls
+morphospace2 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+  proj_shapes(shapes = detr_shapes, col = species) %>%
+  proj_groups(shapes = detr_shapes, groups = species)
+
+names(morphospace2)
+
+# Plot morphospace, project each species' mean shape and range of variation
+morphospace3 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+  proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
+  proj_groups(shapes = detr_shapes, groups = species)
+
+names(morphospace3)
+
+# Plot morphospace, project species' meanshapes and phylogenetic structure
+#(requires a phy object)
+morphospace4 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+  proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
+  proj_phylogeny(tree = tree, pch = 16)
+
+names(morphospace4)
+
 ```
 
 You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/v1/examples>.
