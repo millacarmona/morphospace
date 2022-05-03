@@ -19,6 +19,8 @@ You can install the development version of morphospace from
 devtools::install_github("millacarmona/morphospace")
 ```
 
+## Purpose
+
 This package is intended to aid exploration and depiction of
 multivariate ordinations of shape data obtained through geometric
 morphometrics analyses. The functions from `morphospace` have been
@@ -63,7 +65,12 @@ Morphometric variation is assumed to be already free of differences of
 orientation, position and scale. This standardization can be readily
 performed using functions from the aforementioned R packages.
 
-<img src="man/figures/README-pressure-1.png" width="100%" />
+``` r
+# Inspect shapes
+pile_shapes(shapes, links = links)
+```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
 ## Shapes operations
 
@@ -95,7 +102,7 @@ morphospace1 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_shapes(shapes = detr_shapes)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 ``` r
 
@@ -106,7 +113,7 @@ morphospace2 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_groups(shapes = detr_shapes, groups = species)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" />
 
 ``` r
 
@@ -116,7 +123,7 @@ morphospace3 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_groups(shapes = detr_shapes, groups = species)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-3.png" width="100%" />
 
 ``` r
 
@@ -127,7 +134,7 @@ morphospace4 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_phylogeny(tree = tree, pch = 16)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-4.png" width="100%" />
 
 ``` r
 

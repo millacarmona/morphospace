@@ -29,6 +29,9 @@ You can install the development version of morphospace from [GitHub](https://git
 devtools::install_github("millacarmona/morphospace")
 ```
 
+## Purpose
+
+
 This package is intended to aid exploration and depiction of multivariate ordinations of shape data obtained through geometric morphometrics analyses. The functions from `morphospace` have been designed to work in an integrated workflow along other widely used geometric morphometrics R packages such as `Morpho`, `geomorph`, and `Momocs`, whose functions cover more essential steps of morphometric analysis (e.g. import, normalization, and statistical analysis).
 
 Below, the general concept and capabilities of  `morphospace` are displayed using two data sets representing different types of geometric morphometric data. The first data set, taken from from Fasanelli et al. (2022), contains a sample of tail shapes from the 13 species of the genus *Tyrannus*, two of which (*T. savana* and *T. forficatus*) display exaggeratedly elongated tails, as well as a considerable allometric variation and sexual dimorphism in tail shape. The `tails` data set contains landmark data and centroid sizes from the tails of 281 specimens, their classification to species and sex, and the phylogenetic relationships between *Tyrannus* species (Harvey et al. 2020). Also included are the links between landmarks to aid visualization of landmark configurations.
@@ -52,7 +55,7 @@ tree <- tails$tree
 
 Morphometric variation is assumed to be already free of differences of orientation, position and scale. This standardization can be readily performed using functions from the aforementioned R packages.
 
-```{r pressure, echo = FALSE}
+```{r}
 # Inspect shapes
 pile_shapes(shapes, links = links)
 ```
