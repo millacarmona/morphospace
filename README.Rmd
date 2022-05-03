@@ -29,8 +29,6 @@ You can install the development version of morphospace from [GitHub](https://git
 devtools::install_github("millacarmona/morphospace")
 ```
 
-## A sample of stuff
-
 Load tail data and extract shapes, centroid sizes, classification of sex and species,
 links between landmarks, and phylogenetic tree
 
@@ -46,7 +44,14 @@ links <- tails$links
 tree <- tails$tree
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+Morphometric variation is assumed to be already free of differences of orientation, position and scale. This standardization can be readily performed using the capabilities of `R` packages such as `Morpho`, `geomorph`, and `Momocs`.
+
+```{r pressure, echo = FALSE}
+# Inspect shapes
+pile_shapes(shapes, links = links)
+```
+
+
 
 ```{r cars}
 summary(cars)
@@ -55,9 +60,5 @@ summary(cars)
 You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/v1/examples>.
 
 You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
 
 In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
