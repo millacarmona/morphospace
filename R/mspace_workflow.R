@@ -440,7 +440,7 @@ plot_mspace <- function(mspace,
 
   inh_args <- mspace$plotinfo
   new_args <- as.list(match.call())
-  merged_args <- modifyList(inh_args, new_args)
+  merged_args <- utils::modifyList(inh_args, new_args)
 
   args <- lapply(1:length(merged_args), function(i) {eval(merged_args[[i]])})
   names(args) <- names(merged_args)
