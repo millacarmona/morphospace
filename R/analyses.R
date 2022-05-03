@@ -166,7 +166,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #' @export
 #'
 #' @examples
-pls <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
+pls2b <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
 
   if(is.vector(x)) x <- matrix(x)
   if(is.vector(y)) y <- matrix(y)
@@ -180,13 +180,12 @@ pls <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
   y_centered <- scale(y, scale = FALSE, center = TRUE)
   x_centered <- scale(x, scale = FALSE, center = TRUE)
 
+  svd <- Morpho:::svd2B(x_centered, y_centered)
+  values <- svd$d
+  rotation_y <- svd$v
+  rotation_x <- svd$u
 
   if(LOOCV == FALSE) {
-
-    svd <- Morpho:::svd2B(x_centered, y_centered)
-    values <- svd$d
-    rotation_y <- svd$v
-    rotation_x <- svd$u
 
     yscores <- y_centered %*% svd$v
     xscores <- x_centered %*% svd$u
@@ -199,8 +198,6 @@ pls <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
     ndim <- min(ncol(y), ncol(x))
     yscores <- matrix(NA, nrow = nrow(y), ncol = ndim)
     xscores <- matrix(NA, nrow = nrow(x), ncol = ndim)
-
-    values <- Morpho:::svd2B(x_centered, y_centered)$d
 
     for(i in 1:nrow(y)) {
 
@@ -268,7 +265,7 @@ pls <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
 pls_shapes <- function(shapes, x, LOOCV = FALSE, recompute = FALSE) {
 
   y <- shapes_mat(shapes)$data2d
-  parlesqu <- pls(y = y, x = x, LOOCV = LOOCV, recompute = recompute)
+  parlesqu <- pls2b(y = y, x = x, LOOCV = LOOCV, recompute = recompute)
 
   results <- list(sdev = stats::sd(parlesqu$yscores),
                   rotation = parlesqu$yrotation,

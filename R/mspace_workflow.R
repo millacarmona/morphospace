@@ -284,8 +284,6 @@ proj_axes <- function(neword, mspace, ax = 1, pipe = TRUE, ...) {
     ext_scores <- proj_eigen(x = ext_shapes2d, vectors = mspace$rotation,
                              center = mspace$center)
 
-    lines(ext_scores)
-
     if(.Device != "null device") lines(ext_scores[, mspace$plotinfo$axes], ...)
 
     if(pipe == FALSE) {
