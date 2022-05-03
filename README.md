@@ -32,12 +32,13 @@ displayed using two data sets representing different types of geometric
 morphometric data. The first data set, taken from from Fasanelli et
 al. (2022), contains a sample of tail shapes from the 13 species of the
 genus *Tyrannus*, two of which (*T. savana* and *T. forficatus*) display
-exaggeratedly tails, as well as a considerable allometric variation and
-sexual dimorphism in tail shape. The `tails` data set contains landmark
-data and centroid sizes from the tails of 281 specimens, the
-classification fo each specimen to species and sex, and the phylogenetic
+exaggeratedly elongated tails, as well as a considerable allometric
+variation and sexual dimorphism in tail shape. The `tails` data set
+contains landmark data and centroid sizes from the tails of 281
+specimens, their classification to species and sex, and the phylogenetic
 relationships between *Tyrannus* species (Harvey et al. 2020). Also
-included are the links between landmarks to aid visualization.
+included are the links between landmarks to aid visualization of
+landmark configurations.
 
 ``` r
 library(morphospace)
@@ -82,11 +83,11 @@ detr_cons_shapes <- consensus(shapes = detr_shapes, index = species)
 ## Workflow
 
 The basic idea behind the `morphospace` workflow is to build (empiric)
-morphospaces using multivariate methods, then use the resulting
-synthesis as a reference in which to project different elements. These
-elements are added both to the plot and the `"mspace"` object as
-succesive ‘layers’ or list slots, respectively, using the `%>%` pipe
-operator from `magrittr`.
+morphospaces using multivariate methods (PCA and the likes), then use
+the resulting synthesis as a reference in which to project different
+elements. These elements are added both to the plot and the `"mspace"`
+object as succesive ‘layers’ or list slots, respectively, using the
+`%>%` pipe operator from `magrittr`.
 
 ``` r
 # Create and plot morphospace using detrended shapes, and project specimens
@@ -97,8 +98,6 @@ morphospace1 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
 ``` r
-names(morphospace1)
-#> [1] "x"        "rotation" "center"   "datype"   "ordtype"  "plotinfo"
 
 # Plot morphospace, project specimens and delimit species' range of variation
 #using convex hulls
@@ -110,8 +109,6 @@ morphospace2 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
 <img src="man/figures/README-unnamed-chunk-4-2.png" width="100%" />
 
 ``` r
-names(morphospace2)
-#> [1] "x"        "rotation" "center"   "datype"   "ordtype"  "plotinfo" "gr_class"
 
 # Plot morphospace, project each species' mean shape and range of variation
 morphospace3 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
@@ -122,9 +119,6 @@ morphospace3 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
 <img src="man/figures/README-unnamed-chunk-4-3.png" width="100%" />
 
 ``` r
-names(morphospace3)
-#> [1] "x"            "rotation"     "center"       "datype"       "ordtype"     
-#> [6] "plotinfo"     "gr_centroids" "gr_class"
 
 # Plot morphospace, project species' meanshapes and phylogenetic structure
 #(requires a phy object)
@@ -136,6 +130,14 @@ morphospace4 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
 <img src="man/figures/README-unnamed-chunk-4-4.png" width="100%" />
 
 ``` r
+
+names(morphospace1)
+#> [1] "x"        "rotation" "center"   "datype"   "ordtype"  "plotinfo"
+names(morphospace2)
+#> [1] "x"        "rotation" "center"   "datype"   "ordtype"  "plotinfo" "gr_class"
+names(morphospace3)
+#> [1] "x"            "rotation"     "center"       "datype"       "ordtype"     
+#> [6] "plotinfo"     "gr_centroids" "gr_class"
 names(morphospace4)
 #> [1] "x"            "rotation"     "center"       "datype"       "ordtype"     
 #> [6] "plotinfo"     "gr_centroids" "phylo_scores" "phylo"
