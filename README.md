@@ -102,6 +102,7 @@ object as succesive ‘layers’ or list slots, respectively, using the
 # Create and plot morphospace using detrended shapes, and project specimens
 morphospace1 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_shapes(shapes = detr_shapes)
+title("Morphospace")
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
@@ -113,6 +114,7 @@ morphospace1 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
 morphospace2 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_shapes(shapes = detr_shapes, col = species) %>%
   proj_groups(shapes = detr_shapes, groups = species)
+title("Morphospace \n + taxonomic classification")
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" />
@@ -123,6 +125,7 @@ morphospace2 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
 morphospace3 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_groups(shapes = detr_shapes, groups = species)
+title("Morphospace \n + species mean shapes and ranges of variation")
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-3.png" width="100%" />
@@ -135,6 +138,7 @@ morphospace3 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
 morphospace4 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
+title("Morphospace \n + phylogeny")
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-4.png" width="100%" />
@@ -172,6 +176,7 @@ mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16) %>%
   proj_axes(neword = pca, ax = c(1,2), col = "black", lwd = 2, lty = 2)
+title("Morphospace \n + PCs 1 and 2 projected")
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
@@ -194,10 +199,11 @@ et al. 2019 and Cardini & Polly 2020).
 
 ``` r
 # Simulate 100 random normal distributions, and add an artificial classification and
-# and artificial covariate
+# an artificial covariate
 random_y <- do.call("cbind", lapply(1:100, function(i) {rnorm(90)}))
 class <- factor(rep(c("A", "B", "C"), each = 30))
 random_x <- rnorm(90)
+
 
 # Perform bgPCA on the set of random variables to look for the bgPCs maximizing separation
 # between artificial groups, with and without LOOCV
@@ -206,6 +212,7 @@ bgpca1 <- bg_prcomp(x =random_y, groups = class)
 plot(bgpca1$x, col = c(1:3)[class])
 hulls_by_group_2D(bgpca1$x, class)
 title("without LOOCV")
+
 
 bgpca2 <- bg_prcomp(x = random_y, groups = class, LOOCV = TRUE)
 plot(bgpca2$x, col = c(1:3)[class])
@@ -216,6 +223,7 @@ title("with LOOCV")
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
 ``` r
+
 # Perform PLS on the set of random variables to look for the PLS axis maximzing covariation
 # between them and the artificial covariate, with and without LOOCV
 layout(cbind(1,2))
@@ -223,6 +231,7 @@ pls1 <- pls2b(x = random_x, y = random_y)
 plot(pls1$xscores, pls1$yscores)
 abline(lm(pls1$yscores ~ pls1$xscores), col = "red")
 title("without LOOCV")
+
 
 pls2 <- pls2b(x = random_x, y = random_y, LOOCV = TRUE)
 plot(pls2$xscores, pls2$yscores)
@@ -250,11 +259,13 @@ mspace(detr_cons_shapes, FUN = phy_prcomp, tree = tree, links = links,
        mag = 0.7, axes = c(1,2), xlim = c(-0.35, 0.15), ylim = c(-0.25, 0.1)) %>%
   proj_consensus(shapes = detr_cons_shapes, bg = 1:13, pch = 21) %>%
   proj_phylogeny(tree = tree, pch = 16)
+title("Phylogenetic morphospace")
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 ``` r
+
 # Phylogenetic PCA for all species, adding projection of intrapspecific variation
 mspace(detr_cons_shapes, FUN = phy_prcomp, tree = tree, links = links,
        mag = 0.7, axes = c(1,2), xlim = c(-0.35, 0.15), ylim = c(-0.25, 0.1)) %>%
@@ -262,16 +273,19 @@ mspace(detr_cons_shapes, FUN = phy_prcomp, tree = tree, links = links,
   proj_groups(shapes = detr_shapes, groups = species) %>%
   proj_consensus(shapes = detr_cons_shapes, col = "black", pch = 16) %>%
   proj_phylogeny(tree = tree, pch = 16)
+title("Phylogenetic morphospace \n + samples")
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
 
 ``` r
+
 # Between group PCA - all species
 mspace(shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = species,
        links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_shapes(shapes = shapes, col = species) %>%
   proj_groups(shapes = shapes, groups = species)
+title("Morphospace emphasizing interspecific variation")
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-3.png" width="100%" />
@@ -303,6 +317,7 @@ morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
   proj_consensus(shapes = cons_shapes, col = 1:13, pch = 16) %>%
   proj_shapes(shapes = shapes, col = species) %>%
   proj_groups(shapes = shapes, groups = species)
+title("Interspecific NDF morphospace \n + all samples and mean shapes")
 ```
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
@@ -337,6 +352,8 @@ for(i in 1:nlevels(species)){
 # Add species' mean shapes and phylogeny
 proj_consensus(mspace = morphospace, shapes = consensus(detr_shapes, species), pch = 16, pipe = FALSE)
 proj_phylogeny(mspace = morphospace, tree = tree, pch = 16, pipe = FALSE)
+
+title("Interspecific NDF morphospace \n + all samples and mean shapes \n + intraspecific allometric axes")
 ```
 
 <img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
@@ -356,6 +373,7 @@ morphospace <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2))  %>%
   proj_groups(shapes = detr_shapes, groups = species) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
+title("A morphospace")
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
@@ -365,6 +383,7 @@ morphospace <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2))  %>%
 # The funcion plot_mspace can take an object created with mspace + projections
 # and plot it.
 plot_mspace(mspace = morphospace, points = TRUE, mshapes = FALSE, groups = FALSE, phylo = FALSE)
+title("The same morphospace, plotted with plot_mspace")
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-2.png" width="100%" />
@@ -375,16 +394,19 @@ plot_mspace(mspace = morphospace, points = TRUE, mshapes = FALSE, groups = FALSE
 plot_mspace(mspace = morphospace, axes = c(1,2), groups = TRUE, points = TRUE,
             col.points = species, col.groups = 1:nlevels(species),
             mshapes = FALSE, phylo = FALSE)
+title("The same morphospace, plotted with plot_mspace, \n with additional elements added")
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-3.png" width="100%" />
 
 ``` r
+
 # The function allows modification different aspects of the plot, such as the axes
 # to be plotted, the number of shape models in the background or the size of their landmarks
 plot_mspace(mspace = morphospace, axes = c(1,3), nh = 3, groups = TRUE, points = TRUE,
             col.points = species, col.groups = 1:nlevels(species), cex.ldm = 0,
             mshapes = FALSE, phylo = FALSE)
+title("Morphospaces axes 1 and 3, and with a different background")
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-4.png" width="100%" />
@@ -400,13 +422,16 @@ argument of `plot_mspace`, we get a phenogram:
 phylomorphospace <- mspace(cons_shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0, asp.models = 2, size.models = 0.5)  %>%
   proj_consensus(shapes = cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
+title("Just a phylomorphospace")
 ```
 
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 ``` r
+
 # Plot phenogram
 plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 0.7, size.models = 3, col.groups = 1:13)
+title("Phenogram")
 ```
 
 <img src="man/figures/README-unnamed-chunk-12-2.png" width="100%" />
@@ -449,6 +474,7 @@ mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 0.3,
        asp.models = 0.5, bg.model = "light gray") %>%
   proj_shapes(shapes = shapes, col = species) %>%
   proj_groups(shapes = shapes, groups = species)
+title("Morphospace")
 ```
 
 <img src="man/figures/README-unnamed-chunk-13-2.png" width="100%" />
@@ -514,6 +540,8 @@ for(i in 1:nlevels(species)){
   pca <- prcomp(x = subshapes)
   proj_axes(neword = pca, refined_morphospace, ax = 1, pipe = FALSE, lwd = 2, col = i)
 }
+
+title("Morphospace emphasizing interspecific variation")
 ```
 
 <img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
@@ -560,6 +588,8 @@ for(i in 1:4) {
   lines(xy[index,], col = i, lwd = 2)
   points(xy[index,], pch = 21, bg = i)
 }
+
+title("Stratomorphospace")
 ```
 
 <img src="man/figures/README-unnamed-chunk-16-2.png" width="100%" />
@@ -616,6 +646,5 @@ Li S., Szekely G. (eds.), Statistical Shape and Deformation Analysis,
 
 Sidlauskas, B. (2008). Continuous and arrested morphological
 diversification in sister clades of characiform fishes: a
-phylomorphospace approach. Evolution: International Journal of Organic
-Evolution, 62(12), 3135-3156.
+phylomorphospace approach. Evolution, 62(12), 3135-3156.
 <https://doi.org/10.1111/j.1558-5646.2008.00519.x>.
