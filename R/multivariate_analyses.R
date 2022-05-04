@@ -248,8 +248,8 @@ pls2b <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
 
 #' 2B Partial Least Squares for shape data
 #'
-#' @description A wrapper for [pls()] aimed specifically at synthesizing
-#'   covariation between shape data and other external, non-shape variables.
+#' @description A wrapper for [pls2b()] aimed specifically at synthesizing
+#'   covariation between shape data and other external, non-shape variable(s).
 #'
 #' @param shapes Shape data.
 #' @param x A matrix with variables as columns and observations as rows,

@@ -6,7 +6,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-A package for people who can’t visualize morphospaces good and wanna
+A package for people who can’t visualize morphospaces good and who wanna
 learn to do other geometric morphometrics stuff good too.
 
 ## Installation
@@ -21,28 +21,32 @@ devtools::install_github("millacarmona/morphospace")
 
 ## Purpose
 
-This package is intended to aid exploration and depiction of
-multivariate ordinations of shape data obtained through geometric
-morphometrics analyses. The functions from `morphospace` have been
-designed to work in intergration with other widely used geometric
-morphometrics R packages such as `Morpho` (Schlager 2017), `geomorph`
-(Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et
-al. 2014), whose functions cover other more essential steps in geometric
-morphometrics analysis (e.g. import, normalization, and statistical
-analysis).
+The general motivation to create `morphospace` was to crystallize my
+experiences introducing geometric morphometrics to biologists and
+paleontologists, as well as to assist my own daily research (which
+revolves around morphological evolution and depends heavily on a number
+of R packages). In particular, this package is intended to aid
+representation and exploration of multivariate ordinations of shape
+data, and has been designed to work in intergration with other widely
+used R packages that cover more essential steps in the geometric
+morphometrics pipeline (e.g. importing, normalization, statistical
+analysis) such as `Morpho` (Schlager 2017), `geomorph` (Adams et
+al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014).
+
+## Landmark data
 
 Below, the general concept and capabilities of `morphospace` are
-displayed using two data sets representing different types of geometric
-morphometric data. The first data set, taken from from Fasanelli et
+showcased using two data sets representing different types of geometric
+morphometrics data. The first data set, taken from from Fasanelli et
 al. (2022), contains a sample of tail shapes from the 13 species of the
 genus *Tyrannus*, two of which (*T. savana* and *T. forficatus*) display
 exaggeratedly elongated tails, as well as a considerable allometric
-variation and sexual dimorphism in tail shape. The `tails` data set
-contains landmark data and centroid sizes from the tails of 281
-specimens, their classification to species and sex, and the phylogenetic
-relationships between *Tyrannus* species (see Fasanelli et al. 2022 and
-references therein). Also included are the links between landmarks to
-aid visualization of landmark configurations.
+variation and sexual dimorphism. The `tails` data set contains landmark
+data and centroid sizes from the tails of 281 specimens, their
+classification to species and sex, and the phylogenetic relationships
+between *Tyrannus* species (see Fasanelli et al. 2022 and references
+therein). To further help visualization of shapes, the links between
+landmarks have also been included.
 
 ``` r
 library(morphospace)
@@ -65,7 +69,8 @@ tree <- tails$tree
 
 Morphometric variation is assumed to be already free of differences of
 orientation, position and scale. This standardization can be readily
-performed using functions from the aforementioned R packages.
+performed using a number of functions provided by the aforementioned R
+packages.
 
 ``` r
 # Inspect shapes
@@ -73,8 +78,6 @@ pile_shapes(shapes, links = links)
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
-
-## Shape operations
 
 This package provide some functions that perform basic operations with
 shape variables, such as the calculation of mean shapes or the
@@ -95,7 +98,7 @@ The basic idea behind the `morphospace` workflow is to build (empiric)
 morphospaces using multivariate methods (PCA and the like), then use the
 resulting synthesis as a reference in which to project different
 elements. These elements are added both to the plot and the `"mspace"`
-object as succesive ‘layers’ or list slots, respectively, using the
+object as consecutive ‘layers’ or list slots, respectively, using the
 `%>%` pipe operator from `magrittr` (Bache & Wickham 2022).
 
 ``` r
@@ -185,21 +188,20 @@ title("Morphospace \n+ PCs 1 and 2 projected")
 
 The default settings of `mspace` rely on the `prcomp` function from base
 R to perform the PCA that builds the synthetic morphometric space.
-However, `morphospace` also includes a couple of supervised ordination
-alternatives, namely phylogenetic PCA (Revell 2009; borrowed from
-`phytools`, Revell 2012) between-groups PCA (functions `bg_prcomp`) and
-Partial Least Squares (PLS; functions `pls2b` and `pls_shapes`, the
-latter being an adaptation of the former for the analysis of shape data
-against other non-shape variables). These have been styled so they share
-format with `prcomp`, and the latter two allow performing a
-leave-one-out cross-validation that alleviates some spurious results
-that can arise when the number of variables exceeds the number of
-samples (as it is common in geometric morphometric analyses; see Cardini
-et al. 2019 and Cardini & Polly 2020).
+However, `morphospace` also includes a couple of alternatives for
+supervised ordination, namely phylogenetic PCA (Revell 2009; borrowed
+from `phytools`, Revell 2012), between-groups PCA (`bg_prcomp`), and
+Partial Least Squares (`pls2b`). These have been styled/wrapped so they
+share format with `prcomp`, and the latter two allow for leave-one-out
+cross-validation (LOOCV), which alleviates some spurious patterns that
+arise when the number of variables exceeds the number of samples (as it
+is common in geometric morphometric analyses; see Cardini et al. 2019
+and Cardini & Polly 2020).
 
 ``` r
 # Simulate 100 random normal distributions, and add an artificial classification and
 # an artificial covariate
+set.seed(123)
 random_y <- do.call("cbind", lapply(1:100, function(i) {rnorm(90)}))
 class <- factor(rep(c("A", "B", "C"), each = 30))
 random_x <- rnorm(90)
@@ -247,8 +249,8 @@ dev.off()
 #>           1
 ```
 
-These methods can be used instead of regular PCA for morphospace
-construction via the `FUN` and `...` arguments (adding the argument
+These methods can be used instead of regular PCA for building
+morphospaces via the `FUN` and `...` arguments (adding the argument
 `groups` for `bg_prcomp` and `tree` for `phy_prcomp`) of `mspace`. The
 resulting morphospace can be combined with the rest of the functions in
 the same way as before:
@@ -297,12 +299,13 @@ sequentially construct rather complex graphics.
 
 For example, suppose we are interested in the patterns of interspecific
 variation, but we don’t want the marked divergence of deep forked (DF)
-species to influence the axes because we don’t want the non-deep forked
-(NDF) species to be crushed and collapsed in the same tiny region of the
-morphospace. We could subset our shapes to retain only NDF species,
-build an ordination using a bgPCA between them (so our axes maximize the
-interspecific variation between NDF species), and then project the
-samples corresponding to DF species into the resulting morphospace.
+species to influence the axes, because we don’t want all the non-deep
+forked (NDF) species to be crushed and collapsed in the same tiny region
+of the morphospace. We could subset our shapes to retain only NDF
+species, build an ordination using a bgPCA between them (so our axes
+maximize the interspecific variation between NDF species), and then
+project the samples corresponding to DF species into the resulting
+morphospace.
 
 ``` r
 # Between group PCA - only non-deepforked species, then project deep forked species
@@ -330,6 +333,9 @@ project the phylogenetic relationships into our morphospace so we can
 say we have a phylomorphospace (Sidlauskas 2008). The following chunk of
 code illustrates how to combine the pipe workflow described above with
 `proj_*` functions called outside the pipe.
+
+(Clarification: `pls_shapes` is just a wrapper for `pls2b` aimed at the
+synthesis of shape data supervised by other non-shape variables).
 
 ``` r
 # Between group PCA - only non-deepforked species, then project deep forked species
@@ -486,9 +492,9 @@ variation associated to geographic provenance and allometric variation
 within each species, and then use `consensus` to extract the mean shape
 of the refined sample.
 
-(Just to clarify, we do this in a two step process for a good reason:
-when we use `detrend_shapes` to detrend shape variation, the grand mean
-is used by default as the new mean shape of the sample; however by
+(Clarification: we do this in a two step process for a good reason: when
+we use `detrend_shapes` to detrend shape variation, the grand mean is
+used by default as the new mean shape of the sample; however by
 specifying a value or level of the `x` from the model in the `xvalue`
 argument, we can use that new value as the mean shape for our
 ‘detrended’ shape variation. In this case, we are analitically
