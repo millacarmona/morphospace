@@ -170,7 +170,7 @@ proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 
   if(.Device != "null device") points(scores[, mspace$plotinfo$axes], ...)
 
-  if(pipe == FALSE) return(scores)
+  if(pipe == FALSE) return(invisible(scores))
   if(pipe == TRUE) return(invisible(mspace))
 
 }
@@ -205,7 +205,7 @@ proj_consensus <- function(shapes, mspace, pipe = TRUE, ...) {
 
   mspace$gr_centroids <- gr_centroids
 
-  if(pipe == FALSE) return(gr_centroids)
+  if(pipe == FALSE) return(invisible(gr_centroids))
   if(pipe == TRUE) return(invisible(mspace))
 
 }
@@ -297,7 +297,7 @@ proj_axes <- function(neword, mspace, ax = 1, pipe = TRUE, ...) {
 
   }
 
-  if(pipe == FALSE) return(ext_shapes)
+  if(pipe == FALSE) return(invisible(ext_shapes))
   if(pipe == TRUE) return(invisible(mspace))
 
 }
@@ -341,7 +341,7 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
   if(pipe == FALSE) {
     phylo_shapes <- rev_eigen(scores = phylo_scores, vectors = mspace$rotation,
                               center = mspace$center)
-    return(phylo_shapes)
+    return(invisible(phylo_shapes))
   } else {
     return(invisible(mspace))
   }

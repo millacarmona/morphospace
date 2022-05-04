@@ -84,7 +84,7 @@ detr_cons_shapes <- consensus(shapes = detr_shapes, index = species)
 The basic idea behind the `morphospace` workflow is to build (empiric) morphospaces using multivariate methods (PCA and the like), then use the resulting synthesis as a reference in which to project different elements. These elements are added both to the plot and the `"mspace"` object as succesive 'layers' or list slots, respectively, using the `%>%` pipe operator from `magrittr` (Bache & Wickham 2022).
 
 
-```{r ini, include=F}
+```{r}
 # Create and plot morphospace using detrended shapes, and project specimens
 morphospace1 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_shapes(shapes = detr_shapes)
@@ -230,7 +230,7 @@ morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
 Finally, let's say we want to project the axis representing the allometric variation (e.g. a PLS of shape vs centroid size) of each species, so we can see whether these are aligned with each other or with the axes maximizing NDF interspecific variation. Suppose we also want to project the phylogenetic relationships into our morphospace so we can say we have a phylomorphospace (Sidlauskas 2008). The following chunk of code illustrates how to combine the pipe workflow described above with `proj_*` functions called outside the pipe.
 
 
-```{r, echo = FALSE}
+```{r}
 # Between group PCA - only non-deepforked species, then project deep forked species
 # (so the ordination better reflects evolution of species with "ordinary" tails)
 morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
@@ -379,7 +379,7 @@ for(i in 1:nlevels(species)){
 
 ```
 
-Finally, we can use `plot_mspace` again to create complex hybrid plots. In this case, say are interested in the stratophenetic evolution of these species, so we want to plot the first PC together with the time axis. To do so, we manipulate our variabels a bit first to obtain the classification of each specimen to the combination of (relative) age and species, then build the morphospace, then use `plot_mspace` to plot stratigraphic position against shape (a stratomorphospace if ou will). Finally, we calculate the (absolute) ages associated to each combination, bind them to the groups means, order them and use that to depict the mean shape progression of each species:
+Finally, we can use `plot_mspace` again to create complex hybrid plots. In this case, say are interested in the stratophenetic evolution of these species, so we want to plot the first PC together with the time axis. To do so, we manipulate our variabels a bit first to obtain the classification of each specimen to the combination of (relative) age and species, then build the morphospace, then use `plot_mspace` to plot stratigraphic position against shape (a stratomorphospace if ou will). Finally, we calculate the (absolute) ages associated to each combination, bind them to the groups means, order them and use that to depict the mean shape changes of each species through time:
 
 ```{r}
 # Combine species and biozones factors, then compute the mean shapes of the resulting
