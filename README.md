@@ -114,7 +114,7 @@ title("Morphospace")
 morphospace2 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_shapes(shapes = detr_shapes, col = species) %>%
   proj_groups(shapes = detr_shapes, groups = species)
-title("Morphospace \n + taxonomic classification")
+title("Morphospace \n+ taxonomic classification")
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" />
@@ -125,7 +125,7 @@ title("Morphospace \n + taxonomic classification")
 morphospace3 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_groups(shapes = detr_shapes, groups = species)
-title("Morphospace \n + species mean shapes and ranges of variation")
+title("Morphospace \n+ species mean shapes and ranges of variation")
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-3.png" width="100%" />
@@ -138,7 +138,7 @@ title("Morphospace \n + species mean shapes and ranges of variation")
 morphospace4 <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
-title("Morphospace \n + phylogeny")
+title("Morphospace \n+ phylogeny")
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-4.png" width="100%" />
@@ -176,7 +176,7 @@ mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16) %>%
   proj_axes(neword = pca, ax = c(1,2), col = "black", lwd = 2, lty = 2)
-title("Morphospace \n + PCs 1 and 2 projected")
+title("Morphospace \n+ PCs 1 and 2 projected")
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
@@ -273,7 +273,7 @@ mspace(detr_cons_shapes, FUN = phy_prcomp, tree = tree, links = links,
   proj_groups(shapes = detr_shapes, groups = species) %>%
   proj_consensus(shapes = detr_cons_shapes, col = "black", pch = 16) %>%
   proj_phylogeny(tree = tree, pch = 16)
-title("Phylogenetic morphospace \n + samples")
+title("Phylogenetic morphospace \n+ samples")
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
@@ -317,7 +317,7 @@ morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
   proj_consensus(shapes = cons_shapes, col = 1:13, pch = 16) %>%
   proj_shapes(shapes = shapes, col = species) %>%
   proj_groups(shapes = shapes, groups = species)
-title("Interspecific NDF morphospace \n + all samples and mean shapes")
+title("Interspecific NDF morphospace \n+ all samples and mean shapes")
 ```
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
@@ -353,7 +353,7 @@ for(i in 1:nlevels(species)){
 proj_consensus(mspace = morphospace, shapes = consensus(detr_shapes, species), pch = 16, pipe = FALSE)
 proj_phylogeny(mspace = morphospace, tree = tree, pch = 16, pipe = FALSE)
 
-title("Interspecific NDF morphospace \n + all samples and mean shapes \n + intraspecific allometric axes")
+title("Interspecific NDF morphospace \n+ all samples and mean shapes \n+ intraspecific allometric axes")
 ```
 
 <img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
@@ -533,6 +533,7 @@ refined_morphospace <- mspace(detr_shapes, mag = 0.7, axes = c(1,2), FUN = bg_pr
   proj_shapes(shapes = detr_shapes, col = species) %>%
   proj_consensus(shapes = detr_mshapes, pch=16) %>%
   proj_groups(shapes = detr_shapes, groups = species)
+title("Ignore this one, is a prerequisite for the next plot")
 # Project the axis of maximum intraspecific variation of each species (i.e. a PCA
 # of the subsamples corresponding gto each species)
 for(i in 1:nlevels(species)){
