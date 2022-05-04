@@ -36,7 +36,7 @@ devtools::install_github("millacarmona/morphospace")
 
 ## Purpose
 
-This package is intended to aid exploration and depiction of multivariate ordinations of shape data obtained through geometric morphometrics analyses. The functions from `morphospace` have been designed to work in intergration with other widely used geometric morphometrics R packages such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), and `Momocs` (Bonhome et al. 2014), whose functions cover other more essential steps in geometric morphometrics analysis (e.g. import, normalization, and statistical analysis).
+This package is intended to aid exploration and depiction of multivariate ordinations of shape data obtained through geometric morphometrics analyses. The functions from `morphospace` have been designed to work in intergration with other widely used geometric morphometrics R packages such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014), whose functions cover other more essential steps in geometric morphometrics analysis (e.g. import, normalization, and statistical analysis).
 
 Below, the general concept and capabilities of  `morphospace` are displayed using two data sets representing different types of geometric morphometric data. The first data set, taken from from Fasanelli et al. (2022), contains a sample of tail shapes from the 13 species of the genus *Tyrannus*, two of which (*T. savana* and *T. forficatus*) display exaggeratedly elongated tails, as well as a considerable allometric variation and sexual dimorphism in tail shape. The `tails` data set contains landmark data and centroid sizes from the tails of 281 specimens, their classification to species and sex, and the phylogenetic relationships between *Tyrannus* species (see Fasanelli et al. 2022 and references therein). Also included are the links between landmarks to aid visualization of landmark configurations.
 
@@ -140,7 +140,7 @@ mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
 
 ## Ordination methods
 
-The default settings of `mspace` rely on the `prcomp` function from base R to perform the PCA that builds the synthetic morphometric space. However, `morphospace` also includes a couple of supervised ordination alternatives, namely phylogenetic PCA (Revell 2009; borrowed from `phytools`, Revell 2012) between-groups PCA and Partial Least Squares (PLS). These have been styled so they share format with `prcomp`, and the latter two allow performing a leave-one-out cross-validation that alleviates some spurious results that can arise when the number of variables exceeds the number of samples (as it is common in geometric morphometric analyses; see Cardini et al. 2019 and Cardini & Polly 2020).
+The default settings of `mspace` rely on the `prcomp` function from base R to perform the PCA that builds the synthetic morphometric space. However, `morphospace` also includes a couple of supervised ordination alternatives, namely phylogenetic PCA (Revell 2009; borrowed from `phytools`, Revell 2012) between-groups PCA (functions `bg_prcomp`) and Partial Least Squares (PLS; functions `pls2b` and `pls_shapes`, the latter being an adaptation of the former for the analysis of shape data against other non-shape variables). These have been styled so they share format with `prcomp`, and the latter two allow performing a leave-one-out cross-validation that alleviates some spurious results that can arise when the number of variables exceeds the number of samples (as it is common in geometric morphometric analyses; see Cardini et al. 2019 and Cardini & Polly 2020).
 
 ```{r}
 # Simulate 100 random normal distributions, and add an artificial classification and
@@ -227,10 +227,10 @@ morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
 
 ```
 
-Finally, let's say we want to project the axis representing the allometric variation (e.g. a PLS of shape vs centroid size) of each species, so we can see whether these are aligned with the axes maximizing NDF interspecific variation. Suppose we also want to project the phylogenetic relationships into our morphospace so we can say we have a phylomorphospace (Sidlauskas 2008). The following chunk of code illustrates how to combine the pipe workflow described above with `proj_*` functions called outside the pipe.
+Finally, let's say we want to project the axis representing the allometric variation (e.g. a PLS of shape vs centroid size) of each species, so we can see whether these are aligned with each other or with the axes maximizing NDF interspecific variation. Suppose we also want to project the phylogenetic relationships into our morphospace so we can say we have a phylomorphospace (Sidlauskas 2008). The following chunk of code illustrates how to combine the pipe workflow described above with `proj_*` functions called outside the pipe.
 
 
-```{r}
+```{r, echo = FALSE}
 # Between group PCA - only non-deepforked species, then project deep forked species
 # (so the ordination better reflects evolution of species with "ordinary" tails)
 morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
@@ -297,6 +297,7 @@ phylomorphospace <- mspace(cons_shapes, links = links, mag = 0.7, axes = c(1,2),
   proj_consensus(shapes = cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
 
+# Plot phenogram
 plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 0.7, size.models = 3, col.groups = 1:13)
 
 ```
@@ -305,11 +306,112 @@ plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 0.7, size.models 
 
 ## Closed outlines
 
+`morphospace` can also handle closed outline data in the form of Fourier coefficients resulting from an elliptic Fourier analysis. For the porpuses of importing and analizing data we rely on the `Momocs` package, and use its `"OutCoe"` format for storing closed outlines as starting point. Below the `mspace %>% proj_*` workflow is applied to the `shells` data set taken from Milla Carmona et al. (2018). This include data from 137 specimens belonging to 4 species of the extinct bivalve genus *Ptychomya*, tracking their shape changes through a 5 million years interval from the Lower CRetaceous of Argentina. The data set includes the information about the shape (measured using 7 harmonics), centroid size, age (both relative and absolute), geographic provenance, and taxonomic classification of each specimen.
+
 
 ```{r}
+# Load data from shells, extract shapes and classification into species
+data("shells")
 
+shapes <- shells$shapes$coe
+sizes <- log(shells$sizes)
+species <- shells$data$species
+ages <- shells$data$age
+bzones <- shells$data$zone
+locality <- shells$data$locality
+
+# Pile shapes
+pile_shapes(shapes)
+
+# Create morphospace using all the raw variation
+mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 0.3,
+       asp.models = 0.5, bg.model = "light gray") %>%
+  proj_shapes(shapes = shapes, col = species) %>%
+  proj_groups(shapes = shapes, groups = species)
 
 ```
+
+All the same fun stuff can be done here. For example we might be interested in refining our variation to show the main differences between species, and so we could use `detrend_shapes` to remove variation associated to geographic provenance and allometric variation within each species, and then use `consensus` to extract the mean shape of the refined sample.
+
+(Just to clarify, we do this in a two step process for a good reason: when we use `detrend_shapes` to detrend shape variation, the grand mean is used by default as the new mean shape of the sample; however by specifying a value or level of the `x` from the model in the `xvalue` argument, we can use that new value as the mean shape for our 'detrended' shape variation. In this case, we are analitically displacing all the shells to the shape they would have had they attained their species' maximum size).
+
+(Also, note that we don't need `arrayspecs` when using `detrend_shapes` here, that's because Fourier coefficients are already stored in matrix format).
+
+```{r}
+# 'Clean' shapes separately for each species, removing 1) variation associated
+# to geographic provenance and 2) allometric variation
+detr_shapes <- shapes * 0
+for(i in 1:nlevels(species)) {
+  index <- species == levels(species)[i]
+
+  submod_loc <- lm(shapes[index,] ~ factor(locality[index]))
+  detr_shapes0 <- detrend_shapes(submod_loc)
+
+  submod_siz <- lm(detr_shapes0 ~ sizes[index])
+  subdetr_shapes1 <- detrend_shapes(submod_siz, xvalue = max(sizes[index]))
+
+  detr_shapes[rownames(detr_shapes) %in% rownames(subdetr_shapes1),] <- subdetr_shapes1
+}
+
+# Compute mean shapes
+detr_mshapes <- consensus(detr_shapes, species)
+
+```
+
+We can now build the refined morphospace using `bg_prcomp` and project our sample, groups, mean shapes and the main axis of intraspecific variation of each species just to show that outlines and bivalves can be cool too.
+
+```{r}
+# Create morphospace from the 'refined' variation, further enhancing interspecific
+# variation by using a bgPCA
+refined_morphospace <- mspace(detr_shapes, mag = 0.7, axes = c(1,2), FUN = bg_prcomp, groups = species,
+                              nh = 5, nv = 4, size.models = 0.3,
+                              asp.models = 0.5, bg.model = "light gray") %>%
+  proj_shapes(shapes = detr_shapes, col = species) %>%
+  proj_consensus(shapes = detr_mshapes, pch=16) %>%
+  proj_groups(shapes = detr_shapes, groups = species)
+# Project the axis of maximum intraspecific variation of each species (i.e. a PCA
+# of the subsamples corresponding gto each species)
+for(i in 1:nlevels(species)){
+  subshapes <- detr_shapes[species == levels(species)[i],]
+  pca <- prcomp(x = subshapes)
+  proj_axes(neword = pca, refined_morphospace, ax = 1, pipe = FALSE, lwd = 2, col = i)
+}
+
+```
+
+Finally, we can use `plot_mspace` again to create complex hybrid plots. In this case, say are interested in the stratophenetic evolution of these species, so we want to plot the first PC together with the time axis. To do so, we manipulate our variabels a bit first to obtain the classification of each specimen to the combination of (relative) age and species, then build the morphospace, then use `plot_mspace` to plot stratigraphic position against shape (a stratomorphospace if ou will). Finally, we calculate the (absolute) ages associated to each combination, bind them to the groups means, order them and use that to depict the mean shape progression of each species:
+
+```{r}
+# Combine species and biozones factors, then compute the mean shapes of the resulting
+# groups
+sp.bz <- factor(species:bzones)
+mshapes_agesxspecies <- consensus(shapes, sp.bz)
+
+# Create morphospace
+morphospace <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4,
+                      size.models = 0.3, asp.models = 0.5, bg.model = "light gray") %>%
+  proj_shapes(shapes = shapes) %>%
+  proj_consensus(shapes = mshapes_agesxspecies, pch=16) %>%
+  proj_groups(shapes = shapes, groups = sp.bz)
+
+# Plot time axis vs first PC
+plot_mspace(mspace = morphospace, x = ages, axes = 1,
+            nh = 5, nv = 4, asp.models = 0.13, mag = 0.5,
+            size.models = 4, col.points = species, pch.points = 1,
+            phylo = FALSE, groups = FALSE, mshapes = TRUE)
+
+# Compute and arrange absolute ages for each group, then use it to add and connect mean shapes
+xy <- cbind(tapply(ages, sp.bz, mean), morphospace$gr_centroids[,1])
+xy <- xy[order(xy[,1]),]
+for(i in 1:4) {
+  index <- grepl(x = rownames(xy), pattern = levels(species)[i])
+  lines(xy[index,], col = i, lwd = 2)
+  points(xy[index,], pch = 21, bg = i)
+}
+
+```
+
+
 
 ## References
 
@@ -323,7 +425,11 @@ Cardini A., O’Higgins P., & Rohlf F.J. (2019). Seeing distinct groups where th
 
 Cardini A., & Polly P. D. (2020). Cross-validated between group PCA scatterplots: A solution to spurious group separation?. Evolutionary Biology, 47(1), 85-95. <https://doi.org/10.1007/s11692-020-09494-x>.
 
+Dryden, I.L. (2019). shapes: statistical shape analysis, R package version 1.2.5. <https://CRAN.R-project.org/package=shapes>.
+
 Fasanelli M.N., Milla Carmona P.S., Soto I.M., & Tuero, D.T. (2022). Allometry, sexual selection and evolutionary lines of least resistance shaped the evolution of exaggerated sexual traits within the genus *Tyrannus*. Journal of Evolutionary Biology, in press. <https://doi.org/10.1111/jeb.14000>.
+
+Milla Carmona P.S, Lazo D.G., & Soto I.M. (2018). Morphological evolution of the bivalve *Ptychomya* through the Lower Cretaceous of Argentina. Paleobiology, 44(1), 101-117. <https://doi.org/10.1017/pab.2017.32>
 
 Revell, L.J. (2009). Size-correction and principal components for interspecific comparative studies. Evolution, 63, 3258-3268. <https://doi.org/10.1111/j.1558-5646.2009.00804.x>
 
@@ -332,12 +438,3 @@ Revell, L.J. (2012). phytools: An R package for phylogenetic comparative biology
 Schlager S. (2017). Morpho and Rvcg - Shape Analysis in R. In Zheng G., Li S., Szekely G. (eds.), Statistical Shape and Deformation Analysis, 217-256. Academic Press. <https://doi.org/10.1016/B978-0-12-810493-4.00011-0>.
 
 Sidlauskas, B. (2008). Continuous and arrested morphological diversification in sister clades of characiform fishes: a phylomorphospace approach. Evolution: International Journal of Organic Evolution, 62(12), 3135-3156. <https://doi.org/10.1111/j.1558-5646.2008.00519.x>.
-
-
-
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/v1/examples>.
-
-You can also embed plots, for example:
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.

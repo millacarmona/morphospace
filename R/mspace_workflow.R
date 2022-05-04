@@ -438,13 +438,6 @@ plot_mspace <- function(mspace,
                         lwd.branches = 1) {
 
 
-  # inh_args <- mspace$plotinfo
-  # new_args <- as.list(match.call())
-  # merged_args <- modifyList(inh_args, new_args)
-  #
-  # args <- lapply(1:length(merged_args), function(i) {eval(merged_args[[i]])})
-  # names(args) <- names(merged_args)
-
   supplied <- names(as.list(match.call()))[-1]
   new_args <- lapply(1:length(supplied), function(i) {get(supplied[i])})
   names(new_args) <- supplied
@@ -628,7 +621,7 @@ plot_mspace <- function(mspace,
       if(points == TRUE) {
         points(phyloxy[-c(1:length(tree$tip.label)),], pch = 16)
         points(phyloxy[c(1:length(tree$tip.label)),][rownames(mspace$gr_centroids),],
-               col = col.groups, pch = pch.groups, cex = cex.groups)
+               bg = col.groups, pch = 21, cex = cex.groups)
 
         }
     } else { #else, go for a generic hybrid morphospace

@@ -26,9 +26,10 @@ multivariate ordinations of shape data obtained through geometric
 morphometrics analyses. The functions from `morphospace` have been
 designed to work in intergration with other widely used geometric
 morphometrics R packages such as `Morpho` (Schlager 2017), `geomorph`
-(Adams et al. 2021), and `Momocs` (Bonhome et al. 2014), whose functions
-cover other more essential steps in geometric morphometrics analysis
-(e.g. import, normalization, and statistical analysis).
+(Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et
+al. 2014), whose functions cover other more essential steps in geometric
+morphometrics analysis (e.g. import, normalization, and statistical
+analysis).
 
 Below, the general concept and capabilities of `morphospace` are
 displayed using two data sets representing different types of geometric
@@ -123,13 +124,15 @@ The default settings of `mspace` rely on the `prcomp` function from base
 R to perform the PCA that builds the synthetic morphometric space.
 However, `morphospace` also includes a couple of supervised ordination
 alternatives, namely phylogenetic PCA (Revell 2009; borrowed from
-`phytools`, Revell 2012) between-groups PCA and Partial Least Squares
-(PLS). These have been styled so they share format with `prcomp`, and
-the latter two allow performing a leave-one-out cross-validation that
-alleviates some spurious results that can arise when the number of
-variables exceeds the number of samples (as it is common in geometric
-morphometric analyses; see Cardini et al. 2019 and Cardini & Polly
-2020).
+`phytools`, Revell 2012) between-groups PCA (functions `bg_prcomp`) and
+Partial Least Squares (PLS; functions `pls2b` and `pls_shapes`, the
+latter being an adaptation of the former for the analysis of shape data
+against other non-shape variables). These have been styled so they share
+format with `prcomp`, and the latter two allow performing a
+leave-one-out cross-validation that alleviates some spurious results
+that can arise when the number of variables exceeds the number of
+samples (as it is common in geometric morphometric analyses; see Cardini
+et al. 2019 and Cardini & Polly 2020).
 
 ``` r
 # Simulate 100 random normal distributions, and add an artificial classification and
@@ -248,105 +251,83 @@ morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
 
 Finally, let’s say we want to project the axis representing the
 allometric variation (e.g. a PLS of shape vs centroid size) of each
-species, so we can see whether these are aligned with the axes
-maximizing NDF interspecific variation. Suppose we also want to project
-the phylogenetic relationships into our morphospace so we can say we
-have a phylomorphospace (Sidlauskas 2008). The following chunk of code
-illustrates how to combine the pipe workflow described above with
+species, so we can see whether these are aligned with each other or with
+the axes maximizing NDF interspecific variation. Suppose we also want to
+project the phylogenetic relationships into our morphospace so we can
+say we have a phylomorphospace (Sidlauskas 2008). The following chunk of
+code illustrates how to combine the pipe workflow described above with
 `proj_*` functions called outside the pipe.
 
-``` r
-# Between group PCA - only non-deepforked species, then project deep forked species
-# (so the ordination better reflects evolution of species with "ordinary" tails)
-morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
-                      links = links, mag = 0.7, axes = c(1,2),
-                      xlim = c(-0.1, 0.4), ylim = c(-0.1, 0.1)) %>%
-  proj_consensus(shapes = cons_shapes, col = 1:13, pch = 16) %>%
-  proj_shapes(shapes = shapes, col = species) %>%
-  proj_groups(shapes = shapes, groups = species)
-# Add allometric axis (i.e., the PLS axis maximizing correlation between shape and
-# size) calculated separatedly for each species
-for(i in 1:nlevels(species)){
-  index <- species==levels(species)[i]
-  subshapes <- detr_shapes[,,index]
-  subsizes <- sizes[index]
-  pls <- pls_shapes(shapes = subshapes, x = subsizes)
-  proj_axes(neword = pls, morphospace, ax = 1, pipe = FALSE, col = "red", lwd = 2)
-}
-# Add species' mean shapes and phylogeny
-proj_consensus(mspace = morphospace, shapes = consensus(detr_shapes, species), pch = 16, pipe = FALSE)
-#>                           [,1]         [,2]          [,3]          [,4]
-#> T. albogularis     0.089046912  0.022509712 -0.0005135166 -3.344071e-03
-#> T. caudifasciatus -0.047083450  0.015972993 -0.0075991791 -1.077584e-02
-#> T. couchii         0.008340754  0.018868869 -0.0133488762  5.257035e-03
-#> T. crassirostris  -0.014940452  0.031437733 -0.0213574762  7.433054e-03
-#> T. cubensis       -0.017266607  0.009919055  0.0015425683 -9.178248e-03
-#> T. dominicensis    0.032619665  0.033302881  0.0274486123  1.559447e-03
-#> T. forficatus      0.332600244  0.013980771 -0.0030047297  6.273431e-02
-#> T. melancholicus   0.045589411 -0.032688287 -0.0096946654 -1.558982e-03
-#> T. niveigularis   -0.025722792 -0.014591594  0.0182683269 -1.850043e-03
-#> T. savana          0.319453207 -0.031067786 -0.1108283271 -2.990565e-02
-#> T. tyrannus       -0.046621656 -0.004046648 -0.0030478799 -8.327575e-05
-#> T. verticalis     -0.011485582 -0.021319442  0.0071078565  2.154253e-03
-#> T. vociferans     -0.029634465 -0.017924912  0.0093960700  8.601730e-03
-#>                            [,5]          [,6]          [,7]          [,8]
-#> T. albogularis     0.0105024213  0.0003580610 -1.720632e-04 -1.876000e-11
-#> T. caudifasciatus -0.0014361362  0.0007038034 -8.366542e-04  7.750889e-12
-#> T. couchii         0.0001907758 -0.0011601452 -5.088144e-04  6.309637e-11
-#> T. crassirostris  -0.0010926952  0.0003599824  1.262251e-04 -3.026839e-11
-#> T. cubensis       -0.0015647490  0.0039643980  1.091202e-03 -1.942162e-13
-#> T. dominicensis   -0.0068673166 -0.0006710283  2.366145e-04  4.898872e-13
-#> T. forficatus     -0.0281434684 -0.0094282592 -1.217295e-02 -8.303949e-10
-#> T. melancholicus  -0.0034171919 -0.0001311641  2.579053e-04  4.182492e-12
-#> T. niveigularis    0.0056910645 -0.0016465718 -1.072527e-05  1.662893e-11
-#> T. savana          0.2331766936  0.0438724709  1.833530e-02 -6.481488e-09
-#> T. tyrannus        0.0017859289 -0.0026816308  9.320437e-04 -1.248288e-11
-#> T. verticalis     -0.0017586954 -0.0004386480 -1.322180e-03 -3.412516e-11
-#> T. vociferans      0.0029680090  0.0036933532  1.031440e-04  1.121403e-11
-#>                            [,9]         [,10]         [,11]         [,12]
-#> T. albogularis    -3.198096e-12  4.826269e-11  7.939334e-11  1.045998e-11
-#> T. caudifasciatus  7.872204e-12 -9.849953e-12 -1.561093e-11 -4.549529e-12
-#> T. couchii         2.390874e-11 -1.630557e-10 -2.482767e-10 -3.583927e-11
-#> T. crassirostris  -1.911808e-11  7.387402e-11  1.046144e-10  1.753009e-11
-#> T. cubensis       -8.482743e-12 -1.721383e-11 -2.488089e-11  3.572316e-13
-#> T. dominicensis    2.423073e-12  2.264868e-12  4.007391e-12 -3.552796e-13
-#> T. forficatus     -1.213196e-09  6.701056e-09  8.909882e-09  1.175390e-09
-#> T. melancholicus   1.364091e-12 -7.904619e-12 -1.460064e-11 -2.336950e-12
-#> T. niveigularis   -5.608400e-12 -4.482891e-11 -8.430269e-11 -8.872987e-12
-#> T. savana         -5.109429e-10  1.175661e-08  2.058716e-08  3.373129e-09
-#> T. tyrannus        2.029846e-12  3.286940e-11  5.949680e-11  6.761253e-12
-#> T. verticalis     -1.431622e-11  7.591303e-11  1.230269e-10  1.933450e-11
-#> T. vociferans      1.069509e-11 -2.003194e-11 -2.794690e-11 -6.603317e-12
-#>                           [,13]         [,14]         [,15]         [,16]
-#> T. albogularis    -1.150611e-11 -4.818436e-11 -1.566898e-11  5.699261e-11
-#> T. caudifasciatus  8.417618e-12 -1.914710e-13  8.111368e-13  1.927658e-12
-#> T. couchii         4.824595e-11  1.321489e-10  5.705533e-11 -1.671221e-10
-#> T. crassirostris  -2.819815e-11 -4.362532e-11 -2.632826e-11  5.984313e-11
-#> T. cubensis       -4.354314e-12  2.776357e-11  1.066164e-11 -3.821897e-11
-#> T. dominicensis    1.617052e-12 -5.880819e-12 -1.554505e-12  7.510393e-12
-#> T. forficatus     -7.276297e-10 -5.278228e-09 -3.086419e-09  1.023294e-08
-#> T. melancholicus   2.735959e-12  7.823380e-12  1.542677e-12 -7.828273e-12
-#> T. niveigularis    4.333388e-12  6.316518e-11  1.297969e-11 -6.947628e-11
-#> T. savana         -4.505104e-09 -1.079800e-08 -3.274695e-09  1.081116e-08
-#> T. tyrannus       -4.741222e-12 -4.200847e-11 -9.788564e-12  4.693779e-11
-#> T. verticalis     -2.580968e-11 -6.217638e-11 -2.206374e-11  7.215671e-11
-#> T. vociferans      1.228201e-11  4.197579e-12  5.303191e-12 -5.878136e-12
-#>                           [,17]         [,18]
-#> T. albogularis     1.450419e-12  1.104524e-11
-#> T. caudifasciatus  1.119950e-11 -1.849932e-11
-#> T. couchii         1.718000e-11 -4.276977e-11
-#> T. crassirostris  -2.143987e-11  2.886927e-11
-#> T. cubensis       -1.556853e-11  2.309462e-11
-#> T. dominicensis    4.169763e-12 -5.182075e-12
-#> T. forficatus      5.456239e-09 -7.850122e-10
-#> T. melancholicus   9.931680e-13 -5.821082e-12
-#> T. niveigularis   -1.564141e-11 -3.499798e-12
-#> T. savana         -6.859671e-09  5.460195e-09
-#> T. tyrannus        8.014903e-12  4.521302e-12
-#> T. verticalis     -1.257459e-11  3.688096e-11
-#> T. vociferans      1.458670e-11 -2.026923e-11
-proj_phylogeny(mspace = morphospace, tree = tree, pch = 16, pipe = FALSE)
-```
+    #>                           [,1]         [,2]          [,3]          [,4]
+    #> T. albogularis     0.089046912  0.022509712 -0.0005135166 -3.344071e-03
+    #> T. caudifasciatus -0.047083450  0.015972993 -0.0075991791 -1.077584e-02
+    #> T. couchii         0.008340754  0.018868869 -0.0133488762  5.257035e-03
+    #> T. crassirostris  -0.014940452  0.031437733 -0.0213574762  7.433054e-03
+    #> T. cubensis       -0.017266607  0.009919055  0.0015425683 -9.178248e-03
+    #> T. dominicensis    0.032619665  0.033302881  0.0274486123  1.559447e-03
+    #> T. forficatus      0.332600244  0.013980771 -0.0030047297  6.273431e-02
+    #> T. melancholicus   0.045589411 -0.032688287 -0.0096946654 -1.558982e-03
+    #> T. niveigularis   -0.025722792 -0.014591594  0.0182683269 -1.850043e-03
+    #> T. savana          0.319453207 -0.031067786 -0.1108283271 -2.990565e-02
+    #> T. tyrannus       -0.046621656 -0.004046648 -0.0030478799 -8.327575e-05
+    #> T. verticalis     -0.011485582 -0.021319442  0.0071078565  2.154253e-03
+    #> T. vociferans     -0.029634465 -0.017924912  0.0093960700  8.601730e-03
+    #>                            [,5]          [,6]          [,7]          [,8]
+    #> T. albogularis     0.0105024213  0.0003580610 -1.720632e-04 -1.876000e-11
+    #> T. caudifasciatus -0.0014361362  0.0007038034 -8.366542e-04  7.750889e-12
+    #> T. couchii         0.0001907758 -0.0011601452 -5.088144e-04  6.309637e-11
+    #> T. crassirostris  -0.0010926952  0.0003599824  1.262251e-04 -3.026839e-11
+    #> T. cubensis       -0.0015647490  0.0039643980  1.091202e-03 -1.942162e-13
+    #> T. dominicensis   -0.0068673166 -0.0006710283  2.366145e-04  4.898872e-13
+    #> T. forficatus     -0.0281434684 -0.0094282592 -1.217295e-02 -8.303949e-10
+    #> T. melancholicus  -0.0034171919 -0.0001311641  2.579053e-04  4.182492e-12
+    #> T. niveigularis    0.0056910645 -0.0016465718 -1.072527e-05  1.662893e-11
+    #> T. savana          0.2331766936  0.0438724709  1.833530e-02 -6.481488e-09
+    #> T. tyrannus        0.0017859289 -0.0026816308  9.320437e-04 -1.248288e-11
+    #> T. verticalis     -0.0017586954 -0.0004386480 -1.322180e-03 -3.412516e-11
+    #> T. vociferans      0.0029680090  0.0036933532  1.031440e-04  1.121403e-11
+    #>                            [,9]         [,10]         [,11]         [,12]
+    #> T. albogularis    -3.198096e-12  4.826269e-11  7.939334e-11  1.045998e-11
+    #> T. caudifasciatus  7.872204e-12 -9.849953e-12 -1.561093e-11 -4.549529e-12
+    #> T. couchii         2.390874e-11 -1.630557e-10 -2.482767e-10 -3.583927e-11
+    #> T. crassirostris  -1.911808e-11  7.387402e-11  1.046144e-10  1.753009e-11
+    #> T. cubensis       -8.482743e-12 -1.721383e-11 -2.488089e-11  3.572316e-13
+    #> T. dominicensis    2.423073e-12  2.264868e-12  4.007391e-12 -3.552796e-13
+    #> T. forficatus     -1.213196e-09  6.701056e-09  8.909882e-09  1.175390e-09
+    #> T. melancholicus   1.364091e-12 -7.904619e-12 -1.460064e-11 -2.336950e-12
+    #> T. niveigularis   -5.608400e-12 -4.482891e-11 -8.430269e-11 -8.872987e-12
+    #> T. savana         -5.109429e-10  1.175661e-08  2.058716e-08  3.373129e-09
+    #> T. tyrannus        2.029846e-12  3.286940e-11  5.949680e-11  6.761253e-12
+    #> T. verticalis     -1.431622e-11  7.591303e-11  1.230269e-10  1.933450e-11
+    #> T. vociferans      1.069509e-11 -2.003194e-11 -2.794690e-11 -6.603317e-12
+    #>                           [,13]         [,14]         [,15]         [,16]
+    #> T. albogularis    -1.150611e-11 -4.818436e-11 -1.566898e-11  5.699261e-11
+    #> T. caudifasciatus  8.417618e-12 -1.914710e-13  8.111368e-13  1.927658e-12
+    #> T. couchii         4.824595e-11  1.321489e-10  5.705533e-11 -1.671221e-10
+    #> T. crassirostris  -2.819815e-11 -4.362532e-11 -2.632826e-11  5.984313e-11
+    #> T. cubensis       -4.354314e-12  2.776357e-11  1.066164e-11 -3.821897e-11
+    #> T. dominicensis    1.617052e-12 -5.880819e-12 -1.554505e-12  7.510393e-12
+    #> T. forficatus     -7.276297e-10 -5.278228e-09 -3.086419e-09  1.023294e-08
+    #> T. melancholicus   2.735959e-12  7.823380e-12  1.542677e-12 -7.828273e-12
+    #> T. niveigularis    4.333388e-12  6.316518e-11  1.297969e-11 -6.947628e-11
+    #> T. savana         -4.505104e-09 -1.079800e-08 -3.274695e-09  1.081116e-08
+    #> T. tyrannus       -4.741222e-12 -4.200847e-11 -9.788564e-12  4.693779e-11
+    #> T. verticalis     -2.580968e-11 -6.217638e-11 -2.206374e-11  7.215671e-11
+    #> T. vociferans      1.228201e-11  4.197579e-12  5.303191e-12 -5.878136e-12
+    #>                           [,17]         [,18]
+    #> T. albogularis     1.450419e-12  1.104524e-11
+    #> T. caudifasciatus  1.119950e-11 -1.849932e-11
+    #> T. couchii         1.718000e-11 -4.276977e-11
+    #> T. crassirostris  -2.143987e-11  2.886927e-11
+    #> T. cubensis       -1.556853e-11  2.309462e-11
+    #> T. dominicensis    4.169763e-12 -5.182075e-12
+    #> T. forficatus      5.456239e-09 -7.850122e-10
+    #> T. melancholicus   9.931680e-13 -5.821082e-12
+    #> T. niveigularis   -1.564141e-11 -3.499798e-12
+    #> T. savana         -6.859671e-09  5.460195e-09
+    #> T. tyrannus        8.014903e-12  4.521302e-12
+    #> T. verticalis     -1.257459e-11  3.688096e-11
+    #> T. vociferans      1.458670e-11 -2.026923e-11
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
@@ -519,12 +500,164 @@ phylomorphospace <- mspace(cons_shapes, links = links, mag = 0.7, axes = c(1,2),
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
 ``` r
+# Plot phenogram
 plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 0.7, size.models = 3, col.groups = 1:13)
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-2.png" width="100%" />
 
 ## Closed outlines
+
+`morphospace` can also handle closed outline data in the form of Fourier
+coefficients resulting from an elliptic Fourier analysis. For the
+porpuses of importing and analizing data we rely on the `Momocs`
+package, and use its `"OutCoe"` format for storing closed outlines as
+starting point. Below the `mspace %>% proj_*` workflow is applied to the
+`shells` data set taken from Milla Carmona et al. (2018). This include
+data from 137 specimens belonging to 4 species of the extinct bivalve
+genus *Ptychomya*, tracking their shape changes through a 5 million
+years interval from the Lower CRetaceous of Argentina. The data set
+includes the information about the shape (measured using 7 harmonics),
+centroid size, age (both relative and absolute), geographic provenance,
+and taxonomic classification of each specimen.
+
+``` r
+# Load data from shells, extract shapes and classification into species
+data("shells")
+
+shapes <- shells$shapes$coe
+sizes <- log(shells$sizes)
+species <- shells$data$species
+ages <- shells$data$age
+bzones <- shells$data$zone
+locality <- shells$data$locality
+
+# Pile shapes
+pile_shapes(shapes)
+```
+
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+
+``` r
+# Create morphospace using all the raw variation
+mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 0.3,
+       asp.models = 0.5, bg.model = "light gray") %>%
+  proj_shapes(shapes = shapes, col = species) %>%
+  proj_groups(shapes = shapes, groups = species)
+```
+
+<img src="man/figures/README-unnamed-chunk-12-2.png" width="100%" />
+
+All the same fun stuff can be done here. For example we might be
+interested in refining our variation to show the main differences
+between species, and so we could use `detrend_shapes` to remove
+variation associated to geographic provenance and allometric variation
+within each species, and then use `consensus` to extract the mean shape
+of the refined sample.
+
+(Just to clarify, we do this in a two step process for a good reason:
+when we use `detrend_shapes` to detrend shape variation, the grand mean
+is used by default as the new mean shape of the sample; however by
+specifying a value or level of the `x` from the model in the `xvalue`
+argument, we can use that new value as the mean shape for our
+‘detrended’ shape variation. In this case, we are analitically
+displacing all the shells to the shape they would have had they attained
+their species’ maximum size).
+
+(Also, note that we don’t need `arrayspecs` when using `detrend_shapes`
+here, that’s because Fourier coefficients are already stored in matrix
+format).
+
+``` r
+# 'Clean' shapes separately for each species, removing 1) variation associated
+# to geographic provenance and 2) allometric variation
+detr_shapes <- shapes * 0
+for(i in 1:nlevels(species)) {
+  index <- species == levels(species)[i]
+
+  submod_loc <- lm(shapes[index,] ~ factor(locality[index]))
+  detr_shapes0 <- detrend_shapes(submod_loc)
+
+  submod_siz <- lm(detr_shapes0 ~ sizes[index])
+  subdetr_shapes1 <- detrend_shapes(submod_siz, xvalue = max(sizes[index]))
+
+  detr_shapes[rownames(detr_shapes) %in% rownames(subdetr_shapes1),] <- subdetr_shapes1
+}
+
+# Compute mean shapes
+detr_mshapes <- consensus(detr_shapes, species)
+```
+
+We can now build the refined morphospace using `bg_prcomp` and project
+our sample, groups, mean shapes and the main axis of intraspecific
+variation of each species just to show that outlines and bivalves can be
+cool too.
+
+``` r
+# Create morphospace from the 'refined' variation, further enhancing interspecific
+# variation by using a bgPCA
+refined_morphospace <- mspace(detr_shapes, mag = 0.7, axes = c(1,2), FUN = bg_prcomp, groups = species,
+                              nh = 5, nv = 4, size.models = 0.3,
+                              asp.models = 0.5, bg.model = "light gray") %>%
+  proj_shapes(shapes = detr_shapes, col = species) %>%
+  proj_consensus(shapes = detr_mshapes, pch=16) %>%
+  proj_groups(shapes = detr_shapes, groups = species)
+# Project the axis of maximum intraspecific variation of each species (i.e. a PCA
+# of the subsamples corresponding gto each species)
+for(i in 1:nlevels(species)){
+  subshapes <- detr_shapes[species == levels(species)[i],]
+  pca <- prcomp(x = subshapes)
+  proj_axes(neword = pca, refined_morphospace, ax = 1, pipe = FALSE, lwd = 2, col = i)
+}
+```
+
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+
+Finally, we can use `plot_mspace` again to create complex hybrid plots.
+In this case, say are interested in the stratophenetic evolution of
+these species, so we want to plot the first PC together with the time
+axis. To do so, we manipulate our variabels a bit first to obtain the
+classification of each specimen to the combination of (relative) age and
+species, then build the morphospace, then use `plot_mspace` to plot
+stratigraphic position against shape (a stratomorphospace if ou will).
+Finally, we calculate the (absolute) ages associated to each
+combination, bind them to the groups means, order them and use that to
+depict the mean shape progression of each species:
+
+``` r
+# Combine species and biozones factors, then compute the mean shapes of the resulting
+# groups
+sp.bz <- factor(species:bzones)
+mshapes_agesxspecies <- consensus(shapes, sp.bz)
+
+# Create morphospace
+morphospace <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4,
+                      size.models = 0.3, asp.models = 0.5, bg.model = "light gray") %>%
+  proj_shapes(shapes = shapes) %>%
+  proj_consensus(shapes = mshapes_agesxspecies, pch=16) %>%
+  proj_groups(shapes = shapes, groups = sp.bz)
+```
+
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+
+``` r
+# Plot time axis vs first PC
+plot_mspace(mspace = morphospace, x = ages, axes = 1,
+            nh = 5, nv = 4, asp.models = 0.13, mag = 0.5,
+            size.models = 4, col.points = species, pch.points = 1,
+            phylo = FALSE, groups = FALSE, mshapes = TRUE)
+
+# Compute and arrange absolute ages for each group, then use it to add and connect mean shapes
+xy <- cbind(tapply(ages, sp.bz, mean), morphospace$gr_centroids[,1])
+xy <- xy[order(xy[,1]),]
+for(i in 1:4) {
+  index <- grepl(x = rownames(xy), pattern = levels(species)[i])
+  lines(xy[index,], col = i, lwd = 2)
+  points(xy[index,], pch = 21, bg = i)
+}
+```
+
+<img src="man/figures/README-unnamed-chunk-15-2.png" width="100%" />
 
 ## References
 
@@ -549,11 +682,19 @@ Cardini A., & Polly P. D. (2020). Cross-validated between group PCA
 scatterplots: A solution to spurious group separation?. Evolutionary
 Biology, 47(1), 85-95. <https://doi.org/10.1007/s11692-020-09494-x>.
 
+Dryden, I.L. (2019). shapes: statistical shape analysis, R package
+version 1.2.5. <https://CRAN.R-project.org/package=shapes>.
+
 Fasanelli M.N., Milla Carmona P.S., Soto I.M., & Tuero, D.T. (2022).
 Allometry, sexual selection and evolutionary lines of least resistance
 shaped the evolution of exaggerated sexual traits within the genus
 *Tyrannus*. Journal of Evolutionary Biology, in press.
 <https://doi.org/10.1111/jeb.14000>.
+
+Milla Carmona P.S, Lazo D.G., & Soto I.M. (2018). Morphological
+evolution of the bivalve *Ptychomya* through the Lower Cretaceous of
+Argentina. Paleobiology, 44(1), 101-117.
+<https://doi.org/10.1017/pab.2017.32>
 
 Revell, L.J. (2009). Size-correction and principal components for
 interspecific comparative studies. Evolution, 63, 3258-3268.
@@ -573,14 +714,3 @@ diversification in sister clades of characiform fishes: a
 phylomorphospace approach. Evolution: International Journal of Organic
 Evolution, 62(12), 3135-3156.
 <https://doi.org/10.1111/j.1558-5646.2008.00519.x>.
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this. You could also
-use GitHub Actions to re-render `README.Rmd` every time you push. An
-example workflow can be found here:
-<https://github.com/r-lib/actions/tree/v1/examples>.
-
-You can also embed plots, for example:
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
