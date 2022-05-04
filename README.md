@@ -412,7 +412,7 @@ title("The same morphospace, plotted with plot_mspace, \n with additional elemen
 plot_mspace(mspace = morphospace, axes = c(1,3), nh = 3, groups = TRUE, points = TRUE,
             col.points = species, col.groups = 1:nlevels(species), cex.ldm = 0,
             mshapes = FALSE, phylo = FALSE)
-title("Morphospaces axes 1 and 3, and with a different background")
+title("Morphospace axes 1 and 3, and with a different background")
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-4.png" width="100%" />
@@ -539,7 +539,6 @@ refined_morphospace <- mspace(detr_shapes, mag = 0.7, axes = c(1,2), FUN = bg_pr
   proj_shapes(shapes = detr_shapes, col = species) %>%
   proj_consensus(shapes = detr_mshapes, pch=16) %>%
   proj_groups(shapes = detr_shapes, groups = species)
-title("Ignore this one, is a prerequisite for the next plot")
 # Project the axis of maximum intraspecific variation of each species (i.e. a PCA
 # of the subsamples corresponding gto each species)
 for(i in 1:nlevels(species)){
@@ -581,6 +580,10 @@ morphospace <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4,
 <img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
 
 ``` r
+dev.off()
+#> null device 
+#>           1
+
 # Plot time axis vs first PC
 plot_mspace(mspace = morphospace, x = ages, axes = 1,
             nh = 5, nv = 4, asp.models = 0.13, mag = 0.5,
@@ -598,8 +601,6 @@ for(i in 1:4) {
 
 title("Stratomorphospace")
 ```
-
-<img src="man/figures/README-unnamed-chunk-16-2.png" width="100%" />
 
 ## References
 
