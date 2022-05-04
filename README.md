@@ -558,16 +558,17 @@ these species, so we want to plot the first PC together with the time
 axis. To do so, we manipulate our variabels a bit first to obtain the
 classification of each specimen to the combination of (relative) age and
 species, then build the morphospace, then use `plot_mspace` to plot
-stratigraphic position against shape (a stratomorphospace if ou will).
-Finally, we calculate the (absolute) ages associated to each
-combination, bind them to the groups means, order them and use that to
-depict the mean shape changes of each species through time:
+geochronologic age against shape. Finally, we calculate the (absolute)
+ages associated to each combination, bind them to the groups means,
+order them and use that to depict the mean shape changes of each species
+through time:
 
 ``` r
 # Combine species and biozones factors, then compute the mean shapes of the resulting
 # groups
 sp.bz <- factor(species:bzones)
 mshapes_agesxspecies <- consensus(shapes, sp.bz)
+
 
 # Create morphospace
 morphospace <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4,
@@ -580,9 +581,6 @@ morphospace <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4,
 <img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
 
 ``` r
-dev.off()
-#> null device 
-#>           1
 
 # Plot time axis vs first PC
 plot_mspace(mspace = morphospace, x = ages, axes = 1,
@@ -601,6 +599,8 @@ for(i in 1:4) {
 
 title("Stratomorphospace")
 ```
+
+<img src="man/figures/README-unnamed-chunk-16-2.png" width="100%" />
 
 ## References
 
