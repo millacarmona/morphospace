@@ -16,9 +16,35 @@ ordination.}
 the ordination.}
 }
 \value{
-
+A matrix of variables on their original scale.
 }
 \description{
 Back-calculate variables in their original scale from existing
 ordination data. Used internally.
+}
+\examples{
+#perform principal component analysis of tails data
+data("tails")
+pca <- prcomp(geomorph::two.d.array(tails$shapes))
+
+#transform the scores back to shapes
+backshapes_mat <- rev_eigen(scores = pca$x, vectors = pca$rotation, center = pca$center)
+backshapes_arr <- geomorph::arrayspecs(backshapes_mat, k = 2, p = 9)
+
+#compare
+pile_shapes(tails$shapes)
+pile_shapes(backshapes_arr)
+
+#obtain shapes at the extremes of PC1
+extshapes_mat <- rev_eigen(scores = range(pca$x[,1]), vectors = pca$rotation[,1], center = pca$center)
+extshapes_arr <- geomorph::arrayspecs(extshapes_mat, k = 2, p = 9)
+
+#plot and compare
+plot(extshapes_arr[,,1])
+Morpho::lineplot(extshapes_arr[,,1], tails$links) ; title("negative")
+plot(extshapes_arr[,,2])
+Morpho::lineplot(extshapes_arr[,,2], tails$links) ; title("positive")
+}
+\seealso{
+\code{\link{project_eigen}}
 }

@@ -93,11 +93,9 @@ mspace <- function(shapes,
                             size.models = size.models, asp.models = asp.models)
   models_mat <- shapemodels$models_mat
   models_arr <- shapemodels$models_arr
-  plotframe_x <- shapemodels$plotframe[,1]
-  plotframe_y <- shapemodels$plotframe[,2]
 
-  if(!is.null(xlim)) xlim <- range(c(plotframe_x, models_mat[,1]))
-  if(!is.null(ylim)) ylim <- range(c(plotframe_y, models_mat[,2]))
+  if(!is.null(xlim)) xlim <- range(c(models_mat[,1]))
+  if(!is.null(ylim)) ylim <- range(c(models_mat[,2]))
 
   if(is.null(xlab)) xlab <- paste0("PC", axes[1])
   if(is.null(ylab)) ylab <- paste0("PC", axes[2])
@@ -462,11 +460,10 @@ plot_mspace <- function(mspace,
 
     models_mat <- shapemodels$models_mat
     models_arr <- shapemodels$models_arr
-    plotframe_x <- shapemodels$plotframe[,1]
-    plotframe_y <- shapemodels$plotframe[,2]
 
-    if(!is.null(args$xlim)) xlim <- range(plotframe_x)
-    if(!is.null(args$ylim)) ylim <- range(plotframe_y)
+    if(!is.null(xlim)) xlim <- range(c(models_mat[,1]))
+    if(!is.null(ylim)) ylim <- range(c(models_mat[,2]))
+
 
     if(is.null(args$xlab)) xlab <- paste0("PC", args$axes[1])
     if(is.null(args$ylab)) ylab <- paste0("PC", args$axes[2])
@@ -563,11 +560,9 @@ plot_mspace <- function(mspace,
 
     models_mat <- shapemodels$models_mat
     models_arr <- shapemodels$models_arr
-    plotframe_x <- shapemodels$plotframe[,1]
-    plotframe_y <- shapemodels$plotframe[,2]
 
-    if(!is.null(args$xlim)) xlim <- range(plotframe_x)
-    if(!is.null(args$ylim)) ylim <- range(plotframe_y)
+    if(!is.null(xlim)) xlim <- range(c(models_mat[,1]))
+    if(!is.null(ylim)) ylim <- range(c(models_mat[,2]))
 
     if(is.null(args$xlab)) {
       if(!is.null(x)) {

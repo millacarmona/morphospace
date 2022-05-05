@@ -2,7 +2,7 @@
 % Please edit documentation in R/internal_builders.R
 \name{morphogrid}
 \alias{morphogrid}
-\title{Background shape models}
+\title{Generate background shape models}
 \usage{
 morphogrid(
   ordination,
@@ -60,9 +60,33 @@ landmarks/semilandmarks (for landmark data only).}
 \item{asp.models}{Numeric; the y/x aspect ratio of shape models.}
 }
 \value{
-
+A list of length 2 containing:
+\itemize{
+\item \code{$models_mat:} {a 2-column martix with the (x,y) coordinates of
+all the shape models in the background.}
+\item \code{$models_arr:} {same as \code{models_mat} but in 3-margin array
+format.}
+}
 }
 \description{
 Calculate and arrange background shape models for morphospaces.
 For internal use.
+}
+\examples{
+#perform pca on tails shapes
+data("tails")
+pca <- prcomp(geomorph::two.d.array(tails$shapes))
+
+#generate grid of shape models sampling the range of variation
+#at 4 locations (the 4 corners of the scatterplot)
+shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
+                          k = ncol(tails$shapes), p = nrow(tails$shapes),
+                          nh = 2, nv = 2)
+
+#plot grid from $models_mat and project each shape in models_arr
+plot(shapes_grid$models_mat)
+points(shapes_grid$models_arr[,,1], pch=16, col = 1)
+points(shapes_grid$models_arr[,,2], pch=16, col = 2)
+points(shapes_grid$models_arr[,,3], pch=16, col = 3)
+points(shapes_grid$models_arr[,,4], pch=16, col = 4)
 }

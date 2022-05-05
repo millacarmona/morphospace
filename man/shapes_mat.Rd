@@ -10,10 +10,31 @@ shapes_mat(shapes)
 \item{shapes}{Shape data.}
 }
 \value{
-
+A list of length 2 containing:
+\itemize{
+\item \code{$datype:} {the type of geometric morphometrics data.}
+\item \code{$data2d:} {the shape descriptors arranged in matrix format.}
+}
 }
 \description{
 Identify data type (Fourier coefficients or Procrustes shape
-coordinates) and arrange them in matrix format, suitable to be used as
-input for multivariate analysis. Used internally.
+coordinates) and arrange them in 2-margin matrix format, suitable to be
+used as input for multivariate analysis. Used internally.
+}
+\examples{
+#apply on shells dataset
+data("shells")
+dat1 <- shapes_mat(shells$shapes)
+
+#inspect results
+head(dat1$data2d)
+dat1$datype
+
+#aply on tails dataset
+data("tails")
+dat2 <- shapes_mat(tails$shapes)
+
+#inspect results
+head(dat2$data2d)
+dat2$datype
 }

@@ -2,28 +2,36 @@
 % Please edit documentation in R/internal_builders.R
 \name{inv_efourier}
 \alias{inv_efourier}
-\title{Sample shapes along a morphometric axis}
+\title{Iverse Fourier transform}
 \usage{
-inv_efourier(coe, nb.p = 120)
+inv_efourier(coe, nb.pts = 120)
 }
 \arguments{
 \item{coe}{A vector with Fourier coefficients.}
 
-\item{nb.p}{Numeric, specifying the number of coordinates for sampling the
-outlines.}
-
-\item{k}{}
+\item{nb.pts}{Numeric, specifying the number of coordinates for sampling
+the outlines.}
 }
 \value{
-
-
-
+A matrix of (x,y) cartesian coordinates.
 }
 \description{
 A wrapper for \code{\link[=efourier_i]{efourier_i()}} from \code{Momocs} to transform a
 set of Fourier coefficients into (x,y) coordinates. Used internally.
 }
 \examples{
-Iverse Fourier transform
+#load data and extract the first outline
+data("shells")
+shape_coe <- shells$shapes$coe[1,]
 
+#get and plot (x,y) coordinates for using different number of coordinares
+shape_xy <- inv_efourier(shape_coe, nb.pts = 10)
+plot(shape_xy)
+shape_xy <- inv_efourier(shape_coe, nb.pts = 30)
+plot(shape_xy)
+shape_xy <- inv_efourier(shape_coe, nb.pts = 100)
+plot(shape_xy)
+}
+\seealso{
+\code{\link[Momocs]{efourier_i}}
 }

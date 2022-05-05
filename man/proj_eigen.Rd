@@ -17,9 +17,35 @@ ordination.}
 the ordination.}
 }
 \value{
-
+A matrix with the scores on the supplied vector(s).
 }
 \description{
 Project variables in their original scale into an existing
 ordination. Used internally.
+}
+\examples{
+#perform principal component analysis of tails data
+data("tails")
+pca <- prcomp(geomorph::two.d.array(tails$shapes))
+
+#get project shapes in the pca ordination
+shapes_mat <- geomorph::two.d.array(tails$shapes)
+newscores <- proj_eigen(x = shapes_mat,
+                        vectors = pca$rotation,
+                        center = pca$center)
+
+#plot and compare
+plot(pca$x, pch = 16, col = "gray")
+points(newscores, col = "black")
+
+#compute and project species' mean shapes
+meanshapes_arr <- consensus(tails$shapes, index = tails$data$species)
+meanshapes_mat <- geomorph::two.d.array(meanshapes)
+meanscores <- proj_eigen(x = meanshapes_mat,
+                        vectors = pca$rotation,
+                        center = pca$center)
+points(meanscores, pch = 21, bg = "red", cex = 1.5)
+}
+\seealso{
+\code{\link{rev_eigen}}
 }
