@@ -33,11 +33,14 @@ ef <- shells$shapes
 
 #correct first 3 shapes automatically with index
 ef_corr1 <- correct_efourier(ef, index = 1:3)
-pile_shapes(ef_corr1)
+pile_shapes(ef_corr1, mshape = FALSE)
 
 #correct interactively (the process will remain open until
 #you click 'finish' or press the Esc key)
-\dontrun{ef_corr2 <- correct_efourier(ef_corr1)}
+\dontrun{
+
+ef_corr2 <- correct_efourier(ef_corr1)
+}
 }
 \references{
 Iwata, H., & Ukai, Y. (2002). \emph{SHAPE: a computer program

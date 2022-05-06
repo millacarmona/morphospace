@@ -185,12 +185,49 @@ test_that(desc = "testing detrend_shapes, newx/newy, for numerics", code = {
 
 
 
-data(tails)
-shapes_mat <- geomorph::two.d.array(tails$shapes)
+############################
 
-model1 <- lm(shapes_mat ~ tails$sizes)
-detr_shapes1 <- geomorph::arrayspecs(detrend_shapes(model1), k = 2, p = 9)
+test_that(desc = "testing rotate_fcoef", code = {
+  data(shells)
 
+  shapes_coe <- rbind(shells$shapes[1:10,])
+  shapes_rot_coe <- rotate_fcoef(shapes_coe)
+
+  result1 <- all(dim(shapes_coe) == dim(shapes_rot_coe))
+
+  shape1_coe <- rbind(shells$shapes[1,])
+  shape1_rot_coe <- rotate_fcoef(shape1_coe)
+
+  result2 <- all(dim(shape1_coe) == dim(shape1_rot_coe))
+
+  shape1_coo <- inv_efourier(shape1_coe, 300)
+  shape1_rot_coo <- inv_efourier(shape1_rot_coe, 300)
+
+  testshape <- rotate.coords(rotate.coords(shape1_coo, type = "rotateCC"), type = "rotateCC")
+  result3 <- all(round(testshape[order(testshape[,1])],5) == round(shape1_rot_coo[order(shape1_rot_coo[,1])],5))
+
+  expect_true(result1, result2, result3)
+})
+
+#############################
+
+
+test_that(desc = "testing correct_efourier, automatic behavior", code = {
+  data(shells)
+
+  shapes_coe <- shells$shapes
+  shapes_rot_coe <- correct_efourier(shapes_coe, index = 1:10)
+
+  result1 <- all(dim(shapes_coe) == dim(shapes_rot_coe))
+
+  shape1_coo <- inv_efourier(shapes_coe$coe[1,], 300)
+  shape1_rot_coo <- inv_efourier(shapes_rot_coe$coe[1,], 300)
+
+  testshape <- rotate.coords(rotate.coords(shape1_coo, type = "rotateCC"), type = "rotateCC")
+  result2 <- all(round(testshape[order(testshape[,1])],5) == round(shape1_rot_coo[order(shape1_rot_coo[,1])],5))
+
+  expect_true(result1, result2)
+})
 
 
 

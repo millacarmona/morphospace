@@ -360,11 +360,14 @@ detrend_shapes <- function(model, xvalue = NULL, newx = NULL, newy = NULL) {
 #'
 #' #correct first 3 shapes automatically with index
 #' ef_corr1 <- correct_efourier(ef, index = 1:3)
-#' pile_shapes(ef_corr1)
+#' pile_shapes(ef_corr1, mshape = FALSE)
 #'
 #' #correct interactively (the process will remain open until
 #' #you click 'finish' or press the Esc key)
-#' \dontrun{ef_corr2 <- correct_efourier(ef_corr1)}
+#' \dontrun{
+#'
+#' ef_corr2 <- correct_efourier(ef_corr1)
+#' }
 correct_efourier<-function(ef, index = NULL) {
 
   orig_frame <- par("mar", "oma")
@@ -393,7 +396,7 @@ correct_efourier<-function(ef, index = NULL) {
       index <- which(!sel)[index]
       sel[index] <- TRUE
 
-      ef$coe[index,] <- transp_fcoef(ef$coe[index,])
+      ef$coe[index,] <- rotate_fcoef(ef$coe[index,])
 
       outs_coords[,,index] <- inv_efourier(ef$coe[index,], 300)
       new_outs <- Momocs::Out(outs_coords)
@@ -404,7 +407,7 @@ correct_efourier<-function(ef, index = NULL) {
     }
   } else {
 
-    ef$coe[index,] <- transp_fcoef(ef$coe[index,])
+    ef$coe[index,] <- rotate_fcoef(ef$coe[index,])
 
   }
 
