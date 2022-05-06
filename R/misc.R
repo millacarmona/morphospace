@@ -32,7 +32,15 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
   for(i in 1:dim(shapes_coord)[3]) longlist <- rbind(longlist, shapes_coord[,,i])
 
   if(dat$datype == "landm") {
-    plot(longlist, col = "#708095", axes = FALSE, xlab = "", ylab = "", ...)
+    plot(longlist, type = "n", axes = FALSE, xlab = "", ylab = "", ...)
+
+    if(!is.null(links)) {
+      for(i in 1:dim(shapes_coord)[3]){
+        for(l in 1:length(links)) lines(shapes_coord[links[[l]],,i], col = "gray")
+      }
+    }
+
+    points(longlist, col = "#708095")
 
     if(mshape == TRUE) {
       points(consensus(shapes_coord), pch = 16, ...)

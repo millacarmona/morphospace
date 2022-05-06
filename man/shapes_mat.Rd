@@ -13,7 +13,8 @@ shapes_mat(shapes)
 A list of length 2 containing:
 \itemize{
 \item \code{$datype:} {the type of geometric morphometrics data.}
-\item \code{$data2d:} {the shape descriptors arranged in matrix format.}
+\item \code{$data2d:} {the shape descriptors arranged in 2-margins matrix
+format.}
 }
 }
 \description{

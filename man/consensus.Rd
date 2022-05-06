@@ -14,11 +14,53 @@ averaged or a factor whose levels are used to average groups of
 configurations.}
 }
 \value{
-Either a matrix defining a single mean shape \code{p x k} or an array
-of shapes, one for each level of \code{index}.
+For landmark data, either a \code{p x k} matrix defining a single
+mean shape or a \code{p x k x n} array containing \code{n} mean shapes, one
+for each level of \code{index}. For Fourier data, a \code{n x (4 x nb.h)}
+matrix of Fourier coefficients (with \code{n} being either 1 or the number
+of levels of \code{index} and \code{nb.h} being the number of harmonics
+used during elliptic Fourier analysis).
 }
 \description{
 Compute the mean shape from the entire sample, the mean shape of
 a subset of samples, or the mean shape of the levels of a factor (for
 landmark configurations).
+}
+\examples{
+#load tails data
+data("tails")
+
+#compute and plot mean shape of the entire sample
+mshape <- consensus(shapes)
+mshape
+plot(mshape)
+Morpho::lineplot(mshape, tails$links)
+
+#getting mean shape for levels of a factor: compute and plot mean shape of
+#each of the 13 species
+(index <- tails$data$species)
+sp_mshapes <- consensus(shapes, index = index)
+sp_mshapes
+pile_shapes(sp_mshapes, links = tails$links, mshape = FALSE)
+for(i in 1:13) Morpho::lineplot(sp_mshapes[,,i], tails$links)
+
+#getting mean shape for a subset of specimens: compute and plot mean shape of
+#deep-forked species
+(index <- which(tails$data$type == "DF"))
+df_mshape <- consensus(shapes, index = index)
+df_mmsape
+plot(df_mshape)
+Morpho::lineplot(df_mshape, tails$links)
+#quick demo for Fourier data:
+data("shells")
+
+#mean shape of the entire sample
+mshape <- consensus(shells$shapes)
+mshape
+plot(inv_efourier(mshape, nb.pts = 200), type = "l")
+
+#mean shape of each of the four species
+sp_mshapes <- consensus(shells$shapes, index = shells$data$species)
+sp_mshapes
+pile_shapes(sp_mshapes, mshape = FALSE)
 }

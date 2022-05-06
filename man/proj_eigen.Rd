@@ -17,7 +17,7 @@ ordination.}
 the ordination.}
 }
 \value{
-A matrix with the scores on the supplied vector(s).
+A 2-margins matrix with the scores on the supplied vector(s).
 }
 \description{
 Project variables in their original scale into an existing

@@ -11,7 +11,7 @@
 #' @param center A vector with the mean values of the original variables used in
 #'   the ordination.
 #'
-#' @return A matrix of variables on their original scale.
+#' @return A 2-margins matrix of variables on their original scale.
 #'
 #' @seealso \code{\link{project_eigen}}
 #' @export
@@ -55,7 +55,8 @@ rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + ce
 #' @param center A vector with the mean values of the original variables used in
 #'   the ordination.
 #'
-#' @return A matrix with the scores on the supplied vector(s).
+#' @return A 2-margins matrix with the scores on the supplied vector(s).
+#'
 #' @export
 #'
 #' @seealso \code{\link{rev_eigen}}
@@ -93,10 +94,11 @@ proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors
 #'   set of Fourier coefficients into (x,y) coordinates. Used internally.
 #'
 #' @param coe A vector with Fourier coefficients.
-#' @param nb.pts Numeric, specifying the number of coordinates for sampling
-#'   the outlines.
+#' @param nb.pts Numeric, specifying the number of coordinates for sampling the
+#'   outlines.
 #'
-#' @return A matrix of (x,y) cartesian coordinates.
+#' @return A \code{nb.pts x 2} matrix of (x,y) cartesian coordinates defining
+#'   single outline shape.
 #'
 #' @export
 #'
@@ -145,7 +147,8 @@ inv_efourier <- function(coe, nb.pts = 120) {
 #' @return A list of length 2 containing:
 #' \itemize{
 #'   \item \code{$datype:} {the type of geometric morphometrics data.}
-#'   \item \code{$data2d:} {the shape descriptors arranged in matrix format.}
+#'   \item \code{$data2d:} {the shape descriptors arranged in 2-margins matrix
+#'   format.}
 #'  }
 #'
 #' @export
@@ -227,9 +230,9 @@ shapes_mat <- function(shapes) {
 #'
 #' @return A list of length 2 containing:
 #' \itemize{
-#'   \item \code{$models_mat:} {a 2-column martix with the (x,y) coordinates of
+#'   \item \code{$models_mat:} {a 2-column matrix with the (x,y) coordinates of
 #'   all the shape models in the background.}
-#'   \item \code{$models_arr:} {same as \code{models_mat} but in 3-margin array
+#'   \item \code{$models_arr:} {same as \code{models_mat} but in 3-margins array
 #'   format.}
 #' }
 #'

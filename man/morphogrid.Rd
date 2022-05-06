@@ -62,9 +62,9 @@ landmarks/semilandmarks (for landmark data only).}
 \value{
 A list of length 2 containing:
 \itemize{
-\item \code{$models_mat:} {a 2-column martix with the (x,y) coordinates of
+\item \code{$models_mat:} {a 2-column matrix with the (x,y) coordinates of
 all the shape models in the background.}
-\item \code{$models_arr:} {same as \code{models_mat} but in 3-margin array
+\item \code{$models_arr:} {same as \code{models_mat} but in 3-margins array
 format.}
 }
 }

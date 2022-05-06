@@ -16,7 +16,7 @@ ordination.}
 the ordination.}
 }
 \value{
-A matrix of variables on their original scale.
+A 2-margins matrix of variables on their original scale.
 }
 \description{
 Back-calculate variables in their original scale from existing
