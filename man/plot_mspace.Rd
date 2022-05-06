@@ -7,6 +7,8 @@
 plot_mspace(
   mspace,
   axes,
+  links = NULL,
+  template = NULL,
   x = NULL,
   y = NULL,
   nh,
@@ -42,6 +44,16 @@ plot_mspace(
 \item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
 
 \item{axes}{Numeric of length 1 or 2, indicating the axes to be plotted.}
+
+\item{links}{A list with the indices of the coordinates defining the
+wireframe (following the format used in \code{Morpho}).}
+
+\item{template}{A 2-column matrix containing 1) the actual
+landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
+coordinates defining a curve or set of curves that will be warped using the
+deformation interpolated from the changes between landmarks/semilandmarks
+(the actual positions of which must be marked with a row of NA, see the
+tails dataset).}
 
 \item{x}{Optional vector with a non-morphometric variable to be plotted in
 the x axis. Alternatively, a \code{"phy"} object can be provided.}

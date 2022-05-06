@@ -8,6 +8,7 @@ morphogrid(
   ordination,
   axes,
   datype,
+  template = NULL,
   x = NULL,
   y = NULL,
   p = NULL,
@@ -32,6 +33,13 @@ plotted. If values for either \code{x} or \code{y} are provided, only the
 first value of this argument is considered.}
 
 \item{datype}{type of shape data (either "fcoef" or "landm").}
+
+\item{template}{A 2-column matrix containing 1) the actual
+landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
+coordinates defining a curve or set of curves that will be warped using the
+deformation interpolated from the changes between landmarks/semilandmarks
+(the actual positions of which must be marked with a row of NA, see the
+tails dataset).}
 
 \item{x}{Optional vector with a non-morphometric variable to be plotted in
 the x axis.}

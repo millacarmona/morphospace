@@ -11,6 +11,12 @@
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
 #' @param links A list with the indices of the coordinates defining the
 #'   wireframe (following the format used in \code{Morpho}).
+#' @param template A 2-column matrix containing 1) the actual
+#'   landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
+#'   coordinates defining a curve or set of curves that will be warped using the
+#'   deformation interpolated from the changes between landmarks/semilandmarks
+#'   (the actual positions of which must be marked with a row of NA, see the
+#'   tails dataset).
 #' @param p Numeric, indicating the number of landmarks/semilandmarks used (for
 #'   landmark data only).
 #' @param k Numeric, indicating the number of cartesian dimensions of
@@ -41,7 +47,8 @@
 #' @examples
 mspace <- function(shapes,
                    axes = c(1,2),
-                   links,
+                   links = NULL,
+                   template = NULL,
                    p = NULL,
                    k = NULL,
                    FUN = prcomp,
@@ -87,7 +94,7 @@ mspace <- function(shapes,
   FUN <- match.fun(FUN)
   ordination <- FUN(data2d, ...)
 
-  shapemodels <- morphogrid(ordination = ordination, axes = axes, datype = datype,
+  shapemodels <- morphogrid(ordination = ordination, axes = axes, datype = datype, template = template,
                             x = NULL, y = NULL, p = p, k = k, nh = nh, nv = nv, mag = mag,
                             asp = asp, xlim = xlim, ylim = ylim, rot.models = rot.models,
                             size.models = size.models, asp.models = asp.models)
@@ -115,8 +122,14 @@ mspace <- function(shapes,
   for(i in 1:dim(models_arr)[3]) {
     if(datype == "landm") {
       points(models_arr[,,i], pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
-      for(l in 1:length(links)) lines(models_arr[,,i][links[[l]],],
-                                      col = col.models, lwd = lwd.models)
+
+      if(!is.null(template)) {
+        lines(models_arr[,,i], col = col.models, lwd = lwd.models)
+      } else {
+        for(l in 1:length(links)) lines(models_arr[,,i][links[[l]],],
+                                        col = col.models, lwd = lwd.models)
+      }
+
     } else {
       graphics::polygon(models_arr[,,i], pch = 16,
                         col = bg.models, border = col.models, lwd = lwd.models)
@@ -126,8 +139,8 @@ mspace <- function(shapes,
   if(points == TRUE) points(ordination$x)
 
 
-  plotinfo <- list(p = p, k = k, links = links, axes = axes, nh = nh, nv = nv, mag = mag, asp = asp,
-                   asp.models = asp.models, rot.models = rot.models, size.models = size.models,
+  plotinfo <- list(p = p, k = k, links = links, template = template, axes = axes, nh = nh, nv = nv, mag = mag,
+                   asp = asp, asp.models = asp.models, rot.models = rot.models, size.models = size.models,
                    lwd.models = lwd.models, bg.models = bg.models, col.models = col.models,
                    cex.ldm = cex.ldm, col.ldm = col.ldm)
 
@@ -289,7 +302,8 @@ proj_axes <- function(neword, mspace, ax = 1, pipe = TRUE, ...) {
         ext_shapes[[i]] <- ext_shapes2d
       } else {
         ext_shapes[[i]] <- geomorph::arrayspecs(ext_shapes2d,
-                                                k = mspace$plotinfo$k, p = mspace$plotinfo$p)
+                                                k = mspace$plotinfo$k,
+                                                p = mspace$plotinfo$p)
       }
     }
 
@@ -347,8 +361,8 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 }
 
 
-#########################################################################################
 
+#########################################################################################
 
 #' Plot morphospaces
 #'
@@ -358,6 +372,14 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #'
 #' @param mspace An \code{"mspace"} object created using [mspace()].
 #' @param axes Numeric of length 1 or 2, indicating the axes to be plotted.
+#' @param links A list with the indices of the coordinates defining the
+#'   wireframe (following the format used in \code{Morpho}).
+#' @param template A 2-column matrix containing 1) the actual
+#'   landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
+#'   coordinates defining a curve or set of curves that will be warped using the
+#'   deformation interpolated from the changes between landmarks/semilandmarks
+#'   (the actual positions of which must be marked with a row of NA, see the
+#'   tails dataset).
 #' @param x Optional vector with a non-morphometric variable to be plotted in
 #'   the x axis. Alternatively, a \code{"phy"} object can be provided.
 #' @param y Optional vector with a non-morphometric variable to be plotted in
@@ -405,6 +427,8 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #' @examples
 plot_mspace <- function(mspace,
                         axes,
+                        links = NULL,
+                        template = NULL,
                         x = NULL,
                         y = NULL,
                         nh,
@@ -453,9 +477,9 @@ plot_mspace <- function(mspace,
   if(is.null(x) & is.null(y)) { #if neither x nor y have been provided, plot pure morphospace
 
     shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
-                              x = NULL, y = NULL, p = mspace$plotinfo$p, k = mspace$plotinfo$k,
-                              nh = args$nh, nv = args$nv, mag = args$mag, asp = args$asp,
-                              xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
+                              template = args$template, x = NULL, y = NULL, p = mspace$plotinfo$p,
+                              k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
+                              asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
                               size.models = args$size.models, asp.models = args$asp.models)
 
     models_mat <- shapemodels$models_mat
@@ -482,8 +506,13 @@ plot_mspace <- function(mspace,
       if(mspace$datype == "landm") {
         points(models_arr[,,i], pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
 
-        for(l in 1:length(args$links)) lines(models_arr[,,i][args$links[[l]],],
-                                        col = args$col.models, lwd = args$lwd.models)
+        if(!is.null(args$template)) {
+          lines(models_arr[,,i], col = args$col.models, lwd = args$lwd.models)
+        } else {
+          for(l in 1:length(args$links)) lines(models_arr[,,i][args$links[[l]],],
+                                               col = args$col.models, lwd = args$lwd.models)
+        }
+
       } else {
         graphics::polygon(models_arr[,,i], pch = 16,
                           col = args$bg.models, border = args$col.models, lwd = args$lwd.models)
@@ -552,7 +581,7 @@ plot_mspace <- function(mspace,
     }
 
 
-    shapemodels <- morphogrid(ordination = ordination, x = x, y = y, axes = args$axes,
+    shapemodels <- morphogrid(ordination = ordination, x = x, y = y, axes = args$axes, template = args$template,
                               datype = mspace$datype, p = mspace$plotinfo$p, k = mspace$plotinfo$k, nh = args$nh,
                               nv = args$nv, mag = args$mag, asp = args$asp, xlim = args$xlim, ylim = args$ylim,
                               rot.models = args$rot.models, size.models = args$size.models,
@@ -598,8 +627,13 @@ plot_mspace <- function(mspace,
       if(mspace$datype == "landm") {
         points(models_arr[,,i], pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
 
-        for(l in 1:length(args$links)) lines(models_arr[,,i][args$links[[l]],],
-                                        col = args$col.models, lwd = args$lwd.models)
+        if(!is.null(args$template)) {
+          lines(models_arr[,,i], col = args$col.models, lwd = args$lwd.models)
+        } else {
+          for(l in 1:length(args$links)) lines(models_arr[,,i][args$links[[l]],],
+                                          col = args$col.models, lwd = args$lwd.models)
+        }
+
       } else {
         graphics::polygon(models_arr[,,i], pch = 16,
                           col = args$bg.models, border = args$col.models, lwd = args$lwd.models)

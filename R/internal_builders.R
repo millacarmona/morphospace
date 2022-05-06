@@ -212,6 +212,12 @@ shapes_mat <- function(shapes) {
 #'   plotted. If values for either \code{x} or \code{y} are provided, only the
 #'   first value of this argument is considered.
 #' @param datype type of shape data (either "fcoef" or "landm").
+#' @param template A 2-column matrix containing 1) the actual
+#'   landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
+#'   coordinates defining a curve or set of curves that will be warped using the
+#'   deformation interpolated from the changes between landmarks/semilandmarks
+#'   (the actual positions of which must be marked with a row of NA, see the
+#'   tails dataset).
 #' @param x Optional vector with a non-morphometric variable to be plotted in
 #'   the x axis.
 #' @param y Optional vector with a non-morphometric variable to be plotted in
@@ -258,6 +264,7 @@ shapes_mat <- function(shapes) {
 morphogrid <- function(ordination,
                        axes,
                        datype,
+                       template = NULL,
                        x = NULL,
                        y = NULL,
                        p = NULL,
@@ -351,6 +358,23 @@ morphogrid <- function(ordination,
     sh_arr[,,i] <- spdep::Rotation(sh_arr[,,i], rot.models*0.0174532925199)
   }
 
+
+  if(!is.null(template)) {
+    centroid <- matrix(rev_eigen(0, ordination$rotation[,1], ordination$center), ncol = 2, byrow = TRUE)
+    temp_cent<-rbind(centroid,
+                     Momocs::tps2d(template[-(1:p),],
+                                   template[1:p,],
+                                   centroid))
+
+    temp_warpd_list <- lapply(1:dim(sh_arr)[3],
+                              function(i) {Momocs::tps2d(temp_cent[-(1:p),],
+                                                         temp_cent[1:p,],
+                                                         sh_arr[,,i])})
+    sh_arr <- abind::abind(temp_warpd_list, along = 3)
+    p <- nrow(sh_arr)
+  }
+
+
   models_mat<-c()
   models_arr<-sh_arr * 0
   for(i in 1:nrow(gridcoords)) {
@@ -359,10 +383,11 @@ morphogrid <- function(ordination,
     models_arr[,,i] <- (sh_arr[,,i] * 0.07) + descentmat
   }
 
-
   return(list(models_mat = models_mat, models_arr = models_arr))
 
 }
+
+
 
 
 ################################################################################################

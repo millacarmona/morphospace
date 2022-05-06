@@ -7,7 +7,8 @@
 mspace(
   shapes,
   axes = c(1, 2),
-  links,
+  links = NULL,
+  template = NULL,
   p = NULL,
   k = NULL,
   FUN = prcomp,
@@ -38,6 +39,13 @@ mspace(
 
 \item{links}{A list with the indices of the coordinates defining the
 wireframe (following the format used in \code{Morpho}).}
+
+\item{template}{A 2-column matrix containing 1) the actual
+landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
+coordinates defining a curve or set of curves that will be warped using the
+deformation interpolated from the changes between landmarks/semilandmarks
+(the actual positions of which must be marked with a row of NA, see the
+tails dataset).}
 
 \item{p}{Numeric, indicating the number of landmarks/semilandmarks used (for
 landmark data only).}
