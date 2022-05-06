@@ -365,3 +365,50 @@ morphogrid <- function(ordination,
 }
 
 
+################################################################################################
+
+
+#' Rotate Fourier shape 180 degrees
+#'
+#' @description Correct 180-degrees spurious rotation in closed outline shapes.
+#'
+#' @param fcoef The set of Fourier coefficients measuring the shape(s) to be
+#'   rotated.
+#'
+#' @return A set of Fourier coefficients describing the rotated outline(s).
+#'
+#' @export
+#'
+#' @references Iwata, H., & Ukai, Y. (2002). \emph{SHAPE: a computer program
+#'   package for quantitative evaluation of biological shapes based on elliptic
+#'   Fourier descriptors}. Journal of Heredity, 93(5), 384-385.
+#'
+#' @examples
+#' #load shells data, plot the first shape
+#' data("shells")
+#' shape1 <- shells$shapes$coe[1,]
+#' plot(inv_efourier(shape1, 300))
+#'
+#' #rotate and plot again
+#' shape1_rot <- rotate_fcoef(shape1)
+#' plot(inv_efourier(shape1_rot, 300))
+rotate_fcoef <- function(fcoef) {
+
+  fcoef <- rbind(fcoef)
+  nb.h <- ncol(fcoef) / 4
+
+  a <- rbind(fcoef[,1:nb.h])
+  b <- rbind(fcoef[,(nb.h + 1):(nb.h * 2)])
+  c <- rbind(fcoef[,((nb.h * 2) + 1):(nb.h * 3)])
+  d <- rbind(fcoef[,((nb.h * 3) + 1):(nb.h * 4)])
+
+  a[,1:nb.h %% 2 == 0] <- a[,1:nb.h %% 2 == 0] * -1
+  b[,1:nb.h %% 2 == 0] <- b[,1:nb.h %% 2 == 0] * -1
+  c[,1:nb.h %% 2 == 0] <- c[,1:nb.h %% 2 == 0] * -1
+  d[,1:nb.h %% 2 == 0] <- d[,1:nb.h %% 2 == 0] * -1
+
+  rot_fcoef <- rbind(cbind(a, b, c, d))
+  colnames(rot_fcoef) <- paste0(rep(c("A", "B", "C", "D"), each = nb.h), 1:nb.h)
+  return(rot_fcoef)
+}
+

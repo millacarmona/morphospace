@@ -2,6 +2,7 @@
 
 export(bg_prcomp)
 export(consensus)
+export(correct_efourier)
 export(detrend_shapes)
 export(exp_var)
 export(hulls_by_group_2D)
@@ -21,4 +22,5 @@ export(proj_groups)
 export(proj_phylogeny)
 export(proj_shapes)
 export(rev_eigen)
+export(rotate_fcoef)
 export(shapes_mat)

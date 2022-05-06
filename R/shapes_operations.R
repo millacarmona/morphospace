@@ -328,6 +328,90 @@ detrend_shapes <- function(model, xvalue = NULL, newx = NULL, newy = NULL) {
 }
 
 
+##################################################################################
+
+#' Correct artificially rotated set of Fourier shapes interactively
+#'
+#' @description Choose and correct 180-degrees spurious rotation in a sample of
+#'   closed outline shapes.
+#'
+#' @param ef An \code{"OutCoe"} object.
+#' @param index An optional numeric vector providing the indices identifying the
+#'   shapes to be rotated. If declared, overrides interative selection of
+#'   shapes.
+#'
+#' @details The usage of this function is inspired in the SHAPE program for
+#'   elliptic Fourier analysis (Iwata & Ukai 2002). The \code{index} argument is
+#'   intended to facilitate its inclusion in scripts without having to manually
+#'   select the outlines every time.
+#'
+#' @return An \code{"OutCoe"} object containing the corrected outlines.
+#'
+#' @export
+#'
+#' @references Iwata, H., & Ukai, Y. (2002). \emph{SHAPE: a computer program
+#'   package for quantitative evaluation of biological shapes based on elliptic
+#'   Fourier descriptors}. Journal of Heredity, 93(5), 384-385.
+#'
+#' @examples
+#' #load shells data
+#' data("shells")
+#' ef <- shells$shapes
+#'
+#' #correct first 3 shapes automatically with index
+#' ef_corr1 <- correct_efourier(ef, index = 1:3)
+#' pile_shapes(ef_corr1)
+#'
+#' #correct interactively (the process will remain open until
+#' #you click 'finish' or press the Esc key)
+#' \dontrun{ef_corr2 <- correct_efourier(ef_corr1)}
+correct_efourier<-function(ef, index = NULL) {
+
+  orig_frame <- par("mar", "oma")
+  on.exit(par(orig_frame))
+  par(mar = c(1,1,1,1), oma = c(0,0,0,0))
+
+  if(is.null(index)) print("Click Finish (top-right corner of plot pane) or enter <Esc> to finish selection")
+
+  options(warn = -1)
+
+  outs_coords<-array(0, c(300, 2, nrow(ef$coe)))
+  for(i in 1:nrow(ef$coe)) outs_coords[,,i] <- inv_efourier(ef$coe[i,], 300)
+  outs <- Momocs::Out(outs_coords)
+
+  pos <- Momocs::coo_listpanel(
+    Momocs::coo_template(outs$coo))
+
+
+  if(is.null(index)) {
+
+    n <- length(ef)
+    sel <- rep(FALSE, length(ef))
+    while(sum(sel) < n) {
+      index <- identify(pos[!sel,], n = 1, plot = FALSE)
+      if(!length(index)) break
+      index <- which(!sel)[index]
+      sel[index] <- TRUE
+
+      ef$coe[index,] <- transp_fcoef(ef$coe[index,])
+
+      outs_coords[,,index] <- inv_efourier(ef$coe[index,], 300)
+      new_outs <- Momocs::Out(outs_coords)
+
+      Momocs::coo_listpanel(
+        Momocs::coo_template(new_outs$coo))
+
+    }
+  } else {
+
+    ef$coe[index,] <- transp_fcoef(ef$coe[index,])
+
+  }
+
+  options(warn=0)
+  return(ef)
+
+}
 
 
 
