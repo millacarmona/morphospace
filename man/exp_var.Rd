@@ -8,7 +8,7 @@ exp_var(ord)
 }
 \arguments{
 \item{ord}{An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
-\code{"phy_prcomp"} or \code{"pls"} object).}
+\code{"phy_prcomp"} or \code{"pls_shape"} object).}
 }
 \value{
 

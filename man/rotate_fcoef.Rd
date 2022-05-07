@@ -15,6 +15,7 @@ A set of Fourier coefficients describing the rotated outline(s).
 }
 \description{
 Correct 180-degrees spurious rotation in closed outline shapes.
+Used internally.
 }
 \examples{
 #load shells data, plot the first shape

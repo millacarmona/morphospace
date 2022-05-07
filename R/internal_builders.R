@@ -207,11 +207,12 @@ shapes_mat <- function(shapes) {
 #'   For internal use.
 #'
 #' @param ordination An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
-#'   \code{"phy_prcomp"} or \code{"pls"} object).
+#'   \code{"phy_prcomp"} or \code{"pls_shape"} object).
 #' @param axes Numeric of length 1 or 2, indicating the morphometric axes to be
 #'   plotted. If values for either \code{x} or \code{y} are provided, only the
 #'   first value of this argument is considered.
-#' @param datype type of shape data (either "fcoef" or "landm").
+#' @param datype Character; the type of shape data (either \code{"fcoef"} or
+#'   \code{"landm"}).
 #' @param template A 2-column matrix containing 1) the actual
 #'   landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
 #'   coordinates defining a curve or set of curves that will be warped using the
@@ -243,6 +244,9 @@ shapes_mat <- function(shapes) {
 #' }
 #'
 #' @export
+#'
+#' @references MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological
+#'   Association Newsletter, 72(620), 14-27.
 #'
 #' @examples
 #' #perform pca on tails shapes
@@ -396,6 +400,7 @@ morphogrid <- function(ordination,
 #' Rotate Fourier shape 180 degrees
 #'
 #' @description Correct 180-degrees spurious rotation in closed outline shapes.
+#'   Used internally.
 #'
 #' @param fcoef The set of Fourier coefficients measuring the shape(s) to be
 #'   rotated.

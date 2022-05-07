@@ -265,15 +265,18 @@ proj_groups <- function(mspace, shapes = NULL, groups, pipe = TRUE, ...) {
 
 ###############################################################################################
 
-#' Project morphometric axes into morphospace
+#' Project morphometric axis into morphospace
 #'
 #' @description Project one or more morphometric axes (i.e., linear combinations
 #'   of shape variables) into an existing morphospace.
 #'
-#' @param neword An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
-#'   \code{"phy_prcomp"} or \code{"pls"} object).
+#' @param obj An object containing either a multivariate ordination of class
+#'   \code{"prcomp", "bg_prcomp", "phy_prcomp"} or \code{"pls_shape"} or a
+#'   \code{"mlm"} object fitted using [lm()].
 #' @param mspace An \code{"mspace"} object created using [mspace()].
-#' @param ax A vector indicating the axes from \code{neword} to be projected.
+#' @param axis An optional vector indicating the axis from \code{obj} to be
+#'   projected.
+#' @param mag Numeric; magnifying factor for representing shape transformation.
 #' @param pipe Logical; is the function being included in a pipe?
 #' @param ... Further arguments passed to [lines()].
 #'
@@ -281,35 +284,15 @@ proj_groups <- function(mspace, shapes = NULL, groups, pipe = TRUE, ...) {
 #' @export
 #'
 #' @examples
-proj_axes <- function(neword, mspace, ax = 1, pipe = TRUE, ...) {
+proj_axis <- function(obj, mspace, axis = 1, mag = 1, pipe = TRUE, ...) {
 
-  ext_shapes <- vector(mode = "list", length = length(ax))
-  names(ext_shapes) <- paste0("axis_", ax)
-  for(i in 1:length(ax)){
+  ext_shapes2d <- ax_transformation(obj = obj, axis = axis, mag = mag)
+  ext_scores <- proj_eigen(x = ext_shapes2d, vectors = mspace$rotation,
+                           center = mspace$center)
 
-    coeffs <- neword$rotation[, ax[i]]
-    scores <- apply(matrix(neword$x[, ax[i]]), 2, range)
-    center <- neword$center
+  if(.Device != "null device") lines(ext_scores[, mspace$plotinfo$axes], ...)
 
-    ext_shapes2d <- rev_eigen(scores = scores, vector = coeffs, center = center)
-    ext_scores <- proj_eigen(x = ext_shapes2d, vectors = mspace$rotation,
-                             center = mspace$center)
-
-    if(.Device != "null device") lines(ext_scores[, mspace$plotinfo$axes], ...)
-
-    if(pipe == FALSE) {
-      if(mspace$datype == "fcoef") {
-        ext_shapes[[i]] <- ext_shapes2d
-      } else {
-        ext_shapes[[i]] <- geomorph::arrayspecs(ext_shapes2d,
-                                                k = mspace$plotinfo$k,
-                                                p = mspace$plotinfo$p)
-      }
-    }
-
-  }
-
-  if(pipe == FALSE) return(invisible(ext_shapes))
+  if(pipe == FALSE) return(invisible(ext_scores))
   if(pipe == TRUE) return(invisible(mspace))
 
 }

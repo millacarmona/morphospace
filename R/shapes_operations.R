@@ -127,7 +127,7 @@ consensus <- function(shapes, index = NULL) {
 #'
 #' @return A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
 #'   landmark data and \code{n x (4 x nb.h)} for the case of Fourer data (where
-#'   nb. h is the number of harmonics used in elliptic Fourier analysis).
+#'   \code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
 #'
 #' @export
 #'
@@ -279,8 +279,6 @@ consensus <- function(shapes, index = NULL) {
 #' title("raw P. esbelta morphospace")
 #' msp_nosize4 <- mspace(detr_shapes_nosize3, mag = 0.5, size.models = 0.15, asp.models = 0.7, points = TRUE)
 #' title("P. esbelta morphospace, refined using \n allometric variation from P. koeneni")
-
-
 detrend_shapes <- function(model, xvalue = NULL, newx = NULL, newy = NULL) {
 
   coefs <- model$coefficients
@@ -417,5 +415,153 @@ correct_efourier<-function(ef, index = NULL) {
 }
 
 
+##################################################################################
+
+#' Compute shapes expected by a linear model
+#'
+#' @description This function calculates and returns shapes expected under a
+#'   linear model, at one or more specific values of a numeric explanatory
+#'   variable.
+#'
+#' @param model A \code{mlm} object created using [lm()].
+#' @param xvalue A numeric value or values of \code{x} in the \code{model} at
+#'   which calculate expected shape(s).
+#'
+#' @details Similar in spirit to [consensus()] but for continuous covariates
+#'   instead of levels of a factor (and with a different usage).
+#'
+#' @return A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
+#'   landmark data (where \code{n} is the number of shapes provided in the left
+#'   side of the formula in \code{model}) and \code{n x (4 x nb.h)} for the case
+#'   of Fourer data (where nb. h is the number of harmonics used in elliptic
+#'   Fourier analysis).
+#'
+#' @export
+#'
+#' @examples
+#' #load shells data
+#' data("shells")
+#'
+#' #compute shape expected at all the empiric values of size
+#' mod <- lm(shells$shapes$coe ~ log(shells$sizes))
+#' predshapes <- expected_shapes(mod, xvalue = log(shells$sizes))
+#' pile_shapes(predshapes, mshape = FALSE)
+#'
+#' #compute shape expected at the maximum and maximum sizes
+#' mod <- lm(shells$shapes$coe ~ log(shells$sizes))
+#' bigshape <- expected_shapes(mod, xvalue = max(log(shells$sizes)))
+#' smallshape <- expected_shapes(mod, xvalue = min(log(shells$sizes)))
+#'
+#' plot(inv_efourier(bigshape, 300), type = "l", lwd = 2)
+#' plot(inv_efourier(smallshape, 300), type = "l", lwd = 2)
+expected_shapes <- function(model, xvalue) {
+
+  coefs <- model$coefficients
+  designmat<-cbind(1, xvalue)
+  predicted_mat <- designmat %*% coefs
+  return(predicted_mat)
+
+}
+
+
+##################################################################################
+
+#' Compute shapes at the extremes of a morphometric axis
+#'
+#' @description This function computes the theoretical shapes corresponding to the
+#'   extremes of a morphometric axis, which can be supplied as an object
+#'   containing a linear model or a multivariate ordination analysis.
+#'
+#' @param obj An object containing either a multivariate ordination of class
+#'   \code{"prcomp", "bg_prcomp", "phy_prcomp"} or \code{"pls_shape"} or a
+#'   \code{"mlm"} object fitted using [lm()].
+#' @param axis An optional numeric value specifying the axis of the multivariate
+#'   ordination which is to be represented.
+#' @param mag Numeric; magnifying factor for representing shape transformation.
+#'
+#' @return A 2-margins matrix, of dimensions \code{2 x (k x p)} for the case of
+#'   landmark data and \code{2 x (4 x nb.h)} for the case of Fourer data (where
+#'   \code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
+#'
+#' @export
+#'
+#' @references MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological
+#'   Association Newsletter, 72(620), 14-27.
+#'
+#' @examples
+#' #load tail data
+#' data("tails")
+#'
+#' #perform PCA, compute and plot extreme shapes of PC1 at its natural range
+#' pca <- prcomp(geomorph::two.d.array(tails$shapes))
+#' extshapes <- ax_transformation(obj = pca, axis = 1, mag = 1)
+#' pile_shapes(extshapes, links = links, mshape = FALSE)
+#'
+#' #compute and plot extreme shapes of PC2 at its natural range
+#' extshapes <- ax_transformation(obj = pca, axis = 2, mag = 1)
+#' pile_shapes(extshapes, links = links, mshape = FALSE)
+#'
+#' #compute and plot extreme shapes of PC2 magnified x2
+#' extshapes <- ax_transformation(obj = pca, axis = 2, mag = 2)
+#' pile_shapes(extshapes, links = links, mshape = FALSE)
+#'
+#' #perform lm of shape on size, compute and plot extreme shapes at its natural range
+#' model <- lm(geomorph::two.d.array(tails$shapes) ~ log(tails$sizes))
+#' extshapes <- ax_transformation(obj = model, mag = 1)
+#' pile_shapes(extshapes, links = links, mshape = FALSE)
+#'
+#' #perform lm of shape on size, compute and plot extreme shapes at its natural range
+#' model <- lm(geomorph::two.d.array(tails$shapes) ~ tails$data$sex)
+#' extshapes <- ax_transformation(obj = model, mag = 1)
+#' pile_shapes(extshapes, links = links, mshape = FALSE)
+#'
+#' #perform lm of shape on size, compute and plot extreme shapes magnified x2
+#' model <- lm(geomorph::two.d.array(tails$shapes) ~ tails$data$sex)
+#' extshapes <- ax_transformation(obj = model, mag = 2)
+#' pile_shapes(extshapes, links = links, mshape = FALSE)
+ax_transformation <- function(obj, axis = 1, mag = 1) {
+
+  if(any(class(obj) == c("prcomp", "bg_prcomp", "phy_prcomp", "pls_shape"))) {
+    extshapes_mat <- rev_eigen(range(obj$x[,axis] * mag),
+                               vectors = obj$rotation[,axis],
+                               obj$center)
+  }
+
+  if(any(class(obj) == "mlm")) {
+
+    x <- obj$model[,ncol(obj$model)]
+
+    if(is.numeric(x)) {
+      cent <- mean(range(x))
+      halfdif <- diff(range(x)) / 2
+      newrange <- c(cent - (halfdif * mag),
+                    cent + (halfdif * mag))
+
+      extshapes_mat <- expected_shapes(model = obj, xvalue = newrange)
+    }
+
+    if(is.factor(x)) {
+
+      if(nlevels(x) > 2) stop("Only two levels are allowed for extracting axes from mlm objects; try with a bg_prcomp object")
+
+      Y <- model$model[,1]
+      mshapes <- apply(X = Y, MARGIN = 2, FUN = tapply, x, mean)
+      bgpca <- prcomp(mshapes)
+      bgax1 <- bgpca$x[,1]
+
+      cent <- mean(range(bgax1))
+      halfdif <- diff(range(bgax1)) / 2
+      newrange <- c(cent - (halfdif * mag),
+                    cent + (halfdif * mag))
+
+      extshapes_mat <- rev_eigen(newrange, bgpca$rotation[,1], bgpca$center)
+
+    }
+
+  }
+
+  return(extshapes_mat)
+
+}
 
 

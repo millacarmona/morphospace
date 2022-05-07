@@ -26,13 +26,14 @@ morphogrid(
 }
 \arguments{
 \item{ordination}{An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
-\code{"phy_prcomp"} or \code{"pls"} object).}
+\code{"phy_prcomp"} or \code{"pls_shape"} object).}
 
 \item{axes}{Numeric of length 1 or 2, indicating the morphometric axes to be
 plotted. If values for either \code{x} or \code{y} are provided, only the
 first value of this argument is considered.}
 
-\item{datype}{type of shape data (either "fcoef" or "landm").}
+\item{datype}{Character; the type of shape data (either \code{"fcoef"} or
+\code{"landm"}).}
 
 \item{template}{A 2-column matrix containing 1) the actual
 landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
@@ -97,4 +98,8 @@ points(shapes_grid$models_arr[,,1], pch=16, col = 1)
 points(shapes_grid$models_arr[,,2], pch=16, col = 2)
 points(shapes_grid$models_arr[,,3], pch=16, col = 3)
 points(shapes_grid$models_arr[,,4], pch=16, col = 4)
+}
+\references{
+MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological
+Association Newsletter, 72(620), 14-27.
 }
