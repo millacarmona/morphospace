@@ -22,8 +22,11 @@ scores resulting from LOOCV.}
 
 }
 \description{
-Perform Partial Least Squares allowing for leave-one-out
+Performs Partial Least Squares allowing for leave-one-out
 cross-validation, which is useful one the number of variables exceeds the
 number of observations (i.e., alleviates spurious covariation between
 variables).
+}
+\seealso{
+\code{\link{pls_shapes}}
 }

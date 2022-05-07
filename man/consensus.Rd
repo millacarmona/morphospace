@@ -64,3 +64,6 @@ sp_mshapes <- consensus(shells$shapes, index = shells$data$species)
 sp_mshapes
 pile_shapes(sp_mshapes, mshape = FALSE)
 }
+\seealso{
+\code{\link{expected_shapes}}
+}

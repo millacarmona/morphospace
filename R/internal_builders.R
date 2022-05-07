@@ -22,7 +22,9 @@
 #' pca <- prcomp(geomorph::two.d.array(tails$shapes))
 #'
 #' #transform the scores back to shapes
-#' backshapes_mat <- rev_eigen(scores = pca$x, vectors = pca$rotation, center = pca$center)
+#' backshapes_mat <- rev_eigen(scores = pca$x,
+#'                             vectors = pca$rotation,
+#'                             center = pca$center)
 #' backshapes_arr <- geomorph::arrayspecs(backshapes_mat, k = 2, p = 9)
 #'
 #' #compare
@@ -30,7 +32,9 @@
 #' pile_shapes(backshapes_arr)
 #'
 #' #obtain shapes at the extremes of PC1
-#' extshapes_mat <- rev_eigen(scores = range(pca$x[,1]), vectors = pca$rotation[,1], center = pca$center)
+#' extshapes_mat <- rev_eigen(scores = range(pca$x[,1]),
+#'                            vectors = pca$rotation[,1],
+#'                            center = pca$center)
 #' extshapes_arr <- geomorph::arrayspecs(extshapes_mat, k = 2, p = 9)
 #'
 #' #plot and compare

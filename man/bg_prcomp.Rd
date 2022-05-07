@@ -34,8 +34,13 @@ as input.}
 
 }
 \description{
-Perform between group PCA allowing for group weighting and
-leave-one-out cross-validation, which is useful one the number of variables
+Performs between group PCA allowing for leave-one-out cross-validation, which is useful one the number of variables
 exceeds the number of observations (i.e., alleviates spurious separation
 between groups).
+}
+\references{
+
+}
+\seealso{
+\code{\link[base]{prcomp}}
 }

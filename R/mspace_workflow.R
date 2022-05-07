@@ -42,6 +42,11 @@
 #' @param ... Further arguments passed to [FUN].
 #'
 #' @return
+#'
+#' @seealso \code{\link{proj_shapes}}, \code{\link{proj_consensus}},
+#'   \code{\link{proj_groups}}, \code{\link{proj_phylogeny}},
+#'   \code{\link{proj_axis}}, \code{\link{plot_consensus}}
+#'
 #' @export
 #'
 #' @examples
@@ -165,6 +170,7 @@ mspace <- function(shapes,
 #' @param ... Further arguments passed to [points()].
 #'
 #' @return
+#'
 #' @export
 #'
 #' @examples
@@ -198,6 +204,9 @@ proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 #' @param ... Further arguments passed to [points()].
 #'
 #' @return
+#'
+#' @seealso \code{\link{consensus}}
+#'
 #' @export
 #'
 #' @examples
@@ -236,6 +245,9 @@ proj_consensus <- function(shapes, mspace, pipe = TRUE, ...) {
 #' @param ... Further arguments passed to [hulls_by_group_2D()].
 #'
 #' @return
+#'
+#' @seealso \code{\link{hulls_by_group2D}}
+#'
 #' @export
 #'
 #' @examples
@@ -281,7 +293,10 @@ proj_groups <- function(mspace, shapes = NULL, groups, pipe = TRUE, ...) {
 #' @param ... Further arguments passed to [lines()].
 #'
 #' @return
+#'
 #' @export
+#'
+#' @seealso \code{\link{ax_transformation}}
 #'
 #' @examples
 proj_axis <- function(obj, mspace, axis = 1, mag = 1, pipe = TRUE, ...) {
@@ -312,6 +327,7 @@ proj_axis <- function(obj, mspace, axis = 1, mag = 1, pipe = TRUE, ...) {
 #' @param ... Further arguments passed to [lines()].
 #'
 #' @return
+#'
 #' @export
 #'
 #' @examples

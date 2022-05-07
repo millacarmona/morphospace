@@ -21,6 +21,8 @@
 #'
 #' @export
 #'
+#' @seealso \code{\link{expected_shapes}}
+#'
 #' @examples
 #' #load tails data
 #' data("tails")
@@ -321,7 +323,7 @@ detrend_shapes <- function(model, xvalue = NULL, newx = NULL, newy = NULL) {
     predicted_mat <- resids + fitted_vec
   }
 
-  return(predicted_mat)
+  return(rbind(predicted_mat))
 
 }
 
@@ -438,6 +440,8 @@ correct_efourier<-function(ef, index = NULL) {
 #'
 #' @export
 #'
+#' @seealso \code{\link{consensus}}
+#'
 #' @examples
 #' #load shells data
 #' data("shells")
@@ -459,7 +463,7 @@ expected_shapes <- function(model, xvalue) {
   coefs <- model$coefficients
   designmat<-cbind(1, xvalue)
   predicted_mat <- designmat %*% coefs
-  return(predicted_mat)
+  return(rbind(predicted_mat))
 
 }
 
@@ -468,8 +472,8 @@ expected_shapes <- function(model, xvalue) {
 
 #' Compute shapes at the extremes of a morphometric axis
 #'
-#' @description This function computes the theoretical shapes corresponding to the
-#'   extremes of a morphometric axis, which can be supplied as an object
+#' @description This function computes the theoretical shapes corresponding to
+#'   the extremes of a morphometric axis, which can be supplied as an object
 #'   containing a linear model or a multivariate ordination analysis.
 #'
 #' @param obj An object containing either a multivariate ordination of class
@@ -483,7 +487,17 @@ expected_shapes <- function(model, xvalue) {
 #'   landmark data and \code{2 x (4 x nb.h)} for the case of Fourer data (where
 #'   \code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
 #'
+#' @details If an object of class \code{mlm} fitting shape to a factor (only two
+#'   levels allowed) is supplied in \code{obj}, magnification of the axis range
+#'   is attained through bgPCA. Axes computed from linear models and from
+#'   multivariate ordination methods using the same supervising variable will
+#'   usually differ in length (i.e. shape transformations will be magnified or
+#'   attenuated) due to the assumption of the former that the explanatory
+#'   variable has been measured without error.
+#'
 #' @export
+#'
+#' @seealso \code{\link{expected_shapes}}, \code{\link{rev_eigen}}
 #'
 #' @references MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological
 #'   Association Newsletter, 72(620), 14-27.
@@ -560,7 +574,7 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 
   }
 
-  return(extshapes_mat)
+  return(rbind(extshapes_mat))
 
 }
 

@@ -24,3 +24,6 @@ scores resulting from LOOCV.}
 A wrapper for \code{\link[=pls2b]{pls2b()}} aimed specifically at synthesizing
 covariation between shape data and other external, non-shape variable(s).
 }
+\seealso{
+\code{\link{pls2b}}
+}

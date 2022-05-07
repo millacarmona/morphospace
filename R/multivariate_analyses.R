@@ -3,8 +3,7 @@
 
 #' Between-groups Principal Component Analysis
 #'
-#' @description Perform between group PCA allowing for group weighting and
-#'   leave-one-out cross-validation, which is useful one the number of variables
+#' @description Performs between group PCA allowing for leave-one-out cross-validation, which is useful one the number of variables
 #'   exceeds the number of observations (i.e., alleviates spurious separation
 #'   between groups).
 #'
@@ -20,6 +19,11 @@
 #'   as input.
 #'
 #' @return
+#'
+#' @seealso \code{\link[base]{prcomp}}
+#'
+#' @references
+#'
 #' @export
 #'
 #' @examples
@@ -123,6 +127,9 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' @param ...
 #'
 #' @return
+#'
+#' @seealso \code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}}
+#'
 #' @export
 #'
 #' @examples
@@ -152,7 +159,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 
 #' Two-block Partial Least Squares
 #'
-#' @description Perform Partial Least Squares allowing for leave-one-out
+#' @description Performs Partial Least Squares allowing for leave-one-out
 #'   cross-validation, which is useful one the number of variables exceeds the
 #'   number of observations (i.e., alleviates spurious covariation between
 #'   variables).
@@ -166,6 +173,9 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #'   scores resulting from LOOCV.
 #'
 #' @return
+#'
+#' @seealso \code{\link{pls_shapes}}
+#'
 #' @export
 #'
 #' @examples
@@ -265,6 +275,9 @@ pls2b <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
 #'   scores resulting from LOOCV.
 #'
 #' @return
+#'
+#' @seealso \code{\link{pls2b}}
+#'
 #' @export
 #'
 #' @examples

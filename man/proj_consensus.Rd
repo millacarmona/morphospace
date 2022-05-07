@@ -21,3 +21,6 @@ proj_consensus(shapes, mspace, pipe = TRUE, ...)
 \description{
 Project one or more mean shapes into an existing morphospace.
 }
+\seealso{
+\code{\link{consensus}}
+}

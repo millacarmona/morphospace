@@ -4,7 +4,7 @@
 \alias{ax_transformation}
 \title{Compute shapes at the extremes of a morphometric axis}
 \usage{
-ax_transformation(obj, axis = 1, mag = 1, datype = "landm")
+ax_transformation(obj, axis = 1, mag = 1)
 }
 \arguments{
 \item{obj}{An object containing either a multivariate ordination of class
@@ -15,20 +15,25 @@ ax_transformation(obj, axis = 1, mag = 1, datype = "landm")
 ordination which is to be represented.}
 
 \item{mag}{Numeric; magnifying factor for representing shape transformation.}
-
-\item{datype}{Character; the type of shape data (either \code{"fcoef"} or
-\code{"landm"}).}
 }
 \value{
-Shapes representing the extremes of the morphometric axis. For
-landmark data, a \code{p x k x 2} array. For fourier data, a \code{2 x (4 x
-  nb.h)} matrix (\code{nb.h} being the number of harmonics used during
-elliptic Fourier analysis).
+A 2-margins matrix, of dimensions \code{2 x (k x p)} for the case of
+landmark data and \code{2 x (4 x nb.h)} for the case of Fourer data (where
+\code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
 }
 \description{
-This function computes the theoretical shapes corresponding to the
-extremes of a morphometric axis, which can be supplied as an object
+This function computes the theoretical shapes corresponding to
+the extremes of a morphometric axis, which can be supplied as an object
 containing a linear model or a multivariate ordination analysis.
+}
+\details{
+If an object of class \code{mlm} fitting shape to a factor (only two
+levels allowed) is supplied in \code{obj}, magnification of the axis range
+is attained through bgPCA. Axes computed from linear models and from
+multivariate ordination methods using the same supervising variable will
+usually differ in length (i.e. shape transformations will be magnified or
+attenuated) due to the assumption of the former that the explanatory
+variable has been measured without error.
 }
 \examples{
 #load tail data
@@ -65,4 +70,7 @@ pile_shapes(extshapes, links = links, mshape = FALSE)
 \references{
 MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological
 Association Newsletter, 72(620), 14-27.
+}
+\seealso{
+\code{\link{expected_shapes}}, \code{\link{rev_eigen}}
 }

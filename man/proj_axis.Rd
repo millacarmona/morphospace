@@ -29,3 +29,6 @@ projected.}
 Project one or more morphometric axes (i.e., linear combinations
 of shape variables) into an existing morphospace.
 }
+\seealso{
+\code{\link{ax_transformation}}
+}

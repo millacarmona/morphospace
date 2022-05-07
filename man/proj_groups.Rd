@@ -24,3 +24,6 @@ proj_groups(mspace, shapes = NULL, groups, pipe = TRUE, ...)
 Project convex hulls ennclosing a priori groups in an existing
 morphospace.
 }
+\seealso{
+\code{\link{hulls_by_group2D}}
+}

@@ -25,3 +25,6 @@ as input.}
 \description{
 A wrapper for \code{\link[=pyl.pca]{pyl.pca()}} from \code{phytools}.
 }
+\seealso{
+\code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}}
+}

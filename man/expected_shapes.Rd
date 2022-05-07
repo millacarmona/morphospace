@@ -45,3 +45,6 @@ smallshape <- expected_shapes(mod, xvalue = min(log(shells$sizes)))
 plot(inv_efourier(bigshape, 300), type = "l", lwd = 2)
 plot(inv_efourier(smallshape, 300), type = "l", lwd = 2)
 }
+\seealso{
+\code{\link{consensus}}
+}

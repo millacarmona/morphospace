@@ -20,7 +20,7 @@ the new data to predict shapes at the desired \code{xvalue}.}
 \value{
 A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
 landmark data and \code{n x (4 x nb.h)} for the case of Fourer data (where
-nb. h is the number of harmonics used in elliptic Fourier analysis).
+\code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
 }
 \description{
 Detrend shape data using the functional relationship between

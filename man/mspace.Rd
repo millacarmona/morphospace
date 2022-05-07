@@ -95,3 +95,8 @@ Create a morphospace as an ordination comprising set of axes
 synthesizing shape variation. Allows a variety of multivariate methods for
 building the ordination.
 }
+\seealso{
+\code{\link{proj_shapes}}, \code{\link{proj_consensus}},
+\code{\link{proj_groups}}, \code{\link{proj_phylogeny}},
+\code{\link{proj_axis}}, \code{\link{plot_consensus}}
+}
