@@ -41,14 +41,27 @@ A wrapper for \code{\link[=pyl.pca]{pyl.pca()}} from \code{phytools}.
 Phylogenetic PCA finds the linear combination of variables (in the
 the context of \code{morphospace} will generally be a series of shapes
 arranged as 2-margin matrix) maximizing the residual variation left after
-removing covariation explained by phylogenetic history.
+removing covariation explained by phylogenetic history (i.e. they reflect
+the covariance that would correspond to a star phylogeny).
 
-Phylogenetic PCA has a few particularities that is worth having in mind:
-\enumerate{
-\item it is centered on the phylogenetic mean (i.e., the values estimated for
-the root of the tree) instead of the overall centroid of the original
-variables; 2)
-}
+Phylogenetic PCA has some important differences to regular PCA. First, the
+resulting ordination is centered around the phylogenetic mean (i.e. the
+values estimated for the root of the tree) instead of the overall centroid
+of the original variables. More importantly, both phylogenetic PCA's
+eigenvectors and eigenvalues have been constructed using covariation that
+is independent of phylogenetic structure. However only the orientation of
+the scores on those axes, and not their variances, reflect this adjustment.
+In other words, orientation of the phylogenetic PC axes are devoid of
+phylogenetic structure, but magnitudes measured in the resulting morphospace
+(e.g. distances, variances) still retain phylogenetic information. Stemming
+from this same fact, the variances computed using phylogenetic scores differ
+from the ones calculated from the phylogenetic eigenvalues (which represent
+the total amount of variance among the taxa after removing covariance
+accounted by phylogeny, although their magnitude depends on the units used
+to measure branch length), and do not necessarily decrease for subordinate
+axes. Also, the set of phylogenetic scores are not uncorrelated, meaning
+they can contain redundant information. For more details, see Polly et al.
+2013.
 }
 \references{
 Revell, L. J. (2009). \emph{Size-correction and principal

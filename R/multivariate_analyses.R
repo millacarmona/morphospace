@@ -1,6 +1,110 @@
 
 ########################################################################################
 
+#' Phylogenetic Principal Component Analysis
+#'
+#' @description A wrapper for [pyl.pca()] from \code{phytools}.
+#'
+#' @param x A matrix with one or more variables as columns and observations as
+#'   rows. Row must be named and match tip labels from the phylogenetic
+#'   \code{tree}.
+#' @param tree A \code{"phy"} object containing a phylogenetic tree. Tip labels
+#'   should match the row names from \code{x}.
+#' @param corr Logical; whether to use correlation instead of covariance matrix
+#'   as input.
+#' @param ...
+#'
+#' @details Phylogenetic PCA finds the linear combination of variables (in the
+#'   the context of \code{morphospace} will generally be a series of shapes
+#'   arranged as 2-margin matrix) maximizing the residual variation left after
+#'   removing covariation explained by phylogenetic history (i.e. they reflect
+#'   the covariance that would correspond to a star phylogeny).
+#'
+#'   Phylogenetic PCA has some important differences to regular PCA. First, the
+#'   resulting ordination is centered around the phylogenetic mean (i.e. the
+#'   values estimated for the root of the tree) instead of the overall centroid
+#'   of the original variables. More importantly, both phylogenetic PCA's
+#'   eigenvectors and eigenvalues have been constructed using covariation that
+#'   is independent of phylogenetic structure. However only the orientation of
+#'   the scores on those axes, and not their variances, reflect this adjustment.
+#'   In other words, orientation of the phylogenetic PC axes are devoid of
+#'   phylogenetic structure, but magnitudes measured in the resulting morphospace
+#'   (e.g. distances, variances) still retain phylogenetic information. Stemming
+#'   from this same fact, the variances computed using phylogenetic scores differ
+#'   from the ones calculated from the phylogenetic eigenvalues (which represent
+#'   the total amount of variance among the taxa after removing covariance
+#'   accounted by phylogeny, although their magnitude depends on the units used
+#'   to measure branch length), and do not necessarily decrease for subordinate
+#'   axes. Also, the set of phylogenetic scores are not uncorrelated, meaning
+#'   they can contain redundant information. For more details, see Polly et al.
+#'   2013.
+#'
+#'
+#' @return A \code{"phy_prcomp"} object formatted following the \code{"prcomp"}
+#' class:
+#' \itemize{
+#'   \item \code{$sdev:} {the standard deviations of the principal components
+#'   (i.e., the square roots of the eigenvalues of the covariance/correlation
+#'   matrix).}
+#'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
+#'   \item \code{$center:} {the phylogenetic mean (i.e. the shape estimated
+#'   for the root of the tree).}
+#'   \item \code{$totvar:} {the sum of the variances from all the original
+#'   variables.}
+#'   \item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
+#'   of the model; see \code{\link[phytools]{phyl.pca}}.}
+#'
+#' @seealso \code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}},
+#'   \code{\link{exp_var}}
+#'
+#' @export
+#'
+#' @references Revell, L. J. (2009). \emph{Size-correction and principal
+#' components for interspecific comparative studies}. Evolution, 63, 3258-3268.
+#'
+#' Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
+#' \emph{Phylogenetic principal components analysis and geometric
+#' morphometrics}. Hystrix, 24(1), 33.
+#'
+#' Monteiro, L. R. (2013). \emph{Morphometrics and the comparative method:
+#' studying the evolution of biological shape}. Hystrix, the Italian Journal
+#' of Mammalogy, 24(1), 25-32.
+#'
+#' @examples
+phy_prcomp <- function(x, tree, corr = FALSE, ...) {
+
+  if(corr == FALSE) {
+    mode <- "cov"
+  } else {
+    mode <- "corr"
+  }
+  center <- colMeans(x)
+  totvar <- sum(apply(x, 2, stats::var))
+
+  phypca <- phytools::phyl.pca(Y = x, tree = tree, mode = mode, ...)
+
+  if(is.null(phypca$lambda)) {
+    lambda <- 1
+  } else {
+    lambda <- phypca$lambda
+  }
+
+  C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
+  anc <- c(phytools::phyl.vcv(x, C, lambda)$alpha)
+
+  results <- list(sdev = sqrt(phypca$Eval), rotation = phypca$Evec,  x = phypca$S,
+                  center = anc, totvar = totvar)
+  if(!is.null(phypca$lambda)) results$lambda <- phypca$lambda
+  if(!is.null(phypca$logL)) results$logL <- phypca$logL
+
+  class(results) <- "phy_prcomp"
+  return(results)
+
+}
+
+
+########################################################################################
+
 #' Between-groups Principal Component Analysis
 #'
 #' @description Performs between group PCA allowing for leave-one-out
@@ -164,96 +268,6 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 
 ########################################################################################
 
-
-#' Phylogenetic Principal Component Analysis
-#'
-#' @description A wrapper for [pyl.pca()] from \code{phytools}.
-#'
-#' @param x A matrix with one or more variables as columns and observations as
-#'   rows. Row must be named and match tip labels from the phylogenetic
-#'   \code{tree}.
-#' @param tree A \code{"phy"} object containing a phylogenetic tree. Tip labels
-#'   should match the row names from \code{x}.
-#' @param corr Logical; whether to use correlation instead of covariance matrix
-#'   as input.
-#' @param ...
-#'
-#' @details Phylogenetic PCA finds the linear combination of variables (in the
-#'   the context of \code{morphospace} will generally be a series of shapes
-#'   arranged as 2-margin matrix) maximizing the residual variation left after
-#'   removing covariation explained by phylogenetic history.
-#'
-#'   Phylogenetic PCA has a few particularities that is worth having in mind:
-#'   1) it is centered on the phylogenetic mean (i.e., the values estimated for
-#'   the root of the tree) instead of the overall centroid of the original
-#'   variables; 2)
-#'
-#'
-#' @return A \code{"phy_prcomp"} object formatted following the \code{"prcomp"}
-#' class:
-#' \itemize{
-#'   \item \code{$sdev:} {the standard deviations of the principal components
-#'   (i.e., the square roots of the eigenvalues of the covariance/correlation
-#'   matrix).}
-#'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
-#'   \item \code{$center:} {the phylogenetic mean (i.e. the shape estimated
-#'   for the root of the tree).}
-#'   \item \code{$totvar:} {the sum of the variances from all the original
-#'   variables.}
-#'   \item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
-#'   of the model; see \code{\link[phytools]{phyl.pca}}.}
-#'
-#' @seealso \code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}},
-#'   \code{\link{exp_var}}
-#'
-#' @export
-#'
-#' @references Revell, L. J. (2009). \emph{Size-correction and principal
-#' components for interspecific comparative studies}. Evolution, 63, 3258-3268.
-#'
-#' Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
-#' \emph{Phylogenetic principal components analysis and geometric
-#' morphometrics}. Hystrix, 24(1), 33.
-#'
-#' Monteiro, L. R. (2013). \emph{Morphometrics and the comparative method:
-#' studying the evolution of biological shape}. Hystrix, the Italian Journal
-#' of Mammalogy, 24(1), 25-32.
-#'
-#' @examples
-phy_prcomp <- function(x, tree, corr = FALSE, ...) {
-
-  if(corr == FALSE) {
-    mode <- "cov"
-  } else {
-    mode <- "corr"
-  }
-  center <- colMeans(x)
-  totvar <- sum(apply(x, 2, stats::var))
-
-  phypca <- phytools::phyl.pca(Y = x, tree = tree, mode = mode, ...)
-
-  if(!is.null(phypca$lambda)) {
-    lambda <- 1
-  } else {
-    lambda <- phypca$lambda
-  }
-
-  C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
-  anc <- c(phytools::phyl.vcv(x, C, lambda)$alpha)
-
-  results <- list(sdev = sqrt(phypca$Eval), rotation = phypca$Evec,  x = phypca$S,
-                  center = anc, totvar = totvar)
-  if(!is.null(phypca$lambda)) results$lambda <- phypca$lambda
-  if(!is.null(phypca$logL)) results$logL <- phypca$logL
-
-  class(results) <- "phy_prcomp"
-  return(results)
-
-}
-
-
-########################################################################################
-
 #' Two-blocks Partial Least Squares
 #'
 #' @description Performs 2B Partial Least Squares allowing for leave-one-out
@@ -286,7 +300,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #' @return A \code{"pls2b"} object, containing:
 #' \itemize{
 #'   \item \code{$values:} {vector of singular values accounting for the
-#'   covariation among blocks explained by each par of axis.}
+#'   covariation among blocks explained by each par of axes.}
 #'   \item \code{$xrotation:} {matrix of vector coefficients for the first
 #'   block.}
 #'   \item \code{$yrotation:} {matrix of vector coefficients for the second
@@ -300,7 +314,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #'   \item \code{$ytotvar:} {the sum of the variances from the original
 #'   variables from the second block.}
 #'
-#' @seealso \code{\link{pls_shapes}}, \code{\link{phylo_pls2b}},
+#' @seealso \code{\link{pls_shapes}}, \code{\link{phy_pls2b}},
 #'   \code{\link{exp_var}}
 #'
 #' @export
@@ -408,17 +422,27 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 #'   scores resulting from LOOCV.
 #'
 #' @details Similar to \code{\link{pls2b}} but cases are linked by phylogenetic
-#'   relationships. Similarly to \code{\link{phy_prcomp}}, the resulting axes
-#'   maximize the residual covariation among blocks left after removing
-#'   covariation among blocks accounted by phylogenetic history. As in other
-#'   PLS functions from \code{morphospace}, leave-one-out cross-validation
-#'   can be implemented to alleviate the spurious covariation among blocks
-#'   that is produced when the number of variables exceeds the number of cases.
+#'   relationships. Like in the case of \code{\link{phy_prcomp}}, the resulting
+#'   axes maximize the residual covariation among blocks left after removing
+#'   covariation among blocks accounted by phylogenetic history (assuming a
+#'   Brownian model of evolution an 100% phylogenetic signal, which is
+#'   equivalent to setting \code{method = "BM"} in [phytools::phyl.pca()]).
+#'   This method display the same variational properties than phylogenetic PCA,
+#'   (i.e. centering on the phylogenetic mean; orientation of scores reflect
+#'   non-phylogenetic covariation but their variance is not scaled and thus
+#'   contain phylogenetic information; for the latter reason, variance of
+#'   scores and eigenvalues differ; scores are correlated; etc; see Polly
+#'   et al. 2013).
+#'
+#'   As in other supervised multivariate ordination functions from
+#'   \code{morphospace}, leave-one-out cross-validation can be implemented to
+#'   alleviate the spurious covariation among blocks that is produced when
+#'   the number of variables exceeds the number of cases.
 #'
 #' @return A \code{"phy_pls2b"} object, containing:
 #' \itemize{
 #'   \item \code{$values:} {vector of singular values accounting for the
-#'   covariation among blocks explained by each par of axis.}
+#'   covariation among blocks explained by each par of axes.}
 #'   \item \code{$xrotation:} {matrix of vector coefficients for the first
 #'   block.}
 #'   \item \code{$yrotation:} {matrix of vector coefficients for the second
@@ -457,8 +481,8 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 #' @examples
 phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 
-  if(is.vector(x)) x <- matrix(x)
-  if(is.vector(y)) y <- matrix(y)
+  if(is.vector(x)) x <- cbind(x)
+  if(is.vector(y)) y <- cbind(y)
 
   namesx <- rownames(x)
   namesy <- rownames(y)
@@ -578,16 +602,15 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 
 
 
-
 ########################################################################################
 
 #' 2B Partial Least Squares for shape data
 #'
-#' @description A wrapper for [pls2b()] or [phylo_pls2b()] aimed specifically
+#' @description A wrapper for [pls2b()] or [phy_pls2b()] aimed specifically
 #'   at synthesizing covariation between shape data and other external,
 #'   non-shape variable(s).
 #'
-#' @param x A matrix with variables as columns and observations as rows,
+#' @param X A matrix with variables as columns and observations as rows,
 #'   representing the external variables that supervise ordination
 #'   (corresponding to the first block).
 #' @param shapes Shape data (corresponding to the second block of
@@ -602,7 +625,8 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 #'   between a block of variables assumed to be shape variables formatted as
 #'   a 2-margins matrix and another block which can be either another set of
 #'   shape variables or one or more non-shape variables for supervizing the
-#'   analysis.
+#'   analysis. If a phylogenetic tree is supplied, observations from \code{x}
+#'   and \code{shapes} blocks are treated as data measured for its tips.
 #'
 #'   It has been reported that PLS (as an algebraic equivalent of bgPCA)
 #'   produces spurious covariation between blocks when the number of variables
@@ -612,8 +636,8 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 #'   observation is excluded from the calculation of PLS axes before its
 #'   projection in the resulting ordination as a way to calculate its score).
 #'
-#' @return A \code{"pls"} or \code{"phy_pls"} object formatted following the
-#' \code{"prcomp"} class:
+#' @return A \code{"pls_shapes"} or \code{"phy_pls_shapes"} object formatted
+#' following the \code{"prcomp"} class:
 #' \itemize{
 #'   \item \code{$sdev:} {the standard deviation of the PLS axis/axis of the
 #'    shape block.}
@@ -623,10 +647,10 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 #'   the shape block.}
 #'   \item \code{$totvar:} {the sum of the variances from the original
 #'   variables in the shape block.}
-#'   \item \code{$supblock:} {the scores from the supervizing block (i.e.
-#'   the \code{x} scores.}
+#'   \item \code{$x2:} {the scores from the supervizing block (i.e. the
+#'   \code{x} scores.}
 #'
-#' @seealso \code{\link{pls2b}}, \code{\link{phylo_pls2b}}
+#' @seealso \code{\link{pls2b}}, \code{\link{phy_pls2b}}
 #'
 #' @export
 #'
@@ -643,27 +667,30 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 #' 271-302.
 #'
 #' @examples
-pls_shapes <- function(x, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
+pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 
   y <- shapes_mat(shapes)$data2d
 
   if(is.null(tree)) {
-    pls <- pls2b(y = y, x = x, LOOCV = LOOCV, recompute = recompute)
+    pls <- pls2b(y = y, x = X, LOOCV = LOOCV, recompute = recompute)
   } else {
-    pls <- phylo_pls2b(y = y, x = x, tree = tree, LOOCV = LOOCV, recompute = recompute)
+    pls <- phy_pls2b(y = y, x = X, tree = tree, LOOCV = LOOCV, recompute = recompute)
   }
 
-  results <- list(sdev = apply(pls$yscores, 2, stats::sd),
+  yscores <- cbind(pls$yscores)
+  xscores <- cbind(pls$xscores)
+
+  results <- list(sdev = apply(yscores, 2, stats::sd),
                   rotation = pls$yrotation,
-                  x = pls$yscores,
-                  supblock = pls$xscores,
+                  x = yscores,
+                  x2 = xscores,
                   center = pls$ycenter,
                   totvar = pls$ytotvar)
 
   if(class(pls) == "pls2b") {
-    class(results) <- "pls"
+    class(results) <- "pls_shapes"
   } else {
-    class(results) <- "phy_pls"
+    class(results) <- "phy_pls_shapes"
   }
   return(results)
 
@@ -678,7 +705,8 @@ pls_shapes <- function(x, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 #'   by syntethtic axes generated by different multivariate ordination methods.
 #'
 #' @param ordination An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
-#'   \code{"phy_prcomp"}, \code{"pls"} or \code{"phy_pls"} object).
+#'   \code{"phy_prcomp"}, \code{"pls_shapes"} or \code{"phy_pls_shapes"}
+#'   object).
 #'
 #' @return A table informing the percentages and cumulative percentages of
 #'   original variation accounted by each synthetic axis of the multivariate
@@ -708,8 +736,8 @@ exp_var <- function(ordination) {
   if(class(ordination) == "prcomp") axname <- "PC"
   if(class(ordination) == "bg_prcomp") axname <- "bgPC"
   if(class(ordination) == "phy_prcomp") axname <- "phyPC"
-  if(class(ordination) == "pls") axname <- "PLS-"
-  if(class(ordination) == "phy_pls") axname <- "phyPLS-"
+  if(class(ordination) == "pls_shapes") axname <- "PLS-"
+  if(class(ordination) == "phy_pls_shapes") axname <- "phyPLS-"
 
   rownames(tab) <- paste0(axname, 1:nrow(tab))
   return(tab)

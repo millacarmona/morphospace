@@ -37,6 +37,7 @@
 #' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
 #'   models.
 #' @param col.ldm The color of landmarks/semilandmarks in the background models.
+#' @param plot Logical; whether to plot morphospace.
 #' @param xlim,ylim,xlab,ylab,asp Standard arguments passed to the generic plot
 #'   function
 #' @param ... Further arguments passed to [FUN].
@@ -74,6 +75,7 @@ mspace <- function(shapes,
                    points = FALSE,
                    cex.ldm = 1,
                    col.ldm = "black",
+                   plot = TRUE,
                    ...) {
 
   dat <- shapes_mat(shapes)
@@ -121,27 +123,31 @@ mspace <- function(shapes,
     ylab <- paste0("phy", ylab)
   }
 
-  plot(models_mat, type = "n", asp = asp,
-       xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
+  if(plot == TRUE) {
 
-  for(i in 1:dim(models_arr)[3]) {
-    if(datype == "landm") {
-      points(models_arr[,,i], pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
+    plot(models_mat, type = "n", asp = asp,
+         xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
 
-      if(!is.null(template)) {
-        lines(models_arr[,,i], col = col.models, lwd = lwd.models)
+    for(i in 1:dim(models_arr)[3]) {
+      if(datype == "landm") {
+        points(models_arr[,,i], pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
+
+        if(!is.null(template)) {
+          lines(models_arr[,,i], col = col.models, lwd = lwd.models)
+        } else {
+          for(l in 1:length(links)) lines(models_arr[,,i][links[[l]],],
+                                          col = col.models, lwd = lwd.models)
+        }
+
       } else {
-        for(l in 1:length(links)) lines(models_arr[,,i][links[[l]],],
-                                        col = col.models, lwd = lwd.models)
+        graphics::polygon(models_arr[,,i], pch = 16,
+                          col = bg.models, border = col.models, lwd = lwd.models)
       }
-
-    } else {
-      graphics::polygon(models_arr[,,i], pch = 16,
-                        col = bg.models, border = col.models, lwd = lwd.models)
     }
-  }
 
-  if(points == TRUE) points(ordination$x)
+    if(points == TRUE) points(ordination$x)
+
+  }
 
 
   plotinfo <- list(p = p, k = k, links = links, template = template, axes = axes, nh = nh, nv = nv, mag = mag,

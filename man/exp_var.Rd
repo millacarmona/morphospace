@@ -8,7 +8,8 @@ exp_var(ordination)
 }
 \arguments{
 \item{ordination}{An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
-\code{"phy_prcomp"}, \code{"pls"} or \code{"phy_pls"} object).}
+\code{"phy_prcomp"}, \code{"pls_shapes"} or \code{"phy_pls_shapes"}
+object).}
 }
 \value{
 A table informing the percentages and cumulative percentages of

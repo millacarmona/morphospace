@@ -25,7 +25,7 @@ scores resulting from LOOCV.}
 A \code{"phy_pls2b"} object, containing:
 \itemize{
 \item \code{$values:} {vector of singular values accounting for the
-covariation among blocks explained by each par of axis.}
+covariation among blocks explained by each par of axes.}
 \item \code{$xrotation:} {matrix of vector coefficients for the first
 block.}
 \item \code{$yrotation:} {matrix of vector coefficients for the second
@@ -45,12 +45,22 @@ leave-one-out cross-validation. Experimental.
 }
 \details{
 Similar to \code{\link{pls2b}} but cases are linked by phylogenetic
-relationships. Similarly to \code{\link{phy_prcomp}}, the resulting axes
-maximize the residual covariation among blocks left after removing
-covariation among blocks accounted by phylogenetic history. As in other
-PLS functions from \code{morphospace}, leave-one-out cross-validation
-can be implemented to alleviate the spurious covariation among blocks
-that is produced when the number of variables exceeds the number of cases.
+relationships. Like in the case of \code{\link{phy_prcomp}}, the resulting
+axes maximize the residual covariation among blocks left after removing
+covariation among blocks accounted by phylogenetic history (assuming a
+Brownian model of evolution an 100\% phylogenetic signal, which is
+equivalent to setting \code{method = "BM"} in \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}}).
+This method display the same variational properties than phylogenetic PCA,
+(i.e. centering on the phylogenetic mean; orientation of scores reflect
+non-phylogenetic covariation but their variance is not scaled and thus
+contain phylogenetic information; for the latter reason, variance of
+scores and eigenvalues differ; scores are correlated; etc; see Polly
+et al. 2013).
+
+As in other supervised multivariate ordination functions from
+\code{morphospace}, leave-one-out cross-validation can be implemented to
+alleviate the spurious covariation among blocks that is produced when
+the number of variables exceeds the number of cases.
 }
 \references{
 Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial

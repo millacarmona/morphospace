@@ -29,6 +29,7 @@ mspace(
   points = FALSE,
   cex.ldm = 1,
   col.ldm = "black",
+  plot = TRUE,
   ...
 )
 }
@@ -84,6 +85,8 @@ function}
 models.}
 
 \item{col.ldm}{The color of landmarks/semilandmarks in the background models.}
+
+\item{plot}{Logical; whether to plot morphospace.}
 
 \item{...}{Further arguments passed to \link{FUN}.}
 }

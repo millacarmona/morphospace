@@ -4,10 +4,10 @@
 \alias{pls_shapes}
 \title{2B Partial Least Squares for shape data}
 \usage{
-pls_shapes(x, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
+pls_shapes(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 }
 \arguments{
-\item{x}{A matrix with variables as columns and observations as rows,
+\item{X}{A matrix with variables as columns and observations as rows,
 representing the external variables that supervise ordination
 (corresponding to the first block).}
 
@@ -23,8 +23,8 @@ should match the row number and names from \code{x} and \code{y}.}
 scores resulting from LOOCV.}
 }
 \value{
-A \code{"pls"} or \code{"phy_pls"} object formatted following the
-\code{"prcomp"} class:
+A \code{"pls_shapes"} or \code{"phy_pls_shapes"} object formatted
+following the \code{"prcomp"} class:
 \itemize{
 \item \code{$sdev:} {the standard deviation of the PLS axis/axis of the
 shape block.}
@@ -34,11 +34,11 @@ block.}
 the shape block.}
 \item \code{$totvar:} {the sum of the variances from the original
 variables in the shape block.}
-\item \code{$supblock:} {the scores from the supervizing block (i.e.
-the \code{x} scores.}
+\item \code{$x2:} {the scores from the supervizing block (i.e. the
+\code{x} scores.}
 }
 \description{
-A wrapper for \code{\link[=pls2b]{pls2b()}} or \code{\link[=phylo_pls2b]{phylo_pls2b()}} aimed specifically
+A wrapper for \code{\link[=pls2b]{pls2b()}} or \code{\link[=phy_pls2b]{phy_pls2b()}} aimed specifically
 at synthesizing covariation between shape data and other external,
 non-shape variable(s).
 }
@@ -47,7 +47,8 @@ This function finds the linear combination maximizing covariation
 between a block of variables assumed to be shape variables formatted as
 a 2-margins matrix and another block which can be either another set of
 shape variables or one or more non-shape variables for supervizing the
-analysis.
+analysis. If a phylogenetic tree is supplied, observations from \code{x}
+and \code{shapes} blocks are treated as data measured for its tips.
 
 It has been reported that PLS (as an algebraic equivalent of bgPCA)
 produces spurious covariation between blocks when the number of variables
@@ -71,5 +72,5 @@ components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
 271-302.
 }
 \seealso{
-\code{\link{pls2b}}, \code{\link{phylo_pls2b}}
+\code{\link{pls2b}}, \code{\link{phy_pls2b}}
 }

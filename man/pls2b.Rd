@@ -22,7 +22,7 @@ scores resulting from LOOCV.}
 A \code{"pls2b"} object, containing:
 \itemize{
 \item \code{$values:} {vector of singular values accounting for the
-covariation among blocks explained by each par of axis.}
+covariation among blocks explained by each par of axes.}
 \item \code{$xrotation:} {matrix of vector coefficients for the first
 block.}
 \item \code{$yrotation:} {matrix of vector coefficients for the second
@@ -71,6 +71,6 @@ components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
 271-302.
 }
 \seealso{
-\code{\link{pls_shapes}}, \code{\link{phylo_pls2b}},
+\code{\link{pls_shapes}}, \code{\link{phy_pls2b}},
 \code{\link{exp_var}}
 }
