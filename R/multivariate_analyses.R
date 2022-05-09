@@ -3,9 +3,10 @@
 
 #' Between-groups Principal Component Analysis
 #'
-#' @description Performs between group PCA allowing for leave-one-out cross-validation, which is useful one the number of variables
-#'   exceeds the number of observations (i.e., alleviates spurious separation
-#'   between groups).
+#' @description Performs between group PCA allowing for leave-one-out
+#'   cross-validation, which is useful one the number of variables exceeds the
+#'   number of observations (i.e., alleviates spurious separation between
+#'   groups).
 #'
 #' @param x A matrix with variables as columns and observations as rows.
 #' @param groups Factor; classification of observations of \code{x} into a
@@ -18,11 +19,61 @@
 #' @param corr Logical; whether to use correlation instead of covariance matrix
 #'   as input.
 #'
-#' @return
+#' @details bgPCA finds the liner combination of variables (which in the
+#'   context of \code{morphospace} will generally be a series of shapes
+#'   arranged as 2-margin matrix) maximizing variation between groups'
+#'   centroids, and then project the actual observation into the resulting
+#'   synthetic axes. This method is preferred here to LDA/CVA as a way to
+#'   produce ordinations maximizing separation between groups because it avoids
+#'   spherization of shape variation carried out for the former methods.
 #'
-#' @seealso \code{\link[base]{prcomp}}
+#'   Recently, it has been discovered that bgPCA produces spurious separation
+#'   between groups when the number of variables exceeds the number of
+#'   observations (which is a common situation in geometric morphometrics
+#'   analyses). This problem can be alleviated by carrying out a
+#'   leave-one-out cross-validation (LOOCV; i.e. each observation is
+#'   excluded from the calculation of bgPCA prior to its projection in the
+#'   resulting ordination as a way to calculate its score).
 #'
-#' @references
+#' @return A \code{"bg_prcomp"} object formatted following the \code{"prcomp"}
+#' class:
+#' \itemize{
+#'   \item \code{$sdev:} {the standard deviations of the principal components
+#'   (i.e., the square roots of the eigenvalues of the covariance/correlation
+#'   matrix).}
+#'   \item \code{$rotation:} {a \code{n x (g - 1)} matrix of eigenvector
+#'   coefficients (with \code{g} being the number of groups.}
+#'   \item \code{$center:} {the mean values of the original variables for the
+#'   entire sample (i.e. the grand mean).}
+#'   \item \code{$totvar:} {the mean values of the original variables for
+#'   each group.}
+#'   \item \code{$grcenters:} {the sum of the variances from all the original
+#'   variables.}
+#'
+#' @seealso \code{\link[base]{prcomp}}, \code{\link{exp_var}}
+#'
+#' @references Mitteroecker, P., & Bookstein, F. (2011). \emph{Linear
+#' discrimination, ordination, and the visualization of selection gradients in
+#' modern morphometrics}. Evolutionary Biology, 38(1), 100-114.
+#'
+#' Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
+#' components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
+#' 271-302.
+#'
+#' Cardini, A., O’Higgins, P., & Rohlf, F. J. (2019). \emph{Seeing distinct
+#' groups where there are none: spurious patterns from between-group PCA}.
+#' Evolutionary Biology, 46(4), 303-316.
+#'
+#' Cardini, A., & Polly, P. D. (2020). \emph{Cross-validated between group PCA
+#' scatterplots: A solution to spurious group separation?}. Evolutionary Biology,
+#' 47(1), 85-95.
+#'
+#' Rohlf, F. J. (2021). \emph{Why clusters and other patterns can seem to be
+#' found in analyses of high-dimensional data}. Evolutionary Biology, 48(1), 1-16.
+#'
+#' Thioulouse, J., Renaud, S., Dufour, A. B., & Dray, S. (2021). \emph{Overcoming
+#' the spurious groups problem in between-group PCA}. Evolutionary Biology, 48(4),
+#' 458-471.
 #'
 #' @export
 #'
@@ -113,6 +164,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 
 ########################################################################################
 
+
 #' Phylogenetic Principal Component Analysis
 #'
 #' @description A wrapper for [pyl.pca()] from \code{phytools}.
@@ -126,11 +178,46 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'   as input.
 #' @param ...
 #'
-#' @return
+#' @details Phylogenetic PCA finds the linear combination of variables (in the
+#'   the context of \code{morphospace} will generally be a series of shapes
+#'   arranged as 2-margin matrix) maximizing the residual variation left after
+#'   removing covariation explained by phylogenetic history.
 #'
-#' @seealso \code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}}
+#'   Phylogenetic PCA has a few particularities that is worth having in mind:
+#'   1) it is centered on the phylogenetic mean (i.e., the values estimated for
+#'   the root of the tree) instead of the overall centroid of the original
+#'   variables; 2)
+#'
+#'
+#' @return A \code{"phy_prcomp"} object formatted following the \code{"prcomp"}
+#' class:
+#' \itemize{
+#'   \item \code{$sdev:} {the standard deviations of the principal components
+#'   (i.e., the square roots of the eigenvalues of the covariance/correlation
+#'   matrix).}
+#'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
+#'   \item \code{$center:} {the phylogenetic mean (i.e. the shape estimated
+#'   for the root of the tree).}
+#'   \item \code{$totvar:} {the sum of the variances from all the original
+#'   variables.}
+#'   \item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
+#'   of the model; see \code{\link[phytools]{phyl.pca}}.}
+#'
+#' @seealso \code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}},
+#'   \code{\link{exp_var}}
 #'
 #' @export
+#'
+#' @references Revell, L. J. (2009). \emph{Size-correction and principal
+#' components for interspecific comparative studies}. Evolution, 63, 3258-3268.
+#'
+#' Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
+#' \emph{Phylogenetic principal components analysis and geometric
+#' morphometrics}. Hystrix, 24(1), 33.
+#'
+#' Monteiro, L. R. (2013). \emph{Morphometrics and the comparative method:
+#' studying the evolution of biological shape}. Hystrix, the Italian Journal
+#' of Mammalogy, 24(1), 25-32.
 #'
 #' @examples
 phy_prcomp <- function(x, tree, corr = FALSE, ...) {
@@ -141,11 +228,21 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
     mode <- "corr"
   }
   center <- colMeans(x)
+  totvar <- sum(apply(x, 2, stats::var))
 
   phypca <- phytools::phyl.pca(Y = x, tree = tree, mode = mode, ...)
 
+  if(!is.null(phypca$lambda)) {
+    lambda <- 1
+  } else {
+    lambda <- phypca$lambda
+  }
+
+  C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
+  anc <- c(phytools::phyl.vcv(x, C, lambda)$alpha)
+
   results <- list(sdev = sqrt(phypca$Eval), rotation = phypca$Evec,  x = phypca$S,
-                  center = center)
+                  center = anc, totvar = totvar)
   if(!is.null(phypca$lambda)) results$lambda <- phypca$lambda
   if(!is.null(phypca$logL)) results$logL <- phypca$logL
 
@@ -157,29 +254,71 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 
 ########################################################################################
 
-#' Two-block Partial Least Squares
+#' Two-blocks Partial Least Squares
 #'
-#' @description Performs Partial Least Squares allowing for leave-one-out
+#' @description Performs 2B Partial Least Squares allowing for leave-one-out
 #'   cross-validation, which is useful one the number of variables exceeds the
 #'   number of observations (i.e., alleviates spurious covariation between
 #'   variables).
 #'
-#' @param y A matrix with one or more variables as columns and observations as
-#'   rows, representing the first block.
 #' @param x A matrix with one or more variables as columns and observations as
+#'   rows, representing the first block.
+#' @param y A matrix with one or more variables as columns and observations as
 #'   rows, representing the second block.
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
 #'   scores resulting from LOOCV.
 #'
-#' @return
+#' @details Starting with two blocks of variables measured for the same
+#'   cases, two-blocks PLS finds the linear combination of variables on each
+#'   block maximizing covariation with the variables on the other. In the
+#'   context of \code{morphospace}, one or both of these blocks will usually
+#'   be a series of shapes arranged as a 2-margins matrix.
 #'
-#' @seealso \code{\link{pls_shapes}}
+#'   It has been reported that PLS (as an algebraic equivalent of bgPCA)
+#'   produces spurious covariation between blocks when the number of variables
+#'   exceeds the number of observations (which is a common situation in
+#'   geometric morphometrics analyses). This problem can be alleviated by
+#'   carrying out a leave-one-out cross-validation (LOOCV; i.e. each
+#'   observation is excluded from the calculation of PLS axes before its
+#'   projection in the resulting ordination as a way to calculate its score).
+#'
+#' @return A \code{"pls2b"} object, containing:
+#' \itemize{
+#'   \item \code{$values:} {vector of singular values accounting for the
+#'   covariation among blocks explained by each par of axis.}
+#'   \item \code{$xrotation:} {matrix of vector coefficients for the first
+#'   block.}
+#'   \item \code{$yrotation:} {matrix of vector coefficients for the second
+#'   block.}
+#'   \item \code{$xcenter:} {the mean values of the original variables from
+#'   the first block.}
+#'   \item \code{$ycenter:} {the mean values of the original variables from
+#'   the second block.}
+#'   \item \code{$xtotvar:} {the sum of the variances from the original
+#'   variables from the second block.}
+#'   \item \code{$ytotvar:} {the sum of the variances from the original
+#'   variables from the second block.}
+#'
+#' @seealso \code{\link{pls_shapes}}, \code{\link{phylo_pls2b}},
+#'   \code{\link{exp_var}}
 #'
 #' @export
 #'
+#' @references Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial
+#' least-squares to study covariation in shape}. Systematic Biology, 49(4),
+#' 740-753.
+#'
+#' Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012).
+#' \emph{Geometric morphometrics for biologists: A primer}. 2nd ed. Academic
+#' Press.
+#'
+#' Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
+#' components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
+#' 271-302.
+#'
 #' @examples
-pls2b <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
+pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 
   if(is.vector(x)) x <- matrix(x)
   if(is.vector(y)) y <- matrix(y)
@@ -194,7 +333,7 @@ pls2b <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
   x_centered <- scale(x, scale = FALSE, center = TRUE)
 
   svd <- Morpho:::svd2B(x_centered, y_centered)
-  values <- svd$d
+  values <- svd$d^2
   rotation_y <- svd$v
   rotation_x <- svd$u
 
@@ -202,12 +341,6 @@ pls2b <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
 
     yscores <- y_centered %*% svd$v
     xscores <- x_centered %*% svd$u
-
-    results <- list(yscores = yscores, yrotation = svd$v, ycenter = y_center, ytotvar = totvar_y,
-                    xscores = xscores, xrotation = svd$u, xcenter = x_center, xtotvar = totvar_x,
-                    values = svd$d)
-    class(results) <- "pls"
-    return(results)
 
   } else {
 
@@ -220,78 +353,318 @@ pls2b <- function(y, x, LOOCV = FALSE, recompute = FALSE) {
       suby_centered <- scale(y[-i,], scale = FALSE, center = TRUE)
       subx_centered <- scale(x[-i,], scale = FALSE, center = TRUE)
 
-      svd <- Morpho:::svd2B(subx_centered, suby_centered)
+      subsvd <- Morpho:::svd2B(subx_centered, suby_centered)
 
-      if(i == 1) refyaxis <- svd$v[, 1]
-      if(i == 1) refxaxis <- svd$u[, 1]
+      if(i == 1) refyaxis <- subsvd$v[, 1]
+      if(i == 1) refxaxis <- subsvd$u[, 1]
 
       if(length(refyaxis) > 1) {
-        yscores[i,] <- (y[i,] %*% svd$v) * sign(stats::cor(svd$v[,1], refyaxis))
+        yscores[i,] <- (y[i,] %*% subsvd$v) * sign(stats::cor(subsvd$v[,1], refyaxis))
       } else {
-        yscores[i,] <- (y[i,] %*% svd$v) * sign(svd$v[,1] * refyaxis)
+        yscores[i,] <- (y[i,] %*% subsvd$v) * sign(subsvd$v[,1] * refyaxis)
       }
 
       if(length(refxaxis) > 1) {
-        xscores[i,] <- (x[i,] %*% svd$u) * sign(stats::cor(svd$u[,1], refxaxis))
+        xscores[i,] <- (x[i,] %*% subsvd$u) * sign(stats::cor(subsvd$u[,1], refxaxis))
       } else {
-        xscores[i,] <- (x[i,] %*% svd$u) * sign(svd$u[,1] * refxaxis)
+        xscores[i,] <- (x[i,] %*% subsvd$u) * sign(subsvd$u[,1] * refxaxis)
       }
 
     }
 
-    yscores_centered <- scale(yscores, scale = FALSE, center = TRUE)
-    xscores_centered <- scale(xscores, scale = FALSE, center = TRUE)
+    yscores <- scale(yscores, scale = FALSE, center = TRUE)
+    xscores <- scale(xscores, scale = FALSE, center = TRUE)
 
     if(recompute == TRUE) {
-
       rotation_y <- t(t(yscores) %*% t(t(y)))
       rotation_x <- t(t(xscores) %*% t(t(x)))
+    }
+  }
+
+  results <- list(yscores = yscores, yrotation = rotation_y, ycenter = y_center, ytotvar = totvar_y,
+                  xscores = xscores, xrotation = rotation_x, xcenter = x_center, xtotvar = totvar_x,
+                  values = values)
+  class(results) <- "pls2b"
+  return(results)
+
+}
+
+
+##########################################################################
+
+#' Phylogenetic Two-blocks Partial Least Squares
+#'
+#' @description Performs phylogenetic 2B Partial Least Squares allowing for
+#'   leave-one-out cross-validation. Experimental.
+#'
+#' @param x A matrix with one or more variables as columns and observations as
+#'   rows, representing the first block.
+#' @param y A matrix with one or more variables as columns and observations as
+#'   rows, representing the second block.
+#' @param tree A \code{"phy"} object containing a phylogenetic tree. Tip labels
+#'   should match the row number and names from \code{x} and \code{y}.
+#' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
+#' @param recompute Logical; whether to re-compute rotation matrix using the
+#'   scores resulting from LOOCV.
+#'
+#' @details Similar to \code{\link{pls2b}} but cases are linked by phylogenetic
+#'   relationships. Similarly to \code{\link{phy_prcomp}}, the resulting axes
+#'   maximize the residual covariation among blocks left after removing
+#'   covariation among blocks accounted by phylogenetic history. As in other
+#'   PLS functions from \code{morphospace}, leave-one-out cross-validation
+#'   can be implemented to alleviate the spurious covariation among blocks
+#'   that is produced when the number of variables exceeds the number of cases.
+#'
+#' @return A \code{"phy_pls2b"} object, containing:
+#' \itemize{
+#'   \item \code{$values:} {vector of singular values accounting for the
+#'   covariation among blocks explained by each par of axis.}
+#'   \item \code{$xrotation:} {matrix of vector coefficients for the first
+#'   block.}
+#'   \item \code{$yrotation:} {matrix of vector coefficients for the second
+#'   block.}
+#'   \item \code{$xcenter:} {the mean values of the original variables from
+#'   the first block.}
+#'   \item \code{$ycenter:} {the mean values of the original variables from
+#'   the second block.}
+#'   \item \code{$xtotvar:} {the sum of the variances from the original
+#'   variables from the second block.}
+#'   \item \code{$ytotvar:} {the sum of the variances from the original
+#'   variables from the second block.}
+#'
+#' @seealso \code{\link{pls_shapes}}, \code{\link{pls2b}},
+#'   \code{\link{phy_prcomp}}, \code{\link{exp_var}}
+#'
+#' @export
+#'
+#' @references
+#' Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial
+#' least-squares to study covariation in shape}. Systematic Biology, 49(4),
+#' 740-753.
+#'
+#' Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
+#' components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
+#' 271-302.
+#'
+#' Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
+#' \emph{Phylogenetic principal components analysis and geometric
+#' morphometrics}. Hystrix, 24(1), 33.
+#'
+#' Monteiro, L. R. (2013). \emph{Morphometrics and the comparative method:
+#' studying the evolution of biological shape}. Hystrix, the Italian Journal
+#' of Mammalogy, 24(1), 25-32.
+#'
+#' @examples
+phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
+
+  if(is.vector(x)) x <- matrix(x)
+  if(is.vector(y)) y <- matrix(y)
+
+  namesx <- rownames(x)
+  namesy <- rownames(y)
+
+  if(!all(length(tree$tip.label) == nrow(x), length(tree$tip.label) == nrow(y))) {
+    stop("Number of tips in the tree does not match the number of observations in x and/or y data sets")
+  }
+
+  if(!all(tree$tip.label %in% namesy, tree$tip.label %in% namesx)) {
+    stop("Names in phylogenetic tree does not match names in x and/or y data sets")
+  } else {
+    x <- cbind(x[tree$tip.label,])
+    y <- cbind(y[tree$tip.label,])
+  }
+
+  totvar_x <- sum(apply(x, 2, stats::var))
+  totvar_y <- sum(apply(y, 2, stats::var))
+
+  C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
+
+  xy <- cbind(x,y)
+  C <- phytools::phyl.vcv(xy, C, 1)$C
+  anc <- phytools::phyl.vcv(xy, C, 1)$alpha
+  R <- phytools::phyl.vcv(xy, C, 1)$R
+
+  part_R <- R[1:ncol(x), (ncol(x) + 1):(ncol(x) + ncol(y))]
+  svd <- svd(part_R)
+
+  x_anc <- anc[1:ncol(x)]
+  y_anc <- anc[(ncol(x) + 1):(ncol(x) + ncol(y))]
+
+  x_centered <- t(t(x) - x_anc)
+  y_centered <- t(t(y) - y_anc)
+
+  rotations <- list(svd$v, svd$u)
+  whichy <- which(unlist(lapply(rotations, nrow)) == ncol(y))
+  whichx <- which(unlist(lapply(rotations, nrow)) == ncol(x))
+  y_rotation <- rotations[[whichy]]
+  x_rotation <- rotations[[whichx]]
+
+  values <- svd$d^2
+
+  if(LOOCV == FALSE) {
+
+    yscores <- (y_centered %*% y_rotation)[namesy,]
+    xscores <- (x_centered %*% x_rotation)[namesx,]
+
+  } else {
+
+    ndim <- min(ncol(y), ncol(x))
+    yscores <- matrix(NA, nrow = nrow(y), ncol = ndim)
+    xscores <- matrix(NA, nrow = nrow(x), ncol = ndim)
+
+    for(i in 1:nrow(y)) {
+
+      subx <- cbind(x[-i,])
+      suby <- cbind(y[-i,])
+      subtree <- ape::drop.tip(phy = tree, tip = i)
+
+      subC <- ape::vcv.phylo(subtree)[rownames(subx), rownames(subx)]
+
+      subxy <- cbind(subx, suby)
+      subC <- phytools::phyl.vcv(subxy, subC, 1)$C
+      subanc <- phytools::phyl.vcv(subxy, subC, 1)$alpha
+      subR <- phytools::phyl.vcv(subxy, subC, 1)$R
+
+      subpart_R <- subR[1:ncol(subx), (ncol(subx) + 1):(ncol(subx) + ncol(suby))]
+      subsvd <- svd(subpart_R)
+
+      subx_anc <- anc[1:ncol(subx)]
+      suby_anc <- anc[(ncol(subx) + 1):(ncol(subx) + ncol(suby))]
+
+      subrotations <- list(subsvd$v, subsvd$u)
+      whichy <- which(unlist(lapply(subrotations, nrow)) == ncol(suby))
+      whichx <- which(unlist(lapply(subrotations, nrow)) == ncol(subx))
+      suby_rotation <- subrotations[[whichy]]
+      subx_rotation <- subrotations[[whichx]]
+
+      if(i == 1) refyaxis <- suby_rotation[, 1]
+      if(i == 1) refxaxis <- subx_rotation[, 1]
+
+
+      iy_centered <- (t(cbind(y[i,])) - y_anc)
+      reorienty <- sign(stats::cor(suby_rotation[,1], refyaxis))
+      if(length(refyaxis) > 1) {
+        yscores[i,] <- (iy_centered %*% suby_rotation) * reorienty
+      } else {
+        yscores[i,] <- (iy_centered %*% suby_rotation) * sign(suby_rotation[,1] * refyaxis)
+      }
+
+      ix_centered <- (t(cbind(x[i,])) - x_anc)
+      reorientx <- sign(stats::cor(subx_rotation[,1], refxaxis))
+      if(length(refxaxis) > 1) {
+        xscores[i,] <- (ix_centered %*% subx_rotation) * reorientx
+      } else {
+        xscores[i,] <- (ix_centered %*% subx_rotation) * sign(subx_rotation[,1] * refxaxis)
+      }
 
     }
 
-    results <- list(yscores = yscores, yrotation = rotation_y, ycenter = y_center, ytotvar = totvar_y,
-                    xscores = xscores, xrotation = rotation_x, xcenter = x_center, xtotvar = totvar_x,
-                    values = values)
-    class(results) <- "pls"
-    return(results)
+    if(recompute == TRUE) {
+      yrotation <- t(t(yscores) %*% t(t(y)))
+      xrotation <- t(t(xscores) %*% t(t(x)))
+    }
+
+    yscores <- yscores[namesy,]
+    xscores <- xscores[namesx,]
 
   }
 
+  results <- list(yscores = yscores, yrotation = y_rotation, ycenter = y_anc, ytotvar = totvar_y,
+                  xscores = xscores, xrotation = y_rotation, xcenter = x_anc, xtotvar = totvar_x,
+                  values = values)
+  class(results) <- "phy_pls2b"
+  return(results)
 }
+
+
 
 
 ########################################################################################
 
 #' 2B Partial Least Squares for shape data
 #'
-#' @description A wrapper for [pls2b()] aimed specifically at synthesizing
-#'   covariation between shape data and other external, non-shape variable(s).
+#' @description A wrapper for [pls2b()] or [phylo_pls2b()] aimed specifically
+#'   at synthesizing covariation between shape data and other external,
+#'   non-shape variable(s).
 #'
-#' @param shapes Shape data.
 #' @param x A matrix with variables as columns and observations as rows,
-#'   representing the external variables that supervise ordination.
+#'   representing the external variables that supervise ordination
+#'   (corresponding to the first block).
+#' @param shapes Shape data (corresponding to the second block of
+#' \code{pls2b}.
+#' @param tree A \code{"phy"} object containing a phylogenetic tree. Tip labels
+#'   should match the row number and names from \code{x} and \code{y}.
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
 #'   scores resulting from LOOCV.
 #'
-#' @return
+#' @details This function finds the linear combination maximizing covariation
+#'   between a block of variables assumed to be shape variables formatted as
+#'   a 2-margins matrix and another block which can be either another set of
+#'   shape variables or one or more non-shape variables for supervizing the
+#'   analysis.
 #'
-#' @seealso \code{\link{pls2b}}
+#'   It has been reported that PLS (as an algebraic equivalent of bgPCA)
+#'   produces spurious covariation between blocks when the number of variables
+#'   exceeds the number of observations (which is a common situation in
+#'   geometric morphometrics analyses). This problem can be alleviated by
+#'   carrying out a leave-one-out cross-validation (LOOCV; i.e. each
+#'   observation is excluded from the calculation of PLS axes before its
+#'   projection in the resulting ordination as a way to calculate its score).
+#'
+#' @return A \code{"pls"} or \code{"phy_pls"} object formatted following the
+#' \code{"prcomp"} class:
+#' \itemize{
+#'   \item \code{$sdev:} {the standard deviation of the PLS axis/axis of the
+#'    shape block.}
+#'   \item \code{$rotation:} {a matrix of vector coefficients for the shape
+#'   block.}
+#'   \item \code{$center:} {the mean values of the original variables from
+#'   the shape block.}
+#'   \item \code{$totvar:} {the sum of the variances from the original
+#'   variables in the shape block.}
+#'   \item \code{$supblock:} {the scores from the supervizing block (i.e.
+#'   the \code{x} scores.}
+#'
+#' @seealso \code{\link{pls2b}}, \code{\link{phylo_pls2b}}
 #'
 #' @export
 #'
+#' @references Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial
+#' least-squares to study covariation in shape}. Systematic Biology, 49(4),
+#' 740-753.
+#'
+#' Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012).
+#' \emph{Geometric morphometrics for biologists: A primer}. 2nd ed. Academic
+#' Press.
+#'
+#' Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
+#' components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
+#' 271-302.
+#'
 #' @examples
-pls_shapes <- function(shapes, x, LOOCV = FALSE, recompute = FALSE) {
+pls_shapes <- function(x, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 
   y <- shapes_mat(shapes)$data2d
-  parlesqu <- pls2b(y = y, x = x, LOOCV = LOOCV, recompute = recompute)
 
-  results <- list(sdev = stats::sd(parlesqu$yscores),
-                  rotation = parlesqu$yrotation,
-                  x = parlesqu$yscores,
-                  center = parlesqu$ycenter,
-                  totvar = parlesqu$ytotvar)
-  class(results) <- "pls_shape"
+  if(is.null(tree)) {
+    pls <- pls2b(y = y, x = x, LOOCV = LOOCV, recompute = recompute)
+  } else {
+    pls <- phylo_pls2b(y = y, x = x, tree = tree, LOOCV = LOOCV, recompute = recompute)
+  }
+
+  results <- list(sdev = apply(pls$yscores, 2, stats::sd),
+                  rotation = pls$yrotation,
+                  x = pls$yscores,
+                  supblock = pls$xscores,
+                  center = pls$ycenter,
+                  totvar = pls$ytotvar)
+
+  if(class(pls) == "pls2b") {
+    class(results) <- "pls"
+  } else {
+    class(results) <- "phy_pls"
+  }
   return(results)
 
 }
@@ -304,21 +677,27 @@ pls_shapes <- function(shapes, x, LOOCV = FALSE, recompute = FALSE) {
 #' @description Calculate the percentage of total original variation accounted
 #'   by syntethtic axes generated by different multivariate ordination methods.
 #'
-#' @param ord An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
-#'   \code{"phy_prcomp"} or \code{"pls_shape"} object).
+#' @param ordination An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
+#'   \code{"phy_prcomp"}, \code{"pls"} or \code{"phy_pls"} object).
 #'
-#' @return
+#' @return A table informing the percentages and cumulative percentages of
+#'   original variation accounted by each synthetic axis of the multivariate
+#'   ordination.
+#'
 #' @export
 #'
+#' @seealso \code{\link[base]{prcomp}}, \code{\link{bg_prcomp}},
+#' \code{\link{phy_prcomp}}, \code{\link{pls_shapes}}
+#'
 #' @examples
-exp_var <- function(ord) {
+exp_var <- function(ordination) {
 
-  ax_var <- apply(ord$x, 2, stats::var)
+  ax_var <- apply(ordination$x, 2, stats::var)
 
-  if(class(ord) == "prcomp") {
+  if(class(ordination) == "prcomp") {
     totvar <- sum(ax_var)
   } else {
-    totvar <- ord$totvar
+    totvar <- ordination$totvar
   }
 
   acc_var <- 100 * (ax_var / totvar)
@@ -326,10 +705,11 @@ exp_var <- function(ord) {
                                        cummulative=cumsum(acc_var)),
                              digits = 5))
 
-  if(class(ord) == "prcomp") axname <- "PC"
-  if(class(ord) == "bg_prcomp") axname <- "bgPC"
-  if(class(ord) == "phy_prcomp") axname <- "phyPC"
-  if(class(ord) == "pls") axname <- "PLS-"
+  if(class(ordination) == "prcomp") axname <- "PC"
+  if(class(ordination) == "bg_prcomp") axname <- "bgPC"
+  if(class(ordination) == "phy_prcomp") axname <- "phyPC"
+  if(class(ordination) == "pls") axname <- "PLS-"
+  if(class(ordination) == "phy_pls") axname <- "phyPLS-"
 
   rownames(tab) <- paste0(axname, 1:nrow(tab))
   return(tab)

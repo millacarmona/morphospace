@@ -20,11 +20,49 @@ as input.}
 \item{...}{}
 }
 \value{
-
+A \code{"phy_prcomp"} object formatted following the \code{"prcomp"}
+class:
+\itemize{
+\item \code{$sdev:} {the standard deviations of the principal components
+(i.e., the square roots of the eigenvalues of the covariance/correlation
+matrix).}
+\item \code{$rotation:} {a matrix of eigenvector coefficients.}
+\item \code{$center:} {the phylogenetic mean (i.e. the shape estimated
+for the root of the tree).}
+\item \code{$totvar:} {the sum of the variances from all the original
+variables.}
+\item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
+of the model; see \code{\link[phytools]{phyl.pca}}.}
 }
 \description{
 A wrapper for \code{\link[=pyl.pca]{pyl.pca()}} from \code{phytools}.
 }
+\details{
+Phylogenetic PCA finds the linear combination of variables (in the
+the context of \code{morphospace} will generally be a series of shapes
+arranged as 2-margin matrix) maximizing the residual variation left after
+removing covariation explained by phylogenetic history.
+
+Phylogenetic PCA has a few particularities that is worth having in mind:
+\enumerate{
+\item it is centered on the phylogenetic mean (i.e., the values estimated for
+the root of the tree) instead of the overall centroid of the original
+variables; 2)
+}
+}
+\references{
+Revell, L. J. (2009). \emph{Size-correction and principal
+components for interspecific comparative studies}. Evolution, 63, 3258-3268.
+
+Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
+\emph{Phylogenetic principal components analysis and geometric
+morphometrics}. Hystrix, 24(1), 33.
+
+Monteiro, L. R. (2013). \emph{Morphometrics and the comparative method:
+studying the evolution of biological shape}. Hystrix, the Italian Journal
+of Mammalogy, 24(1), 25-32.
+}
 \seealso{
-\code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}}
+\code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}},
+\code{\link{exp_var}}
 }

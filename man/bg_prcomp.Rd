@@ -31,16 +31,68 @@ scores resulting from LOOCV.}
 as input.}
 }
 \value{
-
+A \code{"bg_prcomp"} object formatted following the \code{"prcomp"}
+class:
+\itemize{
+\item \code{$sdev:} {the standard deviations of the principal components
+(i.e., the square roots of the eigenvalues of the covariance/correlation
+matrix).}
+\item \code{$rotation:} {a \code{n x (g - 1)} matrix of eigenvector
+coefficients (with \code{g} being the number of groups.}
+\item \code{$center:} {the mean values of the original variables for the
+entire sample (i.e. the grand mean).}
+\item \code{$totvar:} {the mean values of the original variables for
+each group.}
+\item \code{$grcenters:} {the sum of the variances from all the original
+variables.}
 }
 \description{
-Performs between group PCA allowing for leave-one-out cross-validation, which is useful one the number of variables
-exceeds the number of observations (i.e., alleviates spurious separation
-between groups).
+Performs between group PCA allowing for leave-one-out
+cross-validation, which is useful one the number of variables exceeds the
+number of observations (i.e., alleviates spurious separation between
+groups).
+}
+\details{
+bgPCA finds the liner combination of variables (which in the
+context of \code{morphospace} will generally be a series of shapes
+arranged as 2-margin matrix) maximizing variation between groups'
+centroids, and then project the actual observation into the resulting
+synthetic axes. This method is preferred here to LDA/CVA as a way to
+produce ordinations maximizing separation between groups because it avoids
+spherization of shape variation carried out for the former methods.
+
+Recently, it has been discovered that bgPCA produces spurious separation
+between groups when the number of variables exceeds the number of
+observations (which is a common situation in geometric morphometrics
+analyses). This problem can be alleviated by carrying out a
+leave-one-out cross-validation (LOOCV; i.e. each observation is
+excluded from the calculation of bgPCA prior to its projection in the
+resulting ordination as a way to calculate its score).
 }
 \references{
+Mitteroecker, P., & Bookstein, F. (2011). \emph{Linear
+discrimination, ordination, and the visualization of selection gradients in
+modern morphometrics}. Evolutionary Biology, 38(1), 100-114.
 
+Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
+components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
+271-302.
+
+Cardini, A., O’Higgins, P., & Rohlf, F. J. (2019). \emph{Seeing distinct
+groups where there are none: spurious patterns from between-group PCA}.
+Evolutionary Biology, 46(4), 303-316.
+
+Cardini, A., & Polly, P. D. (2020). \emph{Cross-validated between group PCA
+scatterplots: A solution to spurious group separation?}. Evolutionary Biology,
+47(1), 85-95.
+
+Rohlf, F. J. (2021). \emph{Why clusters and other patterns can seem to be
+found in analyses of high-dimensional data}. Evolutionary Biology, 48(1), 1-16.
+
+Thioulouse, J., Renaud, S., Dufour, A. B., & Dray, S. (2021). \emph{Overcoming
+the spurious groups problem in between-group PCA}. Evolutionary Biology, 48(4),
+458-471.
 }
 \seealso{
-\code{\link[base]{prcomp}}
+\code{\link[base]{prcomp}}, \code{\link{exp_var}}
 }
