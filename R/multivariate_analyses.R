@@ -44,7 +44,7 @@
 #' class:
 #' \itemize{
 #'   \item \code{$sdev:} {the standard deviations of the principal components
-#'   (i.e., the square roots of the eigenvalues of the covariance/correlation
+#'   (i.e. the square roots of the eigenvalues of the covariance/correlation
 #'   matrix).}
 #'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
 #'   \item \code{$center:} {the phylogenetic mean (i.e. the shape estimated
@@ -53,6 +53,7 @@
 #'   variables.}
 #'   \item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
 #'   of the model; see \code{\link[phytools]{phyl.pca}}.}
+#'   }
 #'
 #' @seealso \code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}},
 #'   \code{\link{exp_var}}
@@ -71,6 +72,20 @@
 #' of Mammalogy, 24(1), 25-32.
 #'
 #' @examples
+#' #load data
+#' data("tails")
+#'
+#' #compute mean shapes for all species and extract the phylogenetic tree
+#' sp_shapes <- consensus(shapes = tails$shapes, index = tails$data$species)
+#' tree <- tails$tree
+#'
+#' #perform phylogenetic PCA
+#' ppca <- phy_prcomp(x = geomorph::two.d.array(sp_shapes), tree = tree)
+#'
+#' #look at the results
+#' names(ppca) #the contents of the resulting object
+#' exp_var(ppca) #variance explained by each axis
+#' plot(ppca$x) #ordination
 phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 
   if(corr == FALSE) {
@@ -109,7 +124,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #'
 #' @description Performs between group PCA allowing for leave-one-out
 #'   cross-validation, which is useful one the number of variables exceeds the
-#'   number of observations (i.e., alleviates spurious separation between
+#'   number of observations (i.e. alleviates spurious separation between
 #'   groups).
 #'
 #' @param x A matrix with variables as columns and observations as rows.
@@ -143,7 +158,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #' class:
 #' \itemize{
 #'   \item \code{$sdev:} {the standard deviations of the principal components
-#'   (i.e., the square roots of the eigenvalues of the covariance/correlation
+#'   (i.e. the square roots of the eigenvalues of the covariance/correlation
 #'   matrix).}
 #'   \item \code{$rotation:} {a \code{n x (g - 1)} matrix of eigenvector
 #'   coefficients (with \code{g} being the number of groups.}
@@ -153,6 +168,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #'   each group.}
 #'   \item \code{$grcenters:} {the sum of the variances from all the original
 #'   variables.}
+#'   }
 #'
 #' @seealso \code{\link[base]{prcomp}}, \code{\link{exp_var}}
 #'
@@ -182,6 +198,21 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #' @export
 #'
 #' @examples
+#' #load data
+#' data("shells")
+#'
+#' #extract species classification and shapes
+#' species <- shells$data$species
+#' shapes <- shells$shapes$coe
+#'
+#' #perform between-groups PCA
+#' bgpca <- bg_prcomp(x = shapes, groups = species)
+#'
+#' #look at the results
+#' names(bgpca) #the contents of the resulting object
+#' exp_var(bgpca) #variance explained by each axis
+#' plot(bgpca$x) #ordination
+#' hulls_by_group_2D(bgpca$x, species) #add convex hulls for species
 bg_prcomp <- function(x, groups, gweights = TRUE,
                       LOOCV = FALSE, recompute = FALSE,
                       corr = FALSE) {
@@ -272,7 +303,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'
 #' @description Performs 2B Partial Least Squares allowing for leave-one-out
 #'   cross-validation, which is useful one the number of variables exceeds the
-#'   number of observations (i.e., alleviates spurious covariation between
+#'   number of observations (i.e. alleviates spurious covariation between
 #'   variables).
 #'
 #' @param x A matrix with one or more variables as columns and observations as
@@ -313,6 +344,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'   variables from the second block.}
 #'   \item \code{$ytotvar:} {the sum of the variances from the original
 #'   variables from the second block.}
+#'   }
 #'
 #' @seealso \code{\link{pls_shapes}}, \code{\link{phy_pls2b}},
 #'   \code{\link{exp_var}}
@@ -332,10 +364,32 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' 271-302.
 #'
 #' @examples
+#' #load data
+#' data("tails")
+#'
+#' #extract shapes and log sizes
+#' shapes <- tails$shapes
+#' sizes <- log(tails$sizes)
+#'
+#' #perform PLS between shape and size
+#' pls <- pls2b(y = geomorph::two.d.array(shapes), x = sizes)
+#'
+#' #look at the results
+#' names(pls) #the contents of the resulting object
+#' plot(pls$xscores, pls$yscores) #ordination
+#'
+#' #pls_shapes achieves identical results, but it is formatted to be used more
+#' #easily when analyzing shape variables and its output is compatible with other
+#' #functions from morphospace
+#' pls2 <- pls_shapes(shapes = shapes, X = sizes)
+#'
+#' names(pls2) #the contents of the resulting object
+#' exp_var(pls2) #variance explained by each axis
+#' plot(pls2$x2, pls2$x) #ordination
 pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 
-  if(is.vector(x)) x <- matrix(x)
-  if(is.vector(y)) y <- matrix(y)
+  if(is.vector(x)) x <- cbind(x)
+  if(is.vector(y)) y <- cbind(y)
 
   totvar_x <- sum(apply(x, 2, stats::var))
   totvar_y <- sum(apply(y, 2, stats::var))
@@ -404,12 +458,11 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 }
 
 
-##########################################################################
+########################################################################################
 
 #' Phylogenetic Two-blocks Partial Least Squares
 #'
-#' @description Performs phylogenetic 2B Partial Least Squares allowing for
-#'   leave-one-out cross-validation. Experimental.
+#' Performs phylogenetic 2B Partial Least Squares allowing for leave-one-out cross-validation. Experimental.
 #'
 #' @param x A matrix with one or more variables as columns and observations as
 #'   rows, representing the first block.
@@ -426,7 +479,8 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 #'   axes maximize the residual covariation among blocks left after removing
 #'   covariation among blocks accounted by phylogenetic history (assuming a
 #'   Brownian model of evolution an 100% phylogenetic signal, which is
-#'   equivalent to setting \code{method = "BM"} in [phytools::phyl.pca()]).
+#'   equivalent to setting \code{method = "BM"} in [phyl.pca()]).
+#'
 #'   This method display the same variational properties than phylogenetic PCA,
 #'   (i.e. centering on the phylogenetic mean; orientation of scores reflect
 #'   non-phylogenetic covariation but their variance is not scaled and thus
@@ -455,6 +509,7 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 #'   variables from the second block.}
 #'   \item \code{$ytotvar:} {the sum of the variances from the original
 #'   variables from the second block.}
+#'   }
 #'
 #' @seealso \code{\link{pls_shapes}}, \code{\link{pls2b}},
 #'   \code{\link{phy_prcomp}}, \code{\link{exp_var}}
@@ -479,6 +534,30 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 #' of Mammalogy, 24(1), 25-32.
 #'
 #' @examples
+#' #load data
+#' data("tails")
+#'
+#' #extract mean log sizes and shapes for all species, as well as the phylogenetic tree
+#' sp_shapes <- consensus(shapes = tails$shapes, index = tails$data$species)
+#' sp_sizes <- tapply(X = log(tails$sizes), INDEX = tails$data$species, FUN = mean)
+#' tree <- tails$tree
+#'
+#' #perform phylogenetic PLS
+#' ppls <- phy_pls2b(y = geomorph::two.d.array(sp_shapes), x = cbind(sp_sizes), tree = tree)
+#'
+#' #look at the results
+#' names(ppls) #the contents of the resulting object
+#' plot(ppls$xscores, ppls$yscores) #ordination
+#'
+#'
+#' #pls_shapes achieves identical results, but it is formatted to be used more
+#' #easily when analyzing shape variables and its output is compatible with other
+#' #functions from morphospace
+#' ppls2 <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree)
+#'
+#' names(ppls2) #the contents of the resulting object
+#' exp_var(ppls2) #variance explained by each axis
+#' plot(ppls2$x2, ppls2$x) #ordination
 phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 
   if(is.vector(x)) x <- cbind(x)
@@ -587,7 +666,8 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
       yrotation <- t(t(yscores) %*% t(t(y)))
       xrotation <- t(t(xscores) %*% t(t(x)))
     }
-
+    rownames(yscores) <- rownames(y)
+    rownames(xscores) <- rownames(x)
     yscores <- yscores[namesy,]
     xscores <- xscores[namesx,]
 
@@ -599,7 +679,6 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
   class(results) <- "phy_pls2b"
   return(results)
 }
-
 
 
 ########################################################################################
@@ -649,6 +728,7 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 #'   variables in the shape block.}
 #'   \item \code{$x2:} {the scores from the supervizing block (i.e. the
 #'   \code{x} scores.}
+#'   }
 #'
 #' @seealso \code{\link{pls2b}}, \code{\link{phy_pls2b}}
 #'
@@ -667,6 +747,47 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 #' 271-302.
 #'
 #' @examples
+#' #load data
+#' data("tails")
+#'
+#' #extract shapes and sizes, compute mean shapes and sizes for all species, extract tree
+#' shapes <- tails$shapes
+#' sizes <- log(tails$sizes)
+#' sp_shapes <- consensus(shapes, tails$data$species)
+#' sp_sizes <- tapply(X = log(sizes), INDEX = tails$data$species, FUN = mean)
+#' tree <- tails$tree
+#'
+#' #perform PLS between shape and size
+#' pls <- pls_shapes(shapes = shapes, X = sizes)
+#'
+#' #inspect results
+#' names(pls) #the contents of the resulting object
+#' exp_var(pls) #variance explained by each axis
+#' plot(pls$x2, pls$x) #ordination
+#'
+#' #perform PLS between shape and size with leave-one-out CV
+#' pls_cv <- pls_shapes(shapes = shapes, X = sizes, LOOCV = TRUE)
+#'
+#' #inspect results
+#' names(pls_cv) #the contents of the resulting object
+#' exp_var(pls_cv) #variance explained by each axis
+#' plot(pls_cv$x2, pls_cv$x) #ordination
+#'
+#' #perform phylogenetic PLS between shape and size (for species means)
+#' ppls <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree)
+#'
+#' #inspect results
+#' names(ppls) #the contents of the resulting object
+#' exp_var(ppls) #variance explained by each axis
+#' plot(ppls$x2, ppls$x) #ordination
+#'
+#' #perform phylogenetic PLS between shape and size with leave-one-out CV
+#' ppls <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree, LOOCV = TRUE)
+#'
+#' #inspect results
+#' names(ppls) #the contents of the resulting object
+#' exp_var(ppls) #variance explained by each axis
+#' plot(ppls$x2, ppls$x) #ordination
 pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 
   y <- shapes_mat(shapes)$data2d
@@ -697,7 +818,7 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 }
 
 
-##########################################################################
+########################################################################################
 
 #' Calculate percentages of variation accounted by synthetic axes
 #'
@@ -718,6 +839,25 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 #' \code{\link{phy_prcomp}}, \code{\link{pls_shapes}}
 #'
 #' @examples
+#' #load data
+#' data("shells")
+#'
+#' #extract shapes, log sizes and species classification
+#' species <- shells$data$species
+#' shapes <- shells$shapes$coe
+#' sizes <- log(shells$sizes)
+#'
+#' #perform PCA, bgPCA, and PLS
+#' pca <- prcomp(shapes)
+#' bgpca <- bg_prcomp(shapes, groups = species)
+#' pls <- pls_shapes(shapes, X = sizes)
+#'
+#' #compare percentages of total variation accounted by the first axes when
+#' #the analysis is unsupervised (PCA), or supervised by species (bgPCA) or
+#' #by log size (PLS)
+#' head(exp_var(pca))
+#' exp_var(bgpca)
+#' exp_var(pls)
 exp_var <- function(ordination) {
 
   ax_var <- apply(ordination$x, 2, stats::var)

@@ -37,6 +37,7 @@ variables in the shape block.}
 \item \code{$x2:} {the scores from the supervizing block (i.e. the
 \code{x} scores.}
 }
+}
 \description{
 A wrapper for \code{\link[=pls2b]{pls2b()}} or \code{\link[=phy_pls2b]{phy_pls2b()}} aimed specifically
 at synthesizing covariation between shape data and other external,
@@ -57,6 +58,49 @@ geometric morphometrics analyses). This problem can be alleviated by
 carrying out a leave-one-out cross-validation (LOOCV; i.e. each
 observation is excluded from the calculation of PLS axes before its
 projection in the resulting ordination as a way to calculate its score).
+}
+\examples{
+#load data
+data("tails")
+
+#extract shapes and sizes, compute mean shapes and sizes for all species, extract tree
+shapes <- tails$shapes
+sizes <- log(tails$sizes)
+sp_shapes <- consensus(shapes, tails$data$species)
+sp_sizes <- tapply(X = log(sizes), INDEX = tails$data$species, FUN = mean)
+tree <- tails$tree
+
+#perform PLS between shape and size
+pls <- pls_shapes(shapes = shapes, X = sizes)
+
+#inspect results
+names(pls) #the contents of the resulting object
+exp_var(pls) #variance explained by each axis
+plot(pls$x2, pls$x) #ordination
+
+#perform PLS between shape and size with leave-one-out CV
+pls_cv <- pls_shapes(shapes = shapes, X = sizes, LOOCV = TRUE)
+
+#inspect results
+names(pls_cv) #the contents of the resulting object
+exp_var(pls_cv) #variance explained by each axis
+plot(pls_cv$x2, pls_cv$x) #ordination
+
+#perform phylogenetic PLS between shape and size (for species means)
+ppls <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree)
+
+#inspect results
+names(ppls) #the contents of the resulting object
+exp_var(ppls) #variance explained by each axis
+plot(ppls$x2, ppls$x) #ordination
+
+#perform phylogenetic PLS between shape and size with leave-one-out CV
+ppls <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree, LOOCV = TRUE)
+
+#inspect results
+names(ppls) #the contents of the resulting object
+exp_var(ppls) #variance explained by each axis
+plot(ppls$x2, ppls$x) #ordination
 }
 \references{
 Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial

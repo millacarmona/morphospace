@@ -36,10 +36,11 @@ variables from the second block.}
 \item \code{$ytotvar:} {the sum of the variances from the original
 variables from the second block.}
 }
+}
 \description{
 Performs 2B Partial Least Squares allowing for leave-one-out
 cross-validation, which is useful one the number of variables exceeds the
-number of observations (i.e., alleviates spurious covariation between
+number of observations (i.e. alleviates spurious covariation between
 variables).
 }
 \details{
@@ -56,6 +57,30 @@ geometric morphometrics analyses). This problem can be alleviated by
 carrying out a leave-one-out cross-validation (LOOCV; i.e. each
 observation is excluded from the calculation of PLS axes before its
 projection in the resulting ordination as a way to calculate its score).
+}
+\examples{
+#load data
+data("tails")
+
+#extract shapes and log sizes
+shapes <- tails$shapes
+sizes <- log(tails$sizes)
+
+#perform PLS between shape and size
+pls <- pls2b(y = geomorph::two.d.array(shapes), x = sizes)
+
+#look at the results
+names(pls) #the contents of the resulting object
+plot(pls$xscores, pls$yscores) #ordination
+
+#pls_shapes achieves identical results, but it is formatted to be used more
+#easily when analyzing shape variables and its output is compatible with other
+#functions from morphospace
+pls2 <- pls_shapes(shapes = shapes, X = sizes)
+
+names(pls2) #the contents of the resulting object
+exp_var(pls2) #variance explained by each axis
+plot(pls2$x2, pls2$x) #ordination
 }
 \references{
 Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial

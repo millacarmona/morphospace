@@ -39,9 +39,9 @@ variables from the second block.}
 \item \code{$ytotvar:} {the sum of the variances from the original
 variables from the second block.}
 }
+}
 \description{
-Performs phylogenetic 2B Partial Least Squares allowing for
-leave-one-out cross-validation. Experimental.
+Performs phylogenetic 2B Partial Least Squares allowing for leave-one-out cross-validation. Experimental.
 }
 \details{
 Similar to \code{\link{pls2b}} but cases are linked by phylogenetic
@@ -49,7 +49,8 @@ relationships. Like in the case of \code{\link{phy_prcomp}}, the resulting
 axes maximize the residual covariation among blocks left after removing
 covariation among blocks accounted by phylogenetic history (assuming a
 Brownian model of evolution an 100\% phylogenetic signal, which is
-equivalent to setting \code{method = "BM"} in \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}}).
+equivalent to setting \code{method = "BM"} in \code{\link[=phyl.pca]{phyl.pca()}}).
+
 This method display the same variational properties than phylogenetic PCA,
 (i.e. centering on the phylogenetic mean; orientation of scores reflect
 non-phylogenetic covariation but their variance is not scaled and thus
@@ -61,6 +62,32 @@ As in other supervised multivariate ordination functions from
 \code{morphospace}, leave-one-out cross-validation can be implemented to
 alleviate the spurious covariation among blocks that is produced when
 the number of variables exceeds the number of cases.
+}
+\examples{
+#load data
+data("tails")
+
+#extract mean log sizes and shapes for all species, as well as the phylogenetic tree
+sp_shapes <- consensus(shapes = tails$shapes, index = tails$data$species)
+sp_sizes <- tapply(X = log(tails$sizes), INDEX = tails$data$species, FUN = mean)
+tree <- tails$tree
+
+#perform phylogenetic PLS
+ppls <- phy_pls2b(y = geomorph::two.d.array(sp_shapes), x = cbind(sp_sizes), tree = tree)
+
+#look at the results
+names(ppls) #the contents of the resulting object
+plot(ppls$xscores, ppls$yscores) #ordination
+
+
+#pls_shapes achieves identical results, but it is formatted to be used more
+#easily when analyzing shape variables and its output is compatible with other
+#functions from morphospace
+ppls2 <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree)
+
+names(ppls2) #the contents of the resulting object
+exp_var(ppls2) #variance explained by each axis
+plot(ppls2$x2, ppls2$x) #ordination
 }
 \references{
 Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial

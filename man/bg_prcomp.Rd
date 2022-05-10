@@ -35,7 +35,7 @@ A \code{"bg_prcomp"} object formatted following the \code{"prcomp"}
 class:
 \itemize{
 \item \code{$sdev:} {the standard deviations of the principal components
-(i.e., the square roots of the eigenvalues of the covariance/correlation
+(i.e. the square roots of the eigenvalues of the covariance/correlation
 matrix).}
 \item \code{$rotation:} {a \code{n x (g - 1)} matrix of eigenvector
 coefficients (with \code{g} being the number of groups.}
@@ -46,10 +46,11 @@ each group.}
 \item \code{$grcenters:} {the sum of the variances from all the original
 variables.}
 }
+}
 \description{
 Performs between group PCA allowing for leave-one-out
 cross-validation, which is useful one the number of variables exceeds the
-number of observations (i.e., alleviates spurious separation between
+number of observations (i.e. alleviates spurious separation between
 groups).
 }
 \details{
@@ -68,6 +69,23 @@ analyses). This problem can be alleviated by carrying out a
 leave-one-out cross-validation (LOOCV; i.e. each observation is
 excluded from the calculation of bgPCA prior to its projection in the
 resulting ordination as a way to calculate its score).
+}
+\examples{
+#load data
+data("shells")
+
+#extract species classification and shapes
+species <- shells$data$species
+shapes <- shells$shapes$coe
+
+#perform between-groups PCA
+bgpca <- bg_prcomp(x = shapes, groups = species)
+
+#look at the results
+names(bgpca) #the contents of the resulting object
+exp_var(bgpca) #variance explained by each axis
+plot(bgpca$x) #ordination
+hulls_by_group_2D(bgpca$x, species) #add convex hulls for species
 }
 \references{
 Mitteroecker, P., & Bookstein, F. (2011). \emph{Linear

@@ -24,7 +24,7 @@ A \code{"phy_prcomp"} object formatted following the \code{"prcomp"}
 class:
 \itemize{
 \item \code{$sdev:} {the standard deviations of the principal components
-(i.e., the square roots of the eigenvalues of the covariance/correlation
+(i.e. the square roots of the eigenvalues of the covariance/correlation
 matrix).}
 \item \code{$rotation:} {a matrix of eigenvector coefficients.}
 \item \code{$center:} {the phylogenetic mean (i.e. the shape estimated
@@ -33,6 +33,7 @@ for the root of the tree).}
 variables.}
 \item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
 of the model; see \code{\link[phytools]{phyl.pca}}.}
+}
 }
 \description{
 A wrapper for \code{\link[=pyl.pca]{pyl.pca()}} from \code{phytools}.
@@ -62,6 +63,22 @@ to measure branch length), and do not necessarily decrease for subordinate
 axes. Also, the set of phylogenetic scores are not uncorrelated, meaning
 they can contain redundant information. For more details, see Polly et al.
 2013.
+}
+\examples{
+#load data
+data("tails")
+
+#compute mean shapes for all species and extract the phylogenetic tree
+sp_shapes <- consensus(shapes = tails$shapes, index = tails$data$species)
+tree <- tails$tree
+
+#perform phylogenetic PCA
+ppca <- phy_prcomp(x = geomorph::two.d.array(sp_shapes), tree = tree)
+
+#look at the results
+names(ppca) #the contents of the resulting object
+exp_var(ppca) #variance explained by each axis
+plot(ppca$x) #ordination
 }
 \references{
 Revell, L. J. (2009). \emph{Size-correction and principal
