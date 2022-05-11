@@ -8,8 +8,8 @@ ax_transformation(obj, axis = 1, mag = 1)
 }
 \arguments{
 \item{obj}{An object containing either a multivariate ordination of class
-\code{"prcomp", "bg_prcomp", "phy_prcomp"} or \code{"pls_shape"} or a
-\code{"mlm"} object fitted using \code{\link[=lm]{lm()}}.}
+\code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes} or
+\code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using \code{\link[=lm]{lm()}}.}
 
 \item{axis}{An optional numeric value specifying the axis of the multivariate
 ordination which is to be represented.}

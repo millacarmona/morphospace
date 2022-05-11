@@ -60,16 +60,17 @@
 #'
 #' @export
 #'
-#' @references Revell, L. J. (2009). \emph{Size-correction and principal
-#' components for interspecific comparative studies}. Evolution, 63, 3258-3268.
+#' @references
+#' Revell, L. J. (2009). \emph{Size-correction and principal components
+#'   for interspecific comparative studies}. Evolution, 63, 3258-3268.
 #'
 #' Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
-#' \emph{Phylogenetic principal components analysis and geometric
-#' morphometrics}. Hystrix, 24(1), 33.
+#'   \emph{Phylogenetic principal components analysis and geometric
+#'   morphometrics}. Hystrix, 24(1), 33-41.
 #'
 #' Monteiro, L. R. (2013). \emph{Morphometrics and the comparative method:
-#' studying the evolution of biological shape}. Hystrix, the Italian Journal
-#' of Mammalogy, 24(1), 25-32.
+#'   studying the evolution of biological shape}. Hystrix, the Italian Journal
+#'   of Mammalogy, 24(1), 25-32.
 #'
 #' @examples
 #' #load data

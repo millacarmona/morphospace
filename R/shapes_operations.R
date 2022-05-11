@@ -477,8 +477,8 @@ expected_shapes <- function(model, xvalue) {
 #'   containing a linear model or a multivariate ordination analysis.
 #'
 #' @param obj An object containing either a multivariate ordination of class
-#'   \code{"prcomp", "bg_prcomp", "phy_prcomp"} or \code{"pls_shape"} or a
-#'   \code{"mlm"} object fitted using [lm()].
+#'   \code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes} or
+#'   \code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using [lm()].
 #' @param axis An optional numeric value specifying the axis of the multivariate
 #'   ordination which is to be represented.
 #' @param mag Numeric; magnifying factor for representing shape transformation.
@@ -535,7 +535,8 @@ expected_shapes <- function(model, xvalue) {
 #' pile_shapes(extshapes, links = links, mshape = FALSE)
 ax_transformation <- function(obj, axis = 1, mag = 1) {
 
-  if(any(class(obj) == c("prcomp", "bg_prcomp", "phy_prcomp", "pls_shape"))) {
+  if(any(class(obj) == c("prcomp", "bg_prcomp", "phy_prcomp",
+                         "pls_shapes", "phy_pls_shapes"))) {
     extshapes_mat <- rev_eigen(range(obj$x[,axis] * mag),
                                vectors = obj$rotation[,axis],
                                obj$center)

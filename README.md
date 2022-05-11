@@ -178,7 +178,8 @@ mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
   proj_groups(shapes = detr_shapes, groups = species) %>%
   proj_consensus(shapes = detr_cons_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16) %>%
-  proj_axes(neword = pca, ax = c(1,2), col = "black", lwd = 2, lty = 2)
+  proj_axis(obj = pca, axis = 1, col = "black", lwd = 2, lty = 2) %>%
+  proj_axis(obj = pca, axis = 2, col = "black", lwd = 2, lty = 2)
 title("Morphospace \n+ PCs 1 and 2 projected")
 ```
 
@@ -352,8 +353,8 @@ for(i in 1:nlevels(species)){
   index <- species==levels(species)[i]
   subshapes <- detr_shapes[,,index]
   subsizes <- sizes[index]
-  pls <- pls_shapes(shapes = subshapes, x = subsizes)
-  proj_axes(neword = pls, morphospace, ax = 1, pipe = FALSE, col = "red", lwd = 2)
+  pls <- pls_shapes(shapes = subshapes, X = subsizes)
+  proj_axis(obj = pls, morphospace, axis = 1, pipe = FALSE, col = "red", lwd = 2)
 }
 # Add species' mean shapes and phylogeny
 proj_consensus(mspace = morphospace, shapes = consensus(detr_shapes, species), pch = 16, pipe = FALSE)
@@ -452,7 +453,7 @@ starting point. Below the `mspace %>% proj_*` workflow is applied to the
 `shells` data set taken from Milla Carmona et al. (2018). This include
 data from 137 specimens belonging to 4 species of the extinct bivalve
 genus *Ptychomya*, tracking their shape changes through a 5 million
-years interval from the Lower CRetaceous of Argentina. The data set
+years interval from the Lower Cretaceous of Argentina. The data set
 includes the information about the shape (measured using 7 harmonics),
 centroid size, age (both relative and absolute), geographic provenance,
 and taxonomic classification of each specimen.
@@ -544,7 +545,7 @@ refined_morphospace <- mspace(detr_shapes, mag = 0.7, axes = c(1,2), FUN = bg_pr
 for(i in 1:nlevels(species)){
   subshapes <- detr_shapes[species == levels(species)[i],]
   pca <- prcomp(x = subshapes)
-  proj_axes(neword = pca, refined_morphospace, ax = 1, pipe = FALSE, lwd = 2, col = i)
+  proj_axis(obj = pca, refined_morphospace, axis = 1, pipe = FALSE, lwd = 2, col = i)
 }
 
 title("Morphospace emphasizing interspecific variation")
