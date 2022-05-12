@@ -50,7 +50,7 @@ resulting ordination is centered around the phylogenetic mean (i.e. the
 values estimated for the root of the tree) instead of the overall centroid
 of the original variables. More importantly, both phylogenetic PCA's
 eigenvectors and eigenvalues have been constructed using covariation that
-is independent of phylogenetic structure. However only the orientation of
+is independent of phylogenetic structure. However, only the orientation of
 the scores on those axes, and not their variances, reflect this adjustment.
 In other words, orientation of the phylogenetic PC axes are devoid of
 phylogenetic structure, but magnitudes measured in the resulting morphospace

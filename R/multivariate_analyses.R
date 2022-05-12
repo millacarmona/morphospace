@@ -25,7 +25,7 @@
 #'   values estimated for the root of the tree) instead of the overall centroid
 #'   of the original variables. More importantly, both phylogenetic PCA's
 #'   eigenvectors and eigenvalues have been constructed using covariation that
-#'   is independent of phylogenetic structure. However only the orientation of
+#'   is independent of phylogenetic structure. However, only the orientation of
 #'   the scores on those axes, and not their variances, reflect this adjustment.
 #'   In other words, orientation of the phylogenetic PC axes are devoid of
 #'   phylogenetic structure, but magnitudes measured in the resulting morphospace
@@ -219,82 +219,65 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
                       corr = FALSE) {
 
   grandmean <- colMeans(x)
+  groupmeans <- apply(X = x, MARGIN = 2, FUN = tapply, groups, mean)
   totvar <- sum(apply(x, 2, stats::var))
+
+  n_g <- tapply(groups, groups, length)
+  if(gweights == TRUE) {
+    wts <- as.numeric(n_g / sum(n_g))
+  } else {
+    wts <- rep(1, nlevels(groups))
+  }
+
+  vcv_g <- stats::cov.wt(groupmeans, wt = wts, cor = corr)$cov
+  svd <- svd(x = vcv_g)
+
+  ndims <- min(nrow(x), nlevels(groups) - 1)
+  rotation <- svd$v[,1:ndims]
+  values <- svd$d[1:ndims]
 
   if(LOOCV == FALSE) {
 
-    x_centered <- scale(x, scale = FALSE, center = TRUE)
-    x_gmeans <- apply(X = x_centered, MARGIN = 2, FUN = tapply, groups, mean)
-
-    n_g <- tapply(groups, groups, length)
-    if(gweights == TRUE) {
-      wts <- as.numeric(n_g / sum(n_g))
-    } else {
-      wts <- rep(1, nlevels(groups))
-    }
-
-    vcv_g <- stats::cov.wt(x_gmeans, wt = wts, cor = corr)$cov
-    svd <- svd(x = vcv_g)
-
-    scores <- proj_eigen(x, svd$v, center = colMeans(x))
-    scores <- cbind(scores[, 1:(nlevels(groups) - 1)])
-
-    results <- list(sdev = sqrt(svd$d), rotation = svd$v, x = scores,
-                    center = grandmean, grcenters = x_gmeans, totvar = totvar)
-    class(results) <- "bg_prcomp"
-    return(results)
+    scores <- proj_eigen(x, rotation, colMeans(x))
 
   } else {
 
-    n_g <- tapply(groups, groups, length)
-    if(gweights == TRUE) {
-      wts <- as.numeric(n_g / sum(n_g))
-    } else {
-      wts <- rep(1, nlevels(groups))
-    }
-
-    x_centered <- scale(x, scale = FALSE, center = TRUE)
-    x_gmeans <- apply(X = x_centered, MARGIN = 2, FUN = tapply, groups, mean)
-
-    vcv_g <- cov.wt(x_gmeans, wt = wts, cor = corr)$cov
-    svd <- svd(vcv_g)
-
-    rotation <- svd$v
-    values <- svd$d
-    refaxis <- svd$v[, 1]
+    refaxis <- rotation[, 1]
 
     scores_l <- lapply(1:nrow(x), function(i) {
       subx <- x[-i,]
       subgroups <- groups[-i]
 
-      subx_centered <- scale(subx, scale = FALSE, center = TRUE)
-      subx_gmeans <- apply(X = subx_centered, MARGIN = 2, FUN = tapply, subgroups, mean)
+      subgroupmeans <- apply(X = subx, MARGIN = 2, FUN = tapply, subgroups, mean)
 
-      n_g <- tapply(subgroups, subgroups, length)
+      subn_g <- tapply(subgroups, subgroups, length)
       if(gweights == TRUE) {
-        wts <- as.numeric(n_g / sum(n_g))
+        subwts <- as.numeric(subn_g / sum(subn_g))
       } else {
-        wts <- rep(1, nlevels(subgroups))
+        subwts <- rep(1, nlevels(subgroups))
       }
 
-      vcv_g <- stats::cov.wt(subx_gmeans, wt = wts, cor = corr)$cov
-      svd <- svd(vcv_g)
+      subvcv_g <- stats::cov.wt(subgroupmeans, wt = subwts, cor = corr)$cov
+      subsvd <- svd(subvcv_g)
 
-      scores <- proj_eigen(x[i,], svd$v, center = colMeans(x))
-      scores <- scores * sign(stats::cor(svd$v[, 1], refaxis))
+      subrotation <- subsvd$v[,1:ndims]
+
+      iscore <- proj_eigen(x[i,], subrotation, center = colMeans(x)) *
+        sign(stats::cor(subrotation[,1], refaxis))
 
     })
-    scores <- do.call("rbind", scores_l)
 
-    scores <- cbind(scale(scores[, 1:(nlevels(groups) - 1)], scale = FALSE, center = TRUE))
+    scores <- do.call("rbind", scores_l)
+    scores <- scale(scores, center = TRUE, scale = FALSE)
+
     if(recompute == TRUE) rotation <- matrix(t(t(scores) %*% t(t(x))), ncol = (nlevels(groups) - 1))
 
-    results <- list(sdev = sqrt(values), rotation = rotation, x = scores,
-                    center = grandmean, grcenters = x_gmeans, totvar = totvar)
-    class(results) <- "bg_prcomp"
-    return(results)
   }
 
+  results <- list(sdev = sqrt(values), rotation = rotation, x = cbind(scores),
+                  center = grandmean, grcenters = groupmeans, totvar = totvar)
+  class(results) <- "bg_prcomp"
+  return(results)
 }
 
 
@@ -389,8 +372,8 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' plot(pls2$x2, pls2$x) #ordination
 pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 
-  if(is.vector(x)) x <- cbind(x)
-  if(is.vector(y)) y <- cbind(y)
+  x <- cbind(x)
+  y <- cbind(y)
 
   totvar_x <- sum(apply(x, 2, stats::var))
   totvar_y <- sum(apply(y, 2, stats::var))
@@ -398,51 +381,56 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
   y_center <- colMeans(y)
   x_center <- colMeans(x)
 
-  y_centered <- scale(y, scale = FALSE, center = TRUE)
-  x_centered <- scale(x, scale = FALSE, center = TRUE)
-
-  svd <- Morpho:::svd2B(x_centered, y_centered)
-  values <- svd$d^2
-  rotation_y <- svd$v
-  rotation_x <- svd$u
+  ndims <- min(nrow(x), ncol(x), ncol(y))
+  svd <- Morpho:::svd2B(x, y)
+  values <- (svd$d^2)[1:ndims]
+  y_rotation <- cbind((svd$v)[,1:ndims])
+  x_rotation <- cbind((svd$u)[,1:ndims])
 
   if(LOOCV == FALSE) {
 
-    yscores <- y_centered %*% svd$v
-    xscores <- x_centered %*% svd$u
+    yscores <- proj_eigen(y, y_rotation, y_center)
+    xscores <- proj_eigen(x, x_rotation, x_center)
 
   } else {
 
-    ndim <- min(ncol(y), ncol(x))
-    yscores <- matrix(NA, nrow = nrow(y), ncol = ndim)
-    xscores <- matrix(NA, nrow = nrow(x), ncol = ndim)
+    yscores <- c()
+    xscores <- c()
+
+    refyaxis <- y_rotation[,1]
+    refxaxis <- x_rotation[,1]
 
     for(i in 1:nrow(y)) {
 
-      suby_centered <- scale(y[-i,], scale = FALSE, center = TRUE)
-      subx_centered <- scale(x[-i,], scale = FALSE, center = TRUE)
+      suby <- y[-i,]
+      subx <- x[-i,]
 
-      subsvd <- Morpho:::svd2B(subx_centered, suby_centered)
-
-      if(i == 1) refyaxis <- subsvd$v[, 1]
-      if(i == 1) refxaxis <- subsvd$u[, 1]
+      subsvd <- Morpho:::svd2B(subx, suby)
 
       if(length(refyaxis) > 1) {
-        yscores[i,] <- (y[i,] %*% subsvd$v) * sign(stats::cor(subsvd$v[,1], refyaxis))
+        yscores <- rbind(yscores,
+                         proj_eigen(y[i,], subsvd$v[,1:ndims], y_center) *
+                           sign(stats::cor(subsvd$v[,1], refyaxis)) )
       } else {
-        yscores[i,] <- (y[i,] %*% subsvd$v) * sign(subsvd$v[,1] * refyaxis)
+        yscores <- rbind(yscores,
+                         proj_eigen(y[i,], subsvd$v[,1:ndims], y_center) *
+                           sign(subsvd$v[,1] * refyaxis) )
       }
 
       if(length(refxaxis) > 1) {
-        xscores[i,] <- (x[i,] %*% subsvd$u) * sign(stats::cor(subsvd$u[,1], refxaxis))
+        xscores <- rbind(xscores,
+                         proj_eigen(x[i,], subsvd$u[,1:ndims], x_center) *
+                           sign(stats::cor(subsvd$u[,1], refxaxis)) )
       } else {
-        xscores[i,] <- (x[i,] %*% subsvd$u) * sign(subsvd$u[,1] * refxaxis)
+        xscores <- rbind(xscores,
+                         proj_eigen(x[i,], subsvd$u[,1:ndims], x_center) *
+                           sign(subsvd$u[,1] * refxaxis) )
       }
 
     }
 
-    yscores <- scale(yscores, scale = FALSE, center = TRUE)
-    xscores <- scale(xscores, scale = FALSE, center = TRUE)
+    yscores <- scale(yscores, center = TRUE, scale = FALSE)
+    xscores <- scale(xscores, center = TRUE, scale = FALSE)
 
     if(recompute == TRUE) {
       rotation_y <- t(t(yscores) %*% t(t(y)))
@@ -450,14 +438,13 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
     }
   }
 
-  results <- list(yscores = yscores, yrotation = rotation_y, ycenter = y_center, ytotvar = totvar_y,
-                  xscores = xscores, xrotation = rotation_x, xcenter = x_center, xtotvar = totvar_x,
+  results <- list(yscores = cbind(yscores), yrotation = y_rotation, ycenter = y_center, ytotvar = totvar_y,
+                  xscores = cbind(xscores), xrotation = x_rotation, xcenter = x_center, xtotvar = totvar_x,
                   values = values)
   class(results) <- "pls2b"
   return(results)
 
 }
-
 
 ########################################################################################
 
@@ -544,7 +531,7 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 #' tree <- tails$tree
 #'
 #' #perform phylogenetic PLS
-#' ppls <- phy_pls2b(y = geomorph::two.d.array(sp_shapes), x = cbind(sp_sizes), tree = tree)
+#' ppls <- phy_pls2b(y = geomorph::two.d.array(sp_shapes), x = sp_sizes, tree = tree)
 #'
 #' #look at the results
 #' names(ppls) #the contents of the resulting object
@@ -554,15 +541,15 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 #' #pls_shapes achieves identical results, but it is formatted to be used more
 #' #easily when analyzing shape variables and its output is compatible with other
 #' #functions from morphospace
-#' ppls2 <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree)
+#' ppls2 <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree)
 #'
 #' names(ppls2) #the contents of the resulting object
 #' exp_var(ppls2) #variance explained by each axis
 #' plot(ppls2$x2, ppls2$x) #ordination
 phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 
-  if(is.vector(x)) x <- cbind(x)
-  if(is.vector(y)) y <- cbind(y)
+  x <- cbind(x)
+  y <- cbind(y)
 
   namesx <- rownames(x)
   namesy <- rownames(y)
@@ -594,27 +581,26 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
   x_anc <- anc[1:ncol(x)]
   y_anc <- anc[(ncol(x) + 1):(ncol(x) + ncol(y))]
 
-  x_centered <- t(t(x) - x_anc)
-  y_centered <- t(t(y) - y_anc)
-
+  ndims <- min(nrow(x), ncol(x), ncol(y))
+  values <- (svd$d^2)[1:ndims]
   rotations <- list(svd$v, svd$u)
   whichy <- which(unlist(lapply(rotations, nrow)) == ncol(y))
   whichx <- which(unlist(lapply(rotations, nrow)) == ncol(x))
-  y_rotation <- rotations[[whichy]]
-  x_rotation <- rotations[[whichx]]
-
-  values <- svd$d^2
+  y_rotation <- cbind(rotations[[whichy]][,1:ndims])
+  x_rotation <- cbind(rotations[[whichx]][,1:ndims])
 
   if(LOOCV == FALSE) {
 
-    yscores <- (y_centered %*% y_rotation)[namesy,]
-    xscores <- (x_centered %*% x_rotation)[namesx,]
+    yscores <- proj_eigen(y, y_rotation, y_anc)[namesy,]
+    xscores <- proj_eigen(x, x_rotation, x_anc)[namesx,]
 
   } else {
 
-    ndim <- min(ncol(y), ncol(x))
-    yscores <- matrix(NA, nrow = nrow(y), ncol = ndim)
-    xscores <- matrix(NA, nrow = nrow(x), ncol = ndim)
+    yscores <- c()
+    xscores <- c()
+
+    refyaxis <- y_rotation[,1]
+    refxaxis <- x_rotation[,1]
 
     for(i in 1:nrow(y)) {
 
@@ -641,32 +627,37 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
       suby_rotation <- subrotations[[whichy]]
       subx_rotation <- subrotations[[whichx]]
 
-      if(i == 1) refyaxis <- suby_rotation[, 1]
-      if(i == 1) refxaxis <- subx_rotation[, 1]
 
-
-      iy_centered <- (t(cbind(y[i,])) - y_anc)
-      reorienty <- sign(stats::cor(suby_rotation[,1], refyaxis))
       if(length(refyaxis) > 1) {
-        yscores[i,] <- (iy_centered %*% suby_rotation) * reorienty
+        yscores <- rbind(yscores,
+                         proj_eigen(y[i,], suby_rotation, y_anc) *
+                           sign(stats::cor(suby_rotation[,1], refyaxis)) )
       } else {
-        yscores[i,] <- (iy_centered %*% suby_rotation) * sign(suby_rotation[,1] * refyaxis)
+        yscores <- rbind(yscores,
+                         proj_eigen(y[i,], suby_rotation, y_anc) *
+                           sign(suby_rotation[,1] * refyaxis) )
       }
 
-      ix_centered <- (t(cbind(x[i,])) - x_anc)
-      reorientx <- sign(stats::cor(subx_rotation[,1], refxaxis))
       if(length(refxaxis) > 1) {
-        xscores[i,] <- (ix_centered %*% subx_rotation) * reorientx
+        xscores <- rbind(xscores,
+                         proj_eigen(x[i,], subx_rotation, x_anc) *
+                           sign(stats::cor(subx_rotation[,1], refxaxis)) )
       } else {
-        xscores[i,] <- (ix_centered %*% subx_rotation) * sign(subx_rotation[,1] * refxaxis)
+        xscores <- rbind(xscores,
+                         proj_eigen(x[i,], subx_rotation, x_anc) *
+                           sign(subx_rotation[,1] * refxaxis) )
       }
 
     }
+
+    yscores <- scale(yscores, center = TRUE, scale = FALSE)
+    xscores <- scale(xscores, center = TRUE, scale = FALSE)
 
     if(recompute == TRUE) {
-      yrotation <- t(t(yscores) %*% t(t(y)))
-      xrotation <- t(t(xscores) %*% t(t(x)))
+      y_rotation <- t(t(yscores) %*% t(t(y)))
+      x_rotation <- t(t(xscores) %*% t(t(x)))
     }
+
     rownames(yscores) <- rownames(y)
     rownames(xscores) <- rownames(x)
     yscores <- yscores[namesy,]
@@ -674,13 +665,12 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 
   }
 
-  results <- list(yscores = yscores, yrotation = y_rotation, ycenter = y_anc, ytotvar = totvar_y,
-                  xscores = xscores, xrotation = y_rotation, xcenter = x_anc, xtotvar = totvar_x,
+  results <- list(yscores = cbind(yscores), yrotation = y_rotation, ycenter = y_anc, ytotvar = totvar_y,
+                  xscores = cbind(xscores), xrotation = y_rotation, xcenter = x_anc, xtotvar = totvar_x,
                   values = values)
   class(results) <- "phy_pls2b"
   return(results)
 }
-
 
 ########################################################################################
 
@@ -775,7 +765,7 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 #' plot(pls_cv$x2, pls_cv$x) #ordination
 #'
 #' #perform phylogenetic PLS between shape and size (for species means)
-#' ppls <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree)
+#' ppls <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree)
 #'
 #' #inspect results
 #' names(ppls) #the contents of the resulting object
@@ -783,7 +773,7 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 #' plot(ppls$x2, ppls$x) #ordination
 #'
 #' #perform phylogenetic PLS between shape and size with leave-one-out CV
-#' ppls <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree, LOOCV = TRUE)
+#' ppls <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree, LOOCV = TRUE)
 #'
 #' #inspect results
 #' names(ppls) #the contents of the resulting object
@@ -799,13 +789,10 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
     pls <- phy_pls2b(y = y, x = X, tree = tree, LOOCV = LOOCV, recompute = recompute)
   }
 
-  yscores <- cbind(pls$yscores)
-  xscores <- cbind(pls$xscores)
-
-  results <- list(sdev = apply(yscores, 2, stats::sd),
+  results <- list(sdev = apply(pls$yscores, 2, stats::sd),
                   rotation = pls$yrotation,
-                  x = yscores,
-                  x2 = xscores,
+                  x = pls$yscores,
+                  x2 = pls$xscores,
                   center = pls$ycenter,
                   totvar = pls$ytotvar)
 

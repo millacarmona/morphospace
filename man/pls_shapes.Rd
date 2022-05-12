@@ -87,7 +87,7 @@ exp_var(pls_cv) #variance explained by each axis
 plot(pls_cv$x2, pls_cv$x) #ordination
 
 #perform phylogenetic PLS between shape and size (for species means)
-ppls <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree)
+ppls <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree)
 
 #inspect results
 names(ppls) #the contents of the resulting object
@@ -95,7 +95,7 @@ exp_var(ppls) #variance explained by each axis
 plot(ppls$x2, ppls$x) #ordination
 
 #perform phylogenetic PLS between shape and size with leave-one-out CV
-ppls <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree, LOOCV = TRUE)
+ppls <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree, LOOCV = TRUE)
 
 #inspect results
 names(ppls) #the contents of the resulting object

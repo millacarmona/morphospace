@@ -73,7 +73,7 @@ sp_sizes <- tapply(X = log(tails$sizes), INDEX = tails$data$species, FUN = mean)
 tree <- tails$tree
 
 #perform phylogenetic PLS
-ppls <- phy_pls2b(y = geomorph::two.d.array(sp_shapes), x = cbind(sp_sizes), tree = tree)
+ppls <- phy_pls2b(y = geomorph::two.d.array(sp_shapes), x = sp_sizes, tree = tree)
 
 #look at the results
 names(ppls) #the contents of the resulting object
@@ -83,7 +83,7 @@ plot(ppls$xscores, ppls$yscores) #ordination
 #pls_shapes achieves identical results, but it is formatted to be used more
 #easily when analyzing shape variables and its output is compatible with other
 #functions from morphospace
-ppls2 <- pls_shapes(shapes = sp_shapes, X = cbind(sp_sizes), tree = tree)
+ppls2 <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree)
 
 names(ppls2) #the contents of the resulting object
 exp_var(ppls2) #variance explained by each axis
