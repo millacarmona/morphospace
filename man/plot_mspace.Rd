@@ -147,3 +147,95 @@ the phylogenetic relationships among tips scores stored in
 or horizontal phenogram will be deployed (the x/y axis range will correspond to
 branch lengths, so caution should be exercised when interpreting the output).
 }
+\examples{
+#load and extract relevant data and information
+data("tails")
+shapes <- tails$shapes
+species <- tails$data$species
+sizes <- tails$sizes
+sp_shapes <- consensus(shapes, species)
+sp_sizes <- cbind(tapply(sizes, species, mean))
+tree <- tails$tree
+links <- tails$links
+template <- tails$template
+
+#generate basic morphospace, add sampled shapes, species mean shapes, species
+#classification, and phylogenetic structure
+msp <- mspace(shapes, axes = c(1,2), plot = FALSE) \%>\%
+ proj_shapes(shapes = shapes) \%>\%
+ proj_consensus(shapes = sp_shapes) \%>\%
+ proj_groups(groups = species) \%>\%
+ proj_phylogeny(tree = tree)
+
+##Plotting 'pure' morphospaces:
+
+#plot mspace object as it is
+plot_mspace(msp, axes = c(1,2),
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+
+#add colors for points, by species
+plot_mspace(msp, axes = c(1,2), col.points = species, col.groups = 1:nlevels(species),
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+
+#add links
+plot_mspace(msp, axes = c(1,2), links = links, col.points = species, col.groups = 1:nlevels(species),
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+
+#change number and sizes of shape models in the background
+plot_mspace(msp, axes = c(1,2), nh = 2, nv = 2, links = links, size.models = 2,
+            col.points = species, col.groups = 1:nlevels(species),
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+
+#magnify deformation
+plot_mspace(msp, axes = c(1,2), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 2,
+            col.points = species, col.groups = 1:nlevels(species),
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+
+#change links for templates, highlight landmarks
+plot_mspace(msp, axes = c(1,2), mag = 1.5, template = template, col.points = species,
+            col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+
+#change axes 1,2 for 1,3
+plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
+            col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+
+#represent ranges and centroids of groups
+plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
+            col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+            points = TRUE, groups = TRUE, mshapes = TRUE, phylo = FALSE)
+
+#add phylogeny
+plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
+            col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+            points = TRUE, groups = TRUE, mshapes = TRUE, phylo = TRUE)
+
+
+
+##Plotting 'hybrid' morphospaces:
+
+#plot size against first PC (scaling factors got a bit weird because of the scale of sizes)
+plot_mspace(msp, x = sizes,  axes = 1, links = links, asp.models = 0.0004, size.models = 6000,
+            col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Centroid size")
+
+#same but with template
+plot_mspace(msp, x = sizes,  axes = 1, template = template, asp.models = 0.0004, size.models = 6000,
+            col.points = species, col.groups = 1:nlevels(species), pch.points = 16, cex.ldm = 0,
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Centroid size")
+
+
+
+##Plotting phenograms:
+
+#plot horizontal phenogram against PC1
+plot_mspace(msp, x = tree,  axes = 1, links = links, asp.models = 0.5, size.models = 5,
+            col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Branch lengths")
+
+#plot horizontal phenogram against PC1
+plot_mspace(msp, y = tree,  axes = 2, links = links, asp.models = 20, size.models = 1,
+            col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
+            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, ylab = "Branch lengths")
+}

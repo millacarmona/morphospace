@@ -173,16 +173,25 @@ mspace <- function(shapes,
   if(!is.null(xlim)) xlim <- range(c(models_mat[,1]))
   if(!is.null(ylim)) ylim <- range(c(models_mat[,2]))
 
-  if(is.null(xlab)) xlab <- paste0("PC", axes[1])
-  if(is.null(ylab)) ylab <- paste0("PC", axes[2])
+  if(is.null(xlab)) xlab <- paste0(axes[1])
+  if(is.null(ylab)) ylab <- paste0(axes[2])
 
-  if(ordtype == "bg_prcomp") {
-    xlab <- paste0("bg", xlab)
-    ylab <- paste0("bg", ylab)
-  }
-  if(ordtype == "phy_prcomp") {
-    xlab <- paste0("phy", xlab)
-    ylab <- paste0("phy", ylab)
+  if(any(ordtype == c("prcomp", "bg_prcomp", "phy_prcomp"))) {
+    if(ordtype == "prcomp") {
+      xlab <- paste0("PC", xlab)
+      ylab <- paste0("PC", ylab)
+    }
+    if(ordtype == "bg_prcomp") {
+      xlab <- paste0("bgPC", xlab)
+      ylab <- paste0("bgPC", ylab)
+    }
+    if(ordtype == "phy_prcomp") {
+      xlab <- paste0("phyPC", xlab)
+      ylab <- paste0("phyPC", ylab)
+    }
+  } else {
+    xlab <- paste0("PLS-", xlab)
+    ylab <- paste0("PLS-", ylab)
   }
 
   if(plot == TRUE) {
@@ -192,11 +201,11 @@ mspace <- function(shapes,
 
     for(i in 1:dim(models_arr)[3]) {
       if(datype == "landm") {
-        points(models_arr[1:mspace$plotinfo$p,,i],
-               pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
+        points(models_arr[1:p,,i],
+               pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
 
         if(!is.null(template)) {
-          lines(models_arr[-c(1:mspace$plotinfo$p),,i],
+          lines(models_arr[-c(1:p),,i],
                 col = col.models, lwd = lwd.models)
         } else {
           for(l in 1:length(links)) lines(models_arr[,,i][links[[l]],],
@@ -818,13 +827,22 @@ plot_mspace <- function(mspace,
     if(is.null(args$xlab)) xlab <- paste0("PC", args$axes[1])
     if(is.null(args$ylab)) ylab <- paste0("PC", args$axes[2])
 
-    if(mspace$ordtype == "bg_prcomp") {
-      xlab <- paste0("bg", xlab)
-      ylab <- paste0("bg", ylab)
-    }
-    if(mspace$ordtype == "phy_prcomp") {
-      xlab <- paste0("phy", xlab)
-      ylab <- paste0("phy", ylab)
+    if(any(mspace$ordtype == c("prcomp", "bg_prcomp", "phy_prcomp"))) {
+      if(ordtype == "prcomp") {
+        xlab <- paste0("PC", xlab)
+        ylab <- paste0("PC", ylab)
+      }
+      if(mspace$ordtype == "bg_prcomp") {
+        xlab <- paste0("bgPC", xlab)
+        ylab <- paste0("bgPC", ylab)
+      }
+      if(mspace$ordtype == "phy_prcomp") {
+        xlab <- paste0("phyPC", xlab)
+        ylab <- paste0("phyPC", ylab)
+      }
+    } else {
+      xlab <- paste0("PLS-", xlab)
+      ylab <- paste0("PLS-", ylab)
     }
 
     plot(models_mat, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
@@ -932,6 +950,9 @@ plot_mspace <- function(mspace,
         if(mspace$ordtype == "phy_prcomp") {
           xlab <- paste0("phy", xlab)
         }
+        if(mspace$ordtype == "pls_shapes") {
+          xlab <- paste0("PLS-", args$axes[1])
+        }
       }
     }
     if(is.null(args$ylab)) {
@@ -944,6 +965,9 @@ plot_mspace <- function(mspace,
         }
         if(mspace$ordtype == "phy_prcomp") {
           ylab <- paste0("phy", ylab)
+        }
+        if(mspace$ordtype == "pls_shapes") {
+          ylab <- paste0("PLS-", args$axes[1])
         }
       }
     }
