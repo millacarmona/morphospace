@@ -9,17 +9,39 @@ proj_consensus(shapes, mspace, pipe = TRUE, ...)
 \arguments{
 \item{shapes}{Shapes data.}
 
-\item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
+\item{mspace}{An \code{"mspace"} object.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
 \item{...}{Further arguments passed to \code{\link[=points]{points()}}.}
 }
 \value{
-
+If a plot device with a morphospace is open, shapes feeded to
+\code{shapes} are projected into morphospace. If \code{pipe = FALSE} the
+corresponding scores are returned invisibly. If \code{pipe = TRUE} the
+supplied \code{mspace} object will be modified by adding a new
+\code{$gr_centroids} slot, and returned invisibly.
 }
 \description{
 Project one or more mean shapes into an existing morphospace.
+}
+\details{
+The purpose of this function is to add the scores corresponding
+to groups' mean shapes to \code{mspace} objects during pipeline. Otherwise,
+it does the same than \code{proj_shapes}.
+}
+\examples{
+#load and extract relevant data and information
+data("shells")
+shapes <- shells$shapes
+species <- shells$data$species
+sp_shapes <- consensus(shapes, species)
+
+#generate basic morphospace, add sampled and consensus shapes
+mspace(shapes, links = links, mag = 0.7, axes = c(1,2), size.models = 0.3,
+       asp.models = 0.5, bg.model = "light gray") \%>\%
+  proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1, cex = 0.7) \%>\%
+  proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:4, cex = 2)
 }
 \seealso{
 \code{\link{consensus}}

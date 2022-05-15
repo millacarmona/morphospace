@@ -15,6 +15,7 @@ mspace(
   nh = 5,
   nv = 4,
   mag = 1,
+  invax = NULL,
   asp = NA,
   xlim = NULL,
   ylim = NULL,
@@ -64,8 +65,12 @@ variation. The options include \code{prcomp}, \code{bg_prcomp} and
 
 \item{mag}{Numeric; magnifying factor for shape models.}
 
+\item{invax}{Optional numeric indicating which of the axes provided in
+\code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
+\code{c(1,2)}).}
+
 \item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic plot
-function}
+function.}
 
 \item{rot.models}{Numeric; angle (in degrees) to rotate shape models.}
 
@@ -91,12 +96,70 @@ models.}
 \item{...}{Further arguments passed to \link{FUN}.}
 }
 \value{
-
+An object of class \code{"mspace"}, which is a list containing:
+\itemize{
+\item{$ordtype:} { method used for multivariate ordination.}
+\item{$datype:} { type of shape data used.}
+\item{$x:} { scores of the sample of shapes in the synthetic axes.}
+\item{$rotation:} { eigenvector's coefficients.}
+\item{$center:} { the mean values of the original shape variables.}
+\item{$plotinfo:} { a list with the information used to create the plot.}
+}
 }
 \description{
-Create a morphospace as an ordination comprising set of axes
-synthesizing shape variation. Allows a variety of multivariate methods for
-building the ordination.
+Create an empirical morphospace as an ordination comprising set
+of axes synthesizing shape variation. Allows a variety of multivariate methods
+for building the ordination.
+}
+\details{
+This function is the central piece of the \code{morphospace} workflow.
+It produces a synthetic space from a sample of normalized shapes using
+eigenanalysis-based ordination methods (PCA, between groups PCA, two-block
+PLS, and their phylogenetic versions) and generates shape models depicting
+the range of realized variation, retaining the information necessary to
+project and retrieve new compatible shapes. The output of \code{mspace} is
+meant to be expanded using the \code{proj_*} family of functions and the
+\code{\%>\%} operator from \code{maggritr}.
+}
+\examples{
+#load and extract relevant data and information
+data("tails")
+shapes <- tails$shapes
+species <- tails$data$species
+links <- tails$links
+tree <- tails$tree
+template <- tails$template
+
+#create morphospace using the basic sample of shapes, PCA as ordination method
+#and the template provided for warping and creating backround models
+mspace(shapes, template = template, mag = 0.7, axes = c(1,2), cex.ldm = 0,
+       points = TRUE)
+
+#create morphospace using the basic sample of shapes, PCA as ordination method
+#and the links between landmarks provided for backround models
+mspace(shapes, links = links, mag = 0.7, axes = c(1,2), points = TRUE)
+
+#increase magnification factor x2:
+mspace(shapes, links = links, mag = 1.5, axes = c(1,2), points = TRUE)
+
+#plot PCs 1 and 3
+mspace(shapes, links = links, mag = 1.5, axes = c(1,3), points = TRUE)
+
+#create morphospace using the basic sample of shapes, bgPCA as ordination method
+#and links between landmarks for backround models
+mspace(shapes, links = links, FUN = bg_prcomp, groups = species, mag = 0.7,
+       axes = c(1,2), invax = 1, points = TRUE)
+
+#create morphospace using species' consensus shapes and phylogenetic tree,
+#phylogenetic PCA as ordination method, and links between landmarks for backround
+#models
+sp_shapes <- consensus(shapes, species)
+mspace(sp_shapes, links = links, FUN = phy_prcomp, tree = tree, mag = 0.7,
+       axes = c(1,2), points = TRUE)
+
+#just create a morphospace without plotting, save into an object, and inspect
+morphosp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2), plot = FALSE)
+names(morphosp)
 }
 \seealso{
 \code{\link{proj_shapes}}, \code{\link{proj_consensus}},

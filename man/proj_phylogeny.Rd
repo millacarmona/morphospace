@@ -9,17 +9,49 @@ proj_phylogeny(tree, mspace, pipe = TRUE, ...)
 \arguments{
 \item{tree}{A \code{"phy"} object containing a phylogenetic tree.}
 
-\item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
+\item{mspace}{An \code{"mspace"} object.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
 \item{...}{Further arguments passed to \code{\link[=lines]{lines()}}.}
 }
 \value{
-
+If a plot device with a morphospace is open, shapes representing the nodes
+of the phylogenetic tree and lines connecting them and tips are projected into
+morphospace. If \code{pipe = FALSE} scores for nodes and tips of the phylogeny
+are returned invisibly. If \code{pipe = TRUE} the supplied \code{mspace}
+object will be modified by adding a new \code{$phylo_scores} and \code{$phylo}
+slots, and returned invisibly.
 }
 \description{
 Project phylogenetic relationships among a set of shapes
 (representing the consensuses of phhylogenetic terminals) into an existing
 morphospace.
+}
+\details{
+The purpose of this function is twofold. First, it is meant to transform
+a morphospace into a phylomorphospace by infusing  phylogenetic structure into
+the former . To this end, a \code{$gr_centroids} slot matching the tip labels
+from \code{tree} needs to be present (either upstream in the pipeline or already
+incorporated into an existing \code{mspace} object). Second, this function can be
+used to retrieve the scores corresponding to nodes of the phylogenetic tree, which
+can in turn be used to compute the associated shapes using \code{rev_eigen()}. The
+position of these shapes in morphospace is estimated using the squared-changes
+parsimony algorithm as performed by \code{fastAnc} from \code{phytools}.
+}
+\examples{
+#load and extract relevant data and information
+data("tails")
+shapes <- tails$shapes
+species <- tails$data$species
+sp_shapes <- consensus(shapes, species)
+tree <- tails$tree
+template <- tails$template
+
+#generate basic morphospace, add sampled shapes, species mean shapes, and
+#phylogenetic structure
+mspace(shapes, template = template, mag = 0.7, axes = c(1,2), cex.ldm = 0) \%>\%
+  proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1, cex = 0.7) \%>\%
+  proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 2) \%>\%
+  proj_phylogeny(tree = tree)
 }

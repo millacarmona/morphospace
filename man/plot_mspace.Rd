@@ -2,7 +2,7 @@
 % Please edit documentation in R/mspace_workflow.R
 \name{plot_mspace}
 \alias{plot_mspace}
-\title{Plot morphospaces}
+\title{Plot morphospaces and combine them with other elements}
 \usage{
 plot_mspace(
   mspace,
@@ -14,6 +14,7 @@ plot_mspace(
   nh,
   nv,
   mag,
+  invax = NULL,
   points = TRUE,
   mshapes = TRUE,
   groups = TRUE,
@@ -67,6 +68,10 @@ the y axis. Alternatively, a \code{"phy"} object can be provided.}
 
 \item{mag}{Numeric; magnifying factor for shape models.}
 
+\item{invax}{Optional numeric indicating which of the axes provided in
+\code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
+\code{c(1,2)}).}
+
 \item{points}{Logical; whether to plot the scatter points corresponding to
 the sampled shapes stored in \code{mspace$x}.}
 
@@ -80,7 +85,7 @@ stored in \code{mspace$gr_class}}
 in \code{mspace$phylo}}
 
 \item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic plot
-function}
+function.}
 
 \item{size.models}{Numeric; size factor for shape models.}
 
@@ -120,10 +125,25 @@ groups mean shapes.}
 \item{lwd.branches}{Numeric; the width of the lines depicting phylogenetic
 branches.}
 }
-\value{
-
-}
 \description{
-Flexible deployment of morphospaces, including their combination
+Flexible representation of morphospaces, including their combination
 with other variables or a phylogeny.
+}
+\details{
+This function allows to plot the morphospace contained in \code{mspace}
+objects already in existence, either preserving the graphical attributes stamped
+at during the pipeline or modifying one or more of them, so there is no need to
+execute the pipeline every time morphospaces need to be visualized and/or changed.
+
+Also, \code{plot_mspace} expands the range of graphical options available
+beyond 'pure' morphospaces. If a numeric non-shape variable (assumed to have
+been measured for the same specimens in \code{mspace$x}) is feeded to one of
+\code{x} or \code{y}, a 'hybrid' morphospace is produced (i.e. the bivariate
+plot will be constructed from the combination of \code{x} or \code{y} and a
+morphometric axis; shape models in the background will represent variation
+only for the latter). If instead a \code{"phy"} object (assumed to describe
+the phylogenetic relationships among tips scores stored in
+\code{mspace$phylo_scores}) is feeded to one of \code{x} or \code{y}, a vertical
+or horizontal phenogram will be deployed (the x/y axis range will correspond to
+branch lengths, so caution should be exercised when interpreting the output).
 }

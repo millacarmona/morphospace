@@ -3,9 +3,9 @@
 
 #' Create morphospace
 #'
-#' @description Create a morphospace as an ordination comprising set of axes
-#'   synthesizing shape variation. Allows a variety of multivariate methods for
-#'   building the ordination.
+#' @description Create an empirical morphospace as an ordination comprising set
+#'   of axes synthesizing shape variation. Allows a variety of multivariate methods
+#'   for building the ordination.
 #'
 #' @param shapes Shapes data.
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
@@ -27,6 +27,9 @@
 #' @param nh Numeric; the number of shape models along the x axis.
 #' @param nv Numeric; the number of shape models along the y axis.
 #' @param mag Numeric; magnifying factor for shape models.
+#' @param invax Optional numeric indicating which of the axes provided in
+#'   \code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
+#'   \code{c(1,2)}).
 #' @param rot.models  Numeric; angle (in degrees) to rotate shape models.
 #' @param size.models Numeric; size factor for shape models.
 #' @param asp.models Numeric; the y/x aspect ratio of shape models.
@@ -39,10 +42,27 @@
 #' @param col.ldm The color of landmarks/semilandmarks in the background models.
 #' @param plot Logical; whether to plot morphospace.
 #' @param xlim,ylim,xlab,ylab,asp Standard arguments passed to the generic plot
-#'   function
+#'   function.
 #' @param ... Further arguments passed to [FUN].
 #'
-#' @return
+#' @details This function is the central piece of the \code{morphospace} workflow.
+#'   It produces a synthetic space from a sample of normalized shapes using
+#'   eigenanalysis-based ordination methods (PCA, between groups PCA, two-block
+#'   PLS, and their phylogenetic versions) and generates shape models depicting
+#'   the range of realized variation, retaining the information necessary to
+#'   project and retrieve new compatible shapes. The output of \code{mspace} is
+#'   meant to be expanded using the \code{proj_*} family of functions and the
+#'   \code{%>%} operator from \code{maggritr}.
+#'
+#' @return An object of class \code{"mspace"}, which is a list containing:
+#'   \itemize{
+#'   \item{$ordtype:} { method used for multivariate ordination.}
+#'   \item{$datype:} { type of shape data used.}
+#'   \item{$x:} { scores of the sample of shapes in the synthetic axes.}
+#'   \item{$rotation:} { eigenvector's coefficients.}
+#'   \item{$center:} { the mean values of the original shape variables.}
+#'   \item{$plotinfo:} { a list with the information used to create the plot.}
+#'   }
 #'
 #' @seealso \code{\link{proj_shapes}}, \code{\link{proj_consensus}},
 #'   \code{\link{proj_groups}}, \code{\link{proj_phylogeny}},
@@ -51,6 +71,44 @@
 #' @export
 #'
 #' @examples
+#' #load and extract relevant data and information
+#' data("tails")
+#' shapes <- tails$shapes
+#' species <- tails$data$species
+#' links <- tails$links
+#' tree <- tails$tree
+#' template <- tails$template
+#'
+#' #create morphospace using the basic sample of shapes, PCA as ordination method
+#' #and the template provided for warping and creating backround models
+#' mspace(shapes, template = template, mag = 0.7, axes = c(1,2), cex.ldm = 0,
+#'        points = TRUE)
+#'
+#' #create morphospace using the basic sample of shapes, PCA as ordination method
+#' #and the links between landmarks provided for backround models
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2), points = TRUE)
+#'
+#' #increase magnification factor x2:
+#' mspace(shapes, links = links, mag = 1.5, axes = c(1,2), points = TRUE)
+#'
+#' #plot PCs 1 and 3
+#' mspace(shapes, links = links, mag = 1.5, axes = c(1,3), points = TRUE)
+#'
+#' #create morphospace using the basic sample of shapes, bgPCA as ordination method
+#' #and links between landmarks for backround models
+#' mspace(shapes, links = links, FUN = bg_prcomp, groups = species, mag = 0.7,
+#'        axes = c(1,2), invax = 1, points = TRUE)
+#'
+#' #create morphospace using species' consensus shapes and phylogenetic tree,
+#' #phylogenetic PCA as ordination method, and links between landmarks for backround
+#' #models
+#' sp_shapes <- consensus(shapes, species)
+#' mspace(sp_shapes, links = links, FUN = phy_prcomp, tree = tree, mag = 0.7,
+#'        axes = c(1,2), points = TRUE)
+#'
+#' #just create a morphospace without plotting, save into an object, and inspect
+#' morphosp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2), plot = FALSE)
+#' names(morphosp)
 mspace <- function(shapes,
                    axes = c(1,2),
                    links = NULL,
@@ -61,6 +119,7 @@ mspace <- function(shapes,
                    nh = 5,
                    nv = 4,
                    mag = 1,
+                   invax = NULL,
                    asp = NA,
                    xlim = NULL,
                    ylim = NULL,
@@ -95,11 +154,14 @@ mspace <- function(shapes,
     k <- 2
   }
 
-  ordtype <- match.call()$FUN
-  if(is.null(ordtype)) ordtype <- "prcomp"
-
   FUN <- match.fun(FUN)
   ordination <- FUN(data2d, ...)
+  ordtype <- class(ordination)
+
+  if(!is.null(invax)) {
+    ordination$x[,axes[invax]] <- ordination$x[,axes[invax]]*-1
+    ordination$rotation[,axes[invax]] <- ordination$rotation[,axes[invax]]*-1
+  }
 
   shapemodels <- morphogrid(ordination = ordination, axes = axes, datype = datype, template = template,
                             x = NULL, y = NULL, p = p, k = k, nh = nh, nv = nv, mag = mag,
@@ -130,10 +192,12 @@ mspace <- function(shapes,
 
     for(i in 1:dim(models_arr)[3]) {
       if(datype == "landm") {
-        points(models_arr[,,i], pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
+        points(models_arr[1:mspace$plotinfo$p,,i],
+               pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
 
         if(!is.null(template)) {
-          lines(models_arr[,,i], col = col.models, lwd = lwd.models)
+          lines(models_arr[-c(1:mspace$plotinfo$p),,i],
+                col = col.models, lwd = lwd.models)
         } else {
           for(l in 1:length(links)) lines(models_arr[,,i][links[[l]],],
                                           col = col.models, lwd = lwd.models)
@@ -145,7 +209,7 @@ mspace <- function(shapes,
       }
     }
 
-    if(points == TRUE) points(ordination$x)
+    if(points == TRUE) points(ordination$x[,axes])
 
   }
 
@@ -171,15 +235,35 @@ mspace <- function(shapes,
 #' @description Project a set of shapes into an existing morphospace.
 #'
 #' @param shapes Shape data.
-#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param mspace An \code{"mspace"} object.
 #' @param pipe Logical; is the function being included in a pipe?
 #' @param ... Further arguments passed to [points()].
 #'
-#' @return
+#' @details The purpose of this function is to mantain morphospace
+#'   generation and sample representation as independent affairs, and
+#'   to add flexibility to graphical representation of scatter points.
+#'
+#' @return If a plot device with a morphospace is open, shapes feeded to
+#'   \code{shapes} are projected into morphospace. If \code{pipe = FALSE}
+#'   those scores are returned invisibly. If \code{pipe = TRUE} the feeded
+#'   \code{mspace} object is returned unchanged and invisibly.
 #'
 #' @export
 #'
 #' @examples
+#'#load and extract relevant data and information
+#'data("tails")
+#'shapes <- tails$shapes
+#'sex <- tails$data$sex
+#'links <- tails$links
+#'
+#'#generate basic morphospace, add sampled shapes
+#'mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+#'  proj_shapes(shapes = shapes)
+#'
+#'#change colors, symbols, etc for the scatter
+#'mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+#'  proj_shapes(shapes = shapes, pch = c(1,16)[sex], col = c("red", "blue")[sex])
 proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 
   dat <- shapes_mat(shapes)
@@ -205,17 +289,36 @@ proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 #' @description Project one or more mean shapes into an existing morphospace.
 #'
 #' @param shapes Shapes data.
-#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param mspace An \code{"mspace"} object.
 #' @param pipe Logical; is the function being included in a pipe?
 #' @param ... Further arguments passed to [points()].
 #'
-#' @return
+#' @details The purpose of this function is to add the scores corresponding
+#'   to groups' mean shapes to \code{mspace} objects during pipeline. Otherwise,
+#'   it does the same than \code{proj_shapes}.
+#'
+#' @return If a plot device with a morphospace is open, shapes feeded to
+#'   \code{shapes} are projected into morphospace. If \code{pipe = FALSE} the
+#'   corresponding scores are returned invisibly. If \code{pipe = TRUE} the
+#'   supplied \code{mspace} object will be modified by adding a new
+#'   \code{$gr_centroids} slot, and returned invisibly.
 #'
 #' @seealso \code{\link{consensus}}
 #'
 #' @export
 #'
 #' @examples
+#' #load and extract relevant data and information
+#' data("shells")
+#' shapes <- shells$shapes
+#' species <- shells$data$species
+#' sp_shapes <- consensus(shapes, species)
+#'
+#' #generate basic morphospace, add sampled and consensus shapes
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2), size.models = 0.3,
+#'        asp.models = 0.5, bg.model = "light gray") %>%
+#'   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1, cex = 0.7) %>%
+#'   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:4, cex = 2)
 proj_consensus <- function(shapes, mspace, pipe = TRUE, ...) {
 
   dat <- shapes_mat(shapes)
@@ -241,22 +344,42 @@ proj_consensus <- function(shapes, mspace, pipe = TRUE, ...) {
 
 #' Delimit groups in morphospace
 #'
-#' @description Project convex hulls ennclosing a priori groups in an existing
-#'   morphospace.
+#' @description Project convex hulls ennclosing \emph{a priori} groups
+#'   into an existing morphospace.
 #'
-#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param mspace An \code{"mspace"} object.
 #' @param shapes Optional shapes data.
 #' @param groups Factor; classification of observations into groups.
 #' @param pipe Logical; is the function being included in a pipe?
 #' @param ... Further arguments passed to [hulls_by_group_2D()].
 #'
-#' @return
+#' @details The purpose of this function is to add a classification
+#'   for shapes populating the morphospace to \code{mspace} objects
+#'   during pipeline, as well as to facilitate group visualization.
+#'   Otherwise, it is just a wrapper for \code{hulls_by_group_2D}.
+#'
+#' @return If a plot device with a morphospace is open, convex hulls
+#'   enclosing the scores corresponding to \class{groups} are projected
+#'   into morphospace. If \code{pipe = TRUE} the supplied \code{mspace}
+#'   object will be modified by adding a new \code{$gr_class} slot, and
+#'   returned invisibly.
 #'
 #' @seealso \code{\link{hulls_by_group2D}}
 #'
 #' @export
 #'
 #' @examples
+#' #load and extract relevant data and information
+#' data("shells")
+#' shapes <- shells$shapes
+#' species <- shells$data$species
+#' sp_shapes <- consensus(shapes, species)
+#'
+#' #generate basic morphospace, add sampled shapes and convex hulls for species
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2), size.models = 0.3,
+#'        asp.models = 0.5, bg.model = "light gray") %>%
+#'   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) %>%
+#'   proj_groups(groups = species, col = 1:4, lwd = 2)
 proj_groups <- function(mspace, shapes = NULL, groups, pipe = TRUE, ...) {
 
   if(is.null(shapes)) {
@@ -271,12 +394,12 @@ proj_groups <- function(mspace, shapes = NULL, groups, pipe = TRUE, ...) {
 
   }
 
-  hulls_by_group_2D(data2d[, mspace$plotinfo$axes], fac = groups, ...)
+  if(.Device != "null device") hulls_by_group_2D(data2d[, mspace$plotinfo$axes], fac = groups, ...)
 
   mspace$gr_class <- groups
 
   if(pipe == TRUE) return(invisible(mspace))
-  #if(pipe == FALSE) return(  volume_of_hulls  )
+  #if(pipe == FALSE) return(  volume_of_hulls  ) #one for the future
 
 }
 
@@ -291,20 +414,72 @@ proj_groups <- function(mspace, shapes = NULL, groups, pipe = TRUE, ...) {
 #' @param obj An object containing either a multivariate ordination of class
 #'   \code{"prcomp", "bg_prcomp", "phy_prcomp"} or \code{"pls_shape"} or a
 #'   \code{"mlm"} object fitted using [lm()].
-#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param mspace An \code{"mspace"} object.
 #' @param axis An optional vector indicating the axis from \code{obj} to be
 #'   projected.
 #' @param mag Numeric; magnifying factor for representing shape transformation.
 #' @param pipe Logical; is the function being included in a pipe?
 #' @param ... Further arguments passed to [lines()].
 #'
-#' @return
+#' @details This function is primarily aimed at the graphical representation
+#'   of morphometric axes (estimated using either linear models or multivariate
+#'   ordination methods) into an existing morphospace for heuristic exploration
+#'   of patterns in the data. It can also be used to extract theoretical shapes
+#'   at the extremes of those axes, although \code{ax_transformation()} does the
+#'   same thing in a more flexible and straightforward way.
+#'
+#'   Axes computed from linear models and from supervised multivariate ordinations
+#'   using the same supervising variable will usually differ in length (i.e. shape
+#'   transformations will be magnified or attenuated) due to the assumption of the
+#'   former that the explanatory variable has been measured without error. Also,
+#'   the former will not be necessarily centered.
+#'
+#'   For statistical analysis of axes (e.g., trajectory analysis) their vector
+#'   coefficients can be extracted directly from slope coefficients stored in
+#'   \code{mlm} objects or eigenvector coefficients stored in the \code{$rotation}
+#'   slot returned by multivariate ordination methods.
+#'
+#' @return If a plot device with a morphospace is open, a straight line marking the
+#'   scores representing shapes at the extremes of the morphometric axis is projected
+#'   into morphospace. If \code{pipe = FALSE} those scores are returned invisibly.
+#'    If \code{pipe = TRUE} the feeded \code{mspace} object is returned unchanged
+#'    and invisibly.
 #'
 #' @export
 #'
 #' @seealso \code{\link{ax_transformation}}
 #'
 #' @examples
+#' #load and extract relevant data and information
+#' library(geomorph)
+#' data("tails")
+#' shapes <- tails$shapes
+#' logsizes <- log(tails$sizes)
+#' species <- tails$data$species
+#' links <- tails$links
+#'
+#' #compute intraspecific allometric axis detrend_shapes, using lm and pls_shapes
+#' detr_shapes <- arrayspecs(detrend_shapes(lm(two.d.array(shapes) ~ species)),
+#'                           p = 9, k = 2)
+#' intrasp_allo_mod <- lm(two.d.array(detr_shapes) ~ logsizes)
+#' intrasp_allo_pls <- pls_shapes(shapes = two.d.array(detr_shapes), X = logsizes)
+#'
+#' #compute intraspecific allometric axis using consensus, tapply, lm and pls_shapes
+#' sp_shapes <- consensus(shapes, species)
+#' sp_logsizes <- tapply(logsizes, species, max)
+#' intersp_allo_mod <- lm(two.d.array(sp_shapes) ~ sp_logsizes)
+#' intersp_allo_pls <- pls_shapes(shapes = two.d.array(sp_shapes), X = sp_logsizes)
+#'
+#'
+#' #generate basic morphospace, add intraspecific (red) and interspecific (blue) axes
+#' #for lm models
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+#'   proj_axis(obj = intrasp_allo_mod, col = "red", lwd = 2) %>%
+#'   proj_axis(obj = intersp_allo_mod, col = "blue", lwd = 2)
+#' #for pls ordination
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+#'   proj_axis(obj = intrasp_allo_pls, col = "red", lwd = 2) %>%
+#'   proj_axis(obj = intersp_allo_pls, col = "blue", lwd = 2)
 proj_axis <- function(obj, mspace, axis = 1, mag = 1, pipe = TRUE, ...) {
 
   ext_shapes2d <- ax_transformation(obj = obj, axis = axis, mag = mag)
@@ -328,15 +503,44 @@ proj_axis <- function(obj, mspace, axis = 1, mag = 1, pipe = TRUE, ...) {
 #'   morphospace.
 #'
 #' @param tree A \code{"phy"} object containing a phylogenetic tree.
-#' @param mspace An \code{"mspace"} object created using [mspace()].
+#' @param mspace An \code{"mspace"} object.
 #' @param pipe Logical; is the function being included in a pipe?
 #' @param ... Further arguments passed to [lines()].
 #'
-#' @return
+#' @details The purpose of this function is twofold. First, it is meant to transform
+#'   a morphospace into a phylomorphospace by infusing  phylogenetic structure into
+#'   the former . To this end, a \code{$gr_centroids} slot matching the tip labels
+#'   from \code{tree} needs to be present (either upstream in the pipeline or already
+#'   incorporated into an existing \code{mspace} object). Second, this function can be
+#'   used to retrieve the scores corresponding to nodes of the phylogenetic tree, which
+#'   can in turn be used to compute the associated shapes using \code{rev_eigen()}. The
+#'   position of these shapes in morphospace is estimated using the squared-changes
+#'   parsimony algorithm as performed by \code{fastAnc} from \code{phytools}.
+#'
+#' @return If a plot device with a morphospace is open, shapes representing the nodes
+#'   of the phylogenetic tree and lines connecting them and tips are projected into
+#'   morphospace. If \code{pipe = FALSE} scores for nodes and tips of the phylogeny
+#'   are returned invisibly. If \code{pipe = TRUE} the supplied \code{mspace}
+#'   object will be modified by adding a new \code{$phylo_scores} and \code{$phylo}
+#'   slots, and returned invisibly.
 #'
 #' @export
 #'
 #' @examples
+#' #load and extract relevant data and information
+#' data("tails")
+#' shapes <- tails$shapes
+#' species <- tails$data$species
+#' sp_shapes <- consensus(shapes, species)
+#' tree <- tails$tree
+#' template <- tails$template
+#'
+#' #generate basic morphospace, add sampled shapes, species mean shapes, and
+#' #phylogenetic structure
+#' mspace(shapes, template = template, mag = 0.7, axes = c(1,2), cex.ldm = 0) %>%
+#'   proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1, cex = 0.7) %>%
+#'   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 2) %>%
+#'   proj_phylogeny(tree = tree)
 proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 
   if(is.null(mspace$gr_centroids)) stop("Group centroids have not been provided; add proj_consensus() before")
@@ -356,9 +560,7 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
   mspace$phylo <- tree
 
   if(pipe == FALSE) {
-    phylo_shapes <- rev_eigen(scores = phylo_scores, vectors = mspace$rotation,
-                              center = mspace$center)
-    return(invisible(phylo_shapes))
+    return(invisible(phylo_scores))
   } else {
     return(invisible(mspace))
   }
@@ -366,14 +568,12 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 }
 
 
-
 #########################################################################################
 
-#' Plot morphospaces
+#' Plot morphospaces and combine them with other elements
 #'
-#' @description Flexible deployment of morphospaces, including their combination
+#' @description Flexible representation of morphospaces, including their combination
 #'   with other variables or a phylogeny.
-#'
 #'
 #' @param mspace An \code{"mspace"} object created using [mspace()].
 #' @param axes Numeric of length 1 or 2, indicating the axes to be plotted.
@@ -392,6 +592,9 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #' @param nh Numeric; the number of shape models along the x axis.
 #' @param nv Numeric; the number of shape models along the y axis.
 #' @param mag Numeric; magnifying factor for shape models.
+#' @param invax Optional numeric indicating which of the axes provided in
+#'   \code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
+#'   \code{c(1,2)}).
 #' @param points Logical; whether to plot the scatter points corresponding to
 #'   the sampled shapes stored in \code{mspace$x}.
 #' @param mshapes Logical; whether to plot the scatter points corresponding to
@@ -424,12 +627,118 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #' @param lwd.branches Numeric; the width of the lines depicting phylogenetic
 #'   branches.
 #' @param xlim,ylim,xlab,ylab,asp Standard arguments passed to the generic plot
-#'   function
+#'   function.
 #'
-#' @return
+#' @details This function allows to plot the morphospace contained in \code{mspace}
+#'   objects already in existence, either preserving the graphical attributes stamped
+#'   at during the pipeline or modifying one or more of them, so there is no need to
+#'   execute the pipeline every time morphospaces need to be visualized and/or changed.
+#'
+#'   Also, \code{plot_mspace} expands the range of graphical options available
+#'   beyond 'pure' morphospaces. If a numeric non-shape variable (assumed to have
+#'   been measured for the same specimens in \code{mspace$x}) is feeded to one of
+#'   \code{x} or \code{y}, a 'hybrid' morphospace is produced (i.e. the bivariate
+#'   plot will be constructed from the combination of \code{x} or \code{y} and a
+#'   morphometric axis; shape models in the background will represent variation
+#'   only for the latter). If instead a \code{"phy"} object (assumed to describe
+#'   the phylogenetic relationships among tips scores stored in
+#'   \code{mspace$phylo_scores}) is feeded to one of \code{x} or \code{y}, a vertical
+#'   or horizontal phenogram will be deployed (the x/y axis range will correspond to
+#'   branch lengths, so caution should be exercised when interpreting the output).
+#'
 #' @export
 #'
 #' @examples
+#' #load and extract relevant data and information
+#' data("tails")
+#' shapes <- tails$shapes
+#' species <- tails$data$species
+#' sizes <- tails$sizes
+#' sp_shapes <- consensus(shapes, species)
+#' sp_sizes <- cbind(tapply(sizes, species, mean))
+#' tree <- tails$tree
+#' links <- tails$links
+#' template <- tails$template
+#'
+#' #generate basic morphospace, add sampled shapes, species mean shapes, species
+#' #classification, and phylogenetic structure
+#' msp <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
+#'  proj_shapes(shapes = shapes) %>%
+#'  proj_consensus(shapes = sp_shapes) %>%
+#'  proj_groups(groups = species) %>%
+#'  proj_phylogeny(tree = tree)
+#'
+#' ##Plotting 'pure' morphospaces:
+#'
+#' #plot mspace object as it is
+#' plot_mspace(msp, axes = c(1,2),
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+#'
+#' #add colors for points, by species
+#' plot_mspace(msp, axes = c(1,2), col.points = species, col.groups = 1:nlevels(species),
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+#'
+#' #add links
+#' plot_mspace(msp, axes = c(1,2), links = links, col.points = species, col.groups = 1:nlevels(species),
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+#'
+#' #change number and sizes of shape models in the background
+#' plot_mspace(msp, axes = c(1,2), nh = 2, nv = 2, links = links, size.models = 2,
+#'             col.points = species, col.groups = 1:nlevels(species),
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+#'
+#' #magnify deformation
+#' plot_mspace(msp, axes = c(1,2), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 2,
+#'             col.points = species, col.groups = 1:nlevels(species),
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+#'
+#' #change links for templates, highlight landmarks
+#' plot_mspace(msp, axes = c(1,2), mag = 1.5, template = template, col.points = species,
+#'             col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+#'
+#' #change axes 1,2 for 1,3
+#' plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
+#'             col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
+#'
+#' #represent ranges and centroids of groups
+#' plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
+#'             col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+#'             points = TRUE, groups = TRUE, mshapes = TRUE, phylo = FALSE)
+#'
+#' #add phylogeny
+#' plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
+#'             col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+#'             points = TRUE, groups = TRUE, mshapes = TRUE, phylo = TRUE)
+#'
+#'
+#'
+#' ##Plotting 'hybrid' morphospaces:
+#'
+#' #plot size against first PC (scaling factors got a bit weird because of the scale of sizes)
+#' plot_mspace(msp, x = sizes,  axes = 1, links = links, asp.models = 0.0004, size.models = 6000,
+#'             col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Centroid size")
+#'
+#' #same but with template
+#' plot_mspace(msp, x = sizes,  axes = 1, template = template, asp.models = 0.0004, size.models = 6000,
+#'             col.points = species, col.groups = 1:nlevels(species), pch.points = 16, cex.ldm = 0,
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Centroid size")
+#'
+#'
+#'
+#' ##Plotting phenograms:
+#'
+#' #plot horizontal phenogram against PC1
+#' plot_mspace(msp, x = tree,  axes = 1, links = links, asp.models = 0.5, size.models = 5,
+#'             col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Branch lengths")
+#'
+#' #plot horizontal phenogram against PC1
+#' plot_mspace(msp, y = tree,  axes = 2, links = links, asp.models = 20, size.models = 1,
+#'             col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
+#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, ylab = "Branch lengths")
 plot_mspace <- function(mspace,
                         axes,
                         links = NULL,
@@ -439,6 +748,7 @@ plot_mspace <- function(mspace,
                         nh,
                         nv,
                         mag,
+                        invax = NULL,
                         points = TRUE,
                         mshapes = TRUE,
                         groups = TRUE,
@@ -472,6 +782,17 @@ plot_mspace <- function(mspace,
   merged_args <- utils::modifyList(inh_args, new_args)
   args <- merged_args
 
+
+  if(!is.null(invax)) {
+    mspace$x[,axes[invax]] <- mspace$x[,axes[invax]]*-1
+    mspace$rotation[,axes[invax]] <- mspace$rotation[,axes[invax]]*-1
+    if(!is.null(mspace$gr_centroids)) {
+      mspace$gr_centroids[,axes[invax]] <- mspace$gr_centroids[,axes[invax]]*-1
+    }
+    if(!is.null(mspace$phylo_scores)) {
+      mspace$phylo_scores[,axes[invax]] <- mspace$phylo_scores[,axes[invax]]*-1
+    }
+  }
 
   ordination <- list(x = mspace$x, rotation = mspace$rotation, center = mspace$center)
 
@@ -509,10 +830,12 @@ plot_mspace <- function(mspace,
     plot(models_mat, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
     for(i in 1:dim(models_arr)[3]) {
       if(mspace$datype == "landm") {
-        points(models_arr[,,i], pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
+        points(models_arr[1:mspace$plotinfo$p,,i],
+               pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
 
         if(!is.null(args$template)) {
-          lines(models_arr[,,i], col = args$col.models, lwd = args$lwd.models)
+          lines(models_arr[-c(1:mspace$plotinfo$p),,i],
+                col = args$col.models, lwd = args$lwd.models)
         } else {
           for(l in 1:length(args$links)) lines(models_arr[,,i][args$links[[l]],],
                                                col = args$col.models, lwd = args$lwd.models)
@@ -630,10 +953,12 @@ plot_mspace <- function(mspace,
 
     for(i in 1:dim(models_arr)[3]) {
       if(mspace$datype == "landm") {
-        points(models_arr[,,i], pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
+        points(models_arr[1:mspace$plotinfo$p,,i],
+               pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
 
         if(!is.null(args$template)) {
-          lines(models_arr[,,i], col = args$col.models, lwd = args$lwd.models)
+          lines(models_arr[-c(1:mspace$plotinfo$p),,i],
+                col = args$col.models, lwd = args$lwd.models)
         } else {
           for(l in 1:length(args$links)) lines(models_arr[,,i][args$links[[l]],],
                                           col = args$col.models, lwd = args$lwd.models)

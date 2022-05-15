@@ -378,7 +378,8 @@ morphogrid <- function(ordination,
                               function(i) {Momocs::tps2d(temp_cent[-(1:p),],
                                                          temp_cent[1:p,],
                                                          sh_arr[,,i])})
-    sh_arr <- abind::abind(temp_warpd_list, along = 3)
+    temp_warpd_arr <- abind::abind(temp_warpd_list, along = 3)
+    sh_arr <- abind::abind(sh_arr, temp_warpd_arr, along = 1)
     p <- nrow(sh_arr)
   }
 

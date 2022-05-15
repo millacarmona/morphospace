@@ -9,15 +9,38 @@ proj_shapes(shapes, mspace, pipe = TRUE, ...)
 \arguments{
 \item{shapes}{Shape data.}
 
-\item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
+\item{mspace}{An \code{"mspace"} object.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
 \item{...}{Further arguments passed to \code{\link[=points]{points()}}.}
 }
 \value{
-
+If a plot device with a morphospace is open, shapes feeded to
+\code{shapes} are projected into morphospace. If \code{pipe = FALSE}
+those scores are returned invisibly. If \code{pipe = TRUE} the feeded
+\code{mspace} object is returned unchanged and invisibly.
 }
 \description{
 Project a set of shapes into an existing morphospace.
+}
+\details{
+The purpose of this function is to mantain morphospace
+generation and sample representation as independent affairs, and
+to add flexibility to graphical representation of scatter points.
+}
+\examples{
+#load and extract relevant data and information
+data("tails")
+shapes <- tails$shapes
+sex <- tails$data$sex
+links <- tails$links
+
+#generate basic morphospace, add sampled shapes
+mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
+ proj_shapes(shapes = shapes)
+
+#change colors, symbols, etc for the scatter
+mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
+ proj_shapes(shapes = shapes, pch = c(1,16)[sex], col = c("red", "blue")[sex])
 }

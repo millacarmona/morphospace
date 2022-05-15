@@ -7,7 +7,7 @@
 proj_groups(mspace, shapes = NULL, groups, pipe = TRUE, ...)
 }
 \arguments{
-\item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
+\item{mspace}{An \code{"mspace"} object.}
 
 \item{shapes}{Optional shapes data.}
 
@@ -18,11 +18,34 @@ proj_groups(mspace, shapes = NULL, groups, pipe = TRUE, ...)
 \item{...}{Further arguments passed to \code{\link[=hulls_by_group_2D]{hulls_by_group_2D()}}.}
 }
 \value{
-
+If a plot device with a morphospace is open, convex hulls
+enclosing the scores corresponding to \class{groups} are projected
+into morphospace. If \code{pipe = TRUE} the supplied \code{mspace}
+object will be modified by adding a new \code{$gr_class} slot, and
+returned invisibly.
 }
 \description{
-Project convex hulls ennclosing a priori groups in an existing
-morphospace.
+Project convex hulls ennclosing \emph{a priori} groups
+into an existing morphospace.
+}
+\details{
+The purpose of this function is to add a classification
+for shapes populating the morphospace to \code{mspace} objects
+during pipeline, as well as to facilitate group visualization.
+Otherwise, it is just a wrapper for \code{hulls_by_group_2D}.
+}
+\examples{
+#load and extract relevant data and information
+data("shells")
+shapes <- shells$shapes
+species <- shells$data$species
+sp_shapes <- consensus(shapes, species)
+
+#generate basic morphospace, add sampled shapes and convex hulls for species
+mspace(shapes, links = links, mag = 0.7, axes = c(1,2), size.models = 0.3,
+       asp.models = 0.5, bg.model = "light gray") \%>\%
+  proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) \%>\%
+  proj_groups(groups = species, col = 1:4, lwd = 2)
 }
 \seealso{
 \code{\link{hulls_by_group2D}}

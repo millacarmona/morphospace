@@ -489,11 +489,7 @@ expected_shapes <- function(model, xvalue) {
 #'
 #' @details If an object of class \code{mlm} fitting shape to a factor (only two
 #'   levels allowed) is supplied in \code{obj}, magnification of the axis range
-#'   is attained through bgPCA. Axes computed from linear models and from
-#'   supervised multivariate ordinations using the same supervising variable will
-#'   usually differ in length (i.e. shape transformations will be magnified or
-#'   attenuated) due to the assumption of the former that the explanatory
-#'   variable has been measured without error.
+#'   is attained through bgPCA.
 #'
 #' @export
 #'
