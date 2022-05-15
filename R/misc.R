@@ -11,10 +11,27 @@
 #' @param mshape Logical; whether to plot the mean configuration.
 #' @param ... Additional arguments passed to [plot()].
 #'
-#' @return
 #' @export
 #'
 #' @examples
+#' #load landmark data
+#' data("tails")
+#' shapes <- tails$shapes
+#' links <- tails$links
+#'
+#' #pile shapes
+#' pile_shapes(shapes, mshape = FALSE) #bare
+#' pile_shapes(shapes, mshape = FALSE, links = links) #with links
+#' pile_shapes(shapes, mshape = TRUE, links = links) #with links and mean shape
+#'
+#' #load outline data
+#' data("shells")
+#' shapes <- shells$shapes
+#' links <- shells$links
+#'
+#' #pile shapes
+#' pile_shapes(shapes, mshape = FALSE) #bare
+#' pile_shapes(shapes, mshape = TRUE, links = links) #with mean shape
 pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 
   dat <- shapes_mat(shapes)
@@ -74,10 +91,20 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 #'   for each group.
 #' @param ... Further arguments passed to [polygon()].
 #'
-#' @return
 #' @export
 #'
 #' @examples
+#' #load landmark data
+#' data("tails")
+#' shapes <- tails$shapes
+#' species <- tails$data$species
+#'
+#' #perform PCA
+#' pca <- prcomp(geomorph::two.d.array(shapes))
+#'
+#' #plot and add convex hulls
+#' plot(pca$x)
+#' hulls_by_group_2D(pca$x, fac = species, col = "black")
 hulls_by_group_2D <- function(xy, fac, col = 1:nlevels(fac), ...) {
 
   if(length(col) == 1) col <- rep(col, nlevels(fac))
@@ -105,10 +132,24 @@ hulls_by_group_2D <- function(xy, fac, col = 1:nlevels(fac), ...) {
 #' @param ... Further arguments passed to [rgl.triangles()] (e.g.
 #'   \code{specular}, \code{alpha}).
 #'
-#' @return
 #' @export
 #'
 #' @examples
+#' #load landmark data
+#' data("tails")
+#' shapes <- tails$shapes
+#' species <- tails$data$species
+#'
+#' #perform PCA
+#' pca <- prcomp(geomorph::two.d.array(shapes))
+#'
+#' #plot and add convex hulls
+#' \dontrun{
+#'
+#' plot3d(pca$x)
+#' hulls_by_group_3D(pca$x, fac = species, col = "gray")
+#'
+#' }
 hulls_by_group_3D<-function(xyz, fac, col = 1:nlevels(fac), ...) {
 
   if(length(col) == 1) col <- rep(col, nlevels(fac))
