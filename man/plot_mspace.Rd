@@ -148,7 +148,8 @@ or horizontal phenogram will be deployed (the x/y axis range will correspond to
 branch lengths, so caution should be exercised when interpreting the output).
 }
 \examples{
-#load and extract relevant data and information
+#load and extract relevant data, packages and information
+library(magrittr)
 data("tails")
 shapes <- tails$shapes
 species <- tails$data$species
@@ -178,7 +179,8 @@ plot_mspace(msp, axes = c(1,2), col.points = species, col.groups = 1:nlevels(spe
             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 
 #add links
-plot_mspace(msp, axes = c(1,2), links = links, col.points = species, col.groups = 1:nlevels(species),
+plot_mspace(msp, axes = c(1,2), links = links,
+            col.points = species, col.groups = 1:nlevels(species),
             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 
 #change number and sizes of shape models in the background

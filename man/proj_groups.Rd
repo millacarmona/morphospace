@@ -19,7 +19,7 @@ proj_groups(mspace, shapes = NULL, groups, pipe = TRUE, ...)
 }
 \value{
 If a plot device with a morphospace is open, convex hulls
-enclosing the scores corresponding to \class{groups} are projected
+enclosing the scores corresponding to \code{groups} are projected
 into morphospace. If \code{pipe = TRUE} the supplied \code{mspace}
 object will be modified by adding a new \code{$gr_class} slot, and
 returned invisibly.
@@ -35,7 +35,8 @@ during pipeline, as well as to facilitate group visualization.
 Otherwise, it is just a wrapper for \code{hulls_by_group_2D}.
 }
 \examples{
-#load and extract relevant data and information
+#load and extract relevant data, packages and information
+library(magrittr)
 data("shells")
 shapes <- shells$shapes
 species <- shells$data$species
@@ -48,5 +49,5 @@ mspace(shapes, links = links, mag = 0.7, axes = c(1,2), size.models = 0.3,
   proj_groups(groups = species, col = 1:4, lwd = 2)
 }
 \seealso{
-\code{\link{hulls_by_group2D}}
+\code{\link{hulls_by_group_2D}}
 }

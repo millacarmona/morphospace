@@ -21,6 +21,7 @@ Imports:
     geomorph,
     graphics,
     grDevices,
+    magrittr,
     Momocs,
     Morpho,
     phytools,
@@ -29,5 +30,6 @@ Depends:
     R (>= 2.10)
 LazyData: true
 Suggests: 
+    rgl,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

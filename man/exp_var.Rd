@@ -42,6 +42,6 @@ exp_var(bgpca)
 exp_var(pls)
 }
 \seealso{
-\code{\link[base]{prcomp}}, \code{\link{bg_prcomp}},
+\code{\link[stats]{prcomp}}, \code{\link{bg_prcomp}},
 \code{\link{phy_prcomp}}, \code{\link{pls_shapes}}
 }

@@ -129,13 +129,13 @@ test_that(desc = "testing pls2b, general behavior (with loocv)", code = {
 
 ##################################################################
 
-test_that(desc = "testing phy_pls2b, general behavior", code = {
+test_that(desc = "testing pls2b, general behavior", code = {
   data(tails)
 
   Y <- geomorph::two.d.array(consensus(tails$shapes, tails$data$species))
   X <- tapply(tails$sizes, tails$data$species, mean)
   tree <- tails$tree
-  ppls <- phy_pls2b(y = Y, x = X, tree)
+  ppls <- pls2b(y = Y, x = X, tree)
   model_ndimsX <- ncol(model.matrix(~X)) - 1
   model_ndimsY <- ncol(model.matrix(~Y)) - 1
 
@@ -160,13 +160,13 @@ test_that(desc = "testing phy_pls2b, general behavior", code = {
 })
 
 
-test_that(desc = "testing phy_pls2b, general behavior (with loocv)", code = {
+test_that(desc = "testing pls2b, general behavior (with loocv)", code = {
   data(tails)
 
   Y <- geomorph::two.d.array(consensus(tails$shapes, tails$data$species))
   X <- tapply(tails$sizes, tails$data$species, mean)
   tree <- tails$tree
-  ppls <- phy_pls2b(y = Y, x = X, tree, LOOCV = TRUE)
+  ppls <- pls2b(y = Y, x = X, tree, LOOCV = TRUE)
   model_ndimsX <- ncol(model.matrix(~X)) - 1
   model_ndimsY <- ncol(model.matrix(~Y)) - 1
 
@@ -189,3 +189,4 @@ test_that(desc = "testing phy_pls2b, general behavior (with loocv)", code = {
   expect_true(all(result1,result2,result3,result4,result5,
                   result6,result7,result8))
 })
+

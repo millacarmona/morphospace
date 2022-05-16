@@ -112,5 +112,5 @@ the spurious groups problem in between-group PCA}. Evolutionary Biology, 48(4),
 458-471.
 }
 \seealso{
-\code{\link[base]{prcomp}}, \code{\link{exp_var}}
+\code{\link[stats]{prcomp}}, \code{\link{exp_var}}
 }

@@ -27,41 +27,39 @@ a subset of samples, or the mean shape of the levels of a factor (for
 landmark configurations).
 }
 \examples{
-#load tails data
+#load tails data and packages
+library(Morpho)
 data("tails")
+shapes <- tails$shapes
 
 #compute and plot mean shape of the entire sample
 mshape <- consensus(shapes)
-mshape
 plot(mshape)
-Morpho::lineplot(mshape, tails$links)
+lineplot(mshape, tails$links)
 
 #getting mean shape for levels of a factor: compute and plot mean shape of
 #each of the 13 species
-(index <- tails$data$species)
+index <- tails$data$species
 sp_mshapes <- consensus(shapes, index = index)
-sp_mshapes
 pile_shapes(sp_mshapes, links = tails$links, mshape = FALSE)
-for(i in 1:13) Morpho::lineplot(sp_mshapes[,,i], tails$links)
 
 #getting mean shape for a subset of specimens: compute and plot mean shape of
 #deep-forked species
-(index <- which(tails$data$type == "DF"))
+index <- which(tails$data$type == "DF")
 df_mshape <- consensus(shapes, index = index)
-df_mmsape
 plot(df_mshape)
-Morpho::lineplot(df_mshape, tails$links)
+lineplot(df_mshape, tails$links)
+
 #quick demo for Fourier data:
 data("shells")
+shapes <- shells$shapes$coe
 
 #mean shape of the entire sample
-mshape <- consensus(shells$shapes)
-mshape
+mshape <- consensus(shapes)
 plot(inv_efourier(mshape, nb.pts = 200), type = "l")
 
 #mean shape of each of the four species
-sp_mshapes <- consensus(shells$shapes, index = shells$data$species)
-sp_mshapes
+sp_mshapes <- consensus(shapes, index = shells$data$species)
 pile_shapes(sp_mshapes, mshape = FALSE)
 }
 \seealso{

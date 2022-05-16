@@ -82,9 +82,12 @@ Calculate and arrange background shape models for morphospaces.
 For internal use.
 }
 \examples{
-#perform pca on tails shapes
+#' #load data and packages
+library(geomorph)
 data("tails")
-pca <- prcomp(geomorph::two.d.array(tails$shapes))
+
+#perform pca on tails shapes
+pca <- prcomp(two.d.array(tails$shapes))
 
 #generate grid of shape models sampling the range of variation
 #at 4 locations (the 4 corners of the scatterplot)

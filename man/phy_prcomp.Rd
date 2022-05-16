@@ -17,7 +17,7 @@ should match the row names from \code{x}.}
 \item{corr}{Logical; whether to use correlation instead of covariance matrix
 as input.}
 
-\item{...}{}
+\item{...}{Further arguments passed to \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}}.}
 }
 \value{
 A \code{"phy_prcomp"} object formatted following the \code{"prcomp"}
@@ -36,7 +36,7 @@ of the model; see \code{\link[phytools]{phyl.pca}}.}
 }
 }
 \description{
-A wrapper for \code{\link[=pyl.pca]{pyl.pca()}} from \code{phytools}.
+A wrapper for \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}}.
 }
 \details{
 Phylogenetic PCA finds the linear combination of variables (in the
@@ -65,7 +65,8 @@ they can contain redundant information. For more details, see Polly et al.
 2013.
 }
 \examples{
-#load data
+#load data and packages
+library(geomorph)
 data("tails")
 
 #compute mean shapes for all species and extract the phylogenetic tree
@@ -73,7 +74,7 @@ sp_shapes <- consensus(shapes = tails$shapes, index = tails$data$species)
 tree <- tails$tree
 
 #perform phylogenetic PCA
-ppca <- phy_prcomp(x = geomorph::two.d.array(sp_shapes), tree = tree)
+ppca <- phy_prcomp(x = two.d.array(sp_shapes), tree = tree)
 
 #look at the results
 names(ppca) #the contents of the resulting object
@@ -93,6 +94,6 @@ studying the evolution of biological shape}. Hystrix, the Italian Journal
 of Mammalogy, 24(1), 25-32.
 }
 \seealso{
-\code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}},
+\code{\link[phytools]{phyl.pca}}, \code{\link[stats]{prcomp}},
 \code{\link{exp_var}}
 }

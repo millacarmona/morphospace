@@ -14,13 +14,28 @@ hulls_by_group_3D(xyz, fac, col = 1:nlevels(fac), ...)
 \item{col}{A vector (either character or numeric) indicating the colors used
 for each group.}
 
-\item{...}{Further arguments passed to \code{\link[=rgl.triangles]{rgl.triangles()}} (e.g.
+\item{...}{Further arguments passed to \code{\link[rgl:primitive]{rgl::rgl.triangles()}} (e.g.
 \code{specular}, \code{alpha}).}
-}
-\value{
-
 }
 \description{
 Plot convex hulls for different groups in 3D scatterplots
 created using \code{rgl}.
+}
+\examples{
+#load landmark data and necessary packages
+library(geomorph)
+data("tails")
+shapes <- tails$shapes
+species <- tails$data$species
+
+#perform PCA
+pca <- prcomp(two.d.array(shapes))
+
+#plot and add convex hulls
+\dontrun{
+
+plot3d(pca$x)
+hulls_by_group_3D(pca$x, fac = species, col = "gray")
+
+}
 }

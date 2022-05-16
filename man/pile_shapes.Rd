@@ -16,9 +16,26 @@ the wireframe (following the format used in \code{Morpho}).}
 
 \item{...}{Additional arguments passed to \code{\link[=plot]{plot()}}.}
 }
-\value{
-
-}
 \description{
 Superimpose all the shapes in the sample.
+}
+\examples{
+#load landmark data
+data("tails")
+shapes <- tails$shapes
+links <- tails$links
+
+#pile shapes
+pile_shapes(shapes, mshape = FALSE) #bare
+pile_shapes(shapes, mshape = FALSE, links = links) #with links
+pile_shapes(shapes, mshape = TRUE, links = links) #with links and mean shape
+
+#load outline data
+data("shells")
+shapes <- shells$shapes
+links <- shells$links
+
+#pile shapes
+pile_shapes(shapes, mshape = FALSE) #bare
+pile_shapes(shapes, mshape = TRUE, links = links) #with mean shape
 }

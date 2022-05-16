@@ -24,12 +24,15 @@ Project variables in their original scale into an existing
 ordination. Used internally.
 }
 \examples{
-#perform principal component analysis of tails data
+#' #load data and packages
+library(geomorph)
 data("tails")
-pca <- prcomp(geomorph::two.d.array(tails$shapes))
+
+#perform principal component analysis on tails data
+pca <- prcomp(two.d.array(tails$shapes))
 
 #get project shapes in the pca ordination
-shapes_mat <- geomorph::two.d.array(tails$shapes)
+shapes_mat <- two.d.array(tails$shapes)
 newscores <- proj_eigen(x = shapes_mat,
                         vectors = pca$rotation,
                         center = pca$center)
@@ -40,7 +43,7 @@ points(newscores, col = "black")
 
 #compute and project species' mean shapes
 meanshapes_arr <- consensus(tails$shapes, index = tails$data$species)
-meanshapes_mat <- geomorph::two.d.array(meanshapes)
+meanshapes_mat <- two.d.array(meanshapes_arr)
 meanscores <- proj_eigen(x = meanshapes_mat,
                         vectors = pca$rotation,
                         center = pca$center)

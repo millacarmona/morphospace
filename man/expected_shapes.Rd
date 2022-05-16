@@ -29,7 +29,7 @@ Similar in spirit to \code{\link[=consensus]{consensus()}} but for continuous co
 instead of levels of a factor (and with a different usage).
 }
 \examples{
-#load shells data
+#load data
 data("shells")
 
 #compute shape expected at all the empiric values of size

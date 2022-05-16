@@ -11,7 +11,7 @@ mspace(
   template = NULL,
   p = NULL,
   k = NULL,
-  FUN = prcomp,
+  FUN = stats::prcomp,
   nh = 5,
   nv = 4,
   mag = 1,
@@ -56,8 +56,8 @@ landmark data only).}
 landmarks/semilandmarks (for landmark data only).}
 
 \item{FUN}{The function to be used for synthesizing geometric morphometric
-variation. The options include \code{prcomp}, \code{bg_prcomp} and
-\code{phy_prcomp}.}
+variation. Usual alternatives include \code{\link[stats]{prcomp}},
+\code{\link{bg_prcomp}} and \code{\link{phy_prcomp}}.}
 
 \item{nh}{Numeric; the number of shape models along the x axis.}
 
@@ -93,7 +93,7 @@ models.}
 
 \item{plot}{Logical; whether to plot morphospace.}
 
-\item{...}{Further arguments passed to \link{FUN}.}
+\item{...}{Further arguments passed to \code{FUN}.}
 }
 \value{
 An object of class \code{"mspace"}, which is a list containing:
@@ -164,5 +164,5 @@ names(morphosp)
 \seealso{
 \code{\link{proj_shapes}}, \code{\link{proj_consensus}},
 \code{\link{proj_groups}}, \code{\link{proj_phylogeny}},
-\code{\link{proj_axis}}, \code{\link{plot_consensus}}
+\code{\link{proj_axis}}
 }

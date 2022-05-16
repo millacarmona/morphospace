@@ -19,7 +19,7 @@ test_that(desc = "testing mspace, general behavior for landmark data", code = {
   result6 <- .Device != "null device"
 
   expect_true(all(result1,result2,result3,result4,result5,result6))
-
+  dev.off()
 })
 
 
@@ -41,7 +41,7 @@ test_that(desc = "testing mspace, general behavior for Fourier data", code = {
   result6 <- .Device != "null device"
 
   expect_true(all(result1,result2,result3,result4,result5,result6))
-
+  dev.off()
 })
 
 
@@ -53,10 +53,10 @@ test_that(desc = "testing mspace, prcomp", code = {
   tree <- tails$tree
   template <- tails$template
 
-  pca <- prcomp(two.d.array(shapes))
-  bgpca <- bg_prcomp(two.d.array(shapes), species)
-  phypca <- phy_prcomp(two.d.array(consensus(shapes, species)), tree)
-  pls <- pls_shapes(shapes = two.d.array(shapes), X = model.matrix(~species)[,-1])
+  pca <- prcomp(geomorph::two.d.array(shapes))
+  bgpca <- bg_prcomp(geomorph::two.d.array(shapes), species)
+  phypca <- phy_prcomp(geomorph::two.d.array(consensus(shapes, species)), tree)
+  pls <- pls_shapes(shapes = geomorph::two.d.array(shapes), X = model.matrix(~species)[,-1])
 
   msp1 <- mspace(shapes, mag = 0.7, axes = c(1,2), plot = FALSE)
   result1 <- msp1$ordtype == "prcomp"
@@ -72,7 +72,7 @@ test_that(desc = "testing mspace, prcomp", code = {
 test_that(desc = "testing mspace, prcomp", code = {
   data("tails")
   shapes <- tails$shapes
-  pca <- prcomp(two.d.array(shapes))
+  pca <- prcomp(geomorph::two.d.array(shapes))
 
   msp1 <- mspace(shapes, mag = 0.7, axes = c(1,2), plot = FALSE)
   result1 <- msp1$ordtype == "prcomp"
@@ -89,7 +89,7 @@ test_that(desc = "testing mspace, bg_prcomp", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
-  bgpca <- bg_prcomp(two.d.array(shapes), species)
+  bgpca <- bg_prcomp(geomorph::two.d.array(shapes), species)
 
   msp1 <- mspace(shapes, FUN = bg_prcomp, groups = species, mag = 0.7, axes = c(1,2), plot = FALSE)
   result1 <- msp1$ordtype == "bg_prcomp"
@@ -107,7 +107,7 @@ test_that(desc = "testing mspace, phy_prcomp", code = {
   shapes <- tails$shapes
   species <- tails$data$species
   tree <- tails$tree
-  phypca <- phy_prcomp(two.d.array(consensus(shapes, species)), tree)
+  phypca <- phy_prcomp(geomorph::two.d.array(consensus(shapes, species)), tree)
 
   msp1 <- mspace(consensus(shapes, species), FUN = phy_prcomp, tree = tree, mag = 0.7, axes = c(1,2), plot = FALSE)
   result1 <- msp1$ordtype == "phy_prcomp"
@@ -124,7 +124,7 @@ test_that(desc = "testing mspace, pls_shapes", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
-  pls <- pls_shapes(shapes = two.d.array(shapes), X = model.matrix(~species)[,-1])
+  pls <- pls_shapes(shapes = geomorph::two.d.array(shapes), X = model.matrix(~species)[,-1])
 
   msp1 <- mspace(shapes, FUN = pls_shapes, X = model.matrix(~species)[,-1],
                  mag = 0.7, axes = c(1,2), plot = FALSE)
@@ -144,12 +144,12 @@ test_that(desc = "testing mspace, phylogenetic pls_shapes", code = {
   species <- tails$data$species
   tree <- tails$tree
   sp_sizes <- cbind(tapply(tails$sizes,species,mean))
-  phypls <- pls_shapes(shapes = two.d.array(consensus(shapes, species)),
+  phypls <- pls_shapes(shapes = geomorph::two.d.array(consensus(shapes, species)),
                        X = sp_sizes, tree = tree)
 
   msp1 <- mspace(consensus(shapes,species), FUN = pls_shapes, X = sp_sizes, tree = tree,
                  mag = 0.7, axes = c(1,1), plot = FALSE)
-  result1 <- msp1$ordtype == "pls_shapes"
+  result1 <- msp1$ordtype == "phy_pls_shapes"
   result2 <- all(msp1$x == phypls$x)
   result3 <- all(msp1$rotation == phypls$rotation)
   result4 <- all(msp1$center == phypls$center)

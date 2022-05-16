@@ -24,42 +24,39 @@
 #' @seealso \code{\link{expected_shapes}}
 #'
 #' @examples
-#' #load tails data
+#' #load tails data and packages
+#' library(Morpho)
 #' data("tails")
+#' shapes <- tails$shapes
 #'
 #' #compute and plot mean shape of the entire sample
 #' mshape <- consensus(shapes)
-#' mshape
 #' plot(mshape)
-#' Morpho::lineplot(mshape, tails$links)
+#' lineplot(mshape, tails$links)
 #'
 #' #getting mean shape for levels of a factor: compute and plot mean shape of
 #' #each of the 13 species
-#' (index <- tails$data$species)
+#' index <- tails$data$species
 #' sp_mshapes <- consensus(shapes, index = index)
-#' sp_mshapes
 #' pile_shapes(sp_mshapes, links = tails$links, mshape = FALSE)
-#' for(i in 1:13) Morpho::lineplot(sp_mshapes[,,i], tails$links)
 #'
 #' #getting mean shape for a subset of specimens: compute and plot mean shape of
 #' #deep-forked species
-#' (index <- which(tails$data$type == "DF"))
+#' index <- which(tails$data$type == "DF")
 #' df_mshape <- consensus(shapes, index = index)
-#' df_mmsape
 #' plot(df_mshape)
-#' Morpho::lineplot(df_mshape, tails$links)
-
+#' lineplot(df_mshape, tails$links)
+#'
 #' #quick demo for Fourier data:
 #' data("shells")
+#' shapes <- shells$shapes$coe
 #'
 #' #mean shape of the entire sample
-#' mshape <- consensus(shells$shapes)
-#' mshape
+#' mshape <- consensus(shapes)
 #' plot(inv_efourier(mshape, nb.pts = 200), type = "l")
 #'
 #' #mean shape of each of the four species
-#' sp_mshapes <- consensus(shells$shapes, index = shells$data$species)
-#' sp_mshapes
+#' sp_mshapes <- consensus(shapes, index = shells$data$species)
 #' pile_shapes(sp_mshapes, mshape = FALSE)
 consensus <- function(shapes, index = NULL) {
 
@@ -140,7 +137,8 @@ consensus <- function(shapes, index = NULL) {
 #' @examples
 #' #### Landmark data
 #'
-#' #load tails data
+#' #load tails data and packages
+#' library(geomorph)
 #' data(tails)
 #' shapes <- tails$shapes
 #' species <- tails$data$species
@@ -156,7 +154,7 @@ consensus <- function(shapes, index = NULL) {
 #' model <- lm(two.d.array(shapes) ~ logsizes)
 #' detr_shapes_mat <- detrend_shapes(model)
 #'
-#' detr_shapes_nosize <- geomorph::arrayspecs(detr_shapes_mat, k = 2, p = 9)
+#' detr_shapes_nosize <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
 #'
 #' msp_nosize <- mspace(detr_shapes_nosize, links = tails$links, points = TRUE)
 #' hulls_by_group_2D(msp_nosize$x, fac = species)
@@ -169,7 +167,7 @@ consensus <- function(shapes, index = NULL) {
 #' detr_shapes_mat2 <- detrend_shapes(model,
 #'                                    xvalue = max(logsizes))
 #'
-#' detr_shapes_nosize2 <- geomorph::arrayspecs(detr_shapes_mat2, k = 2, p = 9)
+#' detr_shapes_nosize2 <- arrayspecs(detr_shapes_mat2, k = 2, p = 9)
 #'
 #' msp_nosize2 <- mspace(detr_shapes_nosize2, links = tails$links, points = TRUE)
 #' hulls_by_group_2D(msp_nosize2$x, fac = species)
@@ -185,12 +183,12 @@ consensus <- function(shapes, index = NULL) {
 #' shapes_df <- shapes[,,!index]
 #' logsizes_df <- logsizes[!index]
 #'
-#' model <- lm(geomorph::two.d.array(shapes_ndf) ~ logsizes_ndf)
+#' model <- lm(two.d.array(shapes_ndf) ~ logsizes_ndf)
 #' detr_shapes_mat3 <- detrend_shapes(model,
 #'                                    newx = logsizes_df,
-#'                                    newy = geomorph::two.d.array(shapes_df))
+#'                                    newy = two.d.array(shapes_df))
 #'
-#' detr_shapes_nosize3 <- geomorph::arrayspecs(detr_shapes_mat3, k = 2, p = 9)
+#' detr_shapes_nosize3 <- arrayspecs(detr_shapes_mat3, k = 2, p = 9)
 #'
 #' msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links, points = TRUE)
 #' hulls_by_group_2D(msp_nosize3$x, fac = factor(species[!index]))
@@ -202,28 +200,28 @@ consensus <- function(shapes, index = NULL) {
 #' model <- lm(two.d.array(shapes) ~ species)
 #' detr_shapes_mat <- detrend_shapes(model)
 #'
-#' detr_shapes_nospp <- geomorph::arrayspecs(detr_shapes_mat, k = 2, p = 9)
+#' detr_shapes_nospp <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
 #'
 #' msp_nospp <- mspace(detr_shapes_nospp, links = tails$links, points = TRUE)
 #' hulls_by_group_2D(msp_nospp$x, fac = species)
 #'
 #' ## Using xvalue
 #'
-#' #fit linear model between shapes and species, then center at the shape corresponding to the
-#' #mean shape of T. savana
+#' #fit linear model between shapes and species, then center at the shape corresponding to
+#' #the mean shape of T. savana
 #' model <- lm(two.d.array(shapes) ~ species)
 #' detr_shapes_mat2 <- detrend_shapes(model,
 #'                                    xvalue = "T. savana")
 #'
-#' detr_shapes_nospp2 <- geomorph::arrayspecs(detr_shapes_mat2, k = 2, p = 9)
+#' detr_shapes_nospp2 <- arrayspecs(detr_shapes_mat2, k = 2, p = 9)
 #'
 #' msp_nospp2 <- mspace(detr_shapes_nospp2, links = tails$links, points = TRUE)
 #' hulls_by_group_2D(msp_nospp2$x, fac = species)
 #'
 #' ## Using newx, newy
 #'
-#' #fit linear model between shapes and sex for NDF species, then use the NDF sexual dimorphism to
-#' #detrend DF shapes from variation between sexes
+#' #fit linear model between shapes and sex for NDF species, then use the NDF sexual
+#' #dimorphism to detrend DF shapes from variation between sexes
 #' #maximum size of the sample
 #' index <- tails$data$type == "NDF"
 #' shapes_ndf <- shapes[,,index]
@@ -231,12 +229,12 @@ consensus <- function(shapes, index = NULL) {
 #' shapes_df <- shapes[,,!index]
 #' sex_df <- sex[!index]
 #'
-#' model_ndf <- lm(geomorph::two.d.array(shapes_ndf) ~ sex_ndf)
+#' model_ndf <- lm(two.d.array(shapes_ndf) ~ sex_ndf)
 #' detr_shapes_mat3 <- detrend_shapes(model_ndf,
 #'                                    newx = sex_df,
-#'                                    newy = geomorph::two.d.array(shapes_df))
+#'                                    newy = two.d.array(shapes_df))
 #'
-#' detr_shapes_nosize3 <- geomorph::arrayspecs(detr_shapes_mat3, k = 2, p = 9)
+#' detr_shapes_nosize3 <- arrayspecs(detr_shapes_mat3, k = 2, p = 9)
 #'
 #' msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links, points = TRUE)
 #' hulls_by_group_2D(msp_nosize3$x, fac = factor(species[!index]))
@@ -251,19 +249,23 @@ consensus <- function(shapes, index = NULL) {
 #' msp <- mspace(shapes, mag = 0.5, size.models = 0.4, asp.models = 0.5, points = TRUE)
 #' hulls_by_group_2D(msp$x, fac = species)
 #'
-#' #fit linear model between shapes and sizes, then center at the shape corresponding to the grand mean
+#' #fit linear model between shapes and sizes, then center at the shape corresponding to
+#' #the grand mean
 #' model <- lm(shapes ~ logsizes)
 #' detr_shapes_nosize <- detrend_shapes(model)
 #'
-#' msp_nosize <- mspace(detr_shapes_nosize, mag = 0.5, size.models = 0.4, asp.models = 0.5, points = TRUE)
+#' msp_nosize <- mspace(detr_shapes_nosize, mag = 0.5, size.models = 0.4,
+#'                     asp.models = 0.5, points = TRUE)
 #' hulls_by_group_2D(msp_nosize$x, fac = species)
 #'
-#' #fit linear model between shapes and sizes, then center at the shape corresponding to the maximum size
+#' #fit linear model between shapes and sizes, then center at the shape corresponding
+#' #to the maximum size
 #' model <- lm(shapes ~ logsizes)
 #' detr_shapes_nosize2 <- detrend_shapes(model,
 #'                                       xvalue = max(logsizes))
 #'
-#' msp_nosize2 <- mspace(detr_shapes_nosize2, mag = 0.5, size.models = 0.4, asp.models = 0.5, points = TRUE)
+#' msp_nosize2 <- mspace(detr_shapes_nosize2, mag = 0.5, size.models = 0.4,
+#'                       asp.models = 0.5, points = TRUE)
 #' hulls_by_group_2D(msp_nosize2$x, fac = species)
 #'
 #' #fit linear model between shapes and sizes, then center at the maximum size
@@ -277,9 +279,11 @@ consensus <- function(shapes, index = NULL) {
 #'                                       newx = logsizes_esbelta,
 #'                                       newy = shapes_esbelta)
 #'
-#' msp_nosize3 <- mspace(shapes_esbelta, mag = 0.5, size.models = 0.15, asp.models = 0.7, points = TRUE)
+#' msp_nosize3 <- mspace(shapes_esbelta, mag = 0.5, size.models = 0.15,
+#'                       asp.models = 0.7, points = TRUE)
 #' title("raw P. esbelta morphospace")
-#' msp_nosize4 <- mspace(detr_shapes_nosize3, mag = 0.5, size.models = 0.15, asp.models = 0.7, points = TRUE)
+#' msp_nosize4 <- mspace(detr_shapes_nosize3, mag = 0.5, size.models = 0.15,
+#'                        asp.models = 0.7, points = TRUE)
 #' title("P. esbelta morphospace, refined using \n allometric variation from P. koeneni")
 detrend_shapes <- function(model, xvalue = NULL, newx = NULL, newy = NULL) {
 
@@ -370,9 +374,9 @@ detrend_shapes <- function(model, xvalue = NULL, newx = NULL, newy = NULL) {
 #' }
 correct_efourier<-function(ef, index = NULL) {
 
-  orig_frame <- par("mar", "oma")
-  on.exit(par(orig_frame))
-  par(mar = c(1,1,1,1), oma = c(0,0,0,0))
+  orig_frame <- graphics::par("mar", "oma")
+  on.exit(graphics::par(orig_frame))
+  graphics::par(mar = c(1,1,1,1), oma = c(0,0,0,0))
 
   if(is.null(index)) print("Click Finish (top-right corner of plot pane) or enter <Esc> to finish selection")
 
@@ -391,7 +395,7 @@ correct_efourier<-function(ef, index = NULL) {
     n <- length(ef)
     sel <- rep(FALSE, length(ef))
     while(sum(sel) < n) {
-      index <- identify(pos[!sel,], n = 1, plot = FALSE)
+      index <- graphics::identify(pos[!sel,], n = 1, plot = FALSE)
       if(!length(index)) break
       index <- which(!sel)[index]
       sel[index] <- TRUE
@@ -443,7 +447,7 @@ correct_efourier<-function(ef, index = NULL) {
 #' @seealso \code{\link{consensus}}
 #'
 #' @examples
-#' #load shells data
+#' #load data
 #' data("shells")
 #'
 #' #compute shape expected at all the empiric values of size
@@ -477,7 +481,7 @@ expected_shapes <- function(model, xvalue) {
 #'   containing a linear model or a multivariate ordination analysis.
 #'
 #' @param obj An object containing either a multivariate ordination of class
-#'   \code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes} or
+#'   \code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes"} or
 #'   \code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using [lm()].
 #' @param axis An optional numeric value specifying the axis of the multivariate
 #'   ordination which is to be represented.
@@ -499,46 +503,55 @@ expected_shapes <- function(model, xvalue) {
 #'   Association Newsletter, 72(620), 14-27.
 #'
 #' @examples
-#' #load tail data
+#' #load tail data and packages
+#' library(geomorph)
 #' data("tails")
+#' shapes <- tails$shapes
+#' links <- tails$links
 #'
 #' #perform PCA, compute and plot extreme shapes of PC1 at its natural range
-#' pca <- prcomp(geomorph::two.d.array(tails$shapes))
-#' extshapes <- ax_transformation(obj = pca, axis = 1, mag = 1)
-#' pile_shapes(extshapes, links = links, mshape = FALSE)
+#' pca <- prcomp(two.d.array(shapes))
+#' extshapes2d <- ax_transformation(obj = pca, axis = 1, mag = 1)
+#' extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
+#' pile_shapes((extshapes), links = links, mshape = FALSE)
 #'
 #' #compute and plot extreme shapes of PC2 at its natural range
-#' extshapes <- ax_transformation(obj = pca, axis = 2, mag = 1)
+#' extshapes2d <- ax_transformation(obj = pca, axis = 2, mag = 1)
+#' extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 #' pile_shapes(extshapes, links = links, mshape = FALSE)
 #'
 #' #compute and plot extreme shapes of PC2 magnified x2
-#' extshapes <- ax_transformation(obj = pca, axis = 2, mag = 2)
+#' extshapes2d <- ax_transformation(obj = pca, axis = 2, mag = 2)
+#' extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 #' pile_shapes(extshapes, links = links, mshape = FALSE)
 #'
 #' #perform lm of shape on size, compute and plot extreme shapes at its natural range
-#' model <- lm(geomorph::two.d.array(tails$shapes) ~ log(tails$sizes))
-#' extshapes <- ax_transformation(obj = model, mag = 1)
+#' model <- lm(two.d.array(tails$shapes) ~ log(tails$sizes))
+#' extshapes2d <- ax_transformation(obj = model, mag = 1)
+#' extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 #' pile_shapes(extshapes, links = links, mshape = FALSE)
 #'
 #' #perform lm of shape on size, compute and plot extreme shapes at its natural range
-#' model <- lm(geomorph::two.d.array(tails$shapes) ~ tails$data$sex)
-#' extshapes <- ax_transformation(obj = model, mag = 1)
+#' model <- lm(two.d.array(tails$shapes) ~ tails$data$sex)
+#' extshapes2d <- ax_transformation(obj = model, mag = 1)
+#' extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 #' pile_shapes(extshapes, links = links, mshape = FALSE)
 #'
 #' #perform lm of shape on size, compute and plot extreme shapes magnified x2
-#' model <- lm(geomorph::two.d.array(tails$shapes) ~ tails$data$sex)
-#' extshapes <- ax_transformation(obj = model, mag = 2)
+#' model <- lm(two.d.array(tails$shapes) ~ tails$data$sex)
+#' extshapes2d <- ax_transformation(obj = model, mag = 2)
+#' extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 #' pile_shapes(extshapes, links = links, mshape = FALSE)
 ax_transformation <- function(obj, axis = 1, mag = 1) {
 
-  if(any(class(obj) == c("prcomp", "bg_prcomp", "phy_prcomp",
-                         "pls_shapes", "phy_pls_shapes"))) {
-    extshapes_mat <- rev_eigen(range(obj$x[,axis] * mag),
-                               vectors = obj$rotation[,axis],
+  if(any(class(obj) %in% c("prcomp", "bg_prcomp", "phy_prcomp",
+                           "pls_shapes", "phy_pls_shapes"))) {
+    extshapes_mat <- rev_eigen(range(obj$x[,axis]) * mag,
+                               obj$rotation[,axis],
                                obj$center)
   }
 
-  if(any(class(obj) == "mlm")) {
+  if(any(class(obj) %in% "mlm")) {
 
     x <- obj$model[,ncol(obj$model)]
 
@@ -555,9 +568,9 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 
       if(nlevels(x) > 2) stop("Only two levels are allowed for extracting axes from mlm objects; try with a bg_prcomp object")
 
-      Y <- model$model[,1]
+      Y <- obj$model[,1]
       mshapes <- apply(X = Y, MARGIN = 2, FUN = tapply, x, mean)
-      bgpca <- prcomp(mshapes)
+      bgpca <- stats::prcomp(mshapes)
       bgax1 <- bgpca$x[,1]
 
       cent <- mean(range(bgax1))

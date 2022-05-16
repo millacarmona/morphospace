@@ -23,15 +23,19 @@ Back-calculate variables in their original scale from existing
 ordination data. Used internally.
 }
 \examples{
-#perform principal component analysis of tails data
+#load data and packages
+library(Morpho)
+library(geomorph)
 data("tails")
-pca <- prcomp(geomorph::two.d.array(tails$shapes))
+
+#perform principal component analysis on tails data
+pca <- prcomp(two.d.array(tails$shapes))
 
 #transform the scores back to shapes
 backshapes_mat <- rev_eigen(scores = pca$x,
                             vectors = pca$rotation,
                             center = pca$center)
-backshapes_arr <- geomorph::arrayspecs(backshapes_mat, k = 2, p = 9)
+backshapes_arr <- arrayspecs(backshapes_mat, k = 2, p = 9)
 
 #compare
 pile_shapes(tails$shapes)
@@ -41,14 +45,14 @@ pile_shapes(backshapes_arr)
 extshapes_mat <- rev_eigen(scores = range(pca$x[,1]),
                            vectors = pca$rotation[,1],
                            center = pca$center)
-extshapes_arr <- geomorph::arrayspecs(extshapes_mat, k = 2, p = 9)
+extshapes_arr <- arrayspecs(extshapes_mat, k = 2, p = 9)
 
 #plot and compare
 plot(extshapes_arr[,,1])
-Morpho::lineplot(extshapes_arr[,,1], tails$links) ; title("negative")
+lineplot(extshapes_arr[,,1], tails$links) ; title("negative")
 plot(extshapes_arr[,,2])
-Morpho::lineplot(extshapes_arr[,,2], tails$links) ; title("positive")
+lineplot(extshapes_arr[,,2], tails$links) ; title("positive")
 }
 \seealso{
-\code{\link{project_eigen}}
+\code{\link{proj_eigen}}
 }

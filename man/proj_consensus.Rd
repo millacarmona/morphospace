@@ -31,7 +31,8 @@ to groups' mean shapes to \code{mspace} objects during pipeline. Otherwise,
 it does the same than \code{proj_shapes}.
 }
 \examples{
-#load and extract relevant data and information
+#load and extract relevant data, packages and information
+library(magrittr)
 data("shells")
 shapes <- shells$shapes
 species <- shells$data$species

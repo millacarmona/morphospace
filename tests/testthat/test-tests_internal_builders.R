@@ -170,6 +170,7 @@ test_that(desc = "testing morphogrid, dimensions", code = {
   nh = 20
   p = nrow(tails$shapes)
   k = ncol(tails$shapes)
+  pca <- prcomp(geomorph::two.d.array(tails$shapes))
   shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
                             k = k, p = p, nh = nh, nv = nv)
 
@@ -188,6 +189,7 @@ test_that(desc = "testing morphogrid, frame of the plot", code = {
   nh = 2
   p = nrow(tails$shapes)
   k = ncol(tails$shapes)
+  pca <- prcomp(geomorph::two.d.array(tails$shapes))
   shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
                             k = k, p = p, nh = nh, nv = nv)
 

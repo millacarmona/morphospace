@@ -3,7 +3,7 @@
 
 #' Phylogenetic Principal Component Analysis
 #'
-#' @description A wrapper for [pyl.pca()] from \code{phytools}.
+#' @description A wrapper for [phytools::phyl.pca()].
 #'
 #' @param x A matrix with one or more variables as columns and observations as
 #'   rows. Row must be named and match tip labels from the phylogenetic
@@ -12,7 +12,7 @@
 #'   should match the row names from \code{x}.
 #' @param corr Logical; whether to use correlation instead of covariance matrix
 #'   as input.
-#' @param ...
+#' @param ... Further arguments passed to [phytools::phyl.pca()].
 #'
 #' @details Phylogenetic PCA finds the linear combination of variables (in the
 #'   the context of \code{morphospace} will generally be a series of shapes
@@ -55,7 +55,7 @@
 #'   of the model; see \code{\link[phytools]{phyl.pca}}.}
 #'   }
 #'
-#' @seealso \code{\link[phytools]{phyl.pca}}, \code{\link[base]{prcomp}},
+#' @seealso \code{\link[phytools]{phyl.pca}}, \code{\link[stats]{prcomp}},
 #'   \code{\link{exp_var}}
 #'
 #' @export
@@ -73,7 +73,8 @@
 #'   of Mammalogy, 24(1), 25-32.
 #'
 #' @examples
-#' #load data
+#' #load data and packages
+#' library(geomorph)
 #' data("tails")
 #'
 #' #compute mean shapes for all species and extract the phylogenetic tree
@@ -81,7 +82,7 @@
 #' tree <- tails$tree
 #'
 #' #perform phylogenetic PCA
-#' ppca <- phy_prcomp(x = geomorph::two.d.array(sp_shapes), tree = tree)
+#' ppca <- phy_prcomp(x = two.d.array(sp_shapes), tree = tree)
 #'
 #' #look at the results
 #' names(ppca) #the contents of the resulting object
@@ -171,7 +172,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #'   variables.}
 #'   }
 #'
-#' @seealso \code{\link[base]{prcomp}}, \code{\link{exp_var}}
+#' @seealso \code{\link[stats]{prcomp}}, \code{\link{exp_var}}
 #'
 #' @references Mitteroecker, P., & Bookstein, F. (2011). \emph{Linear
 #' discrimination, ordination, and the visualization of selection gradients in
@@ -274,7 +275,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 
   }
 
-  results <- list(sdev = sqrt(values), rotation = rotation, x = cbind(scores),
+  results <- list(sdev = sqrt(values), rotation = cbind(rotation), x = cbind(scores),
                   center = grandmean, grcenters = groupmeans, totvar = totvar)
   class(results) <- "bg_prcomp"
   return(results)
@@ -285,18 +286,19 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 
 #' Two-blocks Partial Least Squares
 #'
-#' @description Performs 2B Partial Least Squares allowing for leave-one-out
-#'   cross-validation, which is useful one the number of variables exceeds the
-#'   number of observations (i.e. alleviates spurious covariation between
-#'   variables).
+#' Performs phylogenetic 2B Partial Least Squares allowing for leave-one-out cross-validation
+#'   and removal of phylogenetic covariation (experimental).
 #'
 #' @param x A matrix with one or more variables as columns and observations as
 #'   rows, representing the first block.
 #' @param y A matrix with one or more variables as columns and observations as
 #'   rows, representing the second block.
+#' @param tree A \code{"phy"} object containing a phylogenetic tree. Tip labels
+#'   should match the row number and names from \code{x} and \code{y}.
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
 #'   scores resulting from LOOCV.
+#'
 #'
 #' @details Starting with two blocks of variables measured for the same
 #'   cases, two-blocks PLS finds the linear combination of variables on each
@@ -312,7 +314,21 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'   observation is excluded from the calculation of PLS axes before its
 #'   projection in the resulting ordination as a way to calculate its score).
 #'
-#' @return A \code{"pls2b"} object, containing:
+#'   If \code{tree} is supplied, rows of \code{x} and \code{y} are assumed to
+#'   be linked by those phylogenetic relationships. In this case, the resulting
+#'   axes maximize the residual covariation among blocks left after removing
+#'   covariation among blocks accounted by phylogenetic history (assuming a
+#'   Brownian model of evolution and 100% phylogenetic signal, which is
+#'   equivalent to setting \code{method = "BM"} in [phytools::phyl.pca()]).
+#'
+#'   The phylogenetic version of \code{pls2b} displays the same variational
+#'   properties than phylogenetic PCA (i.e. centering on the phylogenetic mean;
+#'   orientation of scores reflect non-phylogenetic covariation but their variance
+#'   is not scaled and thus contain phylogenetic information; for the latter
+#'   reason, variance of scores and eigenvalues differ; scores are correlated; etc;
+#'   see Polly et al. 2013).
+#'
+#' @return A \code{"pls2b"} or \code{"phy_pls2b"} object, containing:
 #' \itemize{
 #'   \item \code{$values:} {vector of singular values accounting for the
 #'   covariation among blocks explained by each par of axes.}
@@ -321,42 +337,57 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'   \item \code{$yrotation:} {matrix of vector coefficients for the second
 #'   block.}
 #'   \item \code{$xcenter:} {the mean values of the original variables from
-#'   the first block.}
+#'   the first block (or their phylogenetic mean, if \code{tree} is
+#'   provided).}
 #'   \item \code{$ycenter:} {the mean values of the original variables from
-#'   the second block.}
+#'   the second block (or their phylogenetic mean, if \code{tree} is
+#'   provided).}
 #'   \item \code{$xtotvar:} {the sum of the variances from the original
 #'   variables from the second block.}
 #'   \item \code{$ytotvar:} {the sum of the variances from the original
 #'   variables from the second block.}
 #'   }
 #'
-#' @seealso \code{\link{pls_shapes}}, \code{\link{phy_pls2b}},
+#' @seealso \code{\link{pls_shapes}}, \code{\link{phy_prcomp}},
 #'   \code{\link{exp_var}}
 #'
 #' @export
 #'
-#' @references Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial
+#' @references
+#' Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial
 #' least-squares to study covariation in shape}. Systematic Biology, 49(4),
 #' 740-753.
 #'
-#' Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012).
-#' \emph{Geometric morphometrics for biologists: A primer}. 2nd ed. Academic
+#' Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012). \emph{Geometric
+#' morphometrics for biologists: A primer}. 2nd ed. Academic
 #' Press.
+#'
+#' Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
+#' \emph{Phylogenetic principal components analysis and geometric
+#' morphometrics}. Hystrix, 24(1), 33.
+#'
+#' Monteiro, L. R. (2013). \emph{Morphometrics and the comparative method:
+#' studying the evolution of biological shape}. Hystrix, the Italian Journal
+#' of Mammalogy, 24(1), 25-32.
 #'
 #' Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
 #' components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
 #' 271-302.
 #'
 #' @examples
-#' #load data
+#' #load data and packages
+#' library(geomorph)
 #' data("tails")
 #'
-#' #extract shapes and log sizes
+#' #extract mean log sizes and shapes for all species, as well as the phylogenetic tree
 #' shapes <- tails$shapes
 #' sizes <- log(tails$sizes)
+#' sp_shapes <- consensus(shapes = shapes, index = tails$data$species)
+#' sp_sizes <- tapply(X = sizes, INDEX = tails$data$species, FUN = mean)
+#' tree <- tails$tree
 #'
 #' #perform PLS between shape and size
-#' pls <- pls2b(y = geomorph::two.d.array(shapes), x = sizes)
+#' pls <- pls2b(y = two.d.array(shapes), x = sizes)
 #'
 #' #look at the results
 #' names(pls) #the contents of the resulting object
@@ -370,168 +401,11 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' names(pls2) #the contents of the resulting object
 #' exp_var(pls2) #variance explained by each axis
 #' plot(pls2$x2, pls2$x) #ordination
-pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
-
-  x <- cbind(x)
-  y <- cbind(y)
-
-  totvar_x <- sum(apply(x, 2, stats::var))
-  totvar_y <- sum(apply(y, 2, stats::var))
-
-  y_center <- colMeans(y)
-  x_center <- colMeans(x)
-
-  ndims <- min(nrow(x), ncol(x), ncol(y))
-  svd <- Morpho:::svd2B(x, y)
-  values <- (svd$d^2)[1:ndims]
-  y_rotation <- cbind((svd$v)[,1:ndims])
-  x_rotation <- cbind((svd$u)[,1:ndims])
-
-  if(LOOCV == FALSE) {
-
-    yscores <- proj_eigen(y, y_rotation, y_center)
-    xscores <- proj_eigen(x, x_rotation, x_center)
-
-  } else {
-
-    yscores <- c()
-    xscores <- c()
-
-    refyaxis <- y_rotation[,1]
-    refxaxis <- x_rotation[,1]
-
-    for(i in 1:nrow(y)) {
-
-      suby <- y[-i,]
-      subx <- x[-i,]
-
-      subsvd <- Morpho:::svd2B(subx, suby)
-
-      if(length(refyaxis) > 1) {
-        yscores <- rbind(yscores,
-                         proj_eigen(y[i,], subsvd$v[,1:ndims], y_center) *
-                           sign(stats::cor(subsvd$v[,1], refyaxis)) )
-      } else {
-        yscores <- rbind(yscores,
-                         proj_eigen(y[i,], subsvd$v[,1:ndims], y_center) *
-                           sign(subsvd$v[,1] * refyaxis) )
-      }
-
-      if(length(refxaxis) > 1) {
-        xscores <- rbind(xscores,
-                         proj_eigen(x[i,], subsvd$u[,1:ndims], x_center) *
-                           sign(stats::cor(subsvd$u[,1], refxaxis)) )
-      } else {
-        xscores <- rbind(xscores,
-                         proj_eigen(x[i,], subsvd$u[,1:ndims], x_center) *
-                           sign(subsvd$u[,1] * refxaxis) )
-      }
-
-    }
-
-    yscores <- scale(yscores, center = TRUE, scale = FALSE)
-    xscores <- scale(xscores, center = TRUE, scale = FALSE)
-
-    if(recompute == TRUE) {
-      rotation_y <- t(t(yscores) %*% t(t(y)))
-      rotation_x <- t(t(xscores) %*% t(t(x)))
-    }
-  }
-
-  results <- list(yscores = cbind(yscores), yrotation = y_rotation, ycenter = y_center, ytotvar = totvar_y,
-                  xscores = cbind(xscores), xrotation = x_rotation, xcenter = x_center, xtotvar = totvar_x,
-                  values = values)
-  class(results) <- "pls2b"
-  return(results)
-
-}
-
-########################################################################################
-
-#' Phylogenetic Two-blocks Partial Least Squares
 #'
-#' Performs phylogenetic 2B Partial Least Squares allowing for leave-one-out cross-validation. Experimental.
 #'
-#' @param x A matrix with one or more variables as columns and observations as
-#'   rows, representing the first block.
-#' @param y A matrix with one or more variables as columns and observations as
-#'   rows, representing the second block.
-#' @param tree A \code{"phy"} object containing a phylogenetic tree. Tip labels
-#'   should match the row number and names from \code{x} and \code{y}.
-#' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
-#' @param recompute Logical; whether to re-compute rotation matrix using the
-#'   scores resulting from LOOCV.
-#'
-#' @details Similar to \code{\link{pls2b}} but cases are linked by phylogenetic
-#'   relationships. Like in the case of \code{\link{phy_prcomp}}, the resulting
-#'   axes maximize the residual covariation among blocks left after removing
-#'   covariation among blocks accounted by phylogenetic history (assuming a
-#'   Brownian model of evolution an 100% phylogenetic signal, which is
-#'   equivalent to setting \code{method = "BM"} in [phyl.pca()]).
-#'
-#'   This method display the same variational properties than phylogenetic PCA,
-#'   (i.e. centering on the phylogenetic mean; orientation of scores reflect
-#'   non-phylogenetic covariation but their variance is not scaled and thus
-#'   contain phylogenetic information; for the latter reason, variance of
-#'   scores and eigenvalues differ; scores are correlated; etc; see Polly
-#'   et al. 2013).
-#'
-#'   As in other supervised multivariate ordination functions from
-#'   \code{morphospace}, leave-one-out cross-validation can be implemented to
-#'   alleviate the spurious covariation among blocks that is produced when
-#'   the number of variables exceeds the number of cases.
-#'
-#' @return A \code{"phy_pls2b"} object, containing:
-#' \itemize{
-#'   \item \code{$values:} {vector of singular values accounting for the
-#'   covariation among blocks explained by each par of axes.}
-#'   \item \code{$xrotation:} {matrix of vector coefficients for the first
-#'   block.}
-#'   \item \code{$yrotation:} {matrix of vector coefficients for the second
-#'   block.}
-#'   \item \code{$xcenter:} {the mean values of the original variables from
-#'   the first block.}
-#'   \item \code{$ycenter:} {the mean values of the original variables from
-#'   the second block.}
-#'   \item \code{$xtotvar:} {the sum of the variances from the original
-#'   variables from the second block.}
-#'   \item \code{$ytotvar:} {the sum of the variances from the original
-#'   variables from the second block.}
-#'   }
-#'
-#' @seealso \code{\link{pls_shapes}}, \code{\link{pls2b}},
-#'   \code{\link{phy_prcomp}}, \code{\link{exp_var}}
-#'
-#' @export
-#'
-#' @references
-#' Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial
-#' least-squares to study covariation in shape}. Systematic Biology, 49(4),
-#' 740-753.
-#'
-#' Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
-#' components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
-#' 271-302.
-#'
-#' Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
-#' \emph{Phylogenetic principal components analysis and geometric
-#' morphometrics}. Hystrix, 24(1), 33.
-#'
-#' Monteiro, L. R. (2013). \emph{Morphometrics and the comparative method:
-#' studying the evolution of biological shape}. Hystrix, the Italian Journal
-#' of Mammalogy, 24(1), 25-32.
-#'
-#' @examples
-#' #load data
-#' data("tails")
-#'
-#' #extract mean log sizes and shapes for all species, as well as the phylogenetic tree
-#' sp_shapes <- consensus(shapes = tails$shapes, index = tails$data$species)
-#' sp_sizes <- tapply(X = log(tails$sizes), INDEX = tails$data$species, FUN = mean)
-#' tree <- tails$tree
 #'
 #' #perform phylogenetic PLS
-#' ppls <- phy_pls2b(y = geomorph::two.d.array(sp_shapes), x = sp_sizes, tree = tree)
+#' ppls <- pls2b(y = two.d.array(sp_shapes), x = sp_sizes, tree = tree)
 #'
 #' #look at the results
 #' names(ppls) #the contents of the resulting object
@@ -546,7 +420,7 @@ pls2b <- function(x, y, LOOCV = FALSE, recompute = FALSE) {
 #' names(ppls2) #the contents of the resulting object
 #' exp_var(ppls2) #variance explained by each axis
 #' plot(ppls2$x2, ppls2$x) #ordination
-phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
+pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 
   x <- cbind(x)
   y <- cbind(y)
@@ -554,45 +428,46 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
   namesx <- rownames(x)
   namesy <- rownames(y)
 
-  if(!all(length(tree$tip.label) == nrow(x), length(tree$tip.label) == nrow(y))) {
-    stop("Number of tips in the tree does not match the number of observations in x and/or y data sets")
-  }
+  if(!is.null(tree)){
 
-  if(!all(tree$tip.label %in% namesy, tree$tip.label %in% namesx)) {
-    stop("Names in phylogenetic tree does not match names in x and/or y data sets")
+    if(!all(length(tree$tip.label) == nrow(x), length(tree$tip.label) == nrow(y))) {
+      stop("Number of tips in the tree does not match the number of observations in x and/or y data sets")
+    }
+
+    if(!all(tree$tip.label %in% namesy, tree$tip.label %in% namesx)) {
+      stop("Names in phylogenetic tree does not match names in x and/or y data sets")
+    } else {
+      x <- cbind(x[tree$tip.label,])
+      y <- cbind(y[tree$tip.label,])
+    }
+
+    anc <- apply(cbind(x, y), 2, phytools::fastAnc, tree = tree)[1,]
+    x_center <- anc[1:ncol(x)]
+    y_center <- anc[(ncol(x) + 1):(ncol(x) + ncol(y))]
+
   } else {
-    x <- cbind(x[tree$tip.label,])
-    y <- cbind(y[tree$tip.label,])
+    y_center <- colMeans(y)
+    x_center <- colMeans(x)
   }
 
   totvar_x <- sum(apply(x, 2, stats::var))
   totvar_y <- sum(apply(y, 2, stats::var))
 
-  C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
+  svd <- svd_block(x, y, tree)
 
-  xy <- cbind(x,y)
-  C <- phytools::phyl.vcv(xy, C, 1)$C
-  anc <- phytools::phyl.vcv(xy, C, 1)$alpha
-  R <- phytools::phyl.vcv(xy, C, 1)$R
+  ndims <- length(svd$d)
+  values <- (svd$d^2)
+  y_rotation <- svd$v
+  x_rotation <- svd$u
 
-  part_R <- R[1:ncol(x), (ncol(x) + 1):(ncol(x) + ncol(y))]
-  svd <- svd(part_R)
-
-  x_anc <- anc[1:ncol(x)]
-  y_anc <- anc[(ncol(x) + 1):(ncol(x) + ncol(y))]
-
-  ndims <- min(nrow(x), ncol(x), ncol(y))
-  values <- (svd$d^2)[1:ndims]
-  rotations <- list(svd$v, svd$u)
-  whichy <- which(unlist(lapply(rotations, nrow)) == ncol(y))
-  whichx <- which(unlist(lapply(rotations, nrow)) == ncol(x))
-  y_rotation <- cbind(rotations[[whichy]][,1:ndims])
-  x_rotation <- cbind(rotations[[whichx]][,1:ndims])
 
   if(LOOCV == FALSE) {
 
-    yscores <- proj_eigen(y, y_rotation, y_anc)[namesy,]
-    xscores <- proj_eigen(x, x_rotation, x_anc)[namesx,]
+    yscores <- proj_eigen(y, y_rotation, y_center)[namesy,]
+    xscores <- proj_eigen(x, x_rotation, x_center)[namesx,]
+
+    colMeans(cbind(yscores))
+    colMeans(cbind(xscores))
 
   } else {
 
@@ -606,52 +481,45 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 
       subx <- cbind(x[-i,])
       suby <- cbind(y[-i,])
-      subtree <- ape::drop.tip(phy = tree, tip = i)
 
-      subC <- ape::vcv.phylo(subtree)[rownames(subx), rownames(subx)]
+      if(!is.null(tree)) {
+        subtree <- ape::drop.tip(phy = tree, tip = i)
+      } else {
+        subtree <- NULL
+      }
 
-      subxy <- cbind(subx, suby)
-      subC <- phytools::phyl.vcv(subxy, subC, 1)$C
-      subanc <- phytools::phyl.vcv(subxy, subC, 1)$alpha
-      subR <- phytools::phyl.vcv(subxy, subC, 1)$R
+      subsvd <- svd_block(subx, suby, subtree)
 
-      subpart_R <- subR[1:ncol(subx), (ncol(subx) + 1):(ncol(subx) + ncol(suby))]
-      subsvd <- svd(subpart_R)
-
-      subx_anc <- anc[1:ncol(subx)]
-      suby_anc <- anc[(ncol(subx) + 1):(ncol(subx) + ncol(suby))]
-
-      subrotations <- list(subsvd$v, subsvd$u)
-      whichy <- which(unlist(lapply(subrotations, nrow)) == ncol(suby))
-      whichx <- which(unlist(lapply(subrotations, nrow)) == ncol(subx))
-      suby_rotation <- subrotations[[whichy]]
-      subx_rotation <- subrotations[[whichx]]
+      suby_rotation <- subsvd$v
+      subx_rotation <- subsvd$u
 
 
       if(length(refyaxis) > 1) {
         yscores <- rbind(yscores,
-                         proj_eigen(y[i,], suby_rotation, y_anc) *
+                         proj_eigen(y[i,], suby_rotation, y_center) *
                            sign(stats::cor(suby_rotation[,1], refyaxis)) )
       } else {
         yscores <- rbind(yscores,
-                         proj_eigen(y[i,], suby_rotation, y_anc) *
+                         proj_eigen(y[i,], suby_rotation, y_center) *
                            sign(suby_rotation[,1] * refyaxis) )
       }
 
       if(length(refxaxis) > 1) {
         xscores <- rbind(xscores,
-                         proj_eigen(x[i,], subx_rotation, x_anc) *
+                         proj_eigen(x[i,], subx_rotation, x_center) *
                            sign(stats::cor(subx_rotation[,1], refxaxis)) )
       } else {
         xscores <- rbind(xscores,
-                         proj_eigen(x[i,], subx_rotation, x_anc) *
+                         proj_eigen(x[i,], subx_rotation, x_center) *
                            sign(subx_rotation[,1] * refxaxis) )
       }
 
     }
 
-    yscores <- scale(yscores, center = TRUE, scale = FALSE)
-    xscores <- scale(xscores, center = TRUE, scale = FALSE)
+    if(is.null(tree)) {
+      yscores <- t(t(yscores) - colMeans(yscores))
+      xscores <- t(t(xscores) - colMeans(xscores))
+    }
 
     if(recompute == TRUE) {
       y_rotation <- t(t(yscores) %*% t(t(y)))
@@ -665,20 +533,27 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 
   }
 
-  results <- list(yscores = cbind(yscores), yrotation = y_rotation, ycenter = y_anc, ytotvar = totvar_y,
-                  xscores = cbind(xscores), xrotation = y_rotation, xcenter = x_anc, xtotvar = totvar_x,
+
+  results <- list(yscores = cbind(yscores), yrotation = cbind(y_rotation),
+                  ycenter = y_center, ytotvar = totvar_y,
+                  xscores = cbind(xscores), xrotation = cbind(x_rotation),
+                  xcenter = x_center, xtotvar = totvar_x,
                   values = values)
-  class(results) <- "phy_pls2b"
+  if(is.null(tree)) {
+    class(results) <- "pls2b"
+  } else {
+    class(results) <- "phy_pls2b"
+  }
   return(results)
 }
+
 
 ########################################################################################
 
 #' 2B Partial Least Squares for shape data
 #'
-#' @description A wrapper for [pls2b()] or [phy_pls2b()] aimed specifically
-#'   at synthesizing covariation between shape data and other external,
-#'   non-shape variable(s).
+#' @description A wrapper for [pls2b()] aimed specifically at synthesizing
+#'   covariation between shape data and other external, non-shape variable(s).
 #'
 #' @param X A matrix with variables as columns and observations as rows,
 #'   representing the external variables that supervise ordination
@@ -721,7 +596,7 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 #'   \code{x} scores.}
 #'   }
 #'
-#' @seealso \code{\link{pls2b}}, \code{\link{phy_pls2b}}
+#' @seealso \code{\link{pls2b}}
 #'
 #' @export
 #'
@@ -782,12 +657,9 @@ phy_pls2b <- function(x, y, tree, LOOCV = FALSE, recompute = FALSE) {
 pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 
   y <- shapes_mat(shapes)$data2d
+  x <- cbind(X)
 
-  if(is.null(tree)) {
-    pls <- pls2b(y = y, x = X, LOOCV = LOOCV, recompute = recompute)
-  } else {
-    pls <- phy_pls2b(y = y, x = X, tree = tree, LOOCV = LOOCV, recompute = recompute)
-  }
+  pls <- pls2b(y = y, x = x, tree = tree, LOOCV = LOOCV, recompute = recompute)
 
   results <- list(sdev = apply(pls$yscores, 2, stats::sd),
                   rotation = pls$yrotation,
@@ -823,7 +695,7 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 #'
 #' @export
 #'
-#' @seealso \code{\link[base]{prcomp}}, \code{\link{bg_prcomp}},
+#' @seealso \code{\link[stats]{prcomp}}, \code{\link{bg_prcomp}},
 #' \code{\link{phy_prcomp}}, \code{\link{pls_shapes}}
 #'
 #' @examples

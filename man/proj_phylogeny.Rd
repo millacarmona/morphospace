@@ -40,7 +40,8 @@ position of these shapes in morphospace is estimated using the squared-changes
 parsimony algorithm as performed by \code{fastAnc} from \code{phytools}.
 }
 \examples{
-#load and extract relevant data and information
+#load and extract relevant data, packages and information
+library(magrittr)
 data("tails")
 shapes <- tails$shapes
 species <- tails$data$species

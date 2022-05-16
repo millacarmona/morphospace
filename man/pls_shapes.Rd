@@ -39,9 +39,8 @@ variables in the shape block.}
 }
 }
 \description{
-A wrapper for \code{\link[=pls2b]{pls2b()}} or \code{\link[=phy_pls2b]{phy_pls2b()}} aimed specifically
-at synthesizing covariation between shape data and other external,
-non-shape variable(s).
+A wrapper for \code{\link[=pls2b]{pls2b()}} aimed specifically at synthesizing
+covariation between shape data and other external, non-shape variable(s).
 }
 \details{
 This function finds the linear combination maximizing covariation
@@ -116,5 +115,5 @@ components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
 271-302.
 }
 \seealso{
-\code{\link{pls2b}}, \code{\link{phy_pls2b}}
+\code{\link{pls2b}}
 }

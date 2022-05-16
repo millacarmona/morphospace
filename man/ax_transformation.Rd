@@ -8,7 +8,7 @@ ax_transformation(obj, axis = 1, mag = 1)
 }
 \arguments{
 \item{obj}{An object containing either a multivariate ordination of class
-\code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes} or
+\code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes"} or
 \code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using \code{\link[=lm]{lm()}}.}
 
 \item{axis}{An optional numeric value specifying the axis of the multivariate
@@ -32,35 +32,44 @@ levels allowed) is supplied in \code{obj}, magnification of the axis range
 is attained through bgPCA.
 }
 \examples{
-#load tail data
+#load tail data and packages
+library(geomorph)
 data("tails")
+shapes <- tails$shapes
+links <- tails$links
 
 #perform PCA, compute and plot extreme shapes of PC1 at its natural range
-pca <- prcomp(geomorph::two.d.array(tails$shapes))
-extshapes <- ax_transformation(obj = pca, axis = 1, mag = 1)
-pile_shapes(extshapes, links = links, mshape = FALSE)
+pca <- prcomp(two.d.array(shapes))
+extshapes2d <- ax_transformation(obj = pca, axis = 1, mag = 1)
+extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
+pile_shapes((extshapes), links = links, mshape = FALSE)
 
 #compute and plot extreme shapes of PC2 at its natural range
-extshapes <- ax_transformation(obj = pca, axis = 2, mag = 1)
+extshapes2d <- ax_transformation(obj = pca, axis = 2, mag = 1)
+extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 pile_shapes(extshapes, links = links, mshape = FALSE)
 
 #compute and plot extreme shapes of PC2 magnified x2
-extshapes <- ax_transformation(obj = pca, axis = 2, mag = 2)
+extshapes2d <- ax_transformation(obj = pca, axis = 2, mag = 2)
+extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 pile_shapes(extshapes, links = links, mshape = FALSE)
 
 #perform lm of shape on size, compute and plot extreme shapes at its natural range
-model <- lm(geomorph::two.d.array(tails$shapes) ~ log(tails$sizes))
-extshapes <- ax_transformation(obj = model, mag = 1)
+model <- lm(two.d.array(tails$shapes) ~ log(tails$sizes))
+extshapes2d <- ax_transformation(obj = model, mag = 1)
+extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 pile_shapes(extshapes, links = links, mshape = FALSE)
 
 #perform lm of shape on size, compute and plot extreme shapes at its natural range
-model <- lm(geomorph::two.d.array(tails$shapes) ~ tails$data$sex)
-extshapes <- ax_transformation(obj = model, mag = 1)
+model <- lm(two.d.array(tails$shapes) ~ tails$data$sex)
+extshapes2d <- ax_transformation(obj = model, mag = 1)
+extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 pile_shapes(extshapes, links = links, mshape = FALSE)
 
 #perform lm of shape on size, compute and plot extreme shapes magnified x2
-model <- lm(geomorph::two.d.array(tails$shapes) ~ tails$data$sex)
-extshapes <- ax_transformation(obj = model, mag = 2)
+model <- lm(two.d.array(tails$shapes) ~ tails$data$sex)
+extshapes2d <- ax_transformation(obj = model, mag = 2)
+extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 pile_shapes(extshapes, links = links, mshape = FALSE)
 }
 \references{

@@ -16,10 +16,21 @@ for each group.}
 
 \item{...}{Further arguments passed to \code{\link[=polygon]{polygon()}}.}
 }
-\value{
-
-}
 \description{
 Plot convex hulls for different groups in 2D scatterplots
 created using the generic \code{\link[=plot]{plot()}} function.
+}
+\examples{
+#load landmark data and nencessary packages
+library(geomorph)
+data("tails")
+shapes <- tails$shapes
+species <- tails$data$species
+
+#perform PCA
+pca <- prcomp(two.d.array(shapes))
+
+#plot and add convex hulls
+plot(pca$x)
+hulls_by_group_2D(pca$x, fac = species, col = "black")
 }

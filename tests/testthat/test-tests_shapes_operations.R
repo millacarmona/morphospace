@@ -203,7 +203,7 @@ test_that(desc = "testing rotate_fcoef", code = {
   shape1_coo <- inv_efourier(shape1_coe, 300)
   shape1_rot_coo <- inv_efourier(shape1_rot_coe, 300)
 
-  testshape <- rotate.coords(rotate.coords(shape1_coo, type = "rotateCC"), type = "rotateCC")
+  testshape <- geomorph::rotate.coords(geomorph::rotate.coords(shape1_coo, type = "rotateCC"), type = "rotateCC")
   result3 <- all(round(testshape[order(testshape[,1])],5) == round(shape1_rot_coo[order(shape1_rot_coo[,1])],5))
 
   expect_true(result1, result2, result3)
@@ -223,10 +223,11 @@ test_that(desc = "testing correct_efourier, automatic behavior", code = {
   shape1_coo <- inv_efourier(shapes_coe$coe[1,], 300)
   shape1_rot_coo <- inv_efourier(shapes_rot_coe$coe[1,], 300)
 
-  testshape <- rotate.coords(rotate.coords(shape1_coo, type = "rotateCC"), type = "rotateCC")
+  testshape <- geomorph::rotate.coords(geomorph::rotate.coords(shape1_coo, type = "rotateCC"), type = "rotateCC")
   result2 <- all(round(testshape[order(testshape[,1])],5) == round(shape1_rot_coo[order(shape1_rot_coo[,1])],5))
 
   expect_true(result1, result2)
+  dev.off()
 })
 
 
@@ -262,7 +263,7 @@ test_that(desc = "testing ax_transformations, dimensions", code = {
   pca <- prcomp(geomorph::two.d.array(shapes))
   bgpca <- bg_prcomp(geomorph::two.d.array(shapes), groups = species)
   phypca <- phy_prcomp(geomorph::two.d.array(consensus(shapes, species)), tree = tree)
-  pls <- pls_shapes(shapes = geomorph::two.d.array(shapes), x = sizes)
+  pls <- pls_shapes(shapes = geomorph::two.d.array(shapes), X = sizes)
 
   ext1 <- ax_transformation(obj = model)
   ext2 <- ax_transformation(obj = pca)
@@ -279,34 +280,33 @@ test_that(desc = "testing ax_transformations, dimensions", code = {
 
 
 test_that(desc = "testing ax_transformations, accuracy of shapes", code = {
-  data(tails)
+  data("tails")
 
   shapes <- tails$shapes
   sizes <- tails$sizes
   sex <- tails$data$sex
-  tree <- tails$tree
 
-  model <- lm(geomorph::two.d.array(shapes) ~ sizes)
-  ext_model <- geomorph::arrayspecs(ax_transformation(obj = model, mag = 1), k = ncol(shapes), p = nrow(shapes))
+  model1 <- lm(geomorph::two.d.array(shapes) ~ sizes)
+  ext_model <- geomorph::arrayspecs(ax_transformation(obj = model1, mag = 1), k = ncol(shapes), p = nrow(shapes))
 
-  pls <- pls_shapes(shapes = geomorph::two.d.array(shapes), x = sizes)
+  pls <- pls_shapes(shapes = geomorph::two.d.array(shapes), X = sizes)
   ext_pls <- geomorph::arrayspecs(ax_transformation(obj = pls, mag = 1), k = ncol(shapes), p = nrow(shapes))
   ext_pls2 <- geomorph::arrayspecs(rev_eigen(range(lm(pls$x ~ sizes)$fitted), pls$rotation[,1], pls$center),
                                    k = ncol(shapes), p = nrow(shapes))
 
-  result1 <- all(round(ext_model,10) == round(ext_pls2,10))
+  result1 <- all(round(ext_model[,,order(ext_model[1,1,])],10) == round(ext_pls2[,,order(ext_pls2[1,1,])],10))
 
-
-  model <- lm(geomorph::two.d.array(shapes) ~ sex)
-  ext_model <- geomorph::arrayspecs(ax_transformation(obj = model, mag = 1), k = ncol(shapes), p = nrow(shapes))
+  model2 <- lm(geomorph::two.d.array(shapes) ~ sex)
+  ext_model <- geomorph::arrayspecs(ax_transformation(obj = model2, mag = 1), k = ncol(shapes), p = nrow(shapes))
 
   bgpca <- bg_prcomp(geomorph::two.d.array(shapes), groups = sex)
   ext_bgpca <- geomorph::arrayspecs(ax_transformation(obj = bgpca, mag = 1), k = ncol(shapes), p = nrow(shapes))
   ext_bgpca2 <- geomorph::arrayspecs(rev_eigen(range(lm(bgpca$x[,1] ~ sex)$fitted), bgpca$rotation[,1], bgpca$center),
-                                   k = ncol(shapes), p = nrow(shapes))
+                                     k = ncol(shapes), p = nrow(shapes))
 
-  result2 <- all(round(ext_model,10) == round(ext_bgpca2,10))
-  expect_true(all(results1, results2))
+  result2 <- all(round(ext_model[,,order(ext_model[1,1,])],10) == round(ext_bgpca2[,,order(ext_bgpca2[1,1,])],10))
+
+  expect_true(all(result1, result2))
 })
 
 

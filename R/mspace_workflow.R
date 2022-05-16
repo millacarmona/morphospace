@@ -22,8 +22,8 @@
 #' @param k Numeric, indicating the number of cartesian dimensions of
 #'   landmarks/semilandmarks (for landmark data only).
 #' @param FUN The function to be used for synthesizing geometric morphometric
-#'   variation. The options include \code{prcomp}, \code{bg_prcomp} and
-#'   \code{phy_prcomp}.
+#'   variation. Usual alternatives include \code{\link[stats]{prcomp}},
+#'   \code{\link{bg_prcomp}} and \code{\link{phy_prcomp}}.
 #' @param nh Numeric; the number of shape models along the x axis.
 #' @param nv Numeric; the number of shape models along the y axis.
 #' @param mag Numeric; magnifying factor for shape models.
@@ -43,7 +43,7 @@
 #' @param plot Logical; whether to plot morphospace.
 #' @param xlim,ylim,xlab,ylab,asp Standard arguments passed to the generic plot
 #'   function.
-#' @param ... Further arguments passed to [FUN].
+#' @param ... Further arguments passed to \code{FUN}.
 #'
 #' @details This function is the central piece of the \code{morphospace} workflow.
 #'   It produces a synthetic space from a sample of normalized shapes using
@@ -66,7 +66,7 @@
 #'
 #' @seealso \code{\link{proj_shapes}}, \code{\link{proj_consensus}},
 #'   \code{\link{proj_groups}}, \code{\link{proj_phylogeny}},
-#'   \code{\link{proj_axis}}, \code{\link{plot_consensus}}
+#'   \code{\link{proj_axis}}
 #'
 #' @export
 #'
@@ -115,7 +115,7 @@ mspace <- function(shapes,
                    template = NULL,
                    p = NULL,
                    k = NULL,
-                   FUN = prcomp,
+                   FUN = stats::prcomp,
                    nh = 5,
                    nv = 4,
                    mag = 1,
@@ -176,23 +176,27 @@ mspace <- function(shapes,
   if(is.null(xlab)) xlab <- paste0(axes[1])
   if(is.null(ylab)) ylab <- paste0(axes[2])
 
-  if(any(ordtype == c("prcomp", "bg_prcomp", "phy_prcomp"))) {
-    if(ordtype == "prcomp") {
-      xlab <- paste0("PC", xlab)
-      ylab <- paste0("PC", ylab)
-    }
-    if(ordtype == "bg_prcomp") {
-      xlab <- paste0("bgPC", xlab)
-      ylab <- paste0("bgPC", ylab)
-    }
-    if(ordtype == "phy_prcomp") {
-      xlab <- paste0("phyPC", xlab)
-      ylab <- paste0("phyPC", ylab)
-    }
-  } else {
+  if(ordtype == "prcomp") {
+    xlab <- paste0("PC", xlab)
+    ylab <- paste0("PC", ylab)
+  }
+  if(ordtype == "bg_prcomp") {
+    xlab <- paste0("bgPC", xlab)
+    ylab <- paste0("bgPC", ylab)
+  }
+  if(ordtype == "phy_prcomp") {
+    xlab <- paste0("phyPC", xlab)
+    ylab <- paste0("phyPC", ylab)
+  }
+  if(ordtype == "pls_shapes") {
     xlab <- paste0("PLS-", xlab)
     ylab <- paste0("PLS-", ylab)
   }
+  if(ordtype == "phy_pls_shapes") {
+    xlab <- paste0("phyPLS-", xlab)
+    ylab <- paste0("phyPLS-", ylab)
+  }
+
 
   if(plot == TRUE) {
 
@@ -201,14 +205,14 @@ mspace <- function(shapes,
 
     for(i in 1:dim(models_arr)[3]) {
       if(datype == "landm") {
-        points(models_arr[1:p,,i],
+        graphics::points(models_arr[1:p,,i],
                pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
 
         if(!is.null(template)) {
-          lines(models_arr[-c(1:p),,i],
+          graphics::lines(models_arr[-c(1:p),,i],
                 col = col.models, lwd = lwd.models)
         } else {
-          for(l in 1:length(links)) lines(models_arr[,,i][links[[l]],],
+          for(l in 1:length(links)) graphics::lines(models_arr[,,i][links[[l]],],
                                           col = col.models, lwd = lwd.models)
         }
 
@@ -218,7 +222,7 @@ mspace <- function(shapes,
       }
     }
 
-    if(points == TRUE) points(ordination$x[,axes])
+    if(points == TRUE) graphics::points(ordination$x[,axes])
 
   }
 
@@ -260,19 +264,20 @@ mspace <- function(shapes,
 #' @export
 #'
 #' @examples
-#'#load and extract relevant data and information
-#'data("tails")
-#'shapes <- tails$shapes
-#'sex <- tails$data$sex
-#'links <- tails$links
+#' #load and extract relevant data, packages and information
+#' library(magrittr)
+#' data("tails")
+#' shapes <- tails$shapes
+#' sex <- tails$data$sex
+#' links <- tails$links
 #'
-#'#generate basic morphospace, add sampled shapes
-#'mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
-#'  proj_shapes(shapes = shapes)
+#' #generate basic morphospace, add sampled shapes
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+#'   proj_shapes(shapes = shapes)
 #'
-#'#change colors, symbols, etc for the scatter
-#'mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
-#'  proj_shapes(shapes = shapes, pch = c(1,16)[sex], col = c("red", "blue")[sex])
+#' #change colors, symbols, etc for the scatter
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+#'   proj_shapes(shapes = shapes, pch = c(1,16)[sex], col = c("red", "blue")[sex])
 proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 
   dat <- shapes_mat(shapes)
@@ -284,7 +289,7 @@ proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
   scores <- proj_eigen(x = data2d, vectors = mspace$rotation,
                        center = mspace$center)
 
-  if(.Device != "null device") points(scores[, mspace$plotinfo$axes], ...)
+  if(.Device != "null device") graphics::points(scores[, mspace$plotinfo$axes], ...)
 
   if(pipe == FALSE) return(invisible(scores))
   if(pipe == TRUE) return(invisible(mspace))
@@ -317,7 +322,8 @@ proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 #' @export
 #'
 #' @examples
-#' #load and extract relevant data and information
+#' #load and extract relevant data, packages and information
+#' library(magrittr)
 #' data("shells")
 #' shapes <- shells$shapes
 #' species <- shells$data$species
@@ -339,7 +345,7 @@ proj_consensus <- function(shapes, mspace, pipe = TRUE, ...) {
   gr_centroids <- proj_eigen(x = data2d, vectors = mspace$rotation,
                              center = mspace$center)
 
-  if(.Device != "null device") points(gr_centroids[, mspace$plotinfo$axes], ...)
+  if(.Device != "null device") graphics::points(gr_centroids[, mspace$plotinfo$axes], ...)
 
   mspace$gr_centroids <- gr_centroids
 
@@ -368,17 +374,18 @@ proj_consensus <- function(shapes, mspace, pipe = TRUE, ...) {
 #'   Otherwise, it is just a wrapper for \code{hulls_by_group_2D}.
 #'
 #' @return If a plot device with a morphospace is open, convex hulls
-#'   enclosing the scores corresponding to \class{groups} are projected
+#'   enclosing the scores corresponding to \code{groups} are projected
 #'   into morphospace. If \code{pipe = TRUE} the supplied \code{mspace}
 #'   object will be modified by adding a new \code{$gr_class} slot, and
 #'   returned invisibly.
 #'
-#' @seealso \code{\link{hulls_by_group2D}}
+#' @seealso \code{\link{hulls_by_group_2D}}
 #'
 #' @export
 #'
 #' @examples
-#' #load and extract relevant data and information
+#' #load and extract relevant data, packages and information
+#' library(magrittr)
 #' data("shells")
 #' shapes <- shells$shapes
 #' species <- shells$data$species
@@ -459,7 +466,8 @@ proj_groups <- function(mspace, shapes = NULL, groups, pipe = TRUE, ...) {
 #' @seealso \code{\link{ax_transformation}}
 #'
 #' @examples
-#' #load and extract relevant data and information
+#' #load and extract relevant data, packages and information
+#' library(magrittr)
 #' library(geomorph)
 #' data("tails")
 #' shapes <- tails$shapes
@@ -468,7 +476,8 @@ proj_groups <- function(mspace, shapes = NULL, groups, pipe = TRUE, ...) {
 #' links <- tails$links
 #'
 #' #compute intraspecific allometric axis detrend_shapes, using lm and pls_shapes
-#' detr_shapes <- arrayspecs(detrend_shapes(lm(two.d.array(shapes) ~ species)),
+#' detr_shapes <- arrayspecs(
+#'   detrend_shapes(lm(two.d.array(shapes) ~ species)),
 #'                           p = 9, k = 2)
 #' intrasp_allo_mod <- lm(two.d.array(detr_shapes) ~ logsizes)
 #' intrasp_allo_pls <- pls_shapes(shapes = two.d.array(detr_shapes), X = logsizes)
@@ -495,7 +504,7 @@ proj_axis <- function(obj, mspace, axis = 1, mag = 1, pipe = TRUE, ...) {
   ext_scores <- proj_eigen(x = ext_shapes2d, vectors = mspace$rotation,
                            center = mspace$center)
 
-  if(.Device != "null device") lines(ext_scores[, mspace$plotinfo$axes], ...)
+  if(.Device != "null device") graphics::lines(ext_scores[, mspace$plotinfo$axes], ...)
 
   if(pipe == FALSE) return(invisible(ext_scores))
   if(pipe == TRUE) return(invisible(mspace))
@@ -536,7 +545,8 @@ proj_axis <- function(obj, mspace, axis = 1, mag = 1, pipe = TRUE, ...) {
 #' @export
 #'
 #' @examples
-#' #load and extract relevant data and information
+#' #load and extract relevant data, packages and information
+#' library(magrittr)
 #' data("tails")
 #' shapes <- tails$shapes
 #' species <- tails$data$species
@@ -560,7 +570,7 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 
   if(.Device != "null device") {
     for(i in 1:nrow(tree$edge)) {
-      lines(rbind(phylo_scores[tree$edge[i, 1], mspace$plotinfo$axes],
+      graphics::lines(rbind(phylo_scores[tree$edge[i, 1], mspace$plotinfo$axes],
                   phylo_scores[tree$edge[i, 2], mspace$plotinfo$axes]), ...)
     }
   }
@@ -658,7 +668,8 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #' @export
 #'
 #' @examples
-#' #load and extract relevant data and information
+#' #load and extract relevant data, packages and information
+#' library(magrittr)
 #' data("tails")
 #' shapes <- tails$shapes
 #' species <- tails$data$species
@@ -688,7 +699,8 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 #'
 #' #add links
-#' plot_mspace(msp, axes = c(1,2), links = links, col.points = species, col.groups = 1:nlevels(species),
+#' plot_mspace(msp, axes = c(1,2), links = links,
+#'             col.points = species, col.groups = 1:nlevels(species),
 #'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 #'
 #' #change number and sizes of shape models in the background
@@ -827,35 +839,40 @@ plot_mspace <- function(mspace,
     if(is.null(args$xlab)) xlab <- paste0("PC", args$axes[1])
     if(is.null(args$ylab)) ylab <- paste0("PC", args$axes[2])
 
-    if(any(mspace$ordtype == c("prcomp", "bg_prcomp", "phy_prcomp"))) {
-      if(ordtype == "prcomp") {
-        xlab <- paste0("PC", xlab)
-        ylab <- paste0("PC", ylab)
-      }
-      if(mspace$ordtype == "bg_prcomp") {
-        xlab <- paste0("bgPC", xlab)
-        ylab <- paste0("bgPC", ylab)
-      }
-      if(mspace$ordtype == "phy_prcomp") {
-        xlab <- paste0("phyPC", xlab)
-        ylab <- paste0("phyPC", ylab)
-      }
-    } else {
+
+    if(mspace$ordtype == "prcomp") {
+      xlab <- paste0("PC", xlab)
+      ylab <- paste0("PC", ylab)
+    }
+    if(mspace$ordtype == "bg_prcomp") {
+      xlab <- paste0("bgPC", xlab)
+      ylab <- paste0("bgPC", ylab)
+    }
+    if(mspace$ordtype == "phy_prcomp") {
+      xlab <- paste0("phyPC", xlab)
+      ylab <- paste0("phyPC", ylab)
+    }
+    if(mspace$ordtype == "pls_shapes") {
       xlab <- paste0("PLS-", xlab)
       ylab <- paste0("PLS-", ylab)
     }
+    if(mspace$ordtype == "phy_pls_shapes") {
+      xlab <- paste0("phyPLS-", xlab)
+      ylab <- paste0("phyPLS-", ylab)
+    }
+
 
     plot(models_mat, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
     for(i in 1:dim(models_arr)[3]) {
       if(mspace$datype == "landm") {
-        points(models_arr[1:mspace$plotinfo$p,,i],
+        graphics::points(models_arr[1:mspace$plotinfo$p,,i],
                pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
 
         if(!is.null(args$template)) {
-          lines(models_arr[-c(1:mspace$plotinfo$p),,i],
+          graphics::lines(models_arr[-c(1:mspace$plotinfo$p),,i],
                 col = args$col.models, lwd = args$lwd.models)
         } else {
-          for(l in 1:length(args$links)) lines(models_arr[,,i][args$links[[l]],],
+          for(l in 1:length(args$links)) graphics::lines(models_arr[,,i][args$links[[l]],],
                                                col = args$col.models, lwd = args$lwd.models)
         }
 
@@ -867,7 +884,7 @@ plot_mspace <- function(mspace,
 
 
     #add points, hulls, phylogeny, and/or consensus
-    if(points == TRUE) points(mspace$x[, args$axes],
+    if(points == TRUE) graphics::points(mspace$x[, args$axes],
                               pch = pch.points, col = col.points, cex = cex.points)
     if(groups == TRUE) {
       if(is.null(mspace$gr_class)) {
@@ -882,7 +899,7 @@ plot_mspace <- function(mspace,
         stop("phylogenetic relationships have not been added to mspace object")
       } else {
         for(i in 1:nrow(mspace$phylo$edge)) {
-          lines(rbind(mspace$phylo_scores[mspace$phylo$edge[i, 1], args$axes],
+          graphics::lines(rbind(mspace$phylo_scores[mspace$phylo$edge[i, 1], args$axes],
                       mspace$phylo_scores[mspace$phylo$edge[i, 2], args$axes]),
                 lwd = lwd.branches)
         }
@@ -892,7 +909,7 @@ plot_mspace <- function(mspace,
       if(is.null(mspace$gr_centroids)) {
         stop("groups centroids have not been added to mspace object")
       } else {
-        points(mspace$gr_centroids[, args$axes],
+        graphics::points(mspace$gr_centroids[, args$axes],
                col = col.groups, pch = pch.groups, cex = cex.groups)
       }
     }
@@ -943,15 +960,21 @@ plot_mspace <- function(mspace,
       if(!is.null(x)) {
         xlab <- "x"
       } else {
-        xlab <- paste0("PC", args$axes[1])
+        xlab <- paste0(args$axes[1])
+        if(mspace$ordtype == "prcomp") {
+          xlab <- paste0("PC", xlab)
+        }
         if(mspace$ordtype == "bg_prcomp") {
-          xlab <- paste0("bg", xlab)
+          xlab <- paste0("bgPC", xlab)
         }
         if(mspace$ordtype == "phy_prcomp") {
-          xlab <- paste0("phy", xlab)
+          xlab <- paste0("phyPC", xlab)
         }
         if(mspace$ordtype == "pls_shapes") {
           xlab <- paste0("PLS-", args$axes[1])
+        }
+        if(mspace$ordtype == "phy_pls_shapes") {
+          xlab <- paste0("phyPLS-", args$axes[1])
         }
       }
     }
@@ -959,15 +982,21 @@ plot_mspace <- function(mspace,
       if(!is.null(y)) {
         ylab <- "y"
       } else {
-        ylab <- paste0("PC", args$axes[1])
+        ylab <- paste0(args$axes[1])
+        if(mspace$ordtype == "prcomp") {
+          ylab <- paste0("PC", ylab)
+        }
         if(mspace$ordtype == "bg_prcomp") {
-          ylab <- paste0("bg", ylab)
+          ylab <- paste0("bgPC", ylab)
         }
         if(mspace$ordtype == "phy_prcomp") {
-          ylab <- paste0("phy", ylab)
+          ylab <- paste0("phyPC", ylab)
         }
         if(mspace$ordtype == "pls_shapes") {
           ylab <- paste0("PLS-", args$axes[1])
+        }
+        if(mspace$ordtype == "phy_pls_shapes") {
+          ylab <- paste0("phyPLS-", args$axes[1])
         }
       }
     }
@@ -977,14 +1006,14 @@ plot_mspace <- function(mspace,
 
     for(i in 1:dim(models_arr)[3]) {
       if(mspace$datype == "landm") {
-        points(models_arr[1:mspace$plotinfo$p,,i],
+        graphics::points(models_arr[1:mspace$plotinfo$p,,i],
                pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
 
         if(!is.null(args$template)) {
-          lines(models_arr[-c(1:mspace$plotinfo$p),,i],
+          graphics::lines(models_arr[-c(1:mspace$plotinfo$p),,i],
                 col = args$col.models, lwd = args$lwd.models)
         } else {
-          for(l in 1:length(args$links)) lines(models_arr[,,i][args$links[[l]],],
+          for(l in 1:length(args$links)) graphics::lines(models_arr[,,i][args$links[[l]],],
                                           col = args$col.models, lwd = args$lwd.models)
         }
 
@@ -998,12 +1027,12 @@ plot_mspace <- function(mspace,
     if(phenogr == TRUE) { #if x/y is a phy object, plot a phenogram
       for(i in 1:nrow(tree$edge)) {
         phyloxy <- cbind(x, mspace$phylo_scores[,args$axes[1]], y)
-        lines(rbind(phyloxy[tree$edge[i, 1],],
+        graphics::lines(rbind(phyloxy[tree$edge[i, 1],],
                     phyloxy[tree$edge[i, 2],]), lwd = lwd.branches)
       }
       if(points == TRUE) {
-        points(phyloxy[-c(1:length(tree$tip.label)),], pch = 16)
-        points(phyloxy[c(1:length(tree$tip.label)),][rownames(mspace$gr_centroids),],
+        graphics::points(phyloxy[-c(1:length(tree$tip.label)),], pch = 16)
+        graphics::points(phyloxy[c(1:length(tree$tip.label)),][rownames(mspace$gr_centroids),],
                bg = col.groups, pch = 21, cex = cex.groups)
 
         }
@@ -1012,7 +1041,7 @@ plot_mspace <- function(mspace,
       xy <- cbind(x, mspace$x[,args$axes[1]], y)
 
       #add points, hulls, phylogeny, and/or consensus
-      if(points == TRUE) points(xy, pch = pch.points,
+      if(points == TRUE) graphics::points(xy, pch = pch.points,
                                 col = col.points, cex = cex.points)
       if(groups == TRUE) {
         if(is.null(mspace$gr_class)) {
@@ -1047,7 +1076,7 @@ plot_mspace <- function(mspace,
           }
 
           for(i in 1:nrow(mspace$phylo$edge)) {
-            lines(rbind(phyloxy[mspace$phylo$edge[i, 1],],
+            graphics::lines(rbind(phyloxy[mspace$phylo$edge[i, 1],],
                         phyloxy[mspace$phylo$edge[i, 2],]),
                   lwd = lwd.branches)
           }
@@ -1071,7 +1100,7 @@ plot_mspace <- function(mspace,
 
           meanxy <- cbind(meanx, mspace$gr_centroids[,args$axes[1]], meany)
 
-          points(meanxy, col = col.groups,
+          graphics::points(meanxy, col = col.groups,
                  pch = pch.groups, cex = cex.groups)
         }
       }

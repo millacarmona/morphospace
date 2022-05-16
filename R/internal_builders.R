@@ -13,19 +13,23 @@
 #'
 #' @return A 2-margins matrix of variables on their original scale.
 #'
-#' @seealso \code{\link{project_eigen}}
+#' @seealso \code{\link{proj_eigen}}
 #' @export
 #'
 #' @examples
-#' #perform principal component analysis of tails data
+#' #load data and packages
+#' library(Morpho)
+#' library(geomorph)
 #' data("tails")
-#' pca <- prcomp(geomorph::two.d.array(tails$shapes))
+#'
+#' #perform principal component analysis on tails data
+#' pca <- prcomp(two.d.array(tails$shapes))
 #'
 #' #transform the scores back to shapes
 #' backshapes_mat <- rev_eigen(scores = pca$x,
 #'                             vectors = pca$rotation,
 #'                             center = pca$center)
-#' backshapes_arr <- geomorph::arrayspecs(backshapes_mat, k = 2, p = 9)
+#' backshapes_arr <- arrayspecs(backshapes_mat, k = 2, p = 9)
 #'
 #' #compare
 #' pile_shapes(tails$shapes)
@@ -35,13 +39,13 @@
 #' extshapes_mat <- rev_eigen(scores = range(pca$x[,1]),
 #'                            vectors = pca$rotation[,1],
 #'                            center = pca$center)
-#' extshapes_arr <- geomorph::arrayspecs(extshapes_mat, k = 2, p = 9)
+#' extshapes_arr <- arrayspecs(extshapes_mat, k = 2, p = 9)
 #'
 #' #plot and compare
 #' plot(extshapes_arr[,,1])
-#' Morpho::lineplot(extshapes_arr[,,1], tails$links) ; title("negative")
+#' lineplot(extshapes_arr[,,1], tails$links) ; title("negative")
 #' plot(extshapes_arr[,,2])
-#' Morpho::lineplot(extshapes_arr[,,2], tails$links) ; title("positive")
+#' lineplot(extshapes_arr[,,2], tails$links) ; title("positive")
 rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + center) }
 
 
@@ -66,12 +70,15 @@ rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + ce
 #' @seealso \code{\link{rev_eigen}}
 #'
 #' @examples
-#' #perform principal component analysis of tails data
+#' #' #load data and packages
+#' library(geomorph)
 #' data("tails")
-#' pca <- prcomp(geomorph::two.d.array(tails$shapes))
+#'
+#' #perform principal component analysis on tails data
+#' pca <- prcomp(two.d.array(tails$shapes))
 #'
 #' #get project shapes in the pca ordination
-#' shapes_mat <- geomorph::two.d.array(tails$shapes)
+#' shapes_mat <- two.d.array(tails$shapes)
 #' newscores <- proj_eigen(x = shapes_mat,
 #'                         vectors = pca$rotation,
 #'                         center = pca$center)
@@ -82,7 +89,7 @@ rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + ce
 #'
 #' #compute and project species' mean shapes
 #' meanshapes_arr <- consensus(tails$shapes, index = tails$data$species)
-#' meanshapes_mat <- geomorph::two.d.array(meanshapes)
+#' meanshapes_mat <- two.d.array(meanshapes_arr)
 #' meanscores <- proj_eigen(x = meanshapes_mat,
 #'                         vectors = pca$rotation,
 #'                         center = pca$center)
@@ -90,6 +97,81 @@ rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + ce
 proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors }
 
 
+##########################################################################
+
+#' Singular value decomposition for 2 blocks of variables
+#'
+#' @description Just a wrapper for [svd()] that returns an adequate output
+#'   when used for blocks of variables. Can deal with phylogenetic data too
+#'   using \code{ape} and \code{phytools} functions internally.
+#'
+#' @param x First block of variables
+#' @param y Second block of variables
+#' @param tree An optional \code{"phy"} object containing a phylogenetic
+#'   tree whose tip.labels match rownames of \code{x} and \code{y}.
+#'
+#' @return Mimics the [svd()] output.
+#'
+#' @export
+#'
+#' @examples
+#' #laod data and packages
+#' library(geomorph)
+#'
+#' data("tails")
+#' shapes <- tails$shapes
+#' sizes <- tails$sizes
+#' species <- tails$data$species
+#' tree <- tails$tree
+#' sp_shapes <- consensus(shapes, species)[,,tree$tip.label]
+#' sp_sizes <- cbind(tapply(sizes, species, mean))[tree$tip.label,]
+#'
+#' #perform partial svd
+#' svd_block(x = sizes, y = two.d.array(shapes))
+#'
+#' #perform partial svd on phylogenetic structure
+#' svd_block(x = sp_sizes, y = two.d.array(sp_shapes), tree = tree)
+svd_block <- function(x, y, tree = NULL) {
+
+  x <- cbind(x)
+  y <- cbind(y)
+
+  if(!is.null(tree)) {
+    C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
+    xy <- cbind(x,y)
+    Clambda <- phytools::phyl.vcv(xy, C, 1)$C
+
+    R <- phytools::phyl.vcv(xy, Clambda, 1)$R
+    part_R <- R[1:ncol(x), (ncol(x) + 1):(ncol(x) + ncol(y))]
+
+    svd <- svd(part_R)
+
+  } else {
+    vcv <- stats::cov(cbind(x,y))
+    part_vcv <- vcv[1:ncol(x), (ncol(x) + 1):(ncol(x) + ncol(y))]
+
+    svd <- svd(part_vcv)
+
+
+  }
+
+  ndims <- min(nrow(x), ncol(x), ncol(y))
+  sdev <- (svd$d)[1:ndims]
+  if(ncol(x) != ncol(y)) {
+    rotations <- list(svd$v, svd$u)
+    whichy <- which(unlist(lapply(rotations, nrow)) == ncol(y))
+    whichx <- which(unlist(lapply(rotations, nrow)) == ncol(x))
+    y_rotation <- cbind(rotations[[whichy]][,1:ndims])
+    x_rotation <- cbind(rotations[[whichx]][,1:ndims])
+  } else {
+    x_rotation <- svd$u
+    y_rotation <- svd$v
+  }
+
+  results <- list(d = sdev, v = y_rotation, u = x_rotation)
+  return(results)
+
+}
 ##########################################################################
 
 #' Iverse Fourier transform
@@ -253,9 +335,12 @@ shapes_mat <- function(shapes) {
 #'   Association Newsletter, 72(620), 14-27.
 #'
 #' @examples
-#' #perform pca on tails shapes
+#' #' #load data and packages
+#' library(geomorph)
 #' data("tails")
-#' pca <- prcomp(geomorph::two.d.array(tails$shapes))
+#'
+#' #perform pca on tails shapes
+#' pca <- prcomp(two.d.array(tails$shapes))
 #'
 #' #generate grid of shape models sampling the range of variation
 #' #at 4 locations (the 4 corners of the scatterplot)

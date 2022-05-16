@@ -4,7 +4,7 @@
 \alias{pls2b}
 \title{Two-blocks Partial Least Squares}
 \usage{
-pls2b(x, y, LOOCV = FALSE, recompute = FALSE)
+pls2b(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 }
 \arguments{
 \item{x}{A matrix with one or more variables as columns and observations as
@@ -13,13 +13,16 @@ rows, representing the first block.}
 \item{y}{A matrix with one or more variables as columns and observations as
 rows, representing the second block.}
 
+\item{tree}{A \code{"phy"} object containing a phylogenetic tree. Tip labels
+should match the row number and names from \code{x} and \code{y}.}
+
 \item{LOOCV}{Logical; whether to apply leave-one-out cross-validation.}
 
 \item{recompute}{Logical; whether to re-compute rotation matrix using the
 scores resulting from LOOCV.}
 }
 \value{
-A \code{"pls2b"} object, containing:
+A \code{"pls2b"} or \code{"phy_pls2b"} object, containing:
 \itemize{
 \item \code{$values:} {vector of singular values accounting for the
 covariation among blocks explained by each par of axes.}
@@ -28,9 +31,11 @@ block.}
 \item \code{$yrotation:} {matrix of vector coefficients for the second
 block.}
 \item \code{$xcenter:} {the mean values of the original variables from
-the first block.}
+the first block (or their phylogenetic mean, if \code{tree} is
+provided).}
 \item \code{$ycenter:} {the mean values of the original variables from
-the second block.}
+the second block (or their phylogenetic mean, if \code{tree} is
+provided).}
 \item \code{$xtotvar:} {the sum of the variances from the original
 variables from the second block.}
 \item \code{$ytotvar:} {the sum of the variances from the original
@@ -38,10 +43,8 @@ variables from the second block.}
 }
 }
 \description{
-Performs 2B Partial Least Squares allowing for leave-one-out
-cross-validation, which is useful one the number of variables exceeds the
-number of observations (i.e. alleviates spurious covariation between
-variables).
+Performs phylogenetic 2B Partial Least Squares allowing for leave-one-out cross-validation
+and removal of phylogenetic covariation (experimental).
 }
 \details{
 Starting with two blocks of variables measured for the same
@@ -57,17 +60,35 @@ geometric morphometrics analyses). This problem can be alleviated by
 carrying out a leave-one-out cross-validation (LOOCV; i.e. each
 observation is excluded from the calculation of PLS axes before its
 projection in the resulting ordination as a way to calculate its score).
+
+If \code{tree} is supplied, rows of \code{x} and \code{y} are assumed to
+be linked by those phylogenetic relationships. In this case, the resulting
+axes maximize the residual covariation among blocks left after removing
+covariation among blocks accounted by phylogenetic history (assuming a
+Brownian model of evolution and 100\% phylogenetic signal, which is
+equivalent to setting \code{method = "BM"} in \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}}).
+
+The phylogenetic version of \code{pls2b} displays the same variational
+properties than phylogenetic PCA (i.e. centering on the phylogenetic mean;
+orientation of scores reflect non-phylogenetic covariation but their variance
+is not scaled and thus contain phylogenetic information; for the latter
+reason, variance of scores and eigenvalues differ; scores are correlated; etc;
+see Polly et al. 2013).
 }
 \examples{
-#load data
+#load data and packages
+library(geomorph)
 data("tails")
 
-#extract shapes and log sizes
+#extract mean log sizes and shapes for all species, as well as the phylogenetic tree
 shapes <- tails$shapes
 sizes <- log(tails$sizes)
+sp_shapes <- consensus(shapes = shapes, index = tails$data$species)
+sp_sizes <- tapply(X = sizes, INDEX = tails$data$species, FUN = mean)
+tree <- tails$tree
 
 #perform PLS between shape and size
-pls <- pls2b(y = geomorph::two.d.array(shapes), x = sizes)
+pls <- pls2b(y = two.d.array(shapes), x = sizes)
 
 #look at the results
 names(pls) #the contents of the resulting object
@@ -81,21 +102,48 @@ pls2 <- pls_shapes(shapes = shapes, X = sizes)
 names(pls2) #the contents of the resulting object
 exp_var(pls2) #variance explained by each axis
 plot(pls2$x2, pls2$x) #ordination
+
+
+
+#perform phylogenetic PLS
+ppls <- pls2b(y = two.d.array(sp_shapes), x = sp_sizes, tree = tree)
+
+#look at the results
+names(ppls) #the contents of the resulting object
+plot(ppls$xscores, ppls$yscores) #ordination
+
+
+#pls_shapes achieves identical results, but it is formatted to be used more
+#easily when analyzing shape variables and its output is compatible with other
+#functions from morphospace
+ppls2 <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree)
+
+names(ppls2) #the contents of the resulting object
+exp_var(ppls2) #variance explained by each axis
+plot(ppls2$x2, ppls2$x) #ordination
 }
 \references{
 Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial
 least-squares to study covariation in shape}. Systematic Biology, 49(4),
 740-753.
 
-Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012).
-\emph{Geometric morphometrics for biologists: A primer}. 2nd ed. Academic
+Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012). \emph{Geometric
+morphometrics for biologists: A primer}. 2nd ed. Academic
 Press.
+
+Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
+\emph{Phylogenetic principal components analysis and geometric
+morphometrics}. Hystrix, 24(1), 33.
+
+Monteiro, L. R. (2013). \emph{Morphometrics and the comparative method:
+studying the evolution of biological shape}. Hystrix, the Italian Journal
+of Mammalogy, 24(1), 25-32.
 
 Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
 components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
 271-302.
 }
 \seealso{
-\code{\link{pls_shapes}}, \code{\link{phy_pls2b}},
+\code{\link{pls_shapes}}, \code{\link{phy_prcomp}},
 \code{\link{exp_var}}
 }

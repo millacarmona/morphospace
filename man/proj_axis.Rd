@@ -53,7 +53,8 @@ coefficients can be extracted directly from slope coefficients stored in
 slot returned by multivariate ordination methods.
 }
 \examples{
-#load and extract relevant data and information
+#load and extract relevant data, packages and information
+library(magrittr)
 library(geomorph)
 data("tails")
 shapes <- tails$shapes
@@ -62,7 +63,8 @@ species <- tails$data$species
 links <- tails$links
 
 #compute intraspecific allometric axis detrend_shapes, using lm and pls_shapes
-detr_shapes <- arrayspecs(detrend_shapes(lm(two.d.array(shapes) ~ species)),
+detr_shapes <- arrayspecs(
+  detrend_shapes(lm(two.d.array(shapes) ~ species)),
                           p = 9, k = 2)
 intrasp_allo_mod <- lm(two.d.array(detr_shapes) ~ logsizes)
 intrasp_allo_pls <- pls_shapes(shapes = two.d.array(detr_shapes), X = logsizes)

@@ -30,7 +30,8 @@ generation and sample representation as independent affairs, and
 to add flexibility to graphical representation of scatter points.
 }
 \examples{
-#load and extract relevant data and information
+#load and extract relevant data, packages and information
+library(magrittr)
 data("tails")
 shapes <- tails$shapes
 sex <- tails$data$sex
@@ -38,9 +39,9 @@ links <- tails$links
 
 #generate basic morphospace, add sampled shapes
 mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
- proj_shapes(shapes = shapes)
+  proj_shapes(shapes = shapes)
 
 #change colors, symbols, etc for the scatter
 mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
- proj_shapes(shapes = shapes, pch = c(1,16)[sex], col = c("red", "blue")[sex])
+  proj_shapes(shapes = shapes, pch = c(1,16)[sex], col = c("red", "blue")[sex])
 }

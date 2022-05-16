@@ -38,7 +38,7 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 
   if(dat$datype == "fcoef") {
     coords_l <- lapply(1:nrow(dat$data2d), function(i){
-      inv_efourier(coe = dat$data2d[i,], nb.p = 300)
+      inv_efourier(coe = dat$data2d[i,], nb.pts = 300)
     })
     shapes_coord <- abind::abind(coords_l, along = 3)
   } else {
@@ -53,25 +53,25 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 
     if(!is.null(links)) {
       for(i in 1:dim(shapes_coord)[3]){
-        for(l in 1:length(links)) lines(shapes_coord[links[[l]],,i], col = "gray")
+        for(l in 1:length(links)) graphics::lines(shapes_coord[links[[l]],,i], col = "gray")
       }
     }
 
-    points(longlist, col = "#708095")
+    graphics::points(longlist, col = "#708095")
 
     if(mshape == TRUE) {
-      points(consensus(shapes_coord), pch = 16, ...)
+      graphics::points(consensus(shapes_coord), pch = 16, ...)
       if(!is.null(links)) {
-        for(l in 1:length(links)) lines(consensus(shapes_coord)[links[[l]],])
+        for(l in 1:length(links)) graphics::lines(consensus(shapes_coord)[links[[l]],])
       }
     }
   } else {
     plot(longlist, axes = FALSE, xlab = "", ylab = "", type = "n")
 
-    for(i in 1:dim(shapes_coord)[3]) lines(shapes_coord[,,i], col = "#708095")
+    for(i in 1:dim(shapes_coord)[3]) graphics::lines(shapes_coord[,,i], col = "#708095")
 
     if(mshape == TRUE) {
-      lines(consensus(shapes_coord), lwd = 4)
+      graphics::lines(consensus(shapes_coord), lwd = 4)
     }
   }
 
@@ -94,13 +94,14 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 #' @export
 #'
 #' @examples
-#' #load landmark data
+#' #load landmark data and nencessary packages
+#' library(geomorph)
 #' data("tails")
 #' shapes <- tails$shapes
 #' species <- tails$data$species
 #'
 #' #perform PCA
-#' pca <- prcomp(geomorph::two.d.array(shapes))
+#' pca <- prcomp(two.d.array(shapes))
 #'
 #' #plot and add convex hulls
 #' plot(pca$x)
@@ -129,19 +130,20 @@ hulls_by_group_2D <- function(xy, fac, col = 1:nlevels(fac), ...) {
 #' @param fac A factor grouping data points.
 #' @param col A vector (either character or numeric) indicating the colors used
 #'   for each group.
-#' @param ... Further arguments passed to [rgl.triangles()] (e.g.
+#' @param ... Further arguments passed to [rgl::rgl.triangles()] (e.g.
 #'   \code{specular}, \code{alpha}).
 #'
 #' @export
 #'
 #' @examples
-#' #load landmark data
+#' #load landmark data and necessary packages
+#' library(geomorph)
 #' data("tails")
 #' shapes <- tails$shapes
 #' species <- tails$data$species
 #'
 #' #perform PCA
-#' pca <- prcomp(geomorph::two.d.array(shapes))
+#' pca <- prcomp(two.d.array(shapes))
 #'
 #' #plot and add convex hulls
 #' \dontrun{
