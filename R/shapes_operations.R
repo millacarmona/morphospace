@@ -26,6 +26,7 @@
 #' @examples
 #' #load tails data and packages
 #' library(Morpho)
+#' library(Momocs)
 #' data("tails")
 #' shapes <- tails$shapes
 #'
@@ -49,7 +50,7 @@
 #'
 #' #quick demo for Fourier data:
 #' data("shells")
-#' shapes <- shells$shapes$coe
+#' shapes <- shells$shapes
 #'
 #' #mean shape of the entire sample
 #' mshape <- consensus(shapes)
