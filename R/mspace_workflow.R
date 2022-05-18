@@ -167,64 +167,13 @@ mspace <- function(shapes,
                             x = NULL, y = NULL, p = p, k = k, nh = nh, nv = nv, mag = mag,
                             asp = asp, xlim = xlim, ylim = ylim, rot.models = rot.models,
                             size.models = size.models, asp.models = asp.models)
-  models_mat <- shapemodels$models_mat
-  models_arr <- shapemodels$models_arr
 
-  if(!is.null(xlim)) xlim <- range(c(models_mat[,1]))
-  if(!is.null(ylim)) ylim <- range(c(models_mat[,2]))
+  plot_morphogrid2d(x = NULL, y = NULL, morphogrid = shapemodels, template = template,
+                    links = links, datype = datype, ordtype = ordtype, axes = axes, p = p,
+                    xlim = xlim, ylim = xlim, xlab = xlab, ylab = ylab,
+                    cex.ldm = cex.ldm, col.ldm = col.ldm, col.models = col.models,
+                    lwd.models = lwd.models, bg.models = bg.models, plot = plot)
 
-  if(is.null(xlab)) xlab <- paste0(axes[1])
-  if(is.null(ylab)) ylab <- paste0(axes[2])
-
-  if(ordtype == "prcomp") {
-    xlab <- paste0("PC", xlab)
-    ylab <- paste0("PC", ylab)
-  }
-  if(ordtype == "bg_prcomp") {
-    xlab <- paste0("bgPC", xlab)
-    ylab <- paste0("bgPC", ylab)
-  }
-  if(ordtype == "phy_prcomp") {
-    xlab <- paste0("phyPC", xlab)
-    ylab <- paste0("phyPC", ylab)
-  }
-  if(ordtype == "pls_shapes") {
-    xlab <- paste0("PLS-", xlab)
-    ylab <- paste0("PLS-", ylab)
-  }
-  if(ordtype == "phy_pls_shapes") {
-    xlab <- paste0("phyPLS-", xlab)
-    ylab <- paste0("phyPLS-", ylab)
-  }
-
-
-  if(plot == TRUE) {
-
-    plot(models_mat, type = "n", asp = asp,
-         xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
-
-    for(i in 1:dim(models_arr)[3]) {
-      if(datype == "landm") {
-        graphics::points(models_arr[1:p,,i],
-               pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
-
-        if(!is.null(template)) {
-          graphics::lines(models_arr[-c(1:p),,i],
-                col = col.models, lwd = lwd.models)
-        } else {
-          for(l in 1:length(links)) graphics::lines(models_arr[,,i][links[[l]],],
-                                          col = col.models, lwd = lwd.models)
-        }
-
-      } else {
-        graphics::polygon(models_arr[,,i], pch = 16,
-                          col = bg.models, border = col.models, lwd = lwd.models)
-      }
-    }
-
-    if(points == TRUE) graphics::points(ordination$x[,axes])
-
-  }
 
 
   plotinfo <- list(p = p, k = k, links = links, template = template, axes = axes, nh = nh, nv = nv, mag = mag,
@@ -239,7 +188,6 @@ mspace <- function(shapes,
   return(invisible(results))
 
 }
-
 
 ###############################################################################################
 
@@ -527,7 +475,7 @@ proj_axis <- function(obj, mspace, axis = 1, mag = 1, pipe = TRUE, ...) {
 #'
 #' @details The purpose of this function is twofold. First, it is meant to transform
 #'   a morphospace into a phylomorphospace by infusing  phylogenetic structure into
-#'   the former . To this end, a \code{$gr_centroids} slot matching the tip labels
+#'   the former. To this end, a \code{$gr_centroids} slot matching the tip labels
 #'   from \code{tree} needs to be present (either upstream in the pipeline or already
 #'   incorporated into an existing \code{mspace} object). Second, this function can be
 #'   used to retrieve the scores corresponding to nodes of the phylogenetic tree, which
@@ -571,7 +519,7 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
   if(.Device != "null device") {
     for(i in 1:nrow(tree$edge)) {
       graphics::lines(rbind(phylo_scores[tree$edge[i, 1], mspace$plotinfo$axes],
-                  phylo_scores[tree$edge[i, 2], mspace$plotinfo$axes]), ...)
+                            phylo_scores[tree$edge[i, 2], mspace$plotinfo$axes]), ...)
     }
   }
 
@@ -829,63 +777,16 @@ plot_mspace <- function(mspace,
                               asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
                               size.models = args$size.models, asp.models = args$asp.models)
 
-    models_mat <- shapemodels$models_mat
-    models_arr <- shapemodels$models_arr
-
-    if(!is.null(xlim)) xlim <- range(c(models_mat[,1]))
-    if(!is.null(ylim)) ylim <- range(c(models_mat[,2]))
-
-
-    if(is.null(args$xlab)) xlab <- paste0("PC", args$axes[1])
-    if(is.null(args$ylab)) ylab <- paste0("PC", args$axes[2])
-
-
-    if(mspace$ordtype == "prcomp") {
-      xlab <- paste0("PC", xlab)
-      ylab <- paste0("PC", ylab)
-    }
-    if(mspace$ordtype == "bg_prcomp") {
-      xlab <- paste0("bgPC", xlab)
-      ylab <- paste0("bgPC", ylab)
-    }
-    if(mspace$ordtype == "phy_prcomp") {
-      xlab <- paste0("phyPC", xlab)
-      ylab <- paste0("phyPC", ylab)
-    }
-    if(mspace$ordtype == "pls_shapes") {
-      xlab <- paste0("PLS-", xlab)
-      ylab <- paste0("PLS-", ylab)
-    }
-    if(mspace$ordtype == "phy_pls_shapes") {
-      xlab <- paste0("phyPLS-", xlab)
-      ylab <- paste0("phyPLS-", ylab)
-    }
-
-
-    plot(models_mat, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
-    for(i in 1:dim(models_arr)[3]) {
-      if(mspace$datype == "landm") {
-        graphics::points(models_arr[1:mspace$plotinfo$p,,i],
-               pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
-
-        if(!is.null(args$template)) {
-          graphics::lines(models_arr[-c(1:mspace$plotinfo$p),,i],
-                col = args$col.models, lwd = args$lwd.models)
-        } else {
-          for(l in 1:length(args$links)) graphics::lines(models_arr[,,i][args$links[[l]],],
-                                               col = args$col.models, lwd = args$lwd.models)
-        }
-
-      } else {
-        graphics::polygon(models_arr[,,i], pch = 16,
-                          col = args$bg.models, border = args$col.models, lwd = args$lwd.models)
-      }
-    }
-
+    plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
+                      links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
+                      axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = xlim,
+                      xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
+                      col.ldm = args$col.ldm, col.models = args$col.models,
+                      lwd.models = args$lwd.models, bg.models = args$bg.models)
 
     #add points, hulls, phylogeny, and/or consensus
     if(points == TRUE) graphics::points(mspace$x[, args$axes],
-                              pch = pch.points, col = col.points, cex = cex.points)
+                                        pch = pch.points, col = col.points, cex = cex.points)
     if(groups == TRUE) {
       if(is.null(mspace$gr_class)) {
         stop("groups classification has not been added to mspace object")
@@ -900,8 +801,8 @@ plot_mspace <- function(mspace,
       } else {
         for(i in 1:nrow(mspace$phylo$edge)) {
           graphics::lines(rbind(mspace$phylo_scores[mspace$phylo$edge[i, 1], args$axes],
-                      mspace$phylo_scores[mspace$phylo$edge[i, 2], args$axes]),
-                lwd = lwd.branches)
+                                mspace$phylo_scores[mspace$phylo$edge[i, 2], args$axes]),
+                          lwd = lwd.branches)
         }
       }
     }
@@ -910,7 +811,7 @@ plot_mspace <- function(mspace,
         stop("groups centroids have not been added to mspace object")
       } else {
         graphics::points(mspace$gr_centroids[, args$axes],
-               col = col.groups, pch = pch.groups, cex = cex.groups)
+                         col = col.groups, pch = pch.groups, cex = cex.groups)
       }
     }
 
@@ -919,14 +820,14 @@ plot_mspace <- function(mspace,
   } else { #if x or y have been provided, show hybrid morphospace
 
     #if x/y is a phy object, prepare the ground for a phenogram
-    if(any(class(x) == "phylo", class(y) == "phylo")) {
+    if(any(any(class(x) == "phylo"), any(class(y) == "phylo"))) {
       phenogr <- TRUE
     } else {
       phenogr <- FALSE
     }
 
     if(!is.null(x)) {
-      if(class(x) == "phylo") {
+      if(any(class(x) == "phylo")) {
         tree <- x
         heights <- phytools::nodeHeights(tree)
         x <- c(rep(max(heights), length(tree$tip.label)),
@@ -934,7 +835,7 @@ plot_mspace <- function(mspace,
         args$xlim <- range(x)
       }
     } else {
-      if(class(y) == "phylo") {
+      if(any(class(y) == "phylo")) {
         tree <- y
         heights <- phytools::nodeHeights(tree)
         y <- c(rep(max(heights), length(tree$tip.label)),
@@ -943,106 +844,34 @@ plot_mspace <- function(mspace,
       }
     }
 
-
     shapemodels <- morphogrid(ordination = ordination, x = x, y = y, axes = args$axes, template = args$template,
                               datype = mspace$datype, p = mspace$plotinfo$p, k = mspace$plotinfo$k, nh = args$nh,
                               nv = args$nv, mag = args$mag, asp = args$asp, xlim = args$xlim, ylim = args$ylim,
                               rot.models = args$rot.models, size.models = args$size.models,
                               asp.models = args$asp.models)
 
-    models_mat <- shapemodels$models_mat
-    models_arr <- shapemodels$models_arr
-
-    if(!is.null(xlim)) xlim <- range(c(models_mat[,1]))
-    if(!is.null(ylim)) ylim <- range(c(models_mat[,2]))
-
-    if(is.null(args$xlab)) {
-      if(!is.null(x)) {
-        xlab <- "x"
-      } else {
-        xlab <- paste0(args$axes[1])
-        if(mspace$ordtype == "prcomp") {
-          xlab <- paste0("PC", xlab)
-        }
-        if(mspace$ordtype == "bg_prcomp") {
-          xlab <- paste0("bgPC", xlab)
-        }
-        if(mspace$ordtype == "phy_prcomp") {
-          xlab <- paste0("phyPC", xlab)
-        }
-        if(mspace$ordtype == "pls_shapes") {
-          xlab <- paste0("PLS-", args$axes[1])
-        }
-        if(mspace$ordtype == "phy_pls_shapes") {
-          xlab <- paste0("phyPLS-", args$axes[1])
-        }
-      }
-    }
-    if(is.null(args$ylab)) {
-      if(!is.null(y)) {
-        ylab <- "y"
-      } else {
-        ylab <- paste0(args$axes[1])
-        if(mspace$ordtype == "prcomp") {
-          ylab <- paste0("PC", ylab)
-        }
-        if(mspace$ordtype == "bg_prcomp") {
-          ylab <- paste0("bgPC", ylab)
-        }
-        if(mspace$ordtype == "phy_prcomp") {
-          ylab <- paste0("phyPC", ylab)
-        }
-        if(mspace$ordtype == "pls_shapes") {
-          ylab <- paste0("PLS-", args$axes[1])
-        }
-        if(mspace$ordtype == "phy_pls_shapes") {
-          ylab <- paste0("phyPLS-", args$axes[1])
-        }
-      }
-    }
-
-
-    plot(models_mat, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
-
-    for(i in 1:dim(models_arr)[3]) {
-      if(mspace$datype == "landm") {
-        graphics::points(models_arr[1:mspace$plotinfo$p,,i],
-               pch = 16, cex = args$cex.ldm * 0.1, col = args$col.ldm)
-
-        if(!is.null(args$template)) {
-          graphics::lines(models_arr[-c(1:mspace$plotinfo$p),,i],
-                col = args$col.models, lwd = args$lwd.models)
-        } else {
-          for(l in 1:length(args$links)) graphics::lines(models_arr[,,i][args$links[[l]],],
-                                          col = args$col.models, lwd = args$lwd.models)
-        }
-
-      } else {
-        graphics::polygon(models_arr[,,i], pch = 16,
-                          col = args$bg.models, border = args$col.models, lwd = args$lwd.models)
-      }
-    }
+    plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
+                      links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
+                      axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = xlim,
+                      xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
+                      col.ldm = args$col.ldm, col.models = args$col.models,
+                      lwd.models = args$lwd.models, bg.models = args$bg.models)
 
 
     if(phenogr == TRUE) { #if x/y is a phy object, plot a phenogram
-      for(i in 1:nrow(tree$edge)) {
-        phyloxy <- cbind(x, mspace$phylo_scores[,args$axes[1]], y)
-        graphics::lines(rbind(phyloxy[tree$edge[i, 1],],
-                    phyloxy[tree$edge[i, 2],]), lwd = lwd.branches)
-      }
-      if(points == TRUE) {
-        graphics::points(phyloxy[-c(1:length(tree$tip.label)),], pch = 16)
-        graphics::points(phyloxy[c(1:length(tree$tip.label)),][rownames(mspace$gr_centroids),],
-               bg = col.groups, pch = 21, cex = cex.groups)
 
-        }
+      maptips <-  order(match(rownames(mspace$gr_centroids), tree$tip.label))
+      plot_phenogram(x = x, y = y, tree = tree, axes = args$axes, points = points,
+                     phylo_scores = mspace$phylo_scores, lwd.branches = lwd.branches,
+                     cex.groups = cex.groups, col.groups = col.groups[maptips])
+
     } else { #else, go for a generic hybrid morphospace
 
       xy <- cbind(x, mspace$x[,args$axes[1]], y)
 
       #add points, hulls, phylogeny, and/or consensus
       if(points == TRUE) graphics::points(xy, pch = pch.points,
-                                col = col.points, cex = cex.points)
+                                          col = col.points, cex = cex.points)
       if(groups == TRUE) {
         if(is.null(mspace$gr_class)) {
           stop("groups classification has not been added to mspace object")
@@ -1077,11 +906,12 @@ plot_mspace <- function(mspace,
 
           for(i in 1:nrow(mspace$phylo$edge)) {
             graphics::lines(rbind(phyloxy[mspace$phylo$edge[i, 1],],
-                        phyloxy[mspace$phylo$edge[i, 2],]),
-                  lwd = lwd.branches)
+                                  phyloxy[mspace$phylo$edge[i, 2],]),
+                            lwd = lwd.branches)
           }
         }
       }
+
       if(mshapes == TRUE) {
         if(is.null(mspace$gr_class)) {
           stop("groups centroids have not been added to mspace object")
@@ -1101,11 +931,12 @@ plot_mspace <- function(mspace,
           meanxy <- cbind(meanx, mspace$gr_centroids[,args$axes[1]], meany)
 
           graphics::points(meanxy, col = col.groups,
-                 pch = pch.groups, cex = cex.groups)
+                           pch = pch.groups, cex = cex.groups)
         }
       }
     }
   }
 
 }
+
 

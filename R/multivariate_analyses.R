@@ -425,6 +425,9 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
   x <- cbind(x)
   y <- cbind(y)
 
+  if(is.null(rownames(x))) rownames(x) <- 1:nrow(x)
+  if(is.null(rownames(y))) rownames(y) <- 1:nrow(y)
+
   namesx <- rownames(x)
   namesy <- rownames(y)
 
@@ -465,9 +468,6 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 
     yscores <- proj_eigen(y, y_rotation, y_center)[namesy,]
     xscores <- proj_eigen(x, x_rotation, x_center)[namesx,]
-
-    colMeans(cbind(yscores))
-    colMeans(cbind(xscores))
 
   } else {
 

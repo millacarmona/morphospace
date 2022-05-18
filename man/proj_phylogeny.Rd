@@ -31,7 +31,7 @@ morphospace.
 \details{
 The purpose of this function is twofold. First, it is meant to transform
 a morphospace into a phylomorphospace by infusing  phylogenetic structure into
-the former . To this end, a \code{$gr_centroids} slot matching the tip labels
+the former. To this end, a \code{$gr_centroids} slot matching the tip labels
 from \code{tree} needs to be present (either upstream in the pipeline or already
 incorporated into an existing \code{mspace} object). Second, this function can be
 used to retrieve the scores corresponding to nodes of the phylogenetic tree, which
