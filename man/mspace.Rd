@@ -27,6 +27,7 @@ mspace(
   col.models = "#708095",
   bg.models = NULL,
   lwd.models = 1,
+  alpha.models = 1,
   points = FALSE,
   cex.ldm = 1,
   col.ldm = "black",
@@ -83,6 +84,8 @@ function.}
 \item{bg.models}{Background color for outlines.}
 
 \item{lwd.models}{Numeric; the width of the lines in wireframes/outlines.}
+
+\item{alpha.models}{Numeric; transparency factor for background models (3D only).}
 
 \item{points}{Logical; whether to plot the scatter points.}
 

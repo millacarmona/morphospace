@@ -45,7 +45,7 @@
 
 ################################################################################
 
-#' \emph{Ptychomya} shell outline data set
+#' \emph{Ptychomya} shell outlines data set
 #'
 #' @description Sample of intra- and interspecific shell shapes, quantified
 #'   as closed outlines using 7 harmonics and elliptic Fourier analysis, from
@@ -53,7 +53,7 @@
 #'
 #' @format A list containing:
 #' \describe{
-#'   \item{$tshapes:}{ an \code{"OutCoe"} object containing a \code{137 x 28}
+#'   \item{$shapes:}{ an \code{"OutCoe"} object containing a \code{137 x 28}
 #'   matrix with the normalized Fourier coefficients describing the outline
 #'   shape of the sample of fossil shells.}
 #'   \item{$sizes:}{ a vector of length 137 containing the centroid size of each
@@ -67,15 +67,55 @@
 #'   4 species of the extinct bivalve genus \emph{Ptychomya}, tracking their
 #'   morphological changes through a 5 million years interval from the Lower
 #'   Cretaceous of Argentina (approximately 140 million years ago). The data
-#'   set includes the information about the shape (measured using Fourier
-#'   coefficients from 7 harmonics), centroid size, age (both relative, taken
-#'   from ammonoid biozones, and absolute, estimated using a combination of the
-#'   former, absolute dates, and stratigraphic data), geographic provenance,
+#'   set includes the information about the extrernal shell shape (measured using
+#'   Fourier coefficients from 7 harmonics), centroid size, age (both relative,
+#'   taken from ammonoid biozones, and absolute, estimated using a combination
+#'   of the former, absolute dates, and stratigraphic data), geographic provenance,
 #'   and taxonomic classification of each fossil specimen.
 #'
 #' @references
-#'   Fasanelli M. N., Milla Carmona P. S., Soto I. M., & Tuero, D.T . (2022).
-#'   Allometry, sexual selection and evolutionary lines of least resistance
-#'   shaped the evolution of exaggerated sexual traits within the genus Tyrannus.
-#'   Journal of Evolutionary Biology, 35(5), 669 - 679.
+#'   Milla Carmona, P. S., Lazo, D. G., & Soto, I. M. (2018). Morphological evolution
+#'   of the bivalve Ptychomya through the Lower Cretaceous of Argentina. Paleobiology,
+#'   44(1), 101-117.
 "shells"
+
+
+################################################################################
+
+#' \emph{Steinmanella} shell surfaces data set
+#'
+#' @description Sample of ontogenetic longitudinal shell shapes, quantified using
+#'   90 surface semilandmarks, from 7 species of the extinct genus \emph{Steinmanella}
+#'   (Bivalvia: Trigoniida).
+#'
+#' @format A list containing:
+#' \describe{
+#'   \item{$shapes:}{ a \code{90 x 3 x 278} array with the slid, superimposed
+#'   configurations of semilandmarks describing shell surfaces.}
+#'   \item{$sizes:}{ a vector of length 278 containing the centroid size of
+#'   each shell surface}
+#'   \item{$data: }{ a 4-column data frame with information about the individual
+#'   id, taxonomic classification, amonoid biozone and geographic provenance
+#'   of each shell surface.}
+#'   \item{$mesh_meanspec: }{ a thridimensional surface mesh stored as a
+#'   \code{"mesh3d"} object (from \code{rgl}) corresponding to the shell shape
+#'   closest to the sample's mean (found using [geomorph::findMeanSpec()]), to
+#'   be warped using TPS interpolation.}
+#'   }
+#'
+#' @details The \code{shells3D} data contain data from 67 specimens belonging to
+#'   7 species of the extinct bivalve genus \emph{Steinmanella}. Between 3 and 5
+#'   shapes were measured in each individual using growth lines marking the form
+#'   of the animal at different ages, making a total of 278 shell surfaces describing
+#'   intra- and interspecfic ontogenetic variation. This data includes the
+#'   semilandmarks describing these surfaces' shapes (digitally processed to maximize
+#'   signal), their centroid sizes, the imdividual to which they belong, as well as
+#'   their relative age (ammonoid biozones), geographic provenance, and taxonomic
+#'   classification.
+#'
+#' @references
+#'   Milla Carmona, P. S., Lazo, D. G., & Soto, I. M. (2021). Ontogeny in the
+#'   steinmanellines (Bivalvia: Trigoniida): an intra- and interspecific appraisal
+#'   using the Early Cretaceous faunas from the Neuquén Basin as a case study.
+#'   Paleobiology, in press.
+"shells3D"

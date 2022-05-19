@@ -2,7 +2,7 @@
 % Please edit documentation in R/internal_builders.R
 \name{plot_morphogrid2d}
 \alias{plot_morphogrid2d}
-\title{Plot background shape models}
+\title{Plot background 2D shape models}
 \usage{
 plot_morphogrid2d(
   x = NULL,
@@ -35,8 +35,8 @@ the y axis.}
 
 \item{morphogrid}{An object containing the output of \code{morphogrid}.}
 
-\item{template}{A 2-column matrix containing 1) the actual
-landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
+\item{template}{A 2-column matrix containing 1) the actual landmarks or
+semilandmarks being analized, followed by 2) the (x,y) cartesian
 coordinates defining a curve or set of curves that will be warped using the
 deformation interpolated from the changes between landmarks/semilandmarks
 (the actual positions of which must be marked with a row of NA, see the
@@ -74,7 +74,8 @@ models.}
 \item{plot}{Logical; whether to plot morphospace.}
 }
 \description{
-Plot the output from \code{\link[=morphogrid]{morphogrid()}}. Used internally.
+Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 2-dimensional morphometric
+data. Used internally.
 }
 \examples{
 #load data and packages

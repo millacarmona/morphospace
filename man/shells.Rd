@@ -3,11 +3,11 @@
 \docType{data}
 \name{shells}
 \alias{shells}
-\title{\emph{Ptychomya} shell outline data set}
+\title{\emph{Ptychomya} shell outlines data set}
 \format{
 A list containing:
 \describe{
-\item{$tshapes:}{ an \code{"OutCoe"} object containing a \code{137 x 28}
+\item{$shapes:}{ an \code{"OutCoe"} object containing a \code{137 x 28}
 matrix with the normalized Fourier coefficients describing the outline
 shape of the sample of fossil shells.}
 \item{$sizes:}{ a vector of length 137 containing the centroid size of each
@@ -30,16 +30,15 @@ The \code{shells} data contain data from 137 specimens belonging to
 4 species of the extinct bivalve genus \emph{Ptychomya}, tracking their
 morphological changes through a 5 million years interval from the Lower
 Cretaceous of Argentina (approximately 140 million years ago). The data
-set includes the information about the shape (measured using Fourier
-coefficients from 7 harmonics), centroid size, age (both relative, taken
-from ammonoid biozones, and absolute, estimated using a combination of the
-former, absolute dates, and stratigraphic data), geographic provenance,
+set includes the information about the extrernal shell shape (measured using
+Fourier coefficients from 7 harmonics), centroid size, age (both relative,
+taken from ammonoid biozones, and absolute, estimated using a combination
+of the former, absolute dates, and stratigraphic data), geographic provenance,
 and taxonomic classification of each fossil specimen.
 }
 \references{
-Fasanelli M. N., Milla Carmona P. S., Soto I. M., & Tuero, D.T . (2022).
-Allometry, sexual selection and evolutionary lines of least resistance
-shaped the evolution of exaggerated sexual traits within the genus Tyrannus.
-Journal of Evolutionary Biology, 35(5), 669 - 679.
+Milla Carmona, P. S., Lazo, D. G., & Soto, I. M. (2018). Morphological evolution
+of the bivalve Ptychomya through the Lower Cretaceous of Argentina. Paleobiology,
+44(1), 101-117.
 }
 \keyword{datasets}

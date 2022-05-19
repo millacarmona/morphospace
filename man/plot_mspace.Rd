@@ -30,6 +30,7 @@ plot_mspace(
   col.models,
   bg.models,
   lwd.models,
+  alpha.models,
   cex.ldm,
   col.ldm,
   pch.points = 1,
@@ -98,6 +99,8 @@ function.}
 \item{bg.models}{Background color for outlines.}
 
 \item{lwd.models}{Numeric; the width of the lines in wireframes/outlines.}
+
+\item{alpha.models}{Numeric; transparency factor for background models (3D only).}
 
 \item{cex.ldm}{Numeric; size of landmarks/semilandmarks in the background
 models.}

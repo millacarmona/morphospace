@@ -36,6 +36,7 @@
 #' @param col.models The color for wireframes/outlines.
 #' @param bg.models Background color for outlines.
 #' @param lwd.models Numeric; the width of the lines in wireframes/outlines.
+#' @param alpha.models Numeric; transparency factor for background models (3D only).
 #' @param points Logical; whether to plot the scatter points.
 #' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
 #'   models.
@@ -131,6 +132,7 @@ mspace <- function(shapes,
                    col.models = "#708095",
                    bg.models = NULL,
                    lwd.models = 1,
+                   alpha.models = 1,
                    points = FALSE,
                    cex.ldm = 1,
                    col.ldm = "black",
@@ -163,22 +165,43 @@ mspace <- function(shapes,
     ordination$rotation[,axes[invax]] <- ordination$rotation[,axes[invax]]*-1
   }
 
-  shapemodels <- morphogrid(ordination = ordination, axes = axes, datype = datype, template = template,
-                            x = NULL, y = NULL, p = p, k = k, nh = nh, nv = nv, mag = mag,
-                            asp = asp, xlim = xlim, ylim = ylim, rot.models = rot.models,
-                            size.models = size.models, asp.models = asp.models)
+  if(k == 3 & datype == "landm") {
 
-  plot_morphogrid2d(x = NULL, y = NULL, morphogrid = shapemodels, template = template,
-                    links = links, datype = datype, ordtype = ordtype, axes = axes, p = p,
-                    xlim = xlim, ylim = xlim, xlab = xlab, ylab = ylab,
-                    cex.ldm = cex.ldm, col.ldm = col.ldm, col.models = col.models,
-                    lwd.models = lwd.models, bg.models = bg.models, plot = plot)
+    shapemodels <- morphogrid(ordination = ordination, axes = axes, datype = datype, template = NULL,
+                              x = NULL, y = NULL, p = p, k = k, nh = nh, nv = nv, mag = mag,
+                              asp = asp, xlim = xlim, ylim = ylim, rot.models = rot.models,
+                              size.models = size.models, asp.models = 1)
 
+    refshape <- consensus(shapes)
+    xlim <- range(ordination$x[,axes[1]])
+    ylim <- range(ordination$x[,axes[2]])
+
+    plot_morphogrid3d(x = NULL, y = NULL, morphogrid = shapemodels, refshape = refshape,
+                      template = template, links = links, ordtype = ordtype,
+                      axes = axes, p = p, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab,
+                      cex.ldm = cex.ldm, col.ldm = col.ldm, col.models = col.models,
+                      lwd.models = lwd.models, bg.models = bg.models, size.models = size.models,
+                      asp.models = asp.models, alpha.models = alpha.models, plot = plot)
+  } else {
+
+    shapemodels <- morphogrid(ordination = ordination, axes = axes, datype = datype, template = template,
+                              x = NULL, y = NULL, p = p, k = k, nh = nh, nv = nv, mag = mag,
+                              asp = asp, xlim = xlim, ylim = ylim, rot.models = rot.models,
+                              size.models = size.models, asp.models = asp.models)
+
+    plot_morphogrid2d(x = NULL, y = NULL, morphogrid = shapemodels, template = template,
+                      links = links, datype = datype, ordtype = ordtype, axes = axes, p = p,
+                      xlim = xlim, ylim = xlim, xlab = xlab, ylab = ylab, cex.ldm = cex.ldm,
+                      col.ldm = col.ldm, col.models = col.models, lwd.models = lwd.models,
+                      bg.models = bg.models, plot = plot)
+  }
+
+  if(points == TRUE) graphics::points(ordination$x[,axes])
 
 
   plotinfo <- list(p = p, k = k, links = links, template = template, axes = axes, nh = nh, nv = nv, mag = mag,
                    asp = asp, asp.models = asp.models, rot.models = rot.models, size.models = size.models,
-                   lwd.models = lwd.models, bg.models = bg.models, col.models = col.models,
+                   lwd.models = lwd.models, bg.models = bg.models, col.models = col.models, alpha.models = alpha.models,
                    cex.ldm = cex.ldm, col.ldm = col.ldm)
 
   results <- list(x = ordination$x, rotation = ordination$rotation, center = ordination$center,
@@ -576,6 +599,7 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #' @param col.models The color for wireframes/outlines.
 #' @param bg.models Background color for outlines.
 #' @param lwd.models Numeric; the width of the lines in wireframes/outlines.
+#' @param alpha.models Numeric; transparency factor for background models (3D only).
 #' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
 #'   models.
 #' @param col.ldm The color of landmarks/semilandmarks in the background models.
@@ -733,6 +757,7 @@ plot_mspace <- function(mspace,
                         col.models ,
                         bg.models,
                         lwd.models,
+                        alpha.models,
                         cex.ldm,
                         col.ldm,
                         pch.points = 1,
@@ -771,23 +796,62 @@ plot_mspace <- function(mspace,
 
   if(is.null(x) & is.null(y)) { #if neither x nor y have been provided, plot pure morphospace
 
-    shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
-                              template = args$template, x = NULL, y = NULL, p = mspace$plotinfo$p,
-                              k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
-                              asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
-                              size.models = args$size.models, asp.models = args$asp.models)
+    # shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
+    #                           template = args$template, x = NULL, y = NULL, p = mspace$plotinfo$p,
+    #                           k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
+    #                           asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
+    #                           size.models = args$size.models, asp.models = args$asp.models)
+    #
+    # plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
+    #                   links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
+    #                   axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = xlim,
+    #                   xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
+    #                   col.ldm = args$col.ldm, col.models = args$col.models,
+    #                   lwd.models = args$lwd.models, bg.models = args$bg.models)
 
-    plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
-                      links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
-                      axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = xlim,
-                      xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
-                      col.ldm = args$col.ldm, col.models = args$col.models,
-                      lwd.models = args$lwd.models, bg.models = args$bg.models)
+    if(mspace$plotinfo$k == 3 & mspace$datype == "landm") {
+
+      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
+                                template = NULL, x = NULL, y = NULL, p = mspace$plotinfo$p,
+                                k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
+                                asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
+                                size.models = args$size.models, asp.models = args$asp.models)
+
+      refshape <- matrix(rev_eigen(0,
+                                   ordination$rotation[,1],
+                                   ordination$center),
+                         nrow = mspace$plotinfo$p, ncol = mspace$plotinfo$k, byrow = TRUE)
+
+      xlim <- range(ordination$x[,args$axes[1]])
+      ylim <- range(ordination$x[,args$axes[2]])
+
+      plot_morphogrid3d(x = NULL, y = NULL, morphogrid = shapemodels, refshape = refshape,
+                        template = args$template, links = args$links, ordtype = mspace$ordtype,
+                        axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = ylim,
+                        xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
+                        col.ldm = args$col.ldm, col.models = args$col.models, lwd.models = args$lwd.models,
+                        bg.models = args$bg.models,  size.models = args$size.models,
+                        asp.models = args$asp.models, alpha.models = args$alpha.models)
+    } else {
+
+      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
+                                template = args$template, x = NULL, y = NULL, p = mspace$plotinfo$p,
+                                k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
+                                asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
+                                size.models = args$size.models, asp.models = args$asp.models)
+
+      plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
+                        links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
+                        axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = ylim,
+                        xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
+                        col.ldm = args$col.ldm, col.models = args$col.models, lwd.models = args$lwd.models,
+                        bg.models = args$bg.models)
+    }
 
     #add points, hulls, phylogeny, and/or consensus
     if(points == TRUE) graphics::points(mspace$x[, args$axes],
                                         pch = pch.points, col = col.points, cex = cex.points)
-    if(groups == TRUE) {
+    if(groups == TRUE & !is.null(mspace$gr_class)) {
       if(is.null(mspace$gr_class)) {
         stop("groups classification has not been added to mspace object")
       } else {
@@ -795,7 +859,7 @@ plot_mspace <- function(mspace,
                           col = col.groups)
       }
     }
-    if(phylo == TRUE) {
+    if(phylo == TRUE & !is.null(mspace$phylo)) {
       if(is.null(mspace$phylo)) {
         stop("phylogenetic relationships have not been added to mspace object")
       } else {
@@ -806,7 +870,7 @@ plot_mspace <- function(mspace,
         }
       }
     }
-    if(mshapes == TRUE) {
+    if(mshapes == TRUE & !is.null(mspace$gr_centroids)) {
       if(is.null(mspace$gr_centroids)) {
         stop("groups centroids have not been added to mspace object")
       } else {
@@ -844,18 +908,57 @@ plot_mspace <- function(mspace,
       }
     }
 
-    shapemodels <- morphogrid(ordination = ordination, x = x, y = y, axes = args$axes, template = args$template,
-                              datype = mspace$datype, p = mspace$plotinfo$p, k = mspace$plotinfo$k, nh = args$nh,
-                              nv = args$nv, mag = args$mag, asp = args$asp, xlim = args$xlim, ylim = args$ylim,
-                              rot.models = args$rot.models, size.models = args$size.models,
-                              asp.models = args$asp.models)
+    # shapemodels <- morphogrid(ordination = ordination, x = x, y = y, axes = args$axes, template = args$template,
+    #                           datype = mspace$datype, p = mspace$plotinfo$p, k = mspace$plotinfo$k, nh = args$nh,
+    #                           nv = args$nv, mag = args$mag, asp = args$asp, xlim = args$xlim, ylim = args$ylim,
+    #                           rot.models = args$rot.models, size.models = args$size.models,
+    #                           asp.models = args$asp.models)
+    #
+    # plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
+    #                   links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
+    #                   axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = xlim,
+    #                   xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
+    #                   col.ldm = args$col.ldm, col.models = args$col.models,
+    #                   lwd.models = args$lwd.models, bg.models = args$bg.models)
 
-    plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
-                      links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
-                      axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = xlim,
-                      xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
-                      col.ldm = args$col.ldm, col.models = args$col.models,
-                      lwd.models = args$lwd.models, bg.models = args$bg.models)
+    if(mspace$plotinfo$k == 3 & mspace$datype == "landm") {
+
+      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
+                                template = NULL, x = x, y = y, p = mspace$plotinfo$p,
+                                k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
+                                asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
+                                size.models = args$size.models, asp.models = args$asp.models)
+
+      refshape <- matrix(rev_eigen(0,
+                                   ordination$rotation[,1],
+                                   ordination$center),
+                         nrow = mspace$plotinfo$p, ncol = mspace$plotinfo$k, byrow = TRUE)
+
+      if(is.null(x)) xlim <- range(ordination$x[,args$axes[1]])
+      if(is.null(y)) ylim <- range(ordination$x[,args$axes[1]])
+
+      plot_morphogrid3d(x = x, y = y, morphogrid = shapemodels, refshape = refshape,
+                        template = args$template, links = args$links, ordtype = mspace$ordtype,
+                        axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = ylim,
+                        xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
+                        col.ldm = args$col.ldm, col.models = args$col.models, lwd.models = args$lwd.models,
+                        bg.models = args$bg.models,  size.models = args$size.models,
+                        asp.models = args$asp.models, alpha.models = args$alpha.models)
+    } else {
+
+      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
+                                template = args$template, x = x, y = y, p = mspace$plotinfo$p,
+                                k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
+                                asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
+                                size.models = args$size.models, asp.models = args$asp.models)
+
+      plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
+                        links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
+                        axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = ylim,
+                        xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
+                        col.ldm = args$col.ldm, col.models = args$col.models, lwd.models = args$lwd.models,
+                        bg.models = args$bg.models)
+    }
 
 
     if(phenogr == TRUE) { #if x/y is a phy object, plot a phenogram
@@ -872,7 +975,7 @@ plot_mspace <- function(mspace,
       #add points, hulls, phylogeny, and/or consensus
       if(points == TRUE) graphics::points(xy, pch = pch.points,
                                           col = col.points, cex = cex.points)
-      if(groups == TRUE) {
+      if(groups == TRUE & !is.null(mspace$gr_class)) {
         if(is.null(mspace$gr_class)) {
           stop("groups classification has not been added to mspace object")
         } else {
@@ -880,7 +983,7 @@ plot_mspace <- function(mspace,
         }
       }
 
-      if(phylo == TRUE) {
+      if(phylo == TRUE & !is.null(mspace$phylo)) {
         if(is.null(mspace$phylo)) {
           stop("phylogenetic relationships have not been added to mspace object")
         } else {
@@ -912,7 +1015,7 @@ plot_mspace <- function(mspace,
         }
       }
 
-      if(mshapes == TRUE) {
+      if(mshapes == TRUE & !is.null(mspace$gr_consensus)) {
         if(is.null(mspace$gr_class)) {
           stop("groups centroids have not been added to mspace object")
         } else {

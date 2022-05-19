@@ -484,9 +484,10 @@ morphogrid <- function(ordination,
 
 ################################################################################################
 
-#' Plot background shape models
+#' Plot background 2D shape models
 #'
-#' @description Plot the output from [morphogrid()]. Used internally.
+#' @description Plot the output from [morphogrid()], for 2-dimensional morphometric
+#'   data. Used internally.
 #'
 #' @param morphogrid An object containing the output of \code{morphogrid}.
 #' @param x Optional vector with a non-morphometric variable to be plotted in
@@ -495,8 +496,8 @@ morphogrid <- function(ordination,
 #'   the y axis.
 #' @param links A list with the indices of the coordinates defining the
 #'   wireframe (following the format used in \code{Morpho}).
-#' @param template A 2-column matrix containing 1) the actual
-#'   landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
+#' @param template A 2-column matrix containing 1) the actual landmarks or
+#'   semilandmarks being analized, followed by 2) the (x,y) cartesian
 #'   coordinates defining a curve or set of curves that will be warped using the
 #'   deformation interpolated from the changes between landmarks/semilandmarks
 #'   (the actual positions of which must be marked with a row of NA, see the
@@ -570,6 +571,8 @@ plot_morphogrid2d <- function(x = NULL,
   if(!is.null(xlim)) xlim <- range(c(morphogrid$models_mat[,1]))
   if(!is.null(ylim)) ylim <- range(c(morphogrid$models_mat[,2]))
 
+  if(length(axes) == 1) axes <- rep(axes, 2)
+
   if(is.null(xlab)) {
     if(!is.null(x)) {
       xlab <- "x"
@@ -596,19 +599,19 @@ plot_morphogrid2d <- function(x = NULL,
       ylab <- "y"
     } else {
       if(ordtype == "prcomp") {
-        ylab <- paste0("PC", axes[1])
+        ylab <- paste0("PC", axes[2])
       }
       if(ordtype == "bg_prcomp") {
-        ylab <- paste0("bgPC", axes[1])
+        ylab <- paste0("bgPC", axes[2])
       }
       if(ordtype == "phy_prcomp") {
-        ylab <- paste0("phyPC", axes[1])
+        ylab <- paste0("phyPC", axes[2])
       }
       if(ordtype == "pls_shapes") {
-        ylab <- paste0("PLS-", axes[1])
+        ylab <- paste0("PLS-", axes[2])
       }
       if(ordtype == "phy_pls_shapes") {
-        ylab <- paste0("phyPLS-", axes[1])
+        ylab <- paste0("phyPLS-", axes[2])
       }
     }
   }
@@ -638,166 +641,268 @@ plot_morphogrid2d <- function(x = NULL,
 }
 
 
-################################################################################################
-#
-# plot_morphogrid3d <- function(x = NULL,
-#                               y = NULL,
-#                               morphogrid,
-#                               template = NULL,
-#                               links = NULL,
-#                               datype,
-#                               ordtype,
-#                               axes,
-#                               p,
-#                               xlim = NULL,
-#                               ylim = NULL,
-#                               xlab = NULL,
-#                               ylab = NULL,
-#                               cex.ldm,
-#                               col.ldm,
-#                               col.models,
-#                               lwd.models,
-#                               alpha.model = 1,
-#                               bg.model,
-#                               plot = TRUE) {
-#
-#
-#   if(!is.null(xlim)) xlim <- range(c(morphogrid$models_mat[,1]))
-#   if(!is.null(ylim)) ylim <- range(c(morphogrid$models_mat[,2]))
-#
-#   if(is.null(xlab)) {
-#     if(!is.null(x)) {
-#       xlab <- "x"
-#     } else {
-#       if(ordtype == "prcomp") {
-#         xlab <- paste0("PC", axes[1])
-#       }
-#       if(ordtype == "bg_prcomp") {
-#         xlab <- paste0("bgPC", axes[1])
-#       }
-#       if(ordtype == "phy_prcomp") {
-#         xlab <- paste0("phyPC", axes[1])
-#       }
-#       if(ordtype == "pls_shapes") {
-#         xlab <- paste0("PLS-", axes[1])
-#       }
-#       if(ordtype == "phy_pls_shapes") {
-#         xlab <- paste0("phyPLS-", axes[1])
-#       }
-#     }
-#   }
-#   if(is.null(ylab)) {
-#     if(!is.null(y)) {
-#       ylab <- "y"
-#     } else {
-#       if(ordtype == "prcomp") {
-#         ylab <- paste0("PC", axes[1])
-#       }
-#       if(ordtype == "bg_prcomp") {
-#         ylab <- paste0("bgPC", axes[1])
-#       }
-#       if(ordtype == "phy_prcomp") {
-#         ylab <- paste0("phyPC", axes[1])
-#       }
-#       if(ordtype == "pls_shapes") {
-#         ylab <- paste0("PLS-", axes[1])
-#       }
-#       if(ordtype == "phy_pls_shapes") {
-#         ylab <- paste0("phyPLS-", axes[1])
-#       }
-#     }
-#   }
-#
-#
-#   refshape <- geomorph::arrayspecs(rev_eigen(0, ordination$rotation[,1], ordination$center),
-#                                    p = p, k = k)
-#
-#   wd <- tempdir()
-#   enter <- NULL
-#   if(!is.null(template)) {
-#
-#     while(!is.null(enter)) {
-#       refmesh <- template
-#       rgl::plot3d(refmesh, col = bg.model, specular = "black", axes = FALSE, aspect = FALSE,
-#                   xlab = "", ylab = "", zlab = "", alpha = alpha.model)
-#       rgl::plot3d(refshape, col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
-#                   xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm + 0.5, add = TRUE)
-#       for(l in 1:length(links)) rgl::lines3d(refshape[links[[l]],],
-#                                              col = col.models, lwd = lwd.models)
-#       cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close nor minimize the rgl device).")
-#       enter <- readline("Press <Enter> in the console enter to continue:")
-#     }
-#
-#     for(i in 1:dim(morphogrid$models_arr)[3]) {
-#       modelmesh <- Morpho::tps3d(x = refmesh , refmat = refshape, tarmat = shape_models$models_arr[,,i])
-#       rgl::plot3d(modelmesh, col = bg.model, specular = "black", axes = FALSE, aspect = FALSE,
-#                   xlab = "", ylab = "", zlab = "", alpha = alpha.model)
-#       rgl::plot3d(morphogrid$models_arr[,,i], col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
-#                   xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm + 0.5, add = TRUE)
-#       for(l in 1:length(links)) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
-#                                              col = col.models, lwd = lwd.models)
-#       rgl::rgl.snapshot(paste0(wd, "model", i, ".png"))
-#     }
-#
-#   } else {
-#     while(!is.null(enter)) {
-#       rgl::plot3d(refshape, col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
-#                   xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm + 0.5)
-#
-#       for(l in 1:length(links)) rgl::lines3d(refshape[links[[l]],],
-#                                              col = col.models, lwd = lwd.models)
-#       cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close nor minimize the rgl device).")
-#       enter <- readline("Press <Enter> in the console enter to continue:")
-#     }
-#
-#     for(i in 1:dim(morphogrid$models_arr)[3]) {
-#       rgl::plot3d(morphogrid$models_arr[,,i], col = col.ldm, specular = "black",
-#                   axes = FALSE, aspect = FALSE, xlab = "", ylab = "", zlab = "",
-#                   type = "s", size = cex.ldm + 0.5)
-#
-#       for(l in 1:length(links)) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
-#                                              col = col.models, lwd = lwd.models)
-#       rgl::rgl.snapshot(paste0(wd, "model", i, ".png"))
-#     }
-#   }
-#
-#
-#
-#   for(i in 1:dim(morphogrid$models_arr)[3]) {
-#     model_i <- magick::image_read(paste0(wd, "model", i, ".png"))
-#     model_i_clean <- magick::image_fill(model_i, color = "transparent", refcolor = "white", fuzz = 4, point = "+1+1")
-#     magick::image_write(model_i_clean, path = paste0(wd,"model",i,".png"), format = "png")
-#   }
-#
-#
-#   models <- lapply(1:dim(morphogrid$models_arr)[3], function (i) {
-#     model_i <- png::readPNG(paste0(wd, "model", i, ".png"), native = TRUE)
-#   })
-#
-#
-#   model_cents <- t(apply(morphogrid$models_arr, 3, colMeans))
-#   model_ranges <- lapply(1:length(models), function(i) {
-#
-#     matrix(c(c((model_cents[i,1] - halfsize), (model_cents[i,1] + halfsize)),
-#              c((model_cents[i,2] - halfsize), (model_cents[i,2] + halfsize)) * asp),
-#            nrow = 2, byrow = FALSE)
-#   })
-#
-#   xlim <- range(c(lapply(model_ranges, function(x) {x[,1]}), xlim[,1]))
-#   ylim <- range(c(lapply(model_ranges, function(x) {x[,2]}), ylim[,2]))
-#
-#
-#   if(plot == TRUE) {
-#     plot(morphogrid$models_mat, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
-#
-#     for(i in 1:length(models)) {
-#       rasterImage(models[[i]], model_ranges[[i]][1,1], model_ranges[[i]][1,2],
-#                   model_ranges[[i]][2,1], model_ranges[[i]][2,2])
-#     }
-#
-#   }
-# }
-#
+##################################################################################
+
+#' Plot background 3D shape models
+#'
+#' @description Plot the output from [morphogrid()], for 3-dimensional morphometric
+#'   (landmark) data. Used internally.
+#'
+#' @param morphogrid An object containing the output of \code{morphogrid}.
+#' @param x Optional vector with a non-morphometric variable to be plotted in
+#'   the x axis.
+#' @param y Optional vector with a non-morphometric variable to be plotted in
+#'   the y axis.
+#' @param links A list with the indices of the coordinates defining the
+#'   wireframe (following the format used in \code{Morpho}).
+#' @param template An optional \code{"mesh3d"} object, which will be warped using
+#'   TPS interpolation to produce the set of background shell models.
+#' @param refshape reference shape (i.e., the mean landmark configuration)
+#'   corresponding to the mesh provided in \code{template}.
+#' @param ordtype Character; method used for multivariate ordination
+#'   (\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"}, \code{"pls_shapes"}
+#'   or \code{"phy_pls_shapes"}).
+#' @param axes Numeric of length 2, indicating the axes to be plotted.
+#' @param p Numeric, indicating the number of landmarks/semilandmarks used (for
+#'   landmark data only).
+#' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
+#'   models.
+#' @param col.ldm The color of landmarks/semilandmarks in the background models.
+#' @param size.models Numeric; size factor for shape models.
+#' @param col.models The color for wireframes/outlines.
+#' @param bg.models Background color for outlines.
+#' @param lwd.models Numeric; the width of the lines in wireframes/outlines.
+#' @param alpha.models Numeric; transparency factor for background models.
+#' @param asp.models Numeric; the y/x aspect ratio of shape models.
+#' @param plot Logical; whether to plot morphospace.
+#' @param xlim,ylim,xlab,ylab Standard arguments passed to the generic plot
+#'   function.
+#'
+#' @details This function allows the user to choose the orientation of the 3D
+#'   models by interactively rotating a shape model. Do not close the \code{rgl}
+#'   window, nor minimize it actively (just bring back Rstudio to the front and
+#'   let the device get minimized pasively). The process of generating the morphospace
+#'    is rather slow, specially if a mesh is provided for \code{template} and/or if
+#'    \code{alpha.models} value is lower than \code{1}.
+#'
+#' @export
+#'
+#' @examples
+#' #load data and packages
+#' library(geomorph)
+#' data("shells3D")
+#' shapes <- shells3D$shapes
+#'
+#' #perform pca on tails shapes
+#' pca <- prcomp(two.d.array(shapes))
+#'
+#' #generate grid of shape models sampling the range of variation
+#' #at 4 locations (the 4 corners of the scatterplot)
+#' shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
+#'                           k = ncol(shapes), p = nrow(shapes),
+#'                           nh = 2, nv = 2)
+#'
+#' #get meanshape
+#' meanshape <- consensus(shapes)
+#'
+#' \dontrun{
+#' #plot grid (shape coordinates only)
+#' plot_morphogrid3d(morphogrid = shapes_grid, refshape = meanshape,
+#'                   ordtype = "prcomp", axes = c(1,2), p = 9, col.ldm = 1, cex.ldm = 1,
+#'                   col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
+#'                   asp.models = 3)
+#'
+#' #get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec,
+#' #then get mesh corresponding to mean shape using Morpho::tps3d
+#' meanspec_id<- findMeanSpec(shapes)
+#' meanspec_shape <- shapes[,,refshape_id]
+#' meanmesh <- tps3d(x = shells3D$mesh_meanspec , refmat = meanspec_shape, tarmat = meanshape)
+#'
+#' #plot grid (includinh mesh template)
+#' plot_morphogrid3d(morphogrid = shapes_grid, template = meanmesh, refshape = meanshape,
+#'                   ordtype = "prcomp", axes = c(1,2), p = 9, col.ldm = 1, cex.ldm = 1,
+#'                   col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
+#'                   asp.models = 3)
+#' }
+plot_morphogrid3d <- function(x = NULL,
+                              y = NULL,
+                              morphogrid,
+                              refshape,
+                              template = NULL,
+                              links = NULL,
+                              ordtype,
+                              axes,
+                              p,
+                              xlim = NULL,
+                              ylim = NULL,
+                              xlab = NULL,
+                              ylab = NULL,
+                              cex.ldm,
+                              col.ldm,
+                              col.models,
+                              lwd.models,
+                              size.models,
+                              alpha.models = 1,
+                              bg.models,
+                              asp.models,
+                              plot = TRUE) {
+
+
+  if(is.null(xlim)) xlim <- range(c(morphogrid$models_mat[,1]))
+  if(is.null(ylim)) ylim <- range(c(morphogrid$models_mat[,2]))
+
+  if(is.null(xlab)) {
+    if(!is.null(x)) {
+      xlab <- "x"
+    } else {
+      if(ordtype == "prcomp") {
+        xlab <- paste0("PC", axes[1])
+      }
+      if(ordtype == "bg_prcomp") {
+        xlab <- paste0("bgPC", axes[1])
+      }
+      if(ordtype == "phy_prcomp") {
+        xlab <- paste0("phyPC", axes[1])
+      }
+      if(ordtype == "pls_shapes") {
+        xlab <- paste0("PLS-", axes[1])
+      }
+      if(ordtype == "phy_pls_shapes") {
+        xlab <- paste0("phyPLS-", axes[1])
+      }
+    }
+  }
+  if(is.null(ylab)) {
+    if(!is.null(y)) {
+      ylab <- "y"
+    } else {
+      if(ordtype == "prcomp") {
+        ylab <- paste0("PC", axes[2])
+      }
+      if(ordtype == "bg_prcomp") {
+        ylab <- paste0("bgPC", axes[2])
+      }
+      if(ordtype == "phy_prcomp") {
+        ylab <- paste0("phyPC", axes[2])
+      }
+      if(ordtype == "pls_shapes") {
+        ylab <- paste0("PLS-", axes[2])
+      }
+      if(ordtype == "phy_pls_shapes") {
+        ylab <- paste0("phyPLS-", axes[2])
+      }
+    }
+  }
+
+
+  wd <- tempdir()
+  enter <- NULL
+  if(!is.null(template)) {
+
+    while(is.null(enter)) {
+
+      refmesh <- template
+
+      rgl::plot3d(refmesh, col = bg.models, specular = "black", axes = FALSE, aspect = FALSE,
+                  xlab = "", ylab = "", zlab = "", alpha = alpha.models)
+
+      rgl::plot3d(refshape, col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
+                  xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm, add = TRUE)
+
+      for(l in 1:length(links)) rgl::lines3d(refshape[links[[l]],],
+                                             col = col.models, lwd = lwd.models)
+
+      cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close nor minimize the rgl device).")
+
+      enter <- readline("Press <Enter> in the console enter to continue:")
+
+      cat("This will take a minute")
+
+    }
+
+    for(i in 1:dim(morphogrid$models_arr)[3]) {
+
+      modelmesh <- Morpho::tps3d(x = refmesh , refmat = refshape, tarmat = morphogrid$models_arr[,,i])
+
+      rgl::plot3d(modelmesh, col = bg.models, specular = "black", axes = FALSE, aspect = FALSE,
+                  xlab = "", ylab = "", zlab = "", alpha = alpha.models)
+
+      rgl::plot3d(morphogrid$models_arr[,,i], col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
+                  xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm, add = TRUE)
+
+      for(l in 1:length(links)) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
+                                             col = col.models, lwd = lwd.models)
+
+      rgl::rgl.snapshot(paste0(wd, "model", i, ".png"))
+    }
+
+  } else {
+    while(is.null(enter)) {
+
+      rgl::plot3d(refshape, col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
+                  xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm)
+
+      for(l in 1:length(links)) rgl::lines3d(refshape[links[[l]],],
+                                             col = col.models, lwd = lwd.models)
+
+      cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close nor minimize the rgl device).")
+
+      enter <- readline("Press <Enter> in the console enter to continue:")
+
+      cat("This will take a minute")
+    }
+
+    for(i in 1:dim(morphogrid$models_arr)[3]) {
+
+      rgl::plot3d(morphogrid$models_arr[,,i], col = col.ldm, specular = "black",
+                  axes = FALSE, aspect = FALSE, xlab = "", ylab = "", zlab = "",
+                  type = "s", size = cex.ldm)
+
+      for(l in 1:length(links)) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
+                                             col = col.models, lwd = lwd.models)
+
+      rgl::rgl.snapshot(paste0(wd, "model", i, ".png"))
+    }
+  }
+
+
+
+  for(i in 1:dim(morphogrid$models_arr)[3]) {
+    model_i <- magick::image_read(paste0(wd, "model", i, ".png"))
+    model_i_clean <- magick::image_fill(model_i, color = "transparent", refcolor = "white", fuzz = 4, point = "+1+1")
+    magick::image_write(model_i_clean, path = paste0(wd, "model", i, ".png"), format = "png")
+  }
+
+
+  models <- lapply(1:dim(morphogrid$models_arr)[3], function (i) {
+    model_i <- png::readPNG(paste0(wd, "model", i, ".png"), native = TRUE)
+  })
+
+
+  model_centers <- t(apply(morphogrid$models_arr, 3, colMeans))
+  model_ranges <- lapply(1:length(models), function(i) {
+
+    halfsize <- size.models * 0.015
+
+    matrix(c(c((model_centers[i,1] - halfsize), (model_centers[i,1] + halfsize)),
+             c((model_centers[i,2] - halfsize * (asp.models/2)),
+               (model_centers[i,2] + halfsize * (asp.models/2)))),
+           nrow = 2, byrow = FALSE)
+  })
+
+  xlim <- range(c(lapply(model_ranges, function(x) {x[,1]}), xlim))
+  ylim <- range(c(lapply(model_ranges, function(x) {x[,2]}), ylim))
+
+  if(plot == TRUE) {
+    plot(0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
+
+    for(i in 1:length(models)) {
+      rasterImage(models[[i]], model_ranges[[i]][1,1], model_ranges[[i]][1,2],
+                  model_ranges[[i]][2,1], model_ranges[[i]][2,2])
+    }
+  }
+}
+
 
 
 ################################################################################################
