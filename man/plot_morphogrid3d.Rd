@@ -72,7 +72,7 @@ models.}
 
 \item{alpha.models}{Numeric; transparency factor for background models.}
 
-\item{bg.models}{Background color for outlines.}
+\item{bg.models}{Background color for meshes.}
 
 \item{asp.models}{Numeric; the y/x aspect ratio of shape models.}
 
@@ -86,7 +86,46 @@ Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 3-dimensional 
 This function allows the user to choose the orientation of the 3D
 models by interactively rotating a shape model. Do not close the \code{rgl}
 window, nor minimize it actively (just bring back Rstudio to the front and
-let the device get minimized pasively). The process of generating the morphospace
-is rather slow, specially if a mesh is provided for \code{template} and/or if
-\code{alpha.models} value is lower than \code{1}.
+let the device get minimized pasively). The process of morphospace generation
+is rather slow, specially if a mesh is provided for \code{template}, a large
+number of shape models is asked, and/or \code{alpha.models} value is lower
+than \code{1}.
+}
+\examples{
+#load data and packages
+library(geomorph)
+data("shells3D")
+shapes <- shells3D$shapes
+
+#perform pca on tails shapes
+pca <- prcomp(two.d.array(shapes))
+
+#generate grid of shape models sampling the range of variation
+#at 4 locations (the 4 corners of the scatterplot)
+shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
+                          k = ncol(shapes), p = nrow(shapes),
+                          nh = 2, nv = 2)
+
+#get meanshape
+meanshape <- consensus(shapes)
+
+\dontrun{
+#plot grid (shape coordinates only)
+plot_morphogrid3d(morphogrid = shapes_grid, refshape = meanshape,
+                  ordtype = "prcomp", axes = c(1,2), p = 9, col.ldm = 1, cex.ldm = 1,
+                  col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
+                  asp.models = 3)
+
+#get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec,
+#then get mesh corresponding to mean shape using Morpho::tps3d
+meanspec_id<- findMeanSpec(shapes)
+meanspec_shape <- shapes[,,meanspec_id]
+meanmesh <- tps3d(x = shells3D$mesh_meanspec , refmat = meanspec_shape, tarmat = meanshape)
+
+#plot grid (includinh mesh template)
+plot_morphogrid3d(morphogrid = shapes_grid, template = meanmesh, refshape = meanshape,
+                  ordtype = "prcomp", axes = c(1,2), p = 9, col.ldm = 1, cex.ldm = 1,
+                  col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
+                  asp.models = 3)
+}
 }

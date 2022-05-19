@@ -14,10 +14,10 @@ each shell surface}
 \item{$data: }{ a 4-column data frame with information about the individual
 id, taxonomic classification, amonoid biozone and geographic provenance
 of each shell surface.}
-\item{$mesh_avspec: }{ a thridimensional surface mesh stored as a \code{"mesh3d"}
-object (from \code{rgl}) corresponding to the shell shape closest to the sample's
-mean (found using \code{\link[geomorph:findMeanSpec]{geomorph::findMeanSpec()}}), to be warped using TPS
-interpolation.}
+\item{$mesh_meanspec: }{ a thridimensional surface mesh stored as a
+\code{"mesh3d"} object (from \code{rgl}) corresponding to the shell shape
+closest to the sample's mean (found using \code{\link[geomorph:findMeanSpec]{geomorph::findMeanSpec()}}), to
+be warped using TPS interpolation.}
 }
 }
 \usage{

@@ -445,7 +445,7 @@ morphogrid <- function(ordination,
     sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k) * size.models
   }
 
-  sh_arr[,2,] <- sh_arr[,2,] * asp.models
+  if(k < 3) sh_arr[,2,] <- sh_arr[,2,] * asp.models ######
 
   if(rot.models!=0) for(i in 1:dim(sh_arr)[3]) {
     sh_arr[,,i] <- spdep::Rotation(sh_arr[,,i], rot.models*0.0174532925199)
@@ -670,7 +670,7 @@ plot_morphogrid2d <- function(x = NULL,
 #' @param col.ldm The color of landmarks/semilandmarks in the background models.
 #' @param size.models Numeric; size factor for shape models.
 #' @param col.models The color for wireframes/outlines.
-#' @param bg.models Background color for outlines.
+#' @param bg.models Background color for meshes.
 #' @param lwd.models Numeric; the width of the lines in wireframes/outlines.
 #' @param alpha.models Numeric; transparency factor for background models.
 #' @param asp.models Numeric; the y/x aspect ratio of shape models.
@@ -681,9 +681,10 @@ plot_morphogrid2d <- function(x = NULL,
 #' @details This function allows the user to choose the orientation of the 3D
 #'   models by interactively rotating a shape model. Do not close the \code{rgl}
 #'   window, nor minimize it actively (just bring back Rstudio to the front and
-#'   let the device get minimized pasively). The process of generating the morphospace
-#'    is rather slow, specially if a mesh is provided for \code{template} and/or if
-#'    \code{alpha.models} value is lower than \code{1}.
+#'   let the device get minimized pasively). The process of morphospace generation
+#'    is rather slow, specially if a mesh is provided for \code{template}, a large
+#'    number of shape models is asked, and/or \code{alpha.models} value is lower
+#'    than \code{1}.
 #'
 #' @export
 #'
@@ -715,7 +716,7 @@ plot_morphogrid2d <- function(x = NULL,
 #' #get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec,
 #' #then get mesh corresponding to mean shape using Morpho::tps3d
 #' meanspec_id<- findMeanSpec(shapes)
-#' meanspec_shape <- shapes[,,refshape_id]
+#' meanspec_shape <- shapes[,,meanspec_id]
 #' meanmesh <- tps3d(x = shells3D$mesh_meanspec , refmat = meanspec_shape, tarmat = meanshape)
 #'
 #' #plot grid (includinh mesh template)
@@ -750,6 +751,8 @@ plot_morphogrid3d <- function(x = NULL,
 
   if(is.null(xlim)) xlim <- range(c(morphogrid$models_mat[,1]))
   if(is.null(ylim)) ylim <- range(c(morphogrid$models_mat[,2]))
+
+  if(length(axes) == 1) axes <- rep(axes, 2)
 
   if(is.null(xlab)) {
     if(!is.null(x)) {
@@ -814,7 +817,7 @@ plot_morphogrid3d <- function(x = NULL,
 
       cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close nor minimize the rgl device).")
 
-      enter <- readline("Press <Enter> in the console enter to continue:")
+      enter <- readline("Press <Enter> in the console to continue:")
 
       cat("This will take a minute")
 
@@ -847,9 +850,8 @@ plot_morphogrid3d <- function(x = NULL,
 
       cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close nor minimize the rgl device).")
 
-      enter <- readline("Press <Enter> in the console enter to continue:")
+      enter <- readline("Press <Enter> in the console to continue:")
 
-      cat("This will take a minute")
     }
 
     for(i in 1:dim(morphogrid$models_arr)[3]) {

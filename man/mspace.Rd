@@ -81,7 +81,7 @@ function.}
 
 \item{col.models}{The color for wireframes/outlines.}
 
-\item{bg.models}{Background color for outlines.}
+\item{bg.models}{Background color for outlines/meshes.}
 
 \item{lwd.models}{Numeric; the width of the lines in wireframes/outlines.}
 

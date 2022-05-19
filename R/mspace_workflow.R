@@ -34,7 +34,7 @@
 #' @param size.models Numeric; size factor for shape models.
 #' @param asp.models Numeric; the y/x aspect ratio of shape models.
 #' @param col.models The color for wireframes/outlines.
-#' @param bg.models Background color for outlines.
+#' @param bg.models Background color for outlines/meshes.
 #' @param lwd.models Numeric; the width of the lines in wireframes/outlines.
 #' @param alpha.models Numeric; transparency factor for background models (3D only).
 #' @param points Logical; whether to plot the scatter points.
@@ -597,7 +597,7 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #' @param asp.models Numeric; the y/x aspect ratio of shape models.
 #' @param rot.models  Numeric; angle (in degrees) to rotate shape models.
 #' @param col.models The color for wireframes/outlines.
-#' @param bg.models Background color for outlines.
+#' @param bg.models Background color for outlines/meshes.
 #' @param lwd.models Numeric; the width of the lines in wireframes/outlines.
 #' @param alpha.models Numeric; transparency factor for background models (3D only).
 #' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
@@ -796,20 +796,7 @@ plot_mspace <- function(mspace,
 
   if(is.null(x) & is.null(y)) { #if neither x nor y have been provided, plot pure morphospace
 
-    # shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
-    #                           template = args$template, x = NULL, y = NULL, p = mspace$plotinfo$p,
-    #                           k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
-    #                           asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
-    #                           size.models = args$size.models, asp.models = args$asp.models)
-    #
-    # plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
-    #                   links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
-    #                   axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = xlim,
-    #                   xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
-    #                   col.ldm = args$col.ldm, col.models = args$col.models,
-    #                   lwd.models = args$lwd.models, bg.models = args$bg.models)
-
-    if(mspace$plotinfo$k == 3 & mspace$datype == "landm") {
+     if(mspace$plotinfo$k == 3 & mspace$datype == "landm") {
 
       shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
                                 template = NULL, x = NULL, y = NULL, p = mspace$plotinfo$p,
@@ -907,19 +894,6 @@ plot_mspace <- function(mspace,
         args$ylim <- range(y)
       }
     }
-
-    # shapemodels <- morphogrid(ordination = ordination, x = x, y = y, axes = args$axes, template = args$template,
-    #                           datype = mspace$datype, p = mspace$plotinfo$p, k = mspace$plotinfo$k, nh = args$nh,
-    #                           nv = args$nv, mag = args$mag, asp = args$asp, xlim = args$xlim, ylim = args$ylim,
-    #                           rot.models = args$rot.models, size.models = args$size.models,
-    #                           asp.models = args$asp.models)
-    #
-    # plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
-    #                   links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
-    #                   axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = xlim,
-    #                   xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
-    #                   col.ldm = args$col.ldm, col.models = args$col.models,
-    #                   lwd.models = args$lwd.models, bg.models = args$bg.models)
 
     if(mspace$plotinfo$k == 3 & mspace$datype == "landm") {
 
@@ -1039,7 +1013,6 @@ plot_mspace <- function(mspace,
       }
     }
   }
-
 }
 
 
