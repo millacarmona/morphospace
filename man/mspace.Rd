@@ -125,6 +125,9 @@ meant to be expanded using the \code{proj_*} family of functions and the
 \code{\%>\%} operator from \code{maggritr}.
 }
 \examples{
+
+##2D Landmark data
+
 #load and extract relevant data and information
 data("tails")
 shapes <- tails$shapes
@@ -163,6 +166,48 @@ mspace(sp_shapes, links = links, FUN = phy_prcomp, tree = tree, mag = 0.7,
 #just create a morphospace without plotting, save into an object, and inspect
 morphosp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2), plot = FALSE)
 names(morphosp)
+
+
+
+##3D Landmark data
+
+#load data and packages and extract relevant data and information
+library(magrittr)
+library(Morpho)
+data("shells3D")
+shapes <- shells3D$shapes
+mesh_meanspec <- shells3D$mesh_meanspec
+
+#create morphospace. This is interactive, you need to rotate the shape by yourself and
+#then press enter into the console.
+mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
+       asp.models = 3, col.ldm = "black", cex.ldm = 2. points = TRUE)
+#create morphospace using a mesh template that improves visualization:
+#first, get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec
+meanspec_id<- findMeanSpec(shapes)
+meanspec_shape <- shapes[,,meanspec_id]
+
+#then get the consensus shape and warp the sample mesh to get the mesh corresponding to the
+#consensus using Morpho::tps3d
+meanshape <- consensus(shapes)
+meanmesh <- tps3d(x = mesh_meanspec , refmat = meanspec_shape, tarmat = meanshape)
+
+#finally, create morphospace providing template (this function used the mesh warped to
+#the mean shape of the entire sample, hence the previous lines)
+mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
+       asp.models = 3, bg.model = "gray", cex.ldm = 0, template = meanmesh, points = TRUE)
+
+
+
+##Outline data
+
+#load and extract relevant data and information
+data("shells")
+shapes <- shells$shapes$coe
+
+# Create morphospace using all the raw variation
+mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 0.3,
+       asp.models = 0.5, bg.model = "light gray")
 }
 \seealso{
 \code{\link{proj_shapes}}, \code{\link{proj_consensus}},
