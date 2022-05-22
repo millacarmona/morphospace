@@ -21,10 +21,12 @@ Imports:
     geomorph,
     graphics,
     grDevices,
+    magick,
     magrittr,
     Momocs,
     Morpho,
     phytools,
+    png,
     rgl,
     spdep
 Depends: 
