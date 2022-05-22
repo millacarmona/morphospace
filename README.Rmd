@@ -38,6 +38,16 @@ devtools::install_github("millacarmona/morphospace")
 
 The general motivation to create `morphospace` was to crystallize the experience of introducing biologists and paleontologists to geometric morphometrics, as well as to assist my own daily research (which revolves around morphological evolution and depends heavily on a number of R packages). In particular, this package is intended to enhance representation and exploration of multivariate ordinations of shape data, and has been designed to work in intergration with other widely used R packages that cover more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis) such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014).
 
+
+```{r, echo = FALSE}
+library(morphospace)
+library(geomorph)
+library(Morpho)
+library(Momocs)
+library(magrittr)
+```
+
+
 `morphospace` has been built to work with different types of geometric morphometrics data. Below, the general concept and capabilities of  `morphospace` are showcased using three data sets representing these types.
 
 
@@ -45,11 +55,8 @@ The general motivation to create `morphospace` was to crystallize the experience
 
 The first data set, taken from from Fasanelli et al. (2022), contains a sample of tail shapes from the 13 species of the genus *Tyrannus*, two of which (*T. savana* and *T. forficatus*) display exaggeratedly elongated tails, as well as a considerable allometric variation and sexual dimorphism. The `tails` data set contains landmark data and centroid sizes from the tails of 281 specimens, their classification to species and sex, and the phylogenetic relationships between *Tyrannus* species (see Fasanelli et al. 2022 and references therein). To further help visualization of shapes, the links between landmarks and sets of curves outlining tail feathers (to be warped using TPS interpolation) have also been included.
 
-```{r}
-library(morphospace)
-library(geomorph)
-library(Morpho)
 
+```{r}
 # Load tail data and extract shapes, centroid sizes, classification of sex and species,
 # links between landmarks, template, and phylogenetic tree
 
@@ -79,9 +86,6 @@ detr_shapes <- arrayspecs(detrend_shapes(model = lm(two.d.array(shapes) ~ sex)),
                           p = nrow(shapes), k = ncol(shapes))
 sp_shapes <- consensus(shapes = detr_shapes, index = species)
 ```
-
-
-## Workflow
 
 
 The basic idea behind the `morphospace` workflow is to build (empiric) morphospaces using multivariate methods (PCA and the like), then use the resulting ordination as a reference in which to project different elements depicting various aspects of morphometric variation. These elements are added both to the plot and the `"mspace"` object as consecutive 'layers' and list slots, respectively, using the `%>%` pipe operator from `magrittr` (Bache & Wickham 2022).
@@ -296,15 +300,16 @@ title("Interspecific NDF morphospace\n+ all samples and mean shapes\n+ intraspec
 The `"mspace"` objects created using the `mspace %>% proj_*` pipeline can be plotted with `plot_mspace`, which adds further flexibility to the whole depiction thing. By plotting a `"mspace"` object using this function we can select a different set of axes to plot, colors and symbols for points, groups, etc (or not).
 
 
-```{r}
+```{r, fig.show='hide'}
 # Generate a mspace object
 morphospace <- mspace(detr_shapes, links = links, mag = 0.7, axes = c(1,2))  %>%
   proj_shapes(shapes = detr_shapes, col = species) %>%
   proj_groups(shapes = detr_shapes, groups = species) %>%
   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
-title("A morphospace")
+```
 
+```{r}
 # The funcion plot_mspace can take an object created with mspace + projections
 # and plot it.
 plot_mspace(mspace = morphospace, points = TRUE, mshapes = FALSE, groups = FALSE, phylo = FALSE)
@@ -315,7 +320,7 @@ title("A morphospace plotted with plot_mspace")
 plot_mspace(mspace = morphospace, axes = c(1,2), groups = TRUE, points = TRUE,
             col.points = species, col.groups = 1:nlevels(species),
             mshapes = FALSE, phylo = FALSE)
-title("The same morphospace with additional elements added")
+title("Same morphospace with additional elements")
 
 
 # The function allows modification different aspects of the plot, such as the axes
@@ -323,21 +328,21 @@ title("The same morphospace with additional elements added")
 plot_mspace(mspace = morphospace, template = template, axes = c(1,3), nh = 3, groups = TRUE, 
             points = TRUE, col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5,
             col.ldm = "red", mshapes = FALSE, phylo = FALSE)
-title("Morphospace axes 1 and 3, and with a different background")
+title("Same morphospace, axes 1 and 3, and with a different background")
 ```
 
 In addition, `plot_mspace` allows specification of an external, non-shape variable (or, alternatively, a phylogenetic tree) to be combined with the axes of our morphospace to create 'hybrid' morphospaces. For example, if we provide a phylogenetic tree for the `x` argument of `plot_mspace`, we get a phenogram:
 
 
-```{r}
+```{r, fig.show='hide'}
 # A phylogenetic tree can be included to produce a phenogram
 phylomorphospace <- mspace(sp_shapes, links = links, mag = 0.7, axes = c(1,2), 
                            cex.ldm = 0, asp.models = 2, size.models = 0.5)  %>%
   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
-title("Just a phylomorphospace")
+```
 
-
+```{r}
 # Plot phenogram
 plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 0.7, size.models = 3, col.groups = 1:13)
 title("Phenogram")
@@ -416,13 +421,12 @@ for(i in 1:nlevels(species)){
   pca <- prcomp(x = subshapes)
   proj_axis(obj = pca, morphospace1, axis = 1, pipe = FALSE, lwd = 2, col = i)
 }
-
 title("Morphospace emphasizing interspecific variation")
 ```
 
 Finally, we can use `plot_mspace` again to create more complex hybrid plots. In this case, say are interested in the anagenetic evolution of these species, so we want to plot the first PC together with the time axis. To do so, we do a little variable manipulation first to obtain the classification of each specimen to the combination of (relative) age and species, then build the morphospace, then use `plot_mspace` to plot geochronologic age against shape. Finally, we calculate the (absolute) ages from each combination, bind them to the groups means, order them and use that to depict the mean shape changes of each species through time:
 
-```{r}
+```{r, fig.show='hide'}
 # Combine species and biozones factors, then compute the mean shapes of the resulting
 # groups
 sp.bz <- factor(species:bzones)
@@ -436,7 +440,9 @@ morphospace2 <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.mode
   proj_consensus(shapes = mshapes_agesxspecies, pch=16) %>%
   proj_groups(shapes = shapes, groups = sp.bz)
 
+```
 
+```{r}
 # Plot time axis vs first PC
 plot_mspace(mspace = morphospace2, x = ages, axes = 1,
             nh = 5, nv = 4, asp.models = 0.13, mag = 0.5,
@@ -463,6 +469,7 @@ Least but not last, `morphospace` can also deal with 3D landmark data (my person
 
 
 The `rgl` package (Murduch & Adler 2021) is responsible for depiction of 3D models, which imposes some important differences in the way `morphospace` functions work. Most importantly, each time `mspace` or `plot_mspace` is called a `rgl` device will pop up and we will be asked to rotate a reference shape to a desired orientation. **Do not close or minimize this window**, just rotate the model and then go to the console and hit the <Enter> there directly. 
+
 
 ```{r, include = FALSE}
 par3d(userMatrix = 
@@ -495,6 +502,7 @@ mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
        asp.models = 3, col.ldm = "black", cex.ldm = 2) %>%
   proj_shapes(shapes = shapes, col = species, pch = 16) %>%
   proj_groups(shapes = shapes, groups = species)
+title("Morphospace")
 ```
 
 As with 2D landmarks we can include a template to improve interpretability, although in this case this template is a 3D surface mesh. This can slow down the process considerably, especially if we ask for too many models or use transparent meshes. The template used must be the mesh corresponding to the mean shape, which needs to be computed beforehand (the `shells3D` data set includes the mesh corresponding to the specimen closest to the consensus, which can be warped using `Morpho::tps3d` to obtain the mean mesh, as shown in the next chunk).
@@ -519,6 +527,7 @@ mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
        asp.models = 3, bg.model = "gray", cex.ldm = 0, template = meanmesh) %>%
   proj_shapes(shapes = shapes, col = species, pch = 1, cex = (sizes/max(sizes))^2) %>%
   proj_groups(shapes = shapes, groups = species)
+title("Same morphospace with fancier background")
 ```
 
 So, with this sorted out we can focus on morphometric variation to better represent ontogenetic trajectories. Again we resort to `detrend shapes` to remove variation coming from undesired sources (which in this case are age, provenance and, especialy, individual differneces).
@@ -579,8 +588,10 @@ for(i in 1:nlevels(species)) {
   proj_axis(obj = pls_list[[i]], mspace = morphospace, lwd = 3, col = i, type = "b",
             cex = c(1,2), axis = 1, pipe = FALSE)
 }
-
+title("Refined morphospace")
 ```
+
+
 Finally, we can also use `plot_mspace` to plot the general allometric axis (i.e. computed for the entire sample rather than species-wise) against size:
 
 
@@ -594,9 +605,10 @@ allomorphospace <- mspace(detr_shapes, FUN = pls_shapes, X = sizes, LOOCV = TRUE
 # Use plot_mspace to create hybrid morphospace, with shape against logsize
 plot_mspace(allomorphospace, x = sizes, axes = 1, asp.models = 0.5, size.models = 15,
             col.points = species, pch.points = 16, xlab = "log-size")
+title("Allomorphospace")
 ```
 
-As the use of templates for 3D shapes is very time-consuming, It might be a good idea to experiment with the 'naked' configurations before producing the final plots.
+As the use of templates for 3D shapes can be very time-consuming, it may be a good idea to experiment with the 'naked' configurations before producing the final plots.
 
 
 
