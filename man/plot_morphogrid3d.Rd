@@ -85,7 +85,7 @@ Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 3-dimensional 
 \details{
 This function allows the user to choose the orientation of the 3D
 models by interactively rotating a shape model. Do not close the \code{rgl}
-window, nor minimize it actively (just bring back Rstudio to the front and
+window, or minimize it actively (just bring back Rstudio to the front and
 let the device get minimized pasively). The process of morphospace generation
 is rather slow, specially if a mesh is provided for \code{template}, a large
 number of shape models is asked, and/or \code{alpha.models} value is lower

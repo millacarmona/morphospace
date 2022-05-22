@@ -30,9 +30,10 @@ Sample of ontogenetic longitudinal shell shapes, quantified using
 }
 \details{
 The \code{shells3D} data contain data from 67 specimens belonging to
-7 species of the extinct bivalve genus \emph{Steinmanella}. Between 3 and 5
-shapes were measured in each individual using growth lines marking the form
-of the animal at different ages, making a total of 278 shell surfaces describing
+7 species of the extinct bivalve genus \emph{Steinmanella}, which inhabited
+the Early Cretaceous of Argentina during a ~7 million years interval. Shapes
+were measured in each individual using growth lines marking the form of the
+animal at different ages, making a total of 278 shell surfaces describing
 intra- and interspecfic ontogenetic variation. This data includes the
 semilandmarks describing these surfaces' shapes (digitally processed to maximize
 signal), their centroid sizes, the imdividual to which they belong, as well as

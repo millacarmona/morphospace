@@ -236,9 +236,8 @@ mspace <- function(shapes,
 
     plot_morphogrid2d(x = NULL, y = NULL, morphogrid = shapemodels, template = template,
                       links = links, datype = datype, ordtype = ordtype, axes = axes, p = p,
-                      xlim = xlim, ylim = xlim, xlab = xlab, ylab = ylab, cex.ldm = cex.ldm,
-                      col.ldm = col.ldm, col.models = col.models, lwd.models = lwd.models,
-                      bg.models = bg.models, plot = plot)
+                      xlab = xlab, ylab = ylab, cex.ldm = cex.ldm, col.ldm = col.ldm,
+                      col.models = col.models, lwd.models = lwd.models, bg.models = bg.models, plot = plot)
   }
 
   if(points == TRUE) graphics::points(ordination$x[,axes])
@@ -874,10 +873,9 @@ plot_mspace <- function(mspace,
 
       plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
                         links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
-                        axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = ylim,
-                        xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
-                        col.ldm = args$col.ldm, col.models = args$col.models, lwd.models = args$lwd.models,
-                        bg.models = args$bg.models)
+                        axes = args$axes, p = mspace$plotinfo$p, xlab = args$xlab, ylab = args$ylab,
+                        cex.ldm = args$cex.ldm, col.ldm = args$col.ldm, col.models = args$col.models,
+                        lwd.models = args$lwd.models, bg.models = args$bg.models)
     }
 
     #add points, hulls, phylogeny, and/or consensus
@@ -973,10 +971,9 @@ plot_mspace <- function(mspace,
 
       plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
                         links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
-                        axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = ylim,
-                        xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
-                        col.ldm = args$col.ldm, col.models = args$col.models, lwd.models = args$lwd.models,
-                        bg.models = args$bg.models)
+                        axes = args$axes, p = mspace$plotinfo$p, xlab = args$xlab, ylab = args$ylab,
+                        cex.ldm = args$cex.ldm, col.ldm = args$col.ldm, col.models = args$col.models,
+                        lwd.models = args$lwd.models, bg.models = args$bg.models)
     }
 
 

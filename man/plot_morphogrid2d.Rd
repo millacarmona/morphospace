@@ -14,8 +14,6 @@ plot_morphogrid2d(
   ordtype,
   axes,
   p,
-  xlim = NULL,
-  ylim = NULL,
   xlab = NULL,
   ylab = NULL,
   cex.ldm,
@@ -57,8 +55,7 @@ or \code{"phy_pls_shapes"}).}
 \item{p}{Numeric, indicating the number of landmarks/semilandmarks used (for
 landmark data only).}
 
-\item{xlim, ylim, xlab, ylab}{Standard arguments passed to the generic plot
-function.}
+\item{xlab, ylab}{Standard arguments passed to the generic plot function.}
 
 \item{cex.ldm}{Numeric; size of landmarks/semilandmarks in the background
 models.}

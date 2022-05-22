@@ -517,8 +517,7 @@ morphogrid <- function(ordination,
 #' @param bg.models Background color for outlines.
 #' @param lwd.models Numeric; the width of the lines in wireframes/outlines.
 #' @param plot Logical; whether to plot morphospace.
-#' @param xlim,ylim,xlab,ylab Standard arguments passed to the generic plot
-#'   function.
+#' @param xlab,ylab Standard arguments passed to the generic plot function.
 #'
 #' @export
 #'
@@ -556,8 +555,6 @@ plot_morphogrid2d <- function(x = NULL,
                               ordtype,
                               axes,
                               p,
-                              xlim = NULL,
-                              ylim = NULL,
                               xlab = NULL,
                               ylab = NULL,
                               cex.ldm,
@@ -568,8 +565,8 @@ plot_morphogrid2d <- function(x = NULL,
                               plot = TRUE) {
 
 
-  if(!is.null(xlim)) xlim <- range(c(morphogrid$models_mat[,1]))
-  if(!is.null(ylim)) ylim <- range(c(morphogrid$models_mat[,2]))
+  xlim <- range(c(na.omit(morphogrid$models_mat[,1])))
+  ylim <- range(c(na.omit(morphogrid$models_mat[,2])))
 
   if(length(axes) == 1) axes <- rep(axes, 2)
 
@@ -680,7 +677,7 @@ plot_morphogrid2d <- function(x = NULL,
 #'
 #' @details This function allows the user to choose the orientation of the 3D
 #'   models by interactively rotating a shape model. Do not close the \code{rgl}
-#'   window, nor minimize it actively (just bring back Rstudio to the front and
+#'   window, or minimize it actively (just bring back Rstudio to the front and
 #'   let the device get minimized pasively). The process of morphospace generation
 #'    is rather slow, specially if a mesh is provided for \code{template}, a large
 #'    number of shape models is asked, and/or \code{alpha.models} value is lower
@@ -815,7 +812,7 @@ plot_morphogrid3d <- function(x = NULL,
       for(l in 1:length(links)) rgl::lines3d(refshape[links[[l]],],
                                              col = col.models, lwd = lwd.models)
 
-      cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close nor minimize the rgl device).")
+      cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close or minimize the rgl device).")
 
       enter <- readline("Press <Enter> in the console to continue:")
 
@@ -848,7 +845,7 @@ plot_morphogrid3d <- function(x = NULL,
       for(l in 1:length(links)) rgl::lines3d(refshape[links[[l]],],
                                              col = col.models, lwd = lwd.models)
 
-      cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close nor minimize the rgl device).")
+      cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close or minimize the rgl device).")
 
       enter <- readline("Press <Enter> in the console to continue:")
 
