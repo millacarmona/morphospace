@@ -33,25 +33,32 @@ morphometrics pipeline (e.g. importation, normalization, statistical
 analysis) such as `Morpho` (Schlager 2017), `geomorph` (Adams et
 al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014).
 
-    #> Loading required package: RRPP
-    #> Loading required package: rgl
-    #> Loading required package: Matrix
-    #> 
-    #> Attaching package: 'Morpho'
-    #> The following object is masked from 'package:RRPP':
-    #> 
-    #>     classify
-    #> 
-    #> Attaching package: 'Momocs'
-    #> The following objects are masked from 'package:Morpho':
-    #> 
-    #>     export, tps2d
-    #> The following object is masked from 'package:geomorph':
-    #> 
-    #>     mosquito
-    #> The following object is masked from 'package:stats':
-    #> 
-    #>     filter
+``` r
+library(morphospace)
+library(geomorph)
+#> Loading required package: RRPP
+#> Loading required package: rgl
+#> Loading required package: Matrix
+library(Morpho)
+#> 
+#> Attaching package: 'Morpho'
+#> The following object is masked from 'package:RRPP':
+#> 
+#>     classify
+library(Momocs)
+#> 
+#> Attaching package: 'Momocs'
+#> The following objects are masked from 'package:Morpho':
+#> 
+#>     export, tps2d
+#> The following object is masked from 'package:geomorph':
+#> 
+#>     mosquito
+#> The following object is masked from 'package:stats':
+#> 
+#>     filter
+library(magrittr)
+```
 
 `morphospace` has been built to work with different types of geometric
 morphometrics data. Below, the general concept and capabilities of

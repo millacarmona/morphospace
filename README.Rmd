@@ -39,7 +39,7 @@ devtools::install_github("millacarmona/morphospace")
 The general motivation to create `morphospace` was to crystallize the experience of introducing biologists and paleontologists to geometric morphometrics, as well as to assist my own daily research (which revolves around morphological evolution and depends heavily on a number of R packages). In particular, this package is intended to enhance representation and exploration of multivariate ordinations of shape data, and has been designed to work in intergration with other widely used R packages that cover more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis) such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014).
 
 
-```{r, echo = FALSE}
+```{r, results='hide'}
 library(morphospace)
 library(geomorph)
 library(Morpho)
