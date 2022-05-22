@@ -869,8 +869,8 @@ plot_morphogrid3d <- function(x = NULL,
   for(i in 1:dim(morphogrid$models_arr)[3]) {
     model_i <- magick::image_read(paste0(wd, "model", i, ".png"))
     model_i_clean <- magick::image_fill(model_i, color = "transparent", refcolor = "white", fuzz = 4, point = "+1+1")
-    model_i_clean_trimmed <- magick::image_trim(model_i_clean)
-    magick::image_write(model_i_clean_trimmed, path = paste0(wd,"model",i,".png"), format = "png")
+    #model_i_clean_trimmed <- magick::image_trim(model_i_clean)
+    magick::image_write(model_i_clean, path = paste0(wd,"model",i,".png"), format = "png")
   }
 
 
