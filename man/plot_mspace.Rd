@@ -15,6 +15,7 @@ plot_mspace(
   nv,
   mag,
   invax = NULL,
+  adj_frame = c(1, 1),
   points = TRUE,
   mshapes = TRUE,
   groups = TRUE,
@@ -72,6 +73,9 @@ the y axis. Alternatively, a \code{"phy"} object can be provided.}
 \item{invax}{Optional numeric indicating which of the axes provided in
 \code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
 \code{c(1,2)}).}
+
+\item{adj_frame}{Numeric of length 2, providing \emph{a posteriori} scaling
+factors for the width and height of the frame, respectively.}
 
 \item{points}{Logical; whether to plot the scatter points corresponding to
 the sampled shapes stored in \code{mspace$x}.}

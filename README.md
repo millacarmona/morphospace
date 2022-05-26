@@ -33,37 +33,20 @@ morphometrics pipeline (e.g. importation, normalization, statistical
 analysis) such as `Morpho` (Schlager 2017), `geomorph` (Adams et
 al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014).
 
-``` r
-library(morphospace)
-library(geomorph)
-#> Loading required package: RRPP
-#> Loading required package: rgl
-#> Loading required package: Matrix
-library(Morpho)
-#> 
-#> Attaching package: 'Morpho'
-#> The following object is masked from 'package:RRPP':
-#> 
-#>     classify
-library(Momocs)
-#> 
-#> Attaching package: 'Momocs'
-#> The following objects are masked from 'package:Morpho':
-#> 
-#>     export, tps2d
-#> The following object is masked from 'package:geomorph':
-#> 
-#>     mosquito
-#> The following object is masked from 'package:stats':
-#> 
-#>     filter
-library(magrittr)
-```
+    #> Loading required package: RRPP
+    #> Loading required package: rgl
+    #> Loading required package: Matrix
+    #> 
+    #> Attaching package: 'Morpho'
+    #> The following object is masked from 'package:RRPP':
+    #> 
+    #>     classify
 
 `morphospace` has been built to work with different types of geometric
 morphometrics data. Below, the general concept and capabilities of
 `morphospace` are showcased using three data sets representing these
-types.
+types and various spatio-temporal scales that are typically addressed
+when studying evolutionary variation.
 
 ## 2D Landmark data
 
@@ -74,22 +57,19 @@ elongated tails, as well as a considerable allometric variation and
 sexual dimorphism. The `tails` data set contains landmark data and
 centroid sizes from the tails of 281 specimens, their classification to
 species and sex, and the phylogenetic relationships between *Tyrannus*
-species (see Fasanelli et al. 2022 and references therein). To further
-help visualization of shapes, the links between landmarks and sets of
-curves outlining tail feathers (to be warped using TPS interpolation)
-have also been included.
+species (see Fasanelli et al. 2022 and references therein). The links
+between landmarks have been included to help shape visualization.
 
 ``` r
 # Load tail data and extract shapes, centroid sizes, classification of sex and species,
-# links between landmarks, template, and phylogenetic tree
-
+# links between landmarks, and phylogenetic tree
 data("tails")
+
 shapes <- tails$shapes
 species <- tails$data$species
 sizes <- log(tails$sizes)
 sex <- tails$data$sex
 links <- tails$links
-template <- tails$template
 tree <- tails$tree
 ```
 
@@ -347,8 +327,8 @@ species_ndf <- factor(species[index])
 sizes_ndf <- sizes[index]
 
 morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
-                      links = links, mag = 0.7, axes = c(1,2),
-                      xlim = c(-0.1, 0.4), ylim = c(-0.12, 0.1)) %>%
+                      links = links, mag = 0.7, axes = c(1,2), size.models = 1,
+                      xlim = c(-0.1, 0.4), ylim = c(-0.13, 0.1)) %>%
   proj_consensus(shapes = sp_shapes, bg = 1:13, pch = 21) %>%
   proj_shapes(shapes = detr_shapes, col = species, pch = 1) %>%
   proj_groups(shapes = detr_shapes, groups = species)
@@ -357,20 +337,20 @@ title("Interspecific NDF morphospace\n+ all samples and mean shapes")
 
 <img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 
-Finally, let’s say we want to project the axis representing the
-allometric variation of each species(e.g. a PLS of shape vs centroid
-size), so we can see whether these are aligned with each other or with
-the axes maximizing NDF interspecific variation. Suppose we also want to
-project the phylogenetic relationships into our morphospace so we can
-say we have a phylomorphospace (Sidlauskas 2008). The following chunk of
-code illustrates how to combine the pipe workflow described above with
+Let’s say we want to project the axis representing the allometric
+variation of each species(e.g. a PLS of shape vs centroid size), so we
+can see whether these are aligned with each other or with the axes
+maximizing NDF interspecific variation. Suppose we also want to project
+the phylogenetic relationships into our morphospace so we can say we
+have a phylomorphospace (Sidlauskas 2008). The following chunk of code
+illustrates how to combine the pipe workflow described above with
 `proj_*` functions called outside the pipe.
 
 ``` r
 # NDF bgPCA + projection of the entire sample + projection of phylogenetic relationships
 morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
-                      links = links, mag = 0.7, axes = c(1,2),
-                      xlim = c(-0.1, 0.4), ylim = c(-0.12, 0.1)) %>%
+                      links = links, mag = 0.7, axes = c(1,2), size.models = 1,
+                      xlim = c(-0.1, 0.4), ylim = c(-0.13, 0.1)) %>%
   proj_consensus(shapes = sp_shapes, bg = 1:13, pch = 21) %>%
   proj_shapes(shapes = detr_shapes, col = species, pch = 1) %>%
   proj_groups(shapes = detr_shapes, groups = species) %>%
@@ -388,34 +368,6 @@ title("Interspecific NDF morphospace\n+ all samples and mean shapes\n+ intraspec
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
-
-`mspace` can also be feeded with a curve or set of curves outlining
-aspects of the phenotype not captured by the chosen landmarks that can
-help ‘see’ the structure in which they have been placed on. For example,
-we can use the template outlining the tail feathers instead of the links
-between landmarks:
-
-``` r
-# NDF bgPCA + projection of the entire sample + projection of phylogenetic relationships
-morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
-                      template = template, mag = 0.7, axes = c(1,2), cex.ldm = 5,
-                      col.ldm = "red", xlim = c(-0.1, 0.4), ylim = c(-0.12, 0.1)) %>%
-  proj_consensus(shapes = sp_shapes, bg = 1:13, pch = 21) %>%
-  proj_shapes(shapes = detr_shapes, col = species, pch = 1) %>%
-  proj_groups(shapes = detr_shapes, groups = species) %>%
-  proj_phylogeny(tree = tree)
-# Project allometric axes
-for(i in 1:nlevels(species)){
-  index <- species==levels(species)[i]
-  subshapes <- detr_shapes[,,index]
-  subsizes <- sizes[index]
-  pls <- pls_shapes(shapes = subshapes, X = subsizes)
-  proj_axis(obj = pls, morphospace, axis = 1, pipe = FALSE, col = "blue", lwd = 2)
-}
-title("Interspecific NDF morphospace\n+ all samples and mean shapes\n+ intraspecific allometric axes")
-```
-
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 ## Flexible visualization
 
@@ -441,7 +393,7 @@ plot_mspace(mspace = morphospace, points = TRUE, mshapes = FALSE, groups = FALSE
 title("A morphospace plotted with plot_mspace")
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
 
 ``` r
 
@@ -452,19 +404,34 @@ plot_mspace(mspace = morphospace, axes = c(1,2), groups = TRUE, points = TRUE,
 title("Same morphospace with additional elements")
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-2.png" width="100%" />
 
 ``` r
 
 # The function allows modification different aspects of the plot, such as the axes
 # to be plotted, the number of shape models in the background or the size of their landmarks
-plot_mspace(mspace = morphospace, template = template, axes = c(1,3), nh = 3, groups = TRUE, 
+plot_mspace(mspace = morphospace, links = links, axes = c(1,3), nh = 3, groups = TRUE, 
             points = TRUE, col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5,
             col.ldm = "red", mshapes = FALSE, phylo = FALSE)
 title("Same morphospace, axes 1 and 3, and with a different background")
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-3.png" width="100%" />
+
+``` r
+
+# Finally, here is an example on how to add labels to the plot. We inset argument in the legend
+# function controls
+par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
+plot_mspace(mspace = morphospace, links = links, axes = c(1,3), nh = 3, groups = TRUE, 
+            points = TRUE, col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5,
+            col.ldm = "red", mshapes = FALSE, phylo = FALSE)
+legend("topright", inset = c(-0.22, 0), legend = levels(species), 
+       cex = 0.7, pch = 16, col = 1:nlevels(species), bty = "n", text.font = 3)
+title("Same morphospace, axes 1 and 3, and with a different background")
+```
+
+<img src="man/figures/README-unnamed-chunk-13-4.png" width="100%" />
 
 In addition, `plot_mspace` allows specification of an external,
 non-shape variable (or, alternatively, a phylogenetic tree) to be
@@ -474,19 +441,112 @@ argument of `plot_mspace`, we get a phenogram:
 
 ``` r
 # A phylogenetic tree can be included to produce a phenogram
-phylomorphospace <- mspace(sp_shapes, links = links, mag = 0.7, axes = c(1,2), 
-                           cex.ldm = 0, asp.models = 2, size.models = 0.5)  %>%
+phylomorphospace <- mspace(sp_shapes, links = links, mag = 0.7, axes = c(1,2))  %>%
   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
   proj_phylogeny(tree = tree, pch = 16)
 ```
 
 ``` r
 # Plot phenogram
-plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 0.7, size.models = 3, col.groups = 1:13)
+plot_mspace(phylomorphospace, x = tree, axes = 1, asp.models = 1, size.models = 0.7, col.groups = 1:13)
 title("Phenogram")
 ```
 
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+
+`mspace` (and `plot_mspace`) can also be feeded with a curve or set of
+curves outlining aspects of the phenotype not captured by the chosen
+landmarks, that can help ‘see’ the structure in which they have been
+placed on. We show this using the `wings` data set, which has been taken
+from Soto et al. (2012) and includes wing shape data from 263
+experimentally bred specimens belonging to two recently diverged
+cactophilic *Drosophila* species, *D. koepferae* and *D. buzzattii*.
+These two species show preference to different host cacti (columnar
+cacti from the genus *Trichocereus* and prickly pears from the genus
+*Opuntia*, respectively) and are considered morphologically cryptic
+(usually, they can be recognized only from genital morphology). The data
+set include the centroid size of each wing, as well as information on
+the host cacti each specimen was bred, its species, sex, isofemale line,
+and replica. Also included is a template containing a series of curves
+describing wing outline and veins (created using `build_template2d`),
+which will be warped using TPS interpolation and used to generate fancy
+shape models for our morphospace.
+
+``` r
+# Load wing data and extract shapes, centroid sizes, classification of sex and species,
+# links between landmarks, template, and phylogenetic tree
+
+data("wings")
+
+shapes <- wings$shapes
+sizes <- wings$sizes
+species <- wings$data$species
+cactus <- wings$data$cactus
+line <- wings$data$line
+sex <- wings$data$sex
+replica <- wings$data$replica
+links <- wings$links
+template <- wings$template
+
+#generate morphospace with warped wings, with variation amplified x2
+mspace(shapes, axes = c(1,2), template = template, col.ldm = "red", cex.ldm = 5, size.models = 1, mag = 1) %>%
+  proj_shapes(shapes = shapes, col = c("blue", "green")[species], pch = c(1,16)[cactus])
+title("Morphospace using template")
+```
+
 <img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+
+Assume for a second we are interested in exploring whether we can
+identify morphological differences between species and/or the host
+cactus each group was bred on. The pattern we are seeing suggets that
+variation in wing morphology is very subtle, that wings of these two
+species are basically indistinguishable, and that cactus has a large
+effect on wing morphology. However, there is a lot of noise can get rid
+o using `detrend_shapes`, and we can also use the `mag` argument to
+magnify variation.
+
+``` r
+#remove variation from  sex, line, replica and size
+detr_shapes <- arrayspecs(
+  detrend_shapes(lm(two.d.array(shapes) ~ sex * line * replica * sizes)), 
+  p = 9, k = 2)
+
+# generate morphospace using the refined variation, magnify transformation x3
+mspace(detr_shapes, axes = c(1,2), template = template, col.ldm = "red", 
+       cex.ldm = 5, size.models = 0.15, mag = 3) %>%
+  proj_shapes(shapes = detr_shapes, col = c("blue", "green")[species], pch = c(1,16)[cactus]) %>%
+  proj_groups(groups = species, col = c("blue", "green"))
+title("Refined morphospace using template")
+```
+
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" /> We
+can see interspecific differences more clearly now. We can use
+`bg_prcomp` to explore if there is any other difference in wing
+morphology associated to species and cactus.
+
+``` r
+# generate morphospace using the refined variation, magnify transformation x3
+mspace(detr_shapes, axes = c(1,2), template = template, col.ldm = "red",
+       nh = 2, nv = 2, FUN = bg_prcomp, groups = cactus:species,
+       cex.ldm = 5, size.models = 0.03, mag = 1) %>%
+  proj_shapes(shapes = detr_shapes, col = c("blue", "green")[species], pch = c(1,16)[cactus]) %>%
+  proj_groups(groups = species:cactus, col = c("blue", "blue", "green", "green"))
+title("Refined morphospace emphazising Cactus x Species")
+```
+
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+
+``` r
+# generate morphospace using the refined variation, magnify transformation x3
+mspace(detr_shapes, axes = c(1,3), template = template, col.ldm = "red",
+       nh = 2, nv = 2, FUN = bg_prcomp, groups = cactus:species,
+       cex.ldm = 5, size.models = 0.03, mag = 1) %>%
+  proj_shapes(shapes = detr_shapes, col = c("blue", "green")[species], pch = c(1,16)[cactus]) %>%
+  proj_groups(groups = species:cactus, col = c("blue", "blue", "green", "green"))
+title("Refined morphospace emphazising Cactus x Species")
+```
+
+<img src="man/figures/README-unnamed-chunk-18-2.png" width="100%" />
 
 ## Closed outlines
 
@@ -520,18 +580,18 @@ locality <- shells$data$locality
 pile_shapes(shapes)
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
 
 ``` r
 # Generate morphospace using raw variation
-mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 0.3,
-       asp.models = 0.5, bg.model = "light gray") %>%
+mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 1,
+       asp.models = 2, bg.model = "light gray") %>%
   proj_shapes(shapes = shapes, col = species) %>%
   proj_groups(shapes = shapes, groups = species)
 title("Morphospace")
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-19-2.png" width="100%" />
 
 All the same fun stuff can be done here. For example we might be
 interested in refining variation to show the main differences between
@@ -581,9 +641,9 @@ cool too.
 ``` r
 # Generate morphospace from the 'refined' variation, further enhancing interspecific
 # variation by using a bgPCA
-morphospace1 <- mspace(detr_shapes, mag = 0.7, axes = c(1,2), FUN = bg_prcomp, groups = species,
-                              nh = 5, nv = 4, size.models = 0.3,
-                              asp.models = 0.5, bg.model = "light gray") %>%
+morphospace1 <- mspace(detr_shapes, mag = 0.7, axes = c(1,2), 
+                       FUN = bg_prcomp, groups = species, nh = 5, nv = 4, 
+                       size.models = 1, asp.models = 2, bg.model = "light gray") %>%
   proj_shapes(shapes = detr_shapes, col = species) %>%
   proj_consensus(shapes = sp_shapes, pch=16) %>%
   proj_groups(shapes = detr_shapes, groups = species)
@@ -597,7 +657,7 @@ for(i in 1:nlevels(species)){
 title("Morphospace emphasizing interspecific variation")
 ```
 
-<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
 
 Finally, we can use `plot_mspace` again to create more complex hybrid
 plots. In this case, say are interested in the anagenetic evolution of
@@ -618,8 +678,8 @@ mshapes_agesxspecies <- consensus(shapes, sp.bz)
 
 
 # Generate morphospace
-morphospace2 <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 0.3, 
-                       asp.models = 0.5, bg.model = "light gray") %>%
+morphospace2 <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 1, 
+                       asp.models = 2, bg.model = "light gray") %>%
   proj_shapes(shapes = shapes) %>%
   proj_consensus(shapes = mshapes_agesxspecies, pch=16) %>%
   proj_groups(shapes = shapes, groups = sp.bz)
@@ -627,9 +687,8 @@ morphospace2 <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.mode
 
 ``` r
 # Plot time axis vs first PC
-plot_mspace(mspace = morphospace2, x = ages, axes = 1,
-            nh = 5, nv = 4, asp.models = 0.13, mag = 0.5,
-            size.models = 4, col.points = species, pch.points = 1,
+plot_mspace(mspace = morphospace2, x = ages, axes = 1, nh = 5, nv = 4, mag = 0.5, 
+            asp.models = 2, size.models = 1, col.points = species, pch.points = 1,
             phylo = FALSE, groups = FALSE, mshapes = TRUE, xlab = "Time (MA)")
 # Compute and arrange absolute ages for each group, then use it to add and connect mean shapes
 xy <- cbind(tapply(ages, sp.bz, mean), morphospace2$gr_centroids[,1])
@@ -642,11 +701,11 @@ for(i in 1:4) {
 title("Stratomorphospace")
 ```
 
-<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-23-1.png" width="100%" />
 
 ## 3D Landmark data
 
-Least but not last, `morphospace` can also deal with 3D landmark data
+Last but not least, `morphospace` can also deal with 3D landmark data
 (my personal preference for importing and normalizing 3D landmark data
 are the functions from `Morpho`, but other packages can do this too).
 The show how to apply `mspace %>% proj_*` we use the `shells3D` data set
@@ -667,8 +726,8 @@ The `rgl` package (Murduch & Adler 2021) is responsible for depiction of
 `morphospace` functions work. Most importantly, each time `mspace` or
 `plot_mspace` is called a `rgl` device will pop up and we will be asked
 to rotate a reference shape to a desired orientation. **Do not close or
-minimize this window**, just rotate the model and then go to the console
-and hit the <Enter> there directly.
+minimize this window**, just rotate and zoom in/out the model and then
+go to the console and hit the <Enter> there directly.
 
 ``` r
 # Load data from 3D shells, extract shapes and classification into species
@@ -687,13 +746,13 @@ mesh_meanspec <- shells3D$mesh_meanspec
 pile_shapes(shapes)
 ```
 
-<img src="man/figures/README-unnamed-chunk-23-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-25-1.png" width="100%" />
 
 ``` r
 # Create morphospace using raw variation. This is interactive, you need 
 # to rotate the 3D model by yourself and then press enter into the console
-mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
-       asp.models = 3, col.ldm = "black", cex.ldm = 2) %>%
+mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 1.2,
+       asp.models = 1, col.ldm = "black", cex.ldm = 2) %>%
   proj_shapes(shapes = shapes, col = species, pch = 16) %>%
   proj_groups(shapes = shapes, groups = species)
 #> Preparing for snapshot: rotate mean shape to the desired orientation
@@ -701,7 +760,7 @@ mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
 title("Morphospace")
 ```
 
-<img src="man/figures/README-unnamed-chunk-23-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-25-2.png" width="100%" />
 
 As with 2D landmarks we can include a template to improve
 interpretability, although in this case this template is a 3D surface
@@ -728,17 +787,18 @@ meanmesh <- tps3d(x = mesh_meanspec , refmat = meanspec_shape, tarmat = meanshap
 # Finally, create morphospace providing template (this function used the mesh warped to
 # the mean shape of the entire sample, hence the previous lines). When projecting
 # the scores, make their size proportionla to log centroid size
-mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
-       asp.models = 3, bg.model = "gray", cex.ldm = 0, template = meanmesh) %>%
+mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 1.2,
+       asp.models = 1, bg.model = "gray", cex.ldm = 0, template = meanmesh) %>%
   proj_shapes(shapes = shapes, col = species, pch = 1, cex = (sizes/max(sizes))^2) %>%
   proj_groups(shapes = shapes, groups = species)
 #> Preparing for snapshot: rotate mean shape to the desired orientation
 #>  (don't close or minimize the rgl device).Press <Enter> in the console to continue:
-#> This will take a minute
+#> This will take a minute...
+#> DONE.
 title("Same morphospace with fancier background")
 ```
 
-<img src="man/figures/README-unnamed-chunk-24-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
 
 So, with this sorted out we can focus on morphometric variation to
 better represent ontogenetic trajectories. Again we resort to
@@ -798,12 +858,13 @@ detr_meanmesh <- tps3d(x = mesh_meanspec , refmat = meanspec_shape, tarmat = det
 
 
 # Generate morphospace from refined variation and project allometric axis
-morphospace <- mspace(detr_shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
-       asp.models = 3, bg.model = "gray", cex.ldm = 0, template = meanmesh, invax = 1) %>%
+morphospace <- mspace(detr_shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 1.2,
+       asp.models = 1, bg.model = "gray", cex.ldm = 0, template = meanmesh, invax = 1) %>%
   proj_shapes(shapes = detr_shapes, cex = 0, col = species, pch = 1)
 #> Preparing for snapshot: rotate mean shape to the desired orientation
 #>  (don't close or minimize the rgl device).Press <Enter> in the console to continue:
-#> This will take a minute
+#> This will take a minute...
+#> DONE.
 for(i in 1:nlevels(species)) {
   proj_axis(obj = pls_list[[i]], mspace = morphospace, lwd = 3, col = i, type = "b",
             cex = c(1,2), axis = 1, pipe = FALSE)
@@ -811,7 +872,7 @@ for(i in 1:nlevels(species)) {
 title("Refined morphospace")
 ```
 
-<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-28-1.png" width="100%" />
 
 Finally, we can also use `plot_mspace` to plot the general allometric
 axis (i.e. computed for the entire sample rather than species-wise)
@@ -820,26 +881,28 @@ against size:
 ``` r
 # Create allomorphospace (I'm just making up names at this point) using PLS 
 # to emphasize allometric variation (this could take a while)
-allomorphospace <- mspace(detr_shapes, FUN = pls_shapes, X = sizes, LOOCV = TRUE, mag = 1, axes = c(1,1),
-                   nh = 4, nv = 4, size.models = 2, asp.models = 4, bg.model = "gray",
+allomorphospace <- mspace(detr_shapes, FUN = pls_shapes, X = sizes, LOOCV = FALSE, mag = 1, axes = c(1,1),
+                   nh = 4, nv = 4, size.models = 1, asp.models = 1, bg.model = "gray",
                    cex.ldm = 0, template = meanmesh, invax = 1, plot = FALSE)
 #> Preparing for snapshot: rotate mean shape to the desired orientation
 #>  (don't close or minimize the rgl device).Press <Enter> in the console to continue:
-#> This will take a minute
+#> This will take a minute...
+#> DONE.
 
 # Use plot_mspace to create hybrid morphospace, with shape against logsize
-plot_mspace(allomorphospace, x = sizes, axes = 1, asp.models = 0.5, size.models = 15,
-            col.points = species, pch.points = 16, xlab = "log-size")
+plot_mspace(allomorphospace, x = sizes, axes = 1, asp.models = 1, size.models = 1,
+            col.points = species, pch.points = 16, xlab = "log-size", xlim = range(sizes))
 #> Preparing for snapshot: rotate mean shape to the desired orientation
 #>  (don't close or minimize the rgl device).Press <Enter> in the console to continue:
-#> This will take a minute
+#> This will take a minute...
+#> DONE.
 title("Allomorphospace")
 ```
 
-<img src="man/figures/README-unnamed-chunk-27-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-29-1.png" width="100%" />
 
-As the use of templates for 3D shapes can be very time-consuming, it may
-be a good idea to experiment with the ‘naked’ configurations before
+Since the use of templates for 3D shapes can be very time-consuming, it
+may be a good idea to experiment with the ‘naked’ configurations before
 producing the final plots.
 
 ## References

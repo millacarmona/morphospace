@@ -21,6 +21,7 @@ mspace(
   ylim = NULL,
   xlab = NULL,
   ylab = NULL,
+  adj_frame = c(1, 1),
   rot.models = 0,
   size.models = 1,
   asp.models = 1,
@@ -72,6 +73,9 @@ variation. Usual alternatives include \code{\link[stats]{prcomp}},
 
 \item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic plot
 function.}
+
+\item{adj_frame}{Numeric of length 2, providing \emph{a posteriori} scaling
+factors for the width and height of the frame, respectively.}
 
 \item{rot.models}{Numeric; angle (in degrees) to rotate shape models.}
 

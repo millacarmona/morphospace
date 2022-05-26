@@ -287,10 +287,122 @@ shapes_mat <- function(shapes) {
 
 ################################################################################################
 
+#' Title
+#'
+#' @param models
+#' @param frame
+#' @param model_width
+#' @param model_height
+#'
+#' @return
+#' @export
+#'
+#' @examples
+adjust_models2d <- function(models, frame, model_width, model_height) {
+
+  frame_xydiffrange <- abs(apply(apply(frame, 2, range), 2, diff))
+  frame_width <- frame_xydiffrange[1]
+  frame_height <- frame_xydiffrange[2]
+
+  models_adj_l <- lapply(1:dim(models)[3], function(i) {
+
+    model <- models[,,i]
+    if(frame_width >= frame_height) {
+      model_ratio <- model_width / model_height
+      frame_ratio <- frame_width / frame_height
+
+      model[,1] <- model[,1] * (frame_ratio / model_ratio)
+
+    } else {
+      model_ratio <- model_height / model_width
+      frame_ratio <- frame_height / frame_width
+
+      model[,2] <- model[,2] * (frame_ratio / model_ratio)
+    }
+
+    model
+  })
+  models_adj <- abind::abind(models_adj_l, along = 3)
+
+
+  model_width2  <- abs(apply(apply(consensus(models_adj), 2, range), 2, diff))[1]
+  model_height2 <- abs(apply(apply(consensus(models_adj), 2, range), 2, diff))[2]
+
+  models_adj_l2 <- lapply(1:dim(models)[3], function(i) {
+
+    model <- models_adj[,,i]
+
+    model[,1] <- model[,1] * ((frame_width / dim(models)[3]) / model_width2)
+    model[,2] <- model[,2] * ((frame_height / dim(models)[3]) / model_height2)
+
+    model
+  })
+  models_adj <- abind::abind(models_adj_l2, along = 3)
+
+  return(models_adj)
+}
+
+
+################################################################################################
+
+#' Title
+#'
+#' @param models
+#' @param frame
+#' @param size.models
+#' @param asp.models
+#'
+#' @return
+#' @export
+#'
+#' @examples
+adjust_models3d <- function(models, frame, size.models, asp.models) {
+
+  mw <- sapply(models, function(x) {dim(x)})[1,]
+  mh <- sapply(models, function(x) {dim(x)})[2,]
+
+  fw <- abs(diff(range(frame[,1])))
+  fh <- abs(diff(range(frame[,2])))
+  N <- nrow(frame)
+
+  mw_std <- (mw/max(mw)) * (fw / N) * (size.models * 7)
+  mh_std <- (mh/max(mh)) * (fh / N) * (size.models * 7) * asp.models
+
+  xlim_min <- xlim_max <- ylim_min <- ylim_max <- c()
+  model_frames <- list()
+  for(i in 1:nrow(frame)) {
+
+    pw_min <- frame[i,1] - (mw_std[i] / 2)
+    pw_max <- frame[i,1] + (mw_std[i] / 2)
+    xlim_min <- min(xlim_min, pw_min)
+    xlim_max <- max(xlim_max, pw_max)
+
+
+    ph_min <- frame[i,2] - (mh_std[i] / 2)
+    ph_max <- frame[i,2] + (mh_std[i] / 2)
+    ylim_min <- min(ylim_min, ph_min)
+    ylim_max <- max(ylim_max, ph_max)
+
+    w <- rbind(pw_min, pw_max)
+    h <- rbind(ph_min, ph_max)
+    model_frames[[i]] <- cbind(w, h)
+  }
+
+  new_xlim <- c(xlim_min, xlim_max)
+  new_ylim <- c(ylim_min, ylim_max)
+
+  results <- list(model_frames = model_frames,
+                  xlim = new_xlim, ylim = new_ylim)
+  return(results)
+
+}
+
+####################################################################################
+
 #' Generate background shape models
 #'
 #' @description Calculate and arrange background shape models for morphospaces.
-#'   For internal use.
+#'   Used internally.
 #'
 #' @param ordination An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
 #'   \code{"phy_prcomp"} or \code{"pls_shape"} object).
@@ -335,25 +447,25 @@ shapes_mat <- function(shapes) {
 #'   Association Newsletter, 72(620), 14-27.
 #'
 #' @examples
-#' #' #load data and packages
-#' library(geomorph)
-#' data("tails")
+#'  #load data and packages
+#'  library(geomorph)
+#'  data("tails")
 #'
-#' #perform pca on tails shapes
-#' pca <- prcomp(two.d.array(tails$shapes))
+#'  #perform pca on tails shapes
+#'  pca <- prcomp(two.d.array(tails$shapes))
 #'
-#' #generate grid of shape models sampling the range of variation
-#' #at 4 locations (the 4 corners of the scatterplot)
-#' shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
-#'                           k = ncol(tails$shapes), p = nrow(tails$shapes),
-#'                           nh = 2, nv = 2)
+#'  #generate grid of shape models sampling the range of variation
+#'  #at 4 locations (the 4 corners of the scatterplot)
+#'  shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
+#'                            k = ncol(tails$shapes), p = nrow(tails$shapes),
+#'                            nh = 2, nv = 2)
 #'
-#' #plot grid from $models_mat and project each shape in models_arr
-#' plot(shapes_grid$models_mat)
-#' points(shapes_grid$models_arr[,,1], pch=16, col = 1)
-#' points(shapes_grid$models_arr[,,2], pch=16, col = 2)
-#' points(shapes_grid$models_arr[,,3], pch=16, col = 3)
-#' points(shapes_grid$models_arr[,,4], pch=16, col = 4)
+#'  #plot grid from $models_mat and project each shape in models_arr
+#'  plot(shapes_grid$models_mat)
+#'  points(shapes_grid$models_arr[,,1], pch=16, col = 1)
+#'  points(shapes_grid$models_arr[,,2], pch=16, col = 2)
+#'  points(shapes_grid$models_arr[,,3], pch=16, col = 3)
+#'  points(shapes_grid$models_arr[,,4], pch=16, col = 4)
 morphogrid <- function(ordination,
                        axes,
                        datype,
@@ -389,13 +501,13 @@ morphogrid <- function(ordination,
     axes <- axes[1]
 
     if(!is.null(x)) {
-      if(is.null(xlim)){
+      if(is.null(xlim)) {
         plotframe_x <- range(x)
       } else {
         plotframe_x <- sort(xlim)
       }
     } else {
-      if(is.null(xlim)){
+      if(is.null(xlim)) {
         plotframe_x <- range(ordination$x[,axes])
       } else {
         plotframe_x <- sort(xlim)
@@ -409,7 +521,7 @@ morphogrid <- function(ordination,
         plotframe_y <- sort(ylim)
       }
     } else {
-      if(is.null(ylim)){
+      if(is.null(ylim)) {
         plotframe_y <- range(ordination$x[,axes])
       } else {
         plotframe_y <- sort(ylim)
@@ -434,22 +546,31 @@ morphogrid <- function(ordination,
   if(!is.null(x)) gridcoords_mag <- gridcoords_mag[,2]
   if(!is.null(y)) gridcoords_mag <- gridcoords_mag[,1]
 
-
   sh_mat <- rev_eigen(gridcoords_mag, vectors, center)
   if(datype == "fcoef") {
-    coords_l <- lapply(1:nrow(sh_mat), function(i){
-      inv_efourier(coe = sh_mat[i,], nb.pts = p)
+    coords_l <- lapply(1:nrow(sh_mat), function(i) {
+      sh <- inv_efourier(coe = sh_mat[i,], nb.pts = p)
+      sh / Morpho::cSize(sh)
     })
-    sh_arr <- abind::abind(coords_l, along = 3) * size.models
+    sh_arr <- abind::abind(coords_l, along = 3)
   } else {
-    sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k) * size.models
+    sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k)
+    for(i in 1:dim(sh_arr)[3]) sh_arr[,,i] <- sh_arr[,,i] / cSize(sh_arr[,,i])
   }
 
-  if(k < 3) sh_arr[,2,] <- sh_arr[,2,] * asp.models ######
 
-  if(rot.models!=0) for(i in 1:dim(sh_arr)[3]) {
-    sh_arr[,,i] <- spdep::Rotation(sh_arr[,,i], rot.models*0.0174532925199)
+  if(rot.models != 0) for(i in 1:dim(sh_arr)[3]) {
+    sh_arr[,,i] <- spdep::Rotation(sh_arr[,,i], rot.models * 0.0174532925199)
   }
+
+
+  if(k < 3) {
+    wh <- abs(apply(apply(consensus(sh_arr), 2, range), 2, diff))
+    sh_arr <- adjust_models2d(sh_arr, gridcoords, wh[1], wh[2])
+
+    sh_arr[,2,] <- sh_arr[,2,] * asp.models
+  }
+  sh_arr <- sh_arr * size.models * 6
 
 
   if(!is.null(template)) {
@@ -469,18 +590,20 @@ morphogrid <- function(ordination,
   }
 
 
-  models_mat<-c()
-  models_arr<-sh_arr * 0
+  models_mat <- c()
+  models_arr <- sh_arr * 0
   for(i in 1:nrow(gridcoords)) {
     descentmat <- matrix(rep(gridcoords[i,], p), p, 2, byrow = TRUE)
     if(k > 2) descentmat <- cbind(descentmat, 0)
-    models_mat <- rbind(models_mat, (sh_arr[,,i] * 0.07) + descentmat)
-    models_arr[,,i] <- (sh_arr[,,i] * 0.07) + descentmat
+    models_arr[,,i] <- (sh_arr[,,i] * 0.5) + descentmat
+    models_mat <- rbind(models_mat, (sh_arr[,,i] * 0.5) + descentmat)
   }
+
 
   return(list(models_mat = models_mat, models_arr = models_arr))
 
 }
+
 
 ################################################################################################
 
@@ -508,6 +631,8 @@ morphogrid <- function(ordination,
 #'   (\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"}, \code{"pls_shapes"}
 #'   or \code{"phy_pls_shapes"}).
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
+#' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
+#'   factors for the width and height of the frame, respectively.
 #' @param p Numeric, indicating the number of landmarks/semilandmarks used (for
 #'   landmark data only).
 #' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
@@ -554,6 +679,7 @@ plot_morphogrid2d <- function(x = NULL,
                               datype,
                               ordtype,
                               axes,
+                              adj_frame = c(1,1),
                               p,
                               xlab = NULL,
                               ylab = NULL,
@@ -614,7 +740,13 @@ plot_morphogrid2d <- function(x = NULL,
   }
 
   if(plot == TRUE) {
-    plot(morphogrid$models_mat, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
+
+    xlim <- c(xlim[1] + (diff(xlim) * (1 - adj_frame[1]) / 2),
+              xlim[2] - (diff(xlim) * (1 - adj_frame[1]) / 2))
+    ylim <- c(ylim[1] + (diff(ylim) * (1 - adj_frame[2]) / 2),
+              ylim[2] - (diff(ylim) * (1 - adj_frame[2]) / 2))
+
+    plot(morphogrid$models_mat, type = "n", xlim = xlim, ylim = ylim , xlab = xlab, ylab = ylab)
 
     for(i in 1:dim(morphogrid$models_arr)[3]) {
       if(datype == "landm") {
@@ -636,7 +768,6 @@ plot_morphogrid2d <- function(x = NULL,
     }
   }
 }
-
 
 ##################################################################################
 
@@ -660,8 +791,8 @@ plot_morphogrid2d <- function(x = NULL,
 #'   (\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"}, \code{"pls_shapes"}
 #'   or \code{"phy_pls_shapes"}).
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
-#' @param p Numeric, indicating the number of landmarks/semilandmarks used (for
-#'   landmark data only).
+#' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
+#'   factors for the width and height of the frame, respectively.
 #' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
 #'   models.
 #' @param col.ldm The color of landmarks/semilandmarks in the background models.
@@ -706,9 +837,9 @@ plot_morphogrid2d <- function(x = NULL,
 #' \dontrun{
 #' #plot grid (shape coordinates only)
 #' plot_morphogrid3d(morphogrid = shapes_grid, refshape = meanshape,
-#'                   ordtype = "prcomp", axes = c(1,2), p = 9, col.ldm = 1, cex.ldm = 1,
+#'                   ordtype = "prcomp", axes = c(1,2), col.ldm = 1, cex.ldm = 1,
 #'                   col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
-#'                   asp.models = 3)
+#'                   asp.models = 1)
 #'
 #' #get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec,
 #' #then get mesh corresponding to mean shape using Morpho::tps3d
@@ -718,9 +849,9 @@ plot_morphogrid2d <- function(x = NULL,
 #'
 #' #plot grid (includinh mesh template)
 #' plot_morphogrid3d(morphogrid = shapes_grid, template = meanmesh, refshape = meanshape,
-#'                   ordtype = "prcomp", axes = c(1,2), p = 9, col.ldm = 1, cex.ldm = 1,
+#'                   ordtype = "prcomp", axes = c(1,2), col.ldm = 1, cex.ldm = 1,
 #'                   col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
-#'                   asp.models = 3)
+#'                   asp.models = 1)
 #' }
 plot_morphogrid3d <- function(x = NULL,
                               y = NULL,
@@ -730,11 +861,11 @@ plot_morphogrid3d <- function(x = NULL,
                               links = NULL,
                               ordtype,
                               axes,
-                              p,
                               xlim = NULL,
                               ylim = NULL,
                               xlab = NULL,
                               ylab = NULL,
+                              adj_frame = 1,
                               cex.ldm,
                               col.ldm,
                               col.models,
@@ -800,7 +931,6 @@ plot_morphogrid3d <- function(x = NULL,
   if(!is.null(template)) {
 
     while(is.null(enter)) {
-
       refmesh <- template
 
       rgl::plot3d(refmesh, col = bg.models, specular = "black", axes = FALSE, aspect = FALSE,
@@ -816,12 +946,12 @@ plot_morphogrid3d <- function(x = NULL,
 
       enter <- readline("Press <Enter> in the console to continue:")
 
-      cat("This will take a minute")
+      rgl::rgl.snapshot(paste0(wd, "model", dim(morphogrid$models_arr)[3] + 1, ".png"))
 
+      cat("This will take a minute...")
     }
 
     for(i in 1:dim(morphogrid$models_arr)[3]) {
-
       modelmesh <- Morpho::tps3d(x = refmesh , refmat = refshape, tarmat = morphogrid$models_arr[,,i])
 
       rgl::plot3d(modelmesh, col = bg.models, specular = "black", axes = FALSE, aspect = FALSE,
@@ -835,10 +965,10 @@ plot_morphogrid3d <- function(x = NULL,
 
       rgl::rgl.snapshot(paste0(wd, "model", i, ".png"))
     }
+    cat("\nDONE.")
 
   } else {
     while(is.null(enter)) {
-
       rgl::plot3d(refshape, col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
                   xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm)
 
@@ -849,10 +979,11 @@ plot_morphogrid3d <- function(x = NULL,
 
       enter <- readline("Press <Enter> in the console to continue:")
 
+      rgl::rgl.snapshot(paste0(wd, "model", dim(morphogrid$models_arr)[3] + 1, ".png"))
+
     }
 
     for(i in 1:dim(morphogrid$models_arr)[3]) {
-
       rgl::plot3d(morphogrid$models_arr[,,i], col = col.ldm, specular = "black",
                   axes = FALSE, aspect = FALSE, xlab = "", ylab = "", zlab = "",
                   type = "s", size = cex.ldm)
@@ -865,40 +996,36 @@ plot_morphogrid3d <- function(x = NULL,
   }
 
 
-
-  for(i in 1:dim(morphogrid$models_arr)[3]) {
+  for(i in 1:(dim(morphogrid$models_arr)[3] + 1)) {
     model_i <- magick::image_read(paste0(wd, "model", i, ".png"))
     model_i_clean <- magick::image_fill(model_i, color = "transparent", refcolor = "white", fuzz = 4, point = "+1+1")
-    #model_i_clean_trimmed <- magick::image_trim(model_i_clean)
     magick::image_write(model_i_clean, path = paste0(wd,"model",i,".png"), format = "png")
   }
 
 
-  models <- lapply(1:dim(morphogrid$models_arr)[3], function (i) {
+  models <- lapply(1:(dim(morphogrid$models_arr)[3] + 1), function (i) {
     model_i <- png::readPNG(paste0(wd, "model", i, ".png"), native = TRUE)
   })
 
 
-  model_centers <- t(apply(morphogrid$models_arr, 3, colMeans))
-  model_ranges <- lapply(1:length(models), function(i) {
+  model_centers <- t(apply(morphogrid$models_arr, 3, colMeans))[,1:2]
 
-    halfsize <- size.models * 0.015
+  adj <- adjust_models3d(models = models, frame = model_centers,
+                         size.models = size.models, asp.models = asp.models)
 
-    matrix(c(c((model_centers[i,1] - halfsize), (model_centers[i,1] + halfsize)),
-             c((model_centers[i,2] - halfsize * (asp.models/2)),
-               (model_centers[i,2] + halfsize * (asp.models/2)))),
-           nrow = 2, byrow = FALSE)
-  })
+  model_frames <- adj$model_frames
+  new_xlim <- c(adj$xlim[1] + (diff(adj$xlim) * (1 - adj_frame[1]) / 2),
+                adj$xlim[2] - (diff(adj$xlim) * (1 - adj_frame[1]) / 2))
+  new_ylim <- c(adj$ylim[1] + (diff(adj$ylim) * (1 - adj_frame[2]) / 2),
+                adj$ylim[2] - (diff(adj$ylim) * (1 - adj_frame[2]) / 2))
 
-  xlim <- range(c(lapply(model_ranges, function(x) {x[,1]}), xlim))
-  ylim <- range(c(lapply(model_ranges, function(x) {x[,2]}), ylim))
 
   if(plot == TRUE) {
-    plot(0, type = "n", xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
+    plot(0, type = "n", xlim = new_xlim, ylim = new_ylim, xlab = xlab, ylab = ylab)
 
-    for(i in 1:length(models)) {
-      rasterImage(models[[i]], model_ranges[[i]][1,1], model_ranges[[i]][1,2],
-                  model_ranges[[i]][2,1], model_ranges[[i]][2,2])
+    for(i in 1:(length(models) - 1)) {
+      rasterImage(models[[i]], model_frames[[i]][1,1], model_frames[[i]][1,2],
+                  model_frames[[i]][2,1], model_frames[[i]][2,2])
     }
   }
 }

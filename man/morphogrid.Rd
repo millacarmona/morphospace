@@ -79,28 +79,28 @@ format.}
 }
 \description{
 Calculate and arrange background shape models for morphospaces.
-For internal use.
+Used internally.
 }
 \examples{
-#' #load data and packages
-library(geomorph)
-data("tails")
+ #load data and packages
+ library(geomorph)
+ data("tails")
 
-#perform pca on tails shapes
-pca <- prcomp(two.d.array(tails$shapes))
+ #perform pca on tails shapes
+ pca <- prcomp(two.d.array(tails$shapes))
 
-#generate grid of shape models sampling the range of variation
-#at 4 locations (the 4 corners of the scatterplot)
-shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
-                          k = ncol(tails$shapes), p = nrow(tails$shapes),
-                          nh = 2, nv = 2)
+ #generate grid of shape models sampling the range of variation
+ #at 4 locations (the 4 corners of the scatterplot)
+ shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
+                           k = ncol(tails$shapes), p = nrow(tails$shapes),
+                           nh = 2, nv = 2)
 
-#plot grid from $models_mat and project each shape in models_arr
-plot(shapes_grid$models_mat)
-points(shapes_grid$models_arr[,,1], pch=16, col = 1)
-points(shapes_grid$models_arr[,,2], pch=16, col = 2)
-points(shapes_grid$models_arr[,,3], pch=16, col = 3)
-points(shapes_grid$models_arr[,,4], pch=16, col = 4)
+ #plot grid from $models_mat and project each shape in models_arr
+ plot(shapes_grid$models_mat)
+ points(shapes_grid$models_arr[,,1], pch=16, col = 1)
+ points(shapes_grid$models_arr[,,2], pch=16, col = 2)
+ points(shapes_grid$models_arr[,,3], pch=16, col = 3)
+ points(shapes_grid$models_arr[,,4], pch=16, col = 4)
 }
 \references{
 MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological

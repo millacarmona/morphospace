@@ -165,6 +165,61 @@ hulls_by_group_3D<-function(xyz, fac, col = 1:nlevels(fac), ...) {
 
 
 
+######################################################################################
 
+#' Build template for 2D shape data
+#'
+#' @description Create a template (i.e. a set of curves describing the structure
+#'   the landmarks are placed upon) to aid morphospace visualization, interactively.
+#'
+#' @param image Character; the path to an image of the structure, in png format.
+#' @param nlands Numeric; the number of landmarks to be placed.
+#' @param ncurves Numeric; the number of curves to be drawn.
+#'
+#' @details This functions let the user create a template interactively. The user
+#'   will be first asked to place the landmarks (the same place and order than the
+#'   shape data of interest). Once \code{nland} landmarks have been placed, the
+#'   user will be asked to place the number of curves specified in \code{ncurves};
+#'   the number of coordinates used to drawn each is arbitrary, and is up the user
+#'   to decide when the curve is ready (press the 'Finish' button in the top-right
+#'   corner of the Plots pane).
+#'
+#' @return A 2-column matrix of the landmarks followed by the coordinates defining
+#'   the curves drawn, separated by \code{NA}s.
+#'
+#' @export
+#'
+#' @examples
+#' #generate template interactively
+#'
+#' \dontrun{
+#' temp <- build_template2d(image, nlands = 9, ncurves = 9)
+#' }
+#'
+#' plot(temp, type = "n", asp = 1)
+#' points(temp[c(1:9),], col = "red", pch = 16)
+#' points(temp[-c(1:9),], type = "l)
+build_template2d <- function(image, nlands, ncurves) {
+
+  im <- png::png(image)
+
+  plot(c(1, dim(im)[2]), c(1, dim(im)[1]), type = "n", xlab = "", ylab = "",
+       asp = 1, axes = FALSE)
+  rasterImage(im, 1, 1, dim(im)[2], dim(im)[1])
+
+  lands <- locator(nlands, type = "p", pch = 8, col = "white")
+  cat(paste0("Place the ", nlands, " landmarks"))
+
+  curves <- lapply(1:ncurves, function(i) {
+    cat(paste0("When the ", i,
+               " curve is ready click Finish (top-right corner of Plots pane) or enter <Esc> in the console"))
+    locator(type = "l", pch = 8, col = i)
+  })
+
+  template <- cbind(c(lands$x, unlist(lapply(curves, function(x) {c(NA, x$x)}))),
+                    c(lands$y, unlist(lapply(curves, function(x) {c(NA, x$y)}))))
+
+  return(template)
+}
 
 

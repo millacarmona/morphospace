@@ -379,7 +379,7 @@ correct_efourier<-function(ef, index = NULL) {
   on.exit(graphics::par(orig_frame))
   graphics::par(mar = c(1,1,1,1), oma = c(0,0,0,0))
 
-  if(is.null(index)) print("Click Finish (top-right corner of plot pane) or enter <Esc> to finish selection")
+  if(is.null(index)) print("Click Finish (top-right corner of Plots pane) or enter <Esc> in the console to finish selection")
 
   options(warn = -1)
 

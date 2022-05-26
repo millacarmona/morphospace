@@ -13,6 +13,7 @@ plot_morphogrid2d(
   datype,
   ordtype,
   axes,
+  adj_frame = c(1, 1),
   p,
   xlab = NULL,
   ylab = NULL,
@@ -51,6 +52,9 @@ wireframe (following the format used in \code{Morpho}).}
 or \code{"phy_pls_shapes"}).}
 
 \item{axes}{Numeric of length 2, indicating the axes to be plotted.}
+
+\item{adj_frame}{Numeric of length 2, providing \emph{a posteriori} scaling
+factors for the width and height of the frame, respectively.}
 
 \item{p}{Numeric, indicating the number of landmarks/semilandmarks used (for
 landmark data only).}

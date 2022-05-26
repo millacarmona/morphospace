@@ -30,6 +30,8 @@
 #' @param invax Optional numeric indicating which of the axes provided in
 #'   \code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
 #'   \code{c(1,2)}).
+#' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
+#'   factors for the width and height of the frame, respectively.
 #' @param rot.models  Numeric; angle (in degrees) to rotate shape models.
 #' @param size.models Numeric; size factor for shape models.
 #' @param asp.models Numeric; the y/x aspect ratio of shape models.
@@ -171,6 +173,7 @@ mspace <- function(shapes,
                    ylim = NULL,
                    xlab = NULL,
                    ylab = NULL,
+                   adj_frame = c(1,1),
                    rot.models = 0,
                    size.models = 1,
                    asp.models = 1,
@@ -222,8 +225,8 @@ mspace <- function(shapes,
     ylim <- range(ordination$x[,axes[2]])
 
     plot_morphogrid3d(x = NULL, y = NULL, morphogrid = shapemodels, refshape = refshape,
-                      template = template, links = links, ordtype = ordtype,
-                      axes = axes, p = p, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab,
+                      template = template, links = links, ordtype = ordtype, adj_frame = adj_frame,
+                      axes = axes, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab,
                       cex.ldm = cex.ldm, col.ldm = col.ldm, col.models = col.models,
                       lwd.models = lwd.models, bg.models = bg.models, size.models = size.models,
                       asp.models = asp.models, alpha.models = alpha.models, plot = plot)
@@ -235,8 +238,8 @@ mspace <- function(shapes,
                               size.models = size.models, asp.models = asp.models)
 
     plot_morphogrid2d(x = NULL, y = NULL, morphogrid = shapemodels, template = template,
-                      links = links, datype = datype, ordtype = ordtype, axes = axes, p = p,
-                      xlab = xlab, ylab = ylab, cex.ldm = cex.ldm, col.ldm = col.ldm,
+                      links = links, datype = datype, ordtype = ordtype, axes = axes, adj_frame = adj_frame,
+                      p = p, xlab = xlab, ylab = ylab, cex.ldm = cex.ldm, col.ldm = col.ldm,
                       col.models = col.models, lwd.models = lwd.models, bg.models = bg.models, plot = plot)
   }
 
@@ -244,9 +247,9 @@ mspace <- function(shapes,
 
 
   plotinfo <- list(p = p, k = k, links = links, template = template, axes = axes, nh = nh, nv = nv, mag = mag,
-                   asp = asp, asp.models = asp.models, rot.models = rot.models, size.models = size.models,
-                   lwd.models = lwd.models, bg.models = bg.models, col.models = col.models, alpha.models = alpha.models,
-                   cex.ldm = cex.ldm, col.ldm = col.ldm)
+                   asp = asp, adj_frame = adj_frame, asp.models = asp.models, rot.models = rot.models,
+                   size.models = size.models, lwd.models = lwd.models, bg.models = bg.models, col.models = col.models,
+                   alpha.models = alpha.models, cex.ldm = cex.ldm, col.ldm = col.ldm)
 
   results <- list(x = ordination$x, rotation = ordination$rotation, center = ordination$center,
                   datype = datype, ordtype = ordtype, plotinfo = plotinfo)
@@ -629,6 +632,8 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #' @param invax Optional numeric indicating which of the axes provided in
 #'   \code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
 #'   \code{c(1,2)}).
+#' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
+#'   factors for the width and height of the frame, respectively.
 #' @param points Logical; whether to plot the scatter points corresponding to
 #'   the sampled shapes stored in \code{mspace$x}.
 #' @param mshapes Logical; whether to plot the scatter points corresponding to
@@ -786,6 +791,7 @@ plot_mspace <- function(mspace,
                         nv,
                         mag,
                         invax = NULL,
+                        adj_frame = c(1,1),
                         points = TRUE,
                         mshapes = TRUE,
                         groups = TRUE,
@@ -858,7 +864,7 @@ plot_mspace <- function(mspace,
 
       plot_morphogrid3d(x = NULL, y = NULL, morphogrid = shapemodels, refshape = refshape,
                         template = args$template, links = args$links, ordtype = mspace$ordtype,
-                        axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = ylim,
+                        axes = args$axes, xlim = xlim, ylim = ylim, adj_frame = args$adj_frame,
                         xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
                         col.ldm = args$col.ldm, col.models = args$col.models, lwd.models = args$lwd.models,
                         bg.models = args$bg.models,  size.models = args$size.models,
@@ -873,9 +879,9 @@ plot_mspace <- function(mspace,
 
       plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
                         links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
-                        axes = args$axes, p = mspace$plotinfo$p, xlab = args$xlab, ylab = args$ylab,
-                        cex.ldm = args$cex.ldm, col.ldm = args$col.ldm, col.models = args$col.models,
-                        lwd.models = args$lwd.models, bg.models = args$bg.models)
+                        axes = args$axes, adj_frame = args$adj_frame, p = mspace$plotinfo$p,
+                        xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm, col.ldm = args$col.ldm,
+                        col.models = args$col.models, lwd.models = args$lwd.models, bg.models = args$bg.models)
     }
 
     #add points, hulls, phylogeny, and/or consensus
@@ -956,7 +962,7 @@ plot_mspace <- function(mspace,
 
       plot_morphogrid3d(x = x, y = y, morphogrid = shapemodels, refshape = refshape,
                         template = args$template, links = args$links, ordtype = mspace$ordtype,
-                        axes = args$axes, p = mspace$plotinfo$p, xlim = xlim, ylim = ylim,
+                        axes = args$axes, xlim = xlim, ylim = ylim, adj_frame = args$adj_frame,
                         xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
                         col.ldm = args$col.ldm, col.models = args$col.models, lwd.models = args$lwd.models,
                         bg.models = args$bg.models,  size.models = args$size.models,
@@ -971,9 +977,9 @@ plot_mspace <- function(mspace,
 
       plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
                         links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
-                        axes = args$axes, p = mspace$plotinfo$p, xlab = args$xlab, ylab = args$ylab,
-                        cex.ldm = args$cex.ldm, col.ldm = args$col.ldm, col.models = args$col.models,
-                        lwd.models = args$lwd.models, bg.models = args$bg.models)
+                        axes = args$axes, adj_frame = args$adj_frame, p = mspace$plotinfo$p,
+                        xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm, col.ldm = args$col.ldm,
+                        col.models = args$col.models, lwd.models = args$lwd.models, bg.models = args$bg.models)
     }
 
 

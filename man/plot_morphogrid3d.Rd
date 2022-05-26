@@ -13,11 +13,11 @@ plot_morphogrid3d(
   links = NULL,
   ordtype,
   axes,
-  p,
   xlim = NULL,
   ylim = NULL,
   xlab = NULL,
   ylab = NULL,
+  adj_frame = 1,
   cex.ldm,
   col.ldm,
   col.models,
@@ -53,11 +53,11 @@ or \code{"phy_pls_shapes"}).}
 
 \item{axes}{Numeric of length 2, indicating the axes to be plotted.}
 
-\item{p}{Numeric, indicating the number of landmarks/semilandmarks used (for
-landmark data only).}
-
 \item{xlim, ylim, xlab, ylab}{Standard arguments passed to the generic plot
 function.}
+
+\item{adj_frame}{Numeric of length 2, providing \emph{a posteriori} scaling
+factors for the width and height of the frame, respectively.}
 
 \item{cex.ldm}{Numeric; size of landmarks/semilandmarks in the background
 models.}
@@ -112,9 +112,9 @@ meanshape <- consensus(shapes)
 \dontrun{
 #plot grid (shape coordinates only)
 plot_morphogrid3d(morphogrid = shapes_grid, refshape = meanshape,
-                  ordtype = "prcomp", axes = c(1,2), p = 9, col.ldm = 1, cex.ldm = 1,
+                  ordtype = "prcomp", axes = c(1,2), col.ldm = 1, cex.ldm = 1,
                   col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
-                  asp.models = 3)
+                  asp.models = 1)
 
 #get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec,
 #then get mesh corresponding to mean shape using Morpho::tps3d
@@ -124,8 +124,8 @@ meanmesh <- tps3d(x = shells3D$mesh_meanspec , refmat = meanspec_shape, tarmat =
 
 #plot grid (includinh mesh template)
 plot_morphogrid3d(morphogrid = shapes_grid, template = meanmesh, refshape = meanshape,
-                  ordtype = "prcomp", axes = c(1,2), p = 9, col.ldm = 1, cex.ldm = 1,
+                  ordtype = "prcomp", axes = c(1,2), col.ldm = 1, cex.ldm = 1,
                   col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
-                  asp.models = 3)
+                  asp.models = 1)
 }
 }
