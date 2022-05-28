@@ -83,7 +83,7 @@ aforementioned R packages.
 pile_shapes(shapes, links = links)
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-4-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-4-1.png" width="100%" />
 
 This package provide some functions that perform basic operations with
 shape variables, such as the calculation of mean shapes or the
@@ -116,7 +116,7 @@ morphospace1 <- mspace(detr_shapes, links = links) %>%
 title("Morphospace")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-6-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-6-1.png" width="100%" />
 
 ``` r
 
@@ -128,7 +128,7 @@ morphospace2 <- mspace(detr_shapes, links = links) %>%
 title("Morphospace\n+ taxonomic classification")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-6-2.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-6-2.png" width="100%" />
 
 ``` r
 
@@ -139,7 +139,7 @@ morphospace3 <- mspace(detr_shapes, links = links) %>%
 title("Morphospace\n+ species mean shapes and ranges of variation")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-6-3.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-6-3.png" width="100%" />
 
 ``` r
 
@@ -152,7 +152,7 @@ morphospace4 <- mspace(detr_shapes, links = links) %>%
 title("Morphospace\n+ phylogeny")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-6-4.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-6-4.png" width="100%" />
 
 ``` r
 
@@ -191,7 +191,7 @@ mspace(detr_shapes, links = links) %>%
 title("Morphospace\n+ PCs 1 and 2 projected")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-7-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-7-1.png" width="100%" />
 
 ## Ordination methods
 
@@ -233,7 +233,7 @@ hulls_by_group_2D(bgpca2$x, class)
 title("with LOOCV")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-8-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-8-1.png" width="100%" />
 
 ``` r
 
@@ -252,7 +252,7 @@ abline(lm(pls2$yscores ~ pls2$xscores), col = "red")
 title("with LOOCV")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-8-2.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-8-2.png" width="100%" />
 
 ``` r
 dev.off()
@@ -276,7 +276,7 @@ mspace(sp_shapes, FUN = phy_prcomp, tree = tree, links = links,
 title("Phylogenetic morphospace")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-9-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-9-1.png" width="100%" />
 
 ``` r
 
@@ -290,7 +290,7 @@ mspace(sp_shapes, FUN = phy_prcomp, tree = tree, links = links,
 title("Phylogenetic morphospace\n+ samples")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-9-2.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-9-2.png" width="100%" />
 
 ``` r
 
@@ -302,7 +302,7 @@ mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = species,
 title("Morphospace emphasizing interspecific variation")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-9-3.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-9-3.png" width="100%" />
 
 The rationale of constructing a reference ordination using a given
 sample of shapes and then projecting other elements into it (computed
@@ -334,7 +334,7 @@ morphospace <- mspace(detr_shapes_ndf, FUN = bg_prcomp, groups = species_ndf,
 title("Interspecific NDF morphospace\n+ all samples and mean shapes")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-10-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-10-1.png" width="100%" />
 
 Let’s say we want to project the axis representing the allometric
 variation of each species(e.g. a PLS of shape vs centroid size), so we
@@ -374,7 +374,7 @@ legend("topright", inset = c(-0.22, 0), legend = levels(species),
        cex = 0.7, pch = 16, col = 1:nlevels(species), bty = "n", text.font = 3)
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-11-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-11-1.png" width="100%" />
 
 ``` r
 par(mar = omar)
@@ -404,7 +404,7 @@ plot_mspace(mspace = morphospace, points = TRUE, mshapes = FALSE, groups = FALSE
 title("A morphospace plotted with plot_mspace")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-13-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-13-1.png" width="100%" />
 
 ``` r
 
@@ -415,7 +415,7 @@ plot_mspace(mspace = morphospace, groups = TRUE, points = TRUE,
 title("Same morphospace with additional elements")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-13-2.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-13-2.png" width="100%" />
 
 ``` r
 
@@ -427,7 +427,7 @@ plot_mspace(mspace = morphospace, links = links, axes = c(1,3), nh = 3, points =
 title("Same morphospace, axes 1 and 3, and with a different background")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-13-3.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-13-3.png" width="100%" />
 
 In addition, `plot_mspace` allows specification of an external,
 non-shape variable (or, alternatively, a phylogenetic tree) to be
@@ -454,7 +454,7 @@ legend("topright", inset = c(-0.22, 0), legend = levels(species),
        cex = 0.7, pch = 16, col = 1:nlevels(species), bty = "n", text.font = 3)
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-15-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-15-1.png" width="100%" />
 
 ``` r
 par(mar = omar)
@@ -500,7 +500,7 @@ mspace(shapes, template = template, col.ldm = "red", cex.ldm = 5) %>%
 title("Morphospace using template")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-16-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-16-1.png" width="100%" />
 
 Assume for a second we are interested in exploring whether we can
 identify morphological differences between species and/or the host
@@ -524,7 +524,7 @@ mspace(detr_shapes, template = template, col.ldm = "red", cex.ldm = 5, mag = 3) 
 title("Refined morphospace using template")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-17-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-17-1.png" width="100%" />
 
 We can see interspecific differences more clearly now. We can use
 `bg_prcomp` to explore if there is any other difference in wing
@@ -545,7 +545,7 @@ legend("topright", inset = c(-0.2, 0), legend = c("D. buzzattii", "D. koepferae"
 title("bgPCA (1-2) between species x cactus")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-18-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-18-1.png" width="100%" />
 
 ``` r
 # plot bgPCs 1 and 3, add legend
@@ -557,7 +557,7 @@ legend("topright", inset = c(-0.2, 0), legend = c("D. buzzattii", "D. koepferae"
 title("bgPCA (1-3) between species x cactus")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-18-2.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-18-2.png" width="100%" />
 
 ``` r
 par(mar = omar)
@@ -595,7 +595,7 @@ locality <- shells$data$locality
 pile_shapes(shapes)
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-19-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-19-1.png" width="100%" />
 
 ``` r
 # Generate morphospace using raw variation
@@ -605,7 +605,7 @@ mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, bg.model = "light gray") 
 title("Morphospace")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-19-2.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-19-2.png" width="100%" />
 
 All the same fun stuff can be done here. For example we might be
 interested in refining variation to show the main differences between
@@ -670,7 +670,7 @@ for(i in 1:nlevels(species)){
 title("Morphospace emphasizing interspecific variation")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-21-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-21-1.png" width="100%" />
 
 Finally, we can use `plot_mspace` again to create more complex hybrid
 plots. In this case, say are interested in the anagenetic evolution of
@@ -717,7 +717,7 @@ legend("topright", inset = c(-0.22, 0), legend = paste0("P. ", levels(species)),
        cex = 0.7, pch = 16, col = 1:nlevels(species), bty = "n", text.font = 3)
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-23-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-23-1.png" width="100%" />
 
 ``` r
 par(mar = omar)
@@ -776,7 +776,7 @@ mspace(shapes, cex.ldm = 2) %>%
 title("Morphospace")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-25-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-25-1.png" width="100%" />
 
 As with 2D landmarks we can include a template to improve
 interpretability, although in this case this template is a 3D surface
@@ -813,7 +813,7 @@ mspace(shapes, bg.model = "gray", cex.ldm = 0, template = meanmesh) %>%
 title("Same morphospace with fancier background")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-26-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-26-1.png" width="100%" />
 
 So, with this sorted out we can focus on morphometric variation to
 better represent ontogenetic trajectories. Again we resort to
@@ -892,7 +892,7 @@ legend("topright", inset = c(-0.25, 0), legend = paste0("P. ", levels(species)),
 title("Refined morphospace")
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-28-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-28-1.png" width="100%" />
 
 ``` r
 par(mar = omar)
@@ -937,7 +937,7 @@ for(i in 1:nlevels(species)) {
 }
 ```
 
-<img src="C:/Users/pablo/Desktop/figures_morphospace_rmdunnamed-chunk-29-1.png" width="100%" />
+<img src="C:/Users/pablo/Desktop/figures_morphospace_rmd/unnamed-chunk-29-1.png" width="100%" />
 
 ``` r
 par(mar = omar)
