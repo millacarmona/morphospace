@@ -39,8 +39,7 @@ species <- shells$data$species
 sp_shapes <- consensus(shapes, species)
 
 #generate basic morphospace, add sampled and consensus shapes
-mspace(shapes, links = links, mag = 0.7, axes = c(1,2), size.models = 0.3,
-       asp.models = 0.5, bg.model = "light gray") \%>\%
+mspace(shapes, mag = 0.7, axes = c(1,2), bg.model = "light gray") \%>\%
   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1, cex = 0.7) \%>\%
   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:4, cex = 2)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/mspace_workflow.R
 \name{mspace}
 \alias{mspace}
-\title{Create morphospace}
+\title{Generate morphospace}
 \usage{
 mspace(
   shapes,
@@ -44,12 +44,13 @@ mspace(
 \item{links}{A list with the indices of the coordinates defining the
 wireframe (following the format used in \code{Morpho}).}
 
-\item{template}{A 2-column matrix containing 1) the actual
-landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
-coordinates defining a curve or set of curves that will be warped using the
-deformation interpolated from the changes between landmarks/semilandmarks
-(the actual positions of which must be marked with a row of NA, see the
-tails dataset).}
+\item{template}{Either a 2-column matrix containing landmarks/semilandmarks
+followed by coordinates defining a curve or set of curves describing additional
+aspects of morphology (for 2D shape data) or a \code{"mesh3d"} object containing
+geometry of the structure the landmarks were placed on (for 3D shape data),
+corresponding to the mean shape of the sample. These will be warped using TPS
+interpolation to produce the set of background shell models (see
+\code{\link{build_template2d}}).}
 
 \item{p}{Numeric, indicating the number of landmarks/semilandmarks used (for
 landmark data only).}
@@ -138,14 +139,8 @@ shapes <- tails$shapes
 species <- tails$data$species
 links <- tails$links
 tree <- tails$tree
-template <- tails$template
 
-#create morphospace using the basic sample of shapes, PCA as ordination method
-#and the template provided for warping and creating backround models
-mspace(shapes, template = template, mag = 0.7, axes = c(1,2), cex.ldm = 0,
-       points = TRUE)
-
-#create morphospace using the basic sample of shapes, PCA as ordination method
+#generate morphospace using the basic sample of shapes, PCA as ordination method
 #and the links between landmarks provided for backround models
 mspace(shapes, links = links, mag = 0.7, axes = c(1,2), points = TRUE)
 
@@ -155,12 +150,12 @@ mspace(shapes, links = links, mag = 1.5, axes = c(1,2), points = TRUE)
 #plot PCs 1 and 3
 mspace(shapes, links = links, mag = 1.5, axes = c(1,3), points = TRUE)
 
-#create morphospace using the basic sample of shapes, bgPCA as ordination method
+#generate morphospace using the basic sample of shapes, bgPCA as ordination method
 #and links between landmarks for backround models
 mspace(shapes, links = links, FUN = bg_prcomp, groups = species, mag = 0.7,
        axes = c(1,2), invax = 1, points = TRUE)
 
-#create morphospace using species' consensus shapes and phylogenetic tree,
+#generate morphospace using species' consensus shapes and phylogenetic tree,
 #phylogenetic PCA as ordination method, and links between landmarks for backround
 #models
 sp_shapes <- consensus(shapes, species)
@@ -172,21 +167,34 @@ morphosp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2), plot = FALSE
 names(morphosp)
 
 
+#load wing data for a quick demo with templates
+data("wings")
+shapes <- wings$shapes
+links <- wings$links
+template <- wings$template
+
+#generate morphospace using links
+mspace(shapes, links = links, mag = 3, axes = c(1,2), points = TRUE)
+
+#generate morphospace using template
+mspace(shapes, template = template, mag = 3, axes = c(1,2), points = TRUE)
+
+
 
 ##3D Landmark data
 
+\dontrun{
 #load data and packages and extract relevant data and information
-library(magrittr)
 library(Morpho)
 data("shells3D")
 shapes <- shells3D$shapes
 mesh_meanspec <- shells3D$mesh_meanspec
 
-#create morphospace. This is interactive, you need to rotate the shape by yourself and
+#generate morphospace. This is interactive, you need to rotate the shape by yourself and
 #then press enter into the console.
-mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
-       asp.models = 3, col.ldm = "black", cex.ldm = 2. points = TRUE)
-#create morphospace using a mesh template that improves visualization:
+mspace(shapes, mag = 1, axes = c(1,2), col.ldm = "black", cex.ldm = 2, points = TRUE)
+
+#generate morphospace using a mesh template that improves visualization:
 #first, get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec
 meanspec_id<- findMeanSpec(shapes)
 meanspec_shape <- shapes[,,meanspec_id]
@@ -196,11 +204,11 @@ meanspec_shape <- shapes[,,meanspec_id]
 meanshape <- consensus(shapes)
 meanmesh <- tps3d(x = mesh_meanspec , refmat = meanspec_shape, tarmat = meanshape)
 
-#finally, create morphospace providing template (this function used the mesh warped to
+#finally, generate morphospace providing template (this function used the mesh warped to
 #the mean shape of the entire sample, hence the previous lines)
-mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
-       asp.models = 3, bg.model = "gray", cex.ldm = 0, template = meanmesh, points = TRUE)
-
+mspace(shapes, mag = 1, axes = c(1,2), template = meanmesh, bg.models = "gray",
+       nh = 4, nv = 4, cex.ldm = 0, points = TRUE)
+}
 
 
 ##Outline data
@@ -209,9 +217,9 @@ mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
 data("shells")
 shapes <- shells$shapes$coe
 
-# Create morphospace using all the raw variation
-mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 0.3,
-       asp.models = 0.5, bg.model = "light gray")
+#generate morphospace using all the raw variation
+mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 1,
+       asp.models = 1, bg.model = "light gray")
 }
 \seealso{
 \code{\link{proj_shapes}}, \code{\link{proj_consensus}},

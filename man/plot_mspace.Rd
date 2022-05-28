@@ -51,12 +51,13 @@ plot_mspace(
 \item{links}{A list with the indices of the coordinates defining the
 wireframe (following the format used in \code{Morpho}).}
 
-\item{template}{A 2-column matrix containing 1) the actual
-landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
-coordinates defining a curve or set of curves that will be warped using the
-deformation interpolated from the changes between landmarks/semilandmarks
-(the actual positions of which must be marked with a row of NA, see the
-tails dataset).}
+\item{template}{Either a 2-column matrix containing landmarks/semilandmarks
+followed by coordinates defining a curve or set of curves describing additional
+aspects of morphology (for 2D shape data) or a \code{"mesh3d"} object containing
+geometry of the structure the landmarks were placed on (for 3D shape data),
+corresponding to the mean shape of the sample. These will be warped using TPS
+interpolation to produce the set of background shell models (see
+\code{\link{build_template2d}}).}
 
 \item{x}{Optional vector with a non-morphometric variable to be plotted in
 the x axis. Alternatively, a \code{"phy"} object can be provided.}
@@ -165,7 +166,6 @@ sp_shapes <- consensus(shapes, species)
 sp_sizes <- cbind(tapply(sizes, species, mean))
 tree <- tails$tree
 links <- tails$links
-template <- tails$template
 
 #generate basic morphospace, add sampled shapes, species mean shapes, species
 #classification, and phylogenetic structure
@@ -191,47 +191,37 @@ plot_mspace(msp, axes = c(1,2), links = links,
             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 
 #change number and sizes of shape models in the background
-plot_mspace(msp, axes = c(1,2), nh = 2, nv = 2, links = links, size.models = 2,
+plot_mspace(msp, axes = c(1,2), nh = 2, nv = 2, links = links, size.models = 0.5,
             col.points = species, col.groups = 1:nlevels(species),
             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 
-#magnify deformation
-plot_mspace(msp, axes = c(1,2), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 2,
-            col.points = species, col.groups = 1:nlevels(species),
-            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
-
-#change links for templates, highlight landmarks
-plot_mspace(msp, axes = c(1,2), mag = 1.5, template = template, col.points = species,
-            col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+#magnify deformation and highlight landmarks
+plot_mspace(msp, axes = c(1,2), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 0.5,
+            col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 
 #change axes 1,2 for 1,3
-plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
-            col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+plot_mspace(msp, axes = c(1,3), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 0.5,
+            col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 
 #represent ranges and centroids of groups
-plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
-            col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+plot_mspace(msp, axes = c(1,3), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 0.5,
+            col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
             points = TRUE, groups = TRUE, mshapes = TRUE, phylo = FALSE)
 
 #add phylogeny
-plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
-            col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+plot_mspace(msp, axes = c(1,3), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 0.5,
+            col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
             points = TRUE, groups = TRUE, mshapes = TRUE, phylo = TRUE)
 
 
 
 ##Plotting 'hybrid' morphospaces:
 
-#plot size against first PC (scaling factors got a bit weird because of the scale of sizes)
-plot_mspace(msp, x = sizes,  axes = 1, links = links, asp.models = 0.0004, size.models = 6000,
-            col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
-            points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Centroid size")
-
-#same but with template
-plot_mspace(msp, x = sizes,  axes = 1, template = template, asp.models = 0.0004, size.models = 6000,
-            col.points = species, col.groups = 1:nlevels(species), pch.points = 16, cex.ldm = 0,
+#plot size against first PC
+plot_mspace(msp, x = sizes,  axes = 1, links = links, col.points = species,
+            col.groups = 1:nlevels(species), pch.points = 16,
             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Centroid size")
 
 
@@ -239,12 +229,12 @@ plot_mspace(msp, x = sizes,  axes = 1, template = template, asp.models = 0.0004,
 ##Plotting phenograms:
 
 #plot horizontal phenogram against PC1
-plot_mspace(msp, x = tree,  axes = 1, links = links, asp.models = 0.5, size.models = 5,
-            col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
+plot_mspace(msp, x = tree,  axes = 1, links = links, col.points = species,
+            col.groups = 1:nlevels(species), pch.points = 16,
             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Branch lengths")
 
 #plot horizontal phenogram against PC1
-plot_mspace(msp, y = tree,  axes = 2, links = links, asp.models = 20, size.models = 1,
-            col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
+plot_mspace(msp, y = tree,  axes = 2, links = links, col.points = species,
+            col.groups = 1:nlevels(species), pch.points = 16,
             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, ylab = "Branch lengths")
 }

@@ -1,7 +1,7 @@
 
 ###########################################################################
 
-#' Create morphospace
+#' Generate morphospace
 #'
 #' @description Create an empirical morphospace as an ordination comprising set
 #'   of axes synthesizing shape variation. Allows a variety of multivariate methods
@@ -11,12 +11,13 @@
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
 #' @param links A list with the indices of the coordinates defining the
 #'   wireframe (following the format used in \code{Morpho}).
-#' @param template A 2-column matrix containing 1) the actual
-#'   landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
-#'   coordinates defining a curve or set of curves that will be warped using the
-#'   deformation interpolated from the changes between landmarks/semilandmarks
-#'   (the actual positions of which must be marked with a row of NA, see the
-#'   tails dataset).
+#' @param template Either a 2-column matrix containing landmarks/semilandmarks
+#'   followed by coordinates defining a curve or set of curves describing additional
+#'   aspects of morphology (for 2D shape data) or a \code{"mesh3d"} object containing
+#'   geometry of the structure the landmarks were placed on (for 3D shape data),
+#'   corresponding to the mean shape of the sample. These will be warped using TPS
+#'   interpolation to produce the set of background shell models (see
+#'   \code{\link{build_template2d}}).
 #' @param p Numeric, indicating the number of landmarks/semilandmarks used (for
 #'   landmark data only).
 #' @param k Numeric, indicating the number of cartesian dimensions of
@@ -83,14 +84,8 @@
 #' species <- tails$data$species
 #' links <- tails$links
 #' tree <- tails$tree
-#' template <- tails$template
 #'
-#' #create morphospace using the basic sample of shapes, PCA as ordination method
-#' #and the template provided for warping and creating backround models
-#' mspace(shapes, template = template, mag = 0.7, axes = c(1,2), cex.ldm = 0,
-#'        points = TRUE)
-#'
-#' #create morphospace using the basic sample of shapes, PCA as ordination method
+#' #generate morphospace using the basic sample of shapes, PCA as ordination method
 #' #and the links between landmarks provided for backround models
 #' mspace(shapes, links = links, mag = 0.7, axes = c(1,2), points = TRUE)
 #'
@@ -100,12 +95,12 @@
 #' #plot PCs 1 and 3
 #' mspace(shapes, links = links, mag = 1.5, axes = c(1,3), points = TRUE)
 #'
-#' #create morphospace using the basic sample of shapes, bgPCA as ordination method
+#' #generate morphospace using the basic sample of shapes, bgPCA as ordination method
 #' #and links between landmarks for backround models
 #' mspace(shapes, links = links, FUN = bg_prcomp, groups = species, mag = 0.7,
 #'        axes = c(1,2), invax = 1, points = TRUE)
 #'
-#' #create morphospace using species' consensus shapes and phylogenetic tree,
+#' #generate morphospace using species' consensus shapes and phylogenetic tree,
 #' #phylogenetic PCA as ordination method, and links between landmarks for backround
 #' #models
 #' sp_shapes <- consensus(shapes, species)
@@ -117,21 +112,34 @@
 #' names(morphosp)
 #'
 #'
+#' #load wing data for a quick demo with templates
+#' data("wings")
+#' shapes <- wings$shapes
+#' links <- wings$links
+#' template <- wings$template
+#'
+#' #generate morphospace using links
+#' mspace(shapes, links = links, mag = 3, axes = c(1,2), points = TRUE)
+#'
+#' #generate morphospace using template
+#' mspace(shapes, template = template, mag = 3, axes = c(1,2), points = TRUE)
+#'
+#'
 #'
 #' ##3D Landmark data
 #'
+#' \dontrun{
 #' #load data and packages and extract relevant data and information
-#' library(magrittr)
 #' library(Morpho)
 #' data("shells3D")
 #' shapes <- shells3D$shapes
 #' mesh_meanspec <- shells3D$mesh_meanspec
 #'
-#' #create morphospace. This is interactive, you need to rotate the shape by yourself and
+#' #generate morphospace. This is interactive, you need to rotate the shape by yourself and
 #' #then press enter into the console.
-#' mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
-#'        asp.models = 3, col.ldm = "black", cex.ldm = 2. points = TRUE)
-#' #create morphospace using a mesh template that improves visualization:
+#' mspace(shapes, mag = 1, axes = c(1,2), col.ldm = "black", cex.ldm = 2, points = TRUE)
+#'
+#' #generate morphospace using a mesh template that improves visualization:
 #' #first, get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec
 #' meanspec_id<- findMeanSpec(shapes)
 #' meanspec_shape <- shapes[,,meanspec_id]
@@ -141,11 +149,11 @@
 #' meanshape <- consensus(shapes)
 #' meanmesh <- tps3d(x = mesh_meanspec , refmat = meanspec_shape, tarmat = meanshape)
 #'
-#' #finally, create morphospace providing template (this function used the mesh warped to
+#' #finally, generate morphospace providing template (this function used the mesh warped to
 #' #the mean shape of the entire sample, hence the previous lines)
-#' mspace(shapes, mag = 1, axes = c(1,2), nh = 4, nv = 4, size.models = 2,
-#'        asp.models = 3, bg.model = "gray", cex.ldm = 0, template = meanmesh, points = TRUE)
-#'
+#' mspace(shapes, mag = 1, axes = c(1,2), template = meanmesh, bg.models = "gray",
+#'        nh = 4, nv = 4, cex.ldm = 0, points = TRUE)
+#' }
 #'
 #'
 #' ##Outline data
@@ -154,9 +162,9 @@
 #' data("shells")
 #' shapes <- shells$shapes$coe
 #'
-#' # Create morphospace using all the raw variation
-#' mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 0.3,
-#'        asp.models = 0.5, bg.model = "light gray")
+#' #generate morphospace using all the raw variation
+#' mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 1,
+#'        asp.models = 1, bg.model = "light gray")
 mspace <- function(shapes,
                    axes = c(1,2),
                    links = NULL,
@@ -284,18 +292,22 @@ mspace <- function(shapes,
 #' @examples
 #' #load and extract relevant data, packages and information
 #' library(magrittr)
-#' data("tails")
-#' shapes <- tails$shapes
-#' sex <- tails$data$sex
-#' links <- tails$links
+#' data("wings")
+#' shapes <- wings$shapes
+#' cactus <- wings$data$sex
+#' species <- wings$data$species
+#' template <- wings$template
 #'
 #' #generate basic morphospace, add sampled shapes
-#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
+#' mspace(shapes, template = template, mag = 0.7, axes = c(1,2)) %>%
 #'   proj_shapes(shapes = shapes)
 #'
 #' #change colors, symbols, etc for the scatter
-#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) %>%
-#'   proj_shapes(shapes = shapes, pch = c(1,16)[sex], col = c("red", "blue")[sex])
+#' mspace(shapes, template = template, mag = 0.7, axes = c(1,2)) %>%
+#'   proj_shapes(shapes = shapes[,,species == "Db"],  col = c("green"),
+#'               pch = c(1,16)[cactus[species == "Db"]]) %>%
+#'   proj_shapes(shapes = shapes[,,species == "Dk"],  col = c("blue"),
+#'               pch = c(1,16)[cactus[species == "Dk"]])
 proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 
   dat <- shapes_mat(shapes)
@@ -348,8 +360,7 @@ proj_shapes <- function(shapes, mspace, pipe = TRUE, ...) {
 #' sp_shapes <- consensus(shapes, species)
 #'
 #' #generate basic morphospace, add sampled and consensus shapes
-#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2), size.models = 0.3,
-#'        asp.models = 0.5, bg.model = "light gray") %>%
+#' mspace(shapes, mag = 0.7, axes = c(1,2), bg.model = "light gray") %>%
 #'   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1, cex = 0.7) %>%
 #'   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:4, cex = 2)
 proj_consensus <- function(shapes, mspace, pipe = TRUE, ...) {
@@ -410,8 +421,7 @@ proj_consensus <- function(shapes, mspace, pipe = TRUE, ...) {
 #' sp_shapes <- consensus(shapes, species)
 #'
 #' #generate basic morphospace, add sampled shapes and convex hulls for species
-#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2), size.models = 0.3,
-#'        asp.models = 0.5, bg.model = "light gray") %>%
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2), bg.model = "light gray") %>%
 #'   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) %>%
 #'   proj_groups(groups = species, col = 1:4, lwd = 2)
 proj_groups <- function(mspace, shapes = NULL, groups, pipe = TRUE, ...) {
@@ -570,11 +580,11 @@ proj_axis <- function(obj, mspace, axis = 1, mag = 1, pipe = TRUE, ...) {
 #' species <- tails$data$species
 #' sp_shapes <- consensus(shapes, species)
 #' tree <- tails$tree
-#' template <- tails$template
+#' links <- tails$links
 #'
 #' #generate basic morphospace, add sampled shapes, species mean shapes, and
 #' #phylogenetic structure
-#' mspace(shapes, template = template, mag = 0.7, axes = c(1,2), cex.ldm = 0) %>%
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0) %>%
 #'   proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1, cex = 0.7) %>%
 #'   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 2) %>%
 #'   proj_phylogeny(tree = tree)
@@ -616,12 +626,13 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #' @param axes Numeric of length 1 or 2, indicating the axes to be plotted.
 #' @param links A list with the indices of the coordinates defining the
 #'   wireframe (following the format used in \code{Morpho}).
-#' @param template A 2-column matrix containing 1) the actual
-#'   landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
-#'   coordinates defining a curve or set of curves that will be warped using the
-#'   deformation interpolated from the changes between landmarks/semilandmarks
-#'   (the actual positions of which must be marked with a row of NA, see the
-#'   tails dataset).
+#' @param template Either a 2-column matrix containing landmarks/semilandmarks
+#'   followed by coordinates defining a curve or set of curves describing additional
+#'   aspects of morphology (for 2D shape data) or a \code{"mesh3d"} object containing
+#'   geometry of the structure the landmarks were placed on (for 3D shape data),
+#'   corresponding to the mean shape of the sample. These will be warped using TPS
+#'   interpolation to produce the set of background shell models (see
+#'   \code{\link{build_template2d}}).
 #' @param x Optional vector with a non-morphometric variable to be plotted in
 #'   the x axis. Alternatively, a \code{"phy"} object can be provided.
 #' @param y Optional vector with a non-morphometric variable to be plotted in
@@ -699,7 +710,6 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #' sp_sizes <- cbind(tapply(sizes, species, mean))
 #' tree <- tails$tree
 #' links <- tails$links
-#' template <- tails$template
 #'
 #' #generate basic morphospace, add sampled shapes, species mean shapes, species
 #' #classification, and phylogenetic structure
@@ -725,47 +735,37 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 #'
 #' #change number and sizes of shape models in the background
-#' plot_mspace(msp, axes = c(1,2), nh = 2, nv = 2, links = links, size.models = 2,
+#' plot_mspace(msp, axes = c(1,2), nh = 2, nv = 2, links = links, size.models = 0.5,
 #'             col.points = species, col.groups = 1:nlevels(species),
 #'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 #'
-#' #magnify deformation
-#' plot_mspace(msp, axes = c(1,2), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 2,
-#'             col.points = species, col.groups = 1:nlevels(species),
-#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
-#'
-#' #change links for templates, highlight landmarks
-#' plot_mspace(msp, axes = c(1,2), mag = 1.5, template = template, col.points = species,
-#'             col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+#' #magnify deformation and highlight landmarks
+#' plot_mspace(msp, axes = c(1,2), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 0.5,
+#'             col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
 #'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 #'
 #' #change axes 1,2 for 1,3
-#' plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
-#'             col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+#' plot_mspace(msp, axes = c(1,3), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 0.5,
+#'             col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
 #'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE)
 #'
 #' #represent ranges and centroids of groups
-#' plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
-#'             col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+#' plot_mspace(msp, axes = c(1,3), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 0.5,
+#'             col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
 #'             points = TRUE, groups = TRUE, mshapes = TRUE, phylo = FALSE)
 #'
 #' #add phylogeny
-#' plot_mspace(msp, axes = c(1,3), mag = 1.5, template = template, col.points = species,
-#'             col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
+#' plot_mspace(msp, axes = c(1,3), mag = 1.5, nh = 2, nv = 2, links = links, size.models = 0.5,
+#'             col.points = species, col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red",
 #'             points = TRUE, groups = TRUE, mshapes = TRUE, phylo = TRUE)
 #'
 #'
 #'
 #' ##Plotting 'hybrid' morphospaces:
 #'
-#' #plot size against first PC (scaling factors got a bit weird because of the scale of sizes)
-#' plot_mspace(msp, x = sizes,  axes = 1, links = links, asp.models = 0.0004, size.models = 6000,
-#'             col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
-#'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Centroid size")
-#'
-#' #same but with template
-#' plot_mspace(msp, x = sizes,  axes = 1, template = template, asp.models = 0.0004, size.models = 6000,
-#'             col.points = species, col.groups = 1:nlevels(species), pch.points = 16, cex.ldm = 0,
+#' #plot size against first PC
+#' plot_mspace(msp, x = sizes,  axes = 1, links = links, col.points = species,
+#'             col.groups = 1:nlevels(species), pch.points = 16,
 #'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Centroid size")
 #'
 #'
@@ -773,13 +773,13 @@ proj_phylogeny <- function(tree, mspace, pipe = TRUE, ...) {
 #' ##Plotting phenograms:
 #'
 #' #plot horizontal phenogram against PC1
-#' plot_mspace(msp, x = tree,  axes = 1, links = links, asp.models = 0.5, size.models = 5,
-#'             col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
+#' plot_mspace(msp, x = tree,  axes = 1, links = links, col.points = species,
+#'             col.groups = 1:nlevels(species), pch.points = 16,
 #'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, xlab = "Branch lengths")
 #'
 #' #plot horizontal phenogram against PC1
-#' plot_mspace(msp, y = tree,  axes = 2, links = links, asp.models = 20, size.models = 1,
-#'             col.points = species, col.groups = 1:nlevels(species), pch.points = 16,
+#' plot_mspace(msp, y = tree,  axes = 2, links = links, col.points = species,
+#'             col.groups = 1:nlevels(species), pch.points = 16,
 #'             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, ylab = "Branch lengths")
 plot_mspace <- function(mspace,
                         axes,

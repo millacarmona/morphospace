@@ -32,16 +32,20 @@ to add flexibility to graphical representation of scatter points.
 \examples{
 #load and extract relevant data, packages and information
 library(magrittr)
-data("tails")
-shapes <- tails$shapes
-sex <- tails$data$sex
-links <- tails$links
+data("wings")
+shapes <- wings$shapes
+cactus <- wings$data$sex
+species <- wings$data$species
+template <- wings$template
 
 #generate basic morphospace, add sampled shapes
-mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
+mspace(shapes, template = template, mag = 0.7, axes = c(1,2)) \%>\%
   proj_shapes(shapes = shapes)
 
 #change colors, symbols, etc for the scatter
-mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
-  proj_shapes(shapes = shapes, pch = c(1,16)[sex], col = c("red", "blue")[sex])
+mspace(shapes, template = template, mag = 0.7, axes = c(1,2)) \%>\%
+  proj_shapes(shapes = shapes[,,species == "Db"],  col = c("green"),
+              pch = c(1,16)[cactus[species == "Db"]]) \%>\%
+  proj_shapes(shapes = shapes[,,species == "Dk"],  col = c("blue"),
+              pch = c(1,16)[cactus[species == "Dk"]])
 }

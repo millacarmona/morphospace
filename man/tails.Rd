@@ -8,18 +8,16 @@
 A list containing:
 \describe{
 \item{$shapes:}{ a \code{9 x 2 x 281} array with the symmetric component
-of the superimposed configurations of landmarks samplig tail shape.}
+of the superimposed configurations of landmarks marking the base of the tail,
+as well as the tips of the two outermost rectrices of each specimen.}
 \item{$sizes:}{ a vector of length 281 containing the centroid size of
 each specimen's tail.}
 \item{$data: }{ a 3-column data frame with information about the taxonomic
 classification, sex and type (deep forked, DF or non-deep forked, NDF.}
 \item{$tree: }{ a \code{"phy"} object containing the phylogenetic tree
 of the 13 \emph{Tyrannus} species.}
-\item{$links: }{ a list containing information about how to oin the
-landmarks to create a wireframe.}
-\item{$template: }{ a 2-column matrix containing the coordinates of the
-9 landmarks, followed by the coordinates defining 9 curves curve describing
-the outline of tail feathers, to be warped using TPS interpolation.}
+\item{$links: }{ a list indicating how to connect the landmarks to create a
+wireframe.}
 }
 }
 \usage{
@@ -37,15 +35,14 @@ of the genus \emph{Tyrannus}, two of which (\emph{T. savana} and
 considerable allometric variation and sexual dimorphism. The \code{tails}
 data set  contains landmark data and centroid sizes from the tails of 281
 specimens, their classification to species and sex, and the phylogenetic
-relationships between Tyrannus species (see Fasanelli et al. 2022 and
-references therein). To further help visualization of shapes, the links
-between landmarks and a template with curves describing the outline of
-tail feathers have also been included.
+relationships between \emph{Tyrannus} species (see Fasanelli et al. 2022
+and references therein). To further help visualization of shapes, the links
+between landmarks have also been included.
 }
 \references{
 Fasanelli M. N., Milla Carmona P. S., Soto I. M., & Tuero, D.T . (2022).
-Allometry, sexual selection and evolutionary lines of least resistance
-shaped the evolution of exaggerated sexual traits within the genus Tyrannus.
-Journal of Evolutionary Biology, 35(5), 669 - 679.
+\emph{Allometry, sexual selection and evolutionary lines of least
+resistance shaped the evolution of exaggerated sexual traits within the
+genus} Tyrannus. Journal of Evolutionary Biology, 35(5), 669 - 679.
 }
 \keyword{datasets}

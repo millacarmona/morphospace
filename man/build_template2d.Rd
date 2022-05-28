@@ -30,3 +30,17 @@ the number of coordinates used to drawn each is arbitrary, and is up the user
 to decide when the curve is ready (press the 'Finish' button in the top-right
 corner of the Plots pane).
 }
+\examples{
+#generate template interactively
+\dontrun{
+temp <- build_template2d(image = "extdata/sample_wing.jpg", nlands = 9, ncurves = 9)
+
+plot(temp, type = "n", asp = 1)
+points(temp[c(1:9),], col = "red", pch = 16)
+points(temp[-c(1:9),], type = "l")
+}
+}
+\references{
+Claude, J. (2008). \emph{Morphometrics with R}. Springer Science & Business Media,
+316.
+}

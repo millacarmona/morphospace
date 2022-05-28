@@ -287,17 +287,55 @@ shapes_mat <- function(shapes) {
 
 ################################################################################################
 
-#' Title
+#' Adjust aspect and scale of background shape models for 2D data
 #'
-#' @param models
-#' @param frame
-#' @param model_width
-#' @param model_height
+#' @description Avoid background shape models distortion caused by differences in ranges
+#'   of x and y axes. Used internally.
 #'
-#' @return
+#' @param models An array containing the background shape models.
+#' @param frame The frame in which shape models are to be plotted.
+#' @param model_width Numeric; the width of a reference shape model (usually the consensus).
+#' @param model_height Numeric; the height of a reference shape model (usually the consensus).
+#'
+#' @return An array containing the adjusted shape models.
+#'
 #' @export
 #'
 #' @examples
+#' #load package and data
+#' library(geomorph)
+#' library(Morpho)
+#' data("wings")
+#' shapes <- wings$shapes
+#'
+#' #perform pca, extract ranges for PC1 and 2 and plot
+#' pca <- prcomp(two.d.array(shapes))
+#' xlim <- range(pca$x[,1])
+#' ylim <- range(pca$x[,2])
+#' plot(pca$x, col = "gray", xlim = xlim, ylim = ylim)
+#'
+#' #calculate and plot shape grid
+#' shapes_grid0 <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
+#'                           k = ncol(shapes), p = nrow(shapes),
+#'                           nh = 4, nv = 4, xlim = xlim, ylim = ylim)
+#' for(i in 1:dim(shapes_grid0$models_arr)[3]) {
+#'   points(shapes_grid0$models_arr[,,i], type = "l", col = "red")
+#' }
+#'
+#' #amplify range of x axis and replot grid
+#' newframe <- cbind(pca$x[,1] * 20, pca$x[,2])
+#' plot(newframe, col = "gray")
+#' for(i in 1:dim(shapes_grid0$models_arr)[3]) {
+#'   points(shapes_grid0$models_arr[,,i], type = "l", col = "red")
+#' }
+#'
+#' #calculate width and height of consensus shape
+#' wh <- abs(apply(apply(consensus(shapes_grid0$models_arr), 2, range), 2, diff))
+#'
+#' #ajust grid to new frame and plot
+#' adj_grid <- adjust_models2d(models = shapes_grid0$models_arr, frame = newframe,
+#'                             model_width = wh[1], model_height = wh[2])
+#' for(i in 1:dim(adj_grid)[3]) points(adj_grid[,,i], type = "l", col = "blue", lwd = 2)
 adjust_models2d <- function(models, frame, model_width, model_height) {
 
   frame_xydiffrange <- abs(apply(apply(frame, 2, range), 2, diff))
@@ -335,7 +373,7 @@ adjust_models2d <- function(models, frame, model_width, model_height) {
     model[,1] <- model[,1] * ((frame_width / dim(models)[3]) / model_width2)
     model[,2] <- model[,2] * ((frame_height / dim(models)[3]) / model_height2)
 
-    model
+    model * 3
   })
   models_adj <- abind::abind(models_adj_l2, along = 3)
 
@@ -345,17 +383,69 @@ adjust_models2d <- function(models, frame, model_width, model_height) {
 
 ################################################################################################
 
-#' Title
+#' Adjust aspect and scale of background shape models for 3D data
 #'
-#' @param models
-#' @param frame
-#' @param size.models
-#' @param asp.models
+#' @description Avoid background shape models distortion caused by differences in ranges
+#'   of x and y axes. Used internally.
 #'
-#' @return
+#' @param models A list containing PNG images depicting background shape models.
+#' @param frame The frame in which shape models are to be plotted.
+#' @param size.models Numeric; size factor for shape models.
+#' @param asp.models Numeric; the y/x aspect ratio of shape models.
+#'
+#' @return A list containing the adjusted frame of each element in \code{models}, and
+#'   new, adjusted limits for the x and y axes from \code{frame}.
+#'
 #' @export
 #'
+#' @seealso \code{\link{morphogrid}}, \code{\link{plot_morphogrid3d}}
+#'
 #' @examples
+#' #load package and data
+#' library(geomorph)
+#' library(Morpho)
+#' library(rgl)
+#' library(png)
+#' data("shells3D")
+#' shapes <- shells3D$shapes
+#'
+#' \dontrun{
+#' #perform pca, extract ranges for PC1 and 2
+#' pca <- prcomp(two.d.array(shapes))
+#' xlim <- range(pca$x[,1])
+#' ylim <- range(pca$x[,2])
+#'
+#' #calculate shape grid and compute model centroid
+#' shapes_grid0 <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
+#'                           k = ncol(shapes), p = nrow(shapes),
+#'                           nh = 2, nv = 2, xlim = xlim, ylim = ylim)
+#' model_centers <- t(apply(shapes_grid0$models_arr, 3, colMeans))[,1:2]
+#'
+#' #create a temporal directory, plot 3D models with rgl, and take a snapshot
+#' wd <- tempdir()
+#' for(i in 1:dim(shapes_grid0$models_arr)[3]) {
+#'   plot3d(shapes_grid0$models_arr[,,i], aspect = FALSE, axes = FALSE,
+#'               xlab = "", ylab = "", zlab = "")
+#'   rgl.snapshot(paste0(wd,"model",i,".png"))
+#' }
+#'
+#' #re-import snapshots
+#' models <- lapply(1:dim(shapes_grid0$models_arr)[3], function (i) {
+#'   model_i <- readPNG(paste0(wd, "model", i, ".png"), native = TRUE)
+#' })
+#'
+#' #adjust snapshots
+#' adj <- adjust_models3d(models = models, frame = model_centers, size.models = 1, asp.models = 1)
+#'
+#' #plot everything
+#' plot(pca$x, xlim = adj$xlim, ylim = adj$ylim)
+#' for(i in 1:length(models)) {
+#'   rasterImage(models[[i]], adj$model_frames[[i]][1,1], adj$model_frames[[i]][1,2],
+#'               adj$model_frames[[i]][2,1], adj$model_frames[[i]][2,2])
+#' }
+#'
+#' #kind of. Anyway, use plot_morphogrid3d that do the full process.
+#' }
 adjust_models3d <- function(models, frame, size.models, asp.models) {
 
   mw <- sapply(models, function(x) {dim(x)})[1,]
@@ -382,6 +472,7 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
     ph_max <- frame[i,2] + (mh_std[i] / 2)
     ylim_min <- min(ylim_min, ph_min)
     ylim_max <- max(ylim_max, ph_max)
+
 
     w <- rbind(pw_min, pw_max)
     h <- rbind(ph_min, ph_max)
@@ -411,12 +502,10 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #'   first value of this argument is considered.
 #' @param datype Character; the type of shape data (either \code{"fcoef"} or
 #'   \code{"landm"}).
-#' @param template A 2-column matrix containing 1) the actual
-#'   landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
-#'   coordinates defining a curve or set of curves that will be warped using the
-#'   deformation interpolated from the changes between landmarks/semilandmarks
-#'   (the actual positions of which must be marked with a row of NA, see the
-#'   tails dataset).
+#' @param template A 2-column matrix containing landmarks/semilandmarks followed
+#'   by coordinates defining a curve or set of curves describing additional aspects
+#'   of morphology, which will be warped using TPS interpolation to produce the set
+#'   of background shell models(see \code{\link{build_template2d}}).
 #' @param x Optional vector with a non-morphometric variable to be plotted in
 #'   the x axis.
 #' @param y Optional vector with a non-morphometric variable to be plotted in
@@ -442,6 +531,8 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #' }
 #'
 #' @export
+#'
+#' @seealso \code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}}
 #'
 #' @references MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological
 #'   Association Newsletter, 72(620), 14-27.
@@ -555,7 +646,7 @@ morphogrid <- function(ordination,
     sh_arr <- abind::abind(coords_l, along = 3)
   } else {
     sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k)
-    for(i in 1:dim(sh_arr)[3]) sh_arr[,,i] <- sh_arr[,,i] / cSize(sh_arr[,,i])
+    for(i in 1:dim(sh_arr)[3]) sh_arr[,,i] <- sh_arr[,,i] / Morpho::cSize(sh_arr[,,i])
   }
 
 
@@ -570,7 +661,7 @@ morphogrid <- function(ordination,
 
     sh_arr[,2,] <- sh_arr[,2,] * asp.models
   }
-  sh_arr <- sh_arr * size.models * 6
+  sh_arr <- sh_arr * size.models
 
 
   if(!is.null(template)) {
@@ -595,8 +686,8 @@ morphogrid <- function(ordination,
   for(i in 1:nrow(gridcoords)) {
     descentmat <- matrix(rep(gridcoords[i,], p), p, 2, byrow = TRUE)
     if(k > 2) descentmat <- cbind(descentmat, 0)
-    models_arr[,,i] <- (sh_arr[,,i] * 0.5) + descentmat
-    models_mat <- rbind(models_mat, (sh_arr[,,i] * 0.5) + descentmat)
+    models_arr[,,i] <- (sh_arr[,,i]) + descentmat
+    models_mat <- rbind(models_mat, (sh_arr[,,i]) + descentmat)
   }
 
 
@@ -619,12 +710,10 @@ morphogrid <- function(ordination,
 #'   the y axis.
 #' @param links A list with the indices of the coordinates defining the
 #'   wireframe (following the format used in \code{Morpho}).
-#' @param template A 2-column matrix containing 1) the actual landmarks or
-#'   semilandmarks being analized, followed by 2) the (x,y) cartesian
-#'   coordinates defining a curve or set of curves that will be warped using the
-#'   deformation interpolated from the changes between landmarks/semilandmarks
-#'   (the actual positions of which must be marked with a row of NA, see the
-#'   tails dataset).
+#' @param template A 2-column matrix containing landmarks/semilandmarks followed
+#'   by coordinates defining a curve or set of curves describing additional aspects
+#'   of morphology, which will be warped using TPS interpolation to produce the set
+#'   of background shell models(see \code{\link{build_template2d}}).
 #' @param datype Character; type of shape data used (\code{"landm"} or
 #'   \code{"fcoef"}).
 #' @param ordtype Character; method used for multivariate ordination
@@ -645,6 +734,8 @@ morphogrid <- function(ordination,
 #' @param xlab,ylab Standard arguments passed to the generic plot function.
 #'
 #' @export
+#'
+#' @seealso \code{\link{morphogrid}}, \code{\link{adjust_models2d}}
 #'
 #' @examples
 #' #load data and packages
@@ -691,8 +782,8 @@ plot_morphogrid2d <- function(x = NULL,
                               plot = TRUE) {
 
 
-  xlim <- range(c(na.omit(morphogrid$models_mat[,1])))
-  ylim <- range(c(na.omit(morphogrid$models_mat[,2])))
+  xlim <- range(c(stats::na.omit(morphogrid$models_mat[,1])))
+  ylim <- range(c(stats::na.omit(morphogrid$models_mat[,2])))
 
   if(length(axes) == 1) axes <- rep(axes, 2)
 
@@ -783,7 +874,9 @@ plot_morphogrid2d <- function(x = NULL,
 #'   the y axis.
 #' @param links A list with the indices of the coordinates defining the
 #'   wireframe (following the format used in \code{Morpho}).
-#' @param template An optional \code{"mesh3d"} object, which will be warped using
+#' @param template An optional \code{"mesh3d"} object containing
+#'   geometry of the structure the landmarks were placed on (for 3D shape data),
+#'   corresponding to the mean shape of the sample, which will be warped using
 #'   TPS interpolation to produce the set of background shell models.
 #' @param refshape reference shape (i.e., the mean landmark configuration)
 #'   corresponding to the mesh provided in \code{template}.
@@ -815,6 +908,8 @@ plot_morphogrid2d <- function(x = NULL,
 #'    than \code{1}.
 #'
 #' @export
+#'
+#' @seealso \code{\link{morphogrid}}, \code{\link{adjust_models3d}}
 #'
 #' @examples
 #' #load data and packages
@@ -1007,7 +1102,6 @@ plot_morphogrid3d <- function(x = NULL,
     model_i <- png::readPNG(paste0(wd, "model", i, ".png"), native = TRUE)
   })
 
-
   model_centers <- t(apply(morphogrid$models_arr, 3, colMeans))[,1:2]
 
   adj <- adjust_models3d(models = models, frame = model_centers,
@@ -1024,7 +1118,7 @@ plot_morphogrid3d <- function(x = NULL,
     plot(0, type = "n", xlim = new_xlim, ylim = new_ylim, xlab = xlab, ylab = ylab)
 
     for(i in 1:(length(models) - 1)) {
-      rasterImage(models[[i]], model_frames[[i]][1,1], model_frames[[i]][1,2],
+      graphics::rasterImage(models[[i]], model_frames[[i]][1,1], model_frames[[i]][1,2],
                   model_frames[[i]][2,1], model_frames[[i]][2,2])
     }
   }

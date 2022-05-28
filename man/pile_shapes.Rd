@@ -14,13 +14,13 @@ the wireframe (following the format used in \code{Morpho}).}
 
 \item{mshape}{Logical; whether to plot the mean configuration.}
 
-\item{...}{Additional arguments passed to \code{\link[=plot]{plot()}}.}
+\item{...}{Additional arguments passed to \code{\link[=plot]{plot()}} or \code{\link[rgl:3dobjects]{rgl::points3d()}}.}
 }
 \description{
 Superimpose all the shapes in the sample.
 }
 \examples{
-#load landmark data
+#load 2D landmark data
 data("tails")
 shapes <- tails$shapes
 links <- tails$links
@@ -29,6 +29,19 @@ links <- tails$links
 pile_shapes(shapes, mshape = FALSE) #bare
 pile_shapes(shapes, mshape = FALSE, links = links) #with links
 pile_shapes(shapes, mshape = TRUE, links = links) #with links and mean shape
+
+
+#load 3D landmark data
+data("shells3D")
+shapes <- shells3D$shapes
+
+\dontrun{
+#pile shapes
+pile_shapes(shapes, mshape = FALSE) #bare
+pile_shapes(shapes, mshape = FALSE, links = list(1:10)) #with false links (just as an example)
+pile_shapes(shapes, mshape = TRUE, links = list(1:10)) #with false links and mean shape
+}
+
 
 #load outline data
 data("shells")

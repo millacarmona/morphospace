@@ -2,16 +2,74 @@
 % Please edit documentation in R/internal_builders.R
 \name{adjust_models3d}
 \alias{adjust_models3d}
-\title{Title}
+\title{Adjust aspect and scale of background shape models for 3D data}
 \usage{
 adjust_models3d(models, frame, size.models, asp.models)
 }
 \arguments{
-\item{asp.models}{}
+\item{models}{A list containing PNG images depicting background shape models.}
+
+\item{frame}{The frame in which shape models are to be plotted.}
+
+\item{size.models}{Numeric; size factor for shape models.}
+
+\item{asp.models}{Numeric; the y/x aspect ratio of shape models.}
 }
 \value{
-
+A list containing the adjusted frame of each element in \code{models}, and
+new, adjusted limits for the x and y axes from \code{frame}.
 }
 \description{
-Title
+Avoid background shape models distortion caused by differences in ranges
+of x and y axes. Used internally.
+}
+\examples{
+#load package and data
+library(geomorph)
+library(Morpho)
+library(rgl)
+library(png)
+data("shells3D")
+shapes <- shells3D$shapes
+
+\dontrun{
+#perform pca, extract ranges for PC1 and 2
+pca <- prcomp(two.d.array(shapes))
+xlim <- range(pca$x[,1])
+ylim <- range(pca$x[,2])
+
+#calculate shape grid and compute model centroid
+shapes_grid0 <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
+                          k = ncol(shapes), p = nrow(shapes),
+                          nh = 2, nv = 2, xlim = xlim, ylim = ylim)
+model_centers <- t(apply(shapes_grid0$models_arr, 3, colMeans))[,1:2]
+
+#create a temporal directory, plot 3D models with rgl, and take a snapshot
+wd <- tempdir()
+for(i in 1:dim(shapes_grid0$models_arr)[3]) {
+  plot3d(shapes_grid0$models_arr[,,i], aspect = FALSE, axes = FALSE,
+              xlab = "", ylab = "", zlab = "")
+  rgl.snapshot(paste0(wd,"model",i,".png"))
+}
+
+#re-import snapshots
+models <- lapply(1:dim(shapes_grid0$models_arr)[3], function (i) {
+  model_i <- readPNG(paste0(wd, "model", i, ".png"), native = TRUE)
+})
+
+#adjust snapshots
+adj <- adjust_models3d(models = models, frame = model_centers, size.models = 1, asp.models = 1)
+
+#plot everything
+plot(pca$x, xlim = adj$xlim, ylim = adj$ylim)
+for(i in 1:length(models)) {
+  rasterImage(models[[i]], adj$model_frames[[i]][1,1], adj$model_frames[[i]][1,2],
+              adj$model_frames[[i]][2,1], adj$model_frames[[i]][2,2])
+}
+
+#kind of. Anyway, use plot_morphogrid3d that do the full process.
+}
+}
+\seealso{
+\code{\link{morphogrid}}, \code{\link{plot_morphogrid3d}}
 }

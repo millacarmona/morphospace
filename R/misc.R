@@ -9,12 +9,12 @@
 #' @param links An optional list with the indices of the coordinates defining
 #'   the wireframe (following the format used in \code{Morpho}).
 #' @param mshape Logical; whether to plot the mean configuration.
-#' @param ... Additional arguments passed to [plot()].
+#' @param ... Additional arguments passed to [plot()] or [rgl::points3d()].
 #'
 #' @export
 #'
 #' @examples
-#' #load landmark data
+#' #load 2D landmark data
 #' data("tails")
 #' shapes <- tails$shapes
 #' links <- tails$links
@@ -23,6 +23,19 @@
 #' pile_shapes(shapes, mshape = FALSE) #bare
 #' pile_shapes(shapes, mshape = FALSE, links = links) #with links
 #' pile_shapes(shapes, mshape = TRUE, links = links) #with links and mean shape
+#'
+#'
+#' #load 3D landmark data
+#' data("shells3D")
+#' shapes <- shells3D$shapes
+#'
+#' \dontrun{
+#' #pile shapes
+#' pile_shapes(shapes, mshape = FALSE) #bare
+#' pile_shapes(shapes, mshape = FALSE, links = list(1:10)) #with false links (just as an example)
+#' pile_shapes(shapes, mshape = TRUE, links = list(1:10)) #with false links and mean shape
+#' }
+#'
 #'
 #' #load outline data
 #' data("shells")
@@ -49,22 +62,44 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
   for(i in 1:dim(shapes_coord)[3]) longlist <- rbind(longlist, shapes_coord[,,i])
 
   if(dat$datype == "landm") {
-    plot(longlist, type = "n", axes = FALSE, xlab = "", ylab = "", ...)
 
-    if(!is.null(links)) {
-      for(i in 1:dim(shapes_coord)[3]){
-        for(l in 1:length(links)) graphics::lines(shapes_coord[links[[l]],,i], col = "gray")
-      }
-    }
+    if(ncol(shapes_coord) == 2) {
+      plot(longlist, type = "n", axes = FALSE, xlab = "", ylab = "", ...)
 
-    graphics::points(longlist, col = "#708095")
-
-    if(mshape == TRUE) {
-      graphics::points(consensus(shapes_coord), pch = 16, ...)
       if(!is.null(links)) {
-        for(l in 1:length(links)) graphics::lines(consensus(shapes_coord)[links[[l]],])
+        for(i in 1:dim(shapes_coord)[3]){
+          for(l in 1:length(links)) graphics::lines(shapes_coord[links[[l]],,i], col = "gray")
+        }
       }
+
+      graphics::points(longlist, col = "#708095")
+
+      if(mshape == TRUE) {
+        graphics::points(consensus(shapes_coord), pch = 16, ...)
+        if(!is.null(links)) {
+          for(l in 1:length(links)) graphics::lines(consensus(shapes_coord)[links[[l]],])
+        }
+      }
+
+    } else {
+      rgl::plot3d(longlist, aspect = FALSE, axes = FALSE, col = "#708095",
+                  xlab = "", ylab = "", zlab = "", size = 5, ...)
+
+      if(!is.null(links)) {
+        for(i in 1:dim(shapes_coord)[3]){
+          for(l in 1:length(links)) rgl::lines3d(shapes_coord[links[[l]],,i], col = "gray", ...)
+        }
+      }
+
+      if(mshape == TRUE) {
+        rgl::points3d(consensus(shapes_coord), size = 10)
+        if(!is.null(links)) {
+          for(l in 1:length(links)) rgl::lines3d(consensus(shapes_coord)[links[[l]],])
+        }
+      }
+
     }
+
   } else {
     plot(longlist, axes = FALSE, xlab = "", ylab = "", type = "n")
 
@@ -164,7 +199,6 @@ hulls_by_group_3D<-function(xyz, fac, col = 1:nlevels(fac), ...) {
 }
 
 
-
 ######################################################################################
 
 #' Build template for 2D shape data
@@ -189,31 +223,41 @@ hulls_by_group_3D<-function(xyz, fac, col = 1:nlevels(fac), ...) {
 #'
 #' @export
 #'
+#' @references
+#' Claude, J. (2008). \emph{Morphometrics with R}. Springer Science & Business Media,
+#' 316.
+#'
 #' @examples
 #' #generate template interactively
-#'
 #' \dontrun{
-#' temp <- build_template2d(image, nlands = 9, ncurves = 9)
-#' }
+#' temp <- build_template2d(image = "extdata/sample_wing.jpg", nlands = 9, ncurves = 9)
 #'
 #' plot(temp, type = "n", asp = 1)
 #' points(temp[c(1:9),], col = "red", pch = 16)
-#' points(temp[-c(1:9),], type = "l)
+#' points(temp[-c(1:9),], type = "l")
+#' }
 build_template2d <- function(image, nlands, ncurves) {
 
-  im <- png::png(image)
+  if(any(grepl(x = image, pattern = ".jpg"),
+         grepl(x = image, pattern = ".jpeg"),
+         grepl(x = image, pattern = ".JPG"),
+         grepl(x = image, pattern = ".JPEG"))) {ras <- jpeg::readJPEG(image)}
 
-  plot(c(1, dim(im)[2]), c(1, dim(im)[1]), type = "n", xlab = "", ylab = "",
+  if(any(grepl(x = image, pattern = ".png"),
+         grepl(x = image, pattern = ".PNG"))) {ras <- png::readPNG(image)}
+
+
+  plot(c(1, dim(ras)[2]), c(1, dim(ras)[1]), type = "n", xlab = "", ylab = "",
        asp = 1, axes = FALSE)
-  rasterImage(im, 1, 1, dim(im)[2], dim(im)[1])
+  graphics::rasterImage(ras, 1, 1, dim(ras)[2], dim(ras)[1])
 
-  lands <- locator(nlands, type = "p", pch = 8, col = "white")
+  lands <- graphics::locator(nlands, type = "p", pch = 8, col = "white")
   cat(paste0("Place the ", nlands, " landmarks"))
 
   curves <- lapply(1:ncurves, function(i) {
-    cat(paste0("When the ", i,
+    cat(paste0("\nWhen the ", i,
                " curve is ready click Finish (top-right corner of Plots pane) or enter <Esc> in the console"))
-    locator(type = "l", pch = 8, col = i)
+    graphics::locator(type = "l", pch = 8, col = i)
   })
 
   template <- cbind(c(lands$x, unlist(lapply(curves, function(x) {c(NA, x$x)}))),
@@ -221,5 +265,3 @@ build_template2d <- function(image, nlands, ncurves) {
 
   return(template)
 }
-
-

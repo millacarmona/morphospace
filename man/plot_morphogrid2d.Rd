@@ -34,12 +34,10 @@ the y axis.}
 
 \item{morphogrid}{An object containing the output of \code{morphogrid}.}
 
-\item{template}{A 2-column matrix containing 1) the actual landmarks or
-semilandmarks being analized, followed by 2) the (x,y) cartesian
-coordinates defining a curve or set of curves that will be warped using the
-deformation interpolated from the changes between landmarks/semilandmarks
-(the actual positions of which must be marked with a row of NA, see the
-tails dataset).}
+\item{template}{A 2-column matrix containing landmarks/semilandmarks followed
+by coordinates defining a curve or set of curves describing additional aspects
+of morphology, which will be warped using TPS interpolation to produce the set
+of background shell models(see \code{\link{build_template2d}}).}
 
 \item{links}{A list with the indices of the coordinates defining the
 wireframe (following the format used in \code{Morpho}).}
@@ -103,4 +101,7 @@ points(shapes_grid$models_arr[,,1], pch=16, col = 1)
 points(shapes_grid$models_arr[,,2], pch=16, col = 2)
 points(shapes_grid$models_arr[,,3], pch=16, col = 3)
 points(shapes_grid$models_arr[,,4], pch=16, col = 4)
+}
+\seealso{
+\code{\link{morphogrid}}, \code{\link{adjust_models2d}}
 }

@@ -9,7 +9,7 @@ A list containing:
 \describe{
 \item{$shapes:}{ an \code{"OutCoe"} object containing a \code{137 x 28}
 matrix with the normalized Fourier coefficients describing the outline
-shape of the sample of fossil shells.}
+of the shell of each specimen in left lateral view.}
 \item{$sizes:}{ a vector of length 137 containing the centroid size of each
 fossil shell.}
 \item{$data: }{ a 4-column data frame with information about the taxonomic
@@ -29,16 +29,16 @@ as closed outlines using 7 harmonics and elliptic Fourier analysis, from
 The \code{shells} data contain data from 137 specimens belonging to
 4 species of the extinct bivalve genus \emph{Ptychomya}, tracking their
 morphological changes through a 5 million years interval from the Lower
-Cretaceous of Argentina (approximately 140 million years ago). The data
-set includes the information about the extrernal shell shape (measured using
-Fourier coefficients from 7 harmonics), centroid size, age (both relative,
+Cretaceous of west-central Argentina (approximately 140 million years ago).
+The data set includes the information about the extrernal shell shape (measured
+using Fourier coefficients from 7 harmonics), centroid size, age (both relative,
 taken from ammonoid biozones, and absolute, estimated using a combination
 of the former, absolute dates, and stratigraphic data), geographic provenance,
 and taxonomic classification of each fossil specimen.
 }
 \references{
-Milla Carmona, P. S., Lazo, D. G., & Soto, I. M. (2018). Morphological evolution
-of the bivalve Ptychomya through the Lower Cretaceous of Argentina. Paleobiology,
-44(1), 101-117.
+Milla Carmona, P. S., Lazo, D. G., & Soto, I. M. (2018). \emph{Morphological
+evolution of the bivalve} Ptychomya \emph{through the Lower Cretaceous of
+Argentina}. Paleobiology, 44(1), 101-117.
 }
 \keyword{datasets}

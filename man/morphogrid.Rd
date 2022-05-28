@@ -35,12 +35,10 @@ first value of this argument is considered.}
 \item{datype}{Character; the type of shape data (either \code{"fcoef"} or
 \code{"landm"}).}
 
-\item{template}{A 2-column matrix containing 1) the actual
-landmarks/semilandmarks being analized, followed by 2) the (x,y) cartesian
-coordinates defining a curve or set of curves that will be warped using the
-deformation interpolated from the changes between landmarks/semilandmarks
-(the actual positions of which must be marked with a row of NA, see the
-tails dataset).}
+\item{template}{A 2-column matrix containing landmarks/semilandmarks followed
+by coordinates defining a curve or set of curves describing additional aspects
+of morphology, which will be warped using TPS interpolation to produce the set
+of background shell models(see \code{\link{build_template2d}}).}
 
 \item{x}{Optional vector with a non-morphometric variable to be plotted in
 the x axis.}
@@ -105,4 +103,7 @@ Used internally.
 \references{
 MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological
 Association Newsletter, 72(620), 14-27.
+}
+\seealso{
+\code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}}
 }

@@ -41,7 +41,9 @@ the y axis.}
 \item{refshape}{reference shape (i.e., the mean landmark configuration)
 corresponding to the mesh provided in \code{template}.}
 
-\item{template}{An optional \code{"mesh3d"} object, which will be warped using
+\item{template}{An optional \code{"mesh3d"} object containing
+geometry of the structure the landmarks were placed on (for 3D shape data),
+corresponding to the mean shape of the sample, which will be warped using
 TPS interpolation to produce the set of background shell models.}
 
 \item{links}{A list with the indices of the coordinates defining the
@@ -128,4 +130,7 @@ plot_morphogrid3d(morphogrid = shapes_grid, template = meanmesh, refshape = mean
                   col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
                   asp.models = 1)
 }
+}
+\seealso{
+\code{\link{morphogrid}}, \code{\link{adjust_models3d}}
 }

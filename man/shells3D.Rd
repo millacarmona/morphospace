@@ -8,16 +8,17 @@
 A list containing:
 \describe{
 \item{$shapes:}{ a \code{90 x 3 x 278} array with the slid, superimposed
-configurations of semilandmarks describing shell surfaces.}
+configurations of semilandmarks describing surfaces representing right
+valves (3-5 per specimen).}
 \item{$sizes:}{ a vector of length 278 containing the centroid size of
 each shell surface}
 \item{$data: }{ a 4-column data frame with information about the individual
 id, taxonomic classification, amonoid biozone and geographic provenance
 of each shell surface.}
-\item{$mesh_meanspec: }{ a thridimensional surface mesh stored as a
-\code{"mesh3d"} object (from \code{rgl}) corresponding to the shell shape
-closest to the sample's mean (found using \code{\link[geomorph:findMeanSpec]{geomorph::findMeanSpec()}}), to
-be warped using TPS interpolation.}
+\item{$mesh_meanspec: }{ a 3D surface mesh stored as a \code{"mesh3d"} object
+(from \code{rgl}) corresponding to the shell shape closest to the sample's
+mean (found using \code{\link[geomorph:findMeanSpec]{geomorph::findMeanSpec()}}), to be warped using TPS
+interpolation.}
 }
 }
 \usage{
@@ -31,19 +32,21 @@ Sample of ontogenetic longitudinal shell shapes, quantified using
 \details{
 The \code{shells3D} data contain data from 67 specimens belonging to
 7 species of the extinct bivalve genus \emph{Steinmanella}, which inhabited
-the Early Cretaceous of Argentina during a ~7 million years interval. Shapes
-were measured in each individual using growth lines marking the form of the
+the Early Cretaceous of west-central Argentina during a ~7 million years interval.
+Shapes were measured in each individual using growth lines marking the form of the
 animal at different ages, making a total of 278 shell surfaces describing
 intra- and interspecfic ontogenetic variation. This data includes the
 semilandmarks describing these surfaces' shapes (digitally processed to maximize
-signal), their centroid sizes, the imdividual to which they belong, as well as
+signal), their centroid sizes, the individual to which they belong, as well as
 their relative age (ammonoid biozones), geographic provenance, and taxonomic
-classification.
+classification. In order to improve visualization, the surface mesh of the
+specimen closest to the consensus of the sample, to be warped using TPS
+interpoltation, has also been included.
 }
 \references{
-Milla Carmona, P. S., Lazo, D. G., & Soto, I. M. (2021). Ontogeny in the
-steinmanellines (Bivalvia: Trigoniida): an intra- and interspecific appraisal
-using the Early Cretaceous faunas from the Neuquén Basin as a case study.
-Paleobiology, in press.
+Milla Carmona, P. S., Lazo, D. G., & Soto, I. M. (2021). \emph{Ontogeny in
+the steinmanellines (Bivalvia: Trigoniida): an intra- and interspecific
+appraisal using the Early Cretaceous faunas from the Neuquén Basin as a
+case study}. Paleobiology, in press.
 }
 \keyword{datasets}

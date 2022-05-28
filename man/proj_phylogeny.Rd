@@ -47,11 +47,11 @@ shapes <- tails$shapes
 species <- tails$data$species
 sp_shapes <- consensus(shapes, species)
 tree <- tails$tree
-template <- tails$template
+links <- tails$links
 
 #generate basic morphospace, add sampled shapes, species mean shapes, and
 #phylogenetic structure
-mspace(shapes, template = template, mag = 0.7, axes = c(1,2), cex.ldm = 0) \%>\%
+mspace(shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0) \%>\%
   proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1, cex = 0.7) \%>\%
   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 2) \%>\%
   proj_phylogeny(tree = tree)
