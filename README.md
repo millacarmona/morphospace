@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# morphospace
+# morphospace <img src="man/morphosp_hex.png" align="right" width="150"/>
 
 <!-- badges: start -->
 <!-- badges: end -->
