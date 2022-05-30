@@ -4,7 +4,7 @@
 \alias{hulls_by_group_2D}
 \title{Plot 2D convex hulls for a series of groups}
 \usage{
-hulls_by_group_2D(xy, fac, col = 1:nlevels(fac), ...)
+hulls_by_group_2D(xy, fac, col = 1:nlevels(fac), lty = 1, ...)
 }
 \arguments{
 \item{xy}{Coordinates of the scatterplot.}
@@ -14,11 +14,14 @@ hulls_by_group_2D(xy, fac, col = 1:nlevels(fac), ...)
 \item{col}{A vector (either character or numeric) indicating the colors used
 for each group.}
 
+\item{lty}{A vector (either character or numeric) indicating the type of line
+used to draw hulls.}
+
 \item{...}{Further arguments passed to \code{\link[=polygon]{polygon()}}.}
 }
 \description{
 Plot convex hulls for different groups in 2D scatterplots
-created using the generic \code{\link[=plot]{plot()}} function.
+created using the generic \code{\link[=plot]{plot()}} function. Used internally (mostly).
 }
 \examples{
 #load landmark data and nencessary packages

@@ -118,12 +118,15 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 #' Plot 2D convex hulls for a series of groups
 #'
 #' @description Plot convex hulls for different groups in 2D scatterplots
-#'   created using the generic [plot()] function.
+#'   created using the generic [plot()] function. Used internally (mostly).
 #'
 #' @param xy Coordinates of the scatterplot.
 #' @param fac A factor grouping data points.
 #' @param col A vector (either character or numeric) indicating the colors used
 #'   for each group.
+#' @param lty A vector (either character or numeric) indicating the type of line
+#'   used to draw hulls.
+#'
 #' @param ... Further arguments passed to [polygon()].
 #'
 #' @export
@@ -141,15 +144,16 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 #' #plot and add convex hulls
 #' plot(pca$x)
 #' hulls_by_group_2D(pca$x, fac = species, col = "black")
-hulls_by_group_2D <- function(xy, fac, col = 1:nlevels(fac), ...) {
+hulls_by_group_2D <- function(xy, fac, col = 1:nlevels(fac), lty = 1, ...) {
 
   if(length(col) == 1) col <- rep(col, nlevels(fac))
+  if(length(lty) == 1) lty <- rep(lty, nlevels(fac))
 
   for(i in 1:nlevels(fac)) {
     x <- xy[fac == levels(fac)[i], 1]
     y <- xy[fac == levels(fac)[i], 2]
     hullp <- grDevices::chull(x = x, y = y)
-    graphics::polygon(x[hullp], y[hullp], border = col[i], ...)
+    graphics::polygon(x[hullp], y[hullp], border = col[i], lty = lty[i], ...)
     }
 }
 
@@ -159,7 +163,7 @@ hulls_by_group_2D <- function(xy, fac, col = 1:nlevels(fac), ...) {
 #' Plot 3D convex hulls for a series of groups
 #'
 #' @description Plot convex hulls for different groups in 3D scatterplots
-#'   created using \code{rgl}.
+#'   created using \code{rgl}. Used internally (mostly).
 #'
 #' @param xyz Coordinates for the scatterplot
 #' @param fac A factor grouping data points.

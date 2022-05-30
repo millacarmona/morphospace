@@ -43,7 +43,8 @@ mean shapes.}
 \item{points}{Logical; whether to plot the scatter points.}
 }
 \description{
-Plot phenogram using phylogenetic and morphometric information. Used internally.
+Plot phenogram using phylogenetic and morphometric information.
+Used internally.
 }
 \examples{
 #load and extract relevant data, packages and information

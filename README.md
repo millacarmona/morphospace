@@ -9,7 +9,7 @@
 The aim of `morphospace` is to enhance representation and heuristic
 exploration of multivariate ordinations of shape data. This package can
 handle the most common types of shape data working in integration with
-other widely used R packages that cover more essential steps from the
+other widely used R packages covering more essential steps from the
 geometric morphometrics pipeline (e.g. importation, normalization,
 statistical analysis) such as `Morpho` (Schlager 2017), `geomorph`
 (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et
@@ -39,18 +39,21 @@ The starting point of the `morphospace` workflow is a set of shapes
 (i.e. morphometric data that is already free of variation due to
 differences in orientation, position and scale). These shapes are
 feeeded to the `mspace` function, which generates a morphospace using a
-variety of multivariate methods (PCA, bgPCA, phylogenetic PCA, PLS,
-phylogenetic PLS). This general workflow is outlined below using the
-`tails` data set from Fasanelli et al. (2022), which contains the shapes
-of 281 specimens belonging to 13 species of the genus *Tyrannus*.
+variety of multivariate methods (PCA and the like). This general
+workflow is outlined below using the `tails` data set from Fasanelli et
+al. (2022), which contains tail shapes from 281 specimens belonging to
+13 species of the genus *Tyrannus*.
 
-    #> Loading required package: RRPP
-    #> Loading required package: rgl
-    #> Loading required package: Matrix
+``` r
+library(morphospace)
+library(geomorph)
+library(magrittr)
+```
 
 ``` r
 # Load tail data
 data("tails")
+
 shapes <- tails$shapes
 spp <- tails$data$species
 wf <- tails$links
@@ -80,19 +83,19 @@ msp <- mspace(shapes = shapes, links = wf, cex.ldm = 5) %>%
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
-Once the `"mspace"` object is in place, `plot_mspace` can be used to
-either regenerate/modify the plot or to produce ‘hybrid’ morphospaces.
-For example, PC1 can be plotted against size to explore allometric
-patterns (or any other conventional non-shape variable). The standard
-`graphics` tools work here, so we manipulate the margins a bit to add a
-legend.
+Once the `"mspace"` object is in place, the `plot_mspace` function can
+be used to either regenerate/modify the plot or to produce ‘hybrid’
+morphospaces. For example, PC1 can be plotted against size to explore
+allometric patterns (or any other conventional non-shape variable). The
+standard `graphics` tools work here, so we manipulate the margins a bit
+to add a legend.
 
 ``` r
 # Plot PC1 against log-size, add legend
 par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
 
 plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
-            col.groups = 1:nlevels(spp), xlab = "Log-size")
+            col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size", groups = TRUE)
 legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
        cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
 ```
@@ -104,6 +107,8 @@ create a phenogram:
 
 ``` r
 # Plot vertical phenogram using PC2, add a legend
+par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
+
 plot_mspace(msp, y = phy, axes = 2, nh = 6, nv = 6, cex.ldm = 4, 
             col.groups = 1:nlevels(spp), ylab = "Time")
 legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
@@ -113,9 +118,12 @@ legend("topright", inset = c(-0.22, 0), legend = levels(spp),
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 `morphospace` can also handle elliptic Fourier coefficients and 3D
-landmark data, and use TPS interpolation of curves/meshes to improve
-visualizations. For these and other options and details, see the package
-vignette.
+landmark data, perform some useful shape operations, and use TPS
+interpolation of curves/meshes to improve visualizations. It also
+supports a variety of multivariate methods (bgPCA, phylogenetic PCA,
+PLS, phylogenetic PLS) to produce ordinations. For these and other
+options and details, see the ‘General usage’ and ‘Worked examples’
+vignettes.
 
 ## References
 

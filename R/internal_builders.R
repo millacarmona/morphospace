@@ -103,7 +103,7 @@ proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors
 #'
 #' @description Just a wrapper for [svd()] that returns an adequate output
 #'   when used for blocks of variables. Can deal with phylogenetic data too
-#'   using \code{ape} and \code{phytools} functions internally.
+#'   using \code{ape} and \code{phytools} functions. Used internally.
 #'
 #' @param x First block of variables
 #' @param y Second block of variables
@@ -1180,7 +1180,8 @@ rotate_fcoef <- function(fcoef) {
 
 #' Plot phenogram
 #'
-#' @description Plot phenogram using phylogenetic and morphometric information. Used internally.
+#' @description Plot phenogram using phylogenetic and morphometric information.
+#'   Used internally.
 #'
 #' @param x Optional vector with a non-morphometric variable to be plotted in
 #'   the x axis.
