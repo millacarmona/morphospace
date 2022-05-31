@@ -107,8 +107,8 @@ legend("topright", inset = c(-0.22, 0), legend = levels(spp),
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
-Ordination axes can be also combined with the phylogenetic tree to
-create a phenogram:
+Ordination axes can be also combined with a phylogenetic tree to create
+a phenogram:
 
 ``` r
 # Plot vertical phenogram using PC2, add a legend

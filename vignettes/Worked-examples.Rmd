@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   out.width = "100%",
   fig.width = 7,
   fig.height = 4.73,
-  dpi = 300
+  dpi = 400
 )
 options(rgl.useNULL=TRUE) 
 ```
@@ -26,7 +26,7 @@ options(rgl.useNULL=TRUE)
 ### 2D Landmark data
 
 
-Most of the capabilities for 2D landmark data visualization has been already covered in the 'General usage' vignette. This section will quickly show how to use a curve or set of curves outlining aspects of the phenotype not captured by the chosen landmarks to improve visualizations via TPS interpolation. To do so we use the `wings` data set, which has been taken from Soto et al. (2012) and includes wing shape data from 263 experimentally bred specimens belonging to two recently diverged cactophilic *Drosophila* species, *D. koepferae* and *D. buzzattii*. These two species show preference to different host cacti (columnar cacti from the genus *Trichocereus* and prickly pears from the genus *Opuntia*, respectively) and are considered morphologically cryptic (usually, they can be recognized only from genital morphology). The data set include the centroid size of each wing, as well as information on the host cacti each specimen was bred on, its species, sex, isofemale line, and replica. Also included is a template containing a series of curves describing wing outline and veins (created using `build_template2d`), which will be warped using TPS interpolation and used to generate fancy shape models for our morphospace.
+Most of the capabilities for 2D landmark data visualization has been already covered in [General usage](https://millacarmona.github.io/morphospace/articles/General-usage.html). This section will quickly show how to use a curve or set of curves outlining aspects of the phenotype not captured by the chosen landmarks to improve visualizations via TPS interpolation. To do so we use the `wings` data set, which has been taken from Soto et al. (2012) and includes wing shape data from 263 experimentally bred specimens belonging to two recently diverged cactophilic *Drosophila* species, *D. koepferae* and *D. buzzattii*. These two species show preference to different host cacti (columnar cacti from the genus *Trichocereus* and prickly pears from the genus *Opuntia*, respectively) and are considered morphologically cryptic (usually, they can be recognized only from genital morphology). The data set include the centroid size of each wing, as well as information on the host cacti each specimen was bred on, its species, sex, isofemale line, and replica. Also included is a template containing a series of curves describing wing outline and veins (created using `build_template2d`), which will be warped using TPS interpolation and used to generate fancy shape models for our morphospace.
 
 ```{r, message = FALSE}
 # Load morphospace as well as geomorph and magrittr
@@ -66,7 +66,7 @@ Assume for a second we are interested in exploring whether we can identify morph
 
 
 ```{r}
-# Remove variationassociated to sex, line, replica and size
+# Remove variation associated to sex, line, replica and size
 detr_shapes <- arrayspecs(
   detrend_shapes(lm(two.d.array(shapes) ~ sex * line * replica * sizes)), 
   p = 9, k = 2)
@@ -129,7 +129,7 @@ pile_shapes(shapes)
 
 
 # Generate morphospace using raw variation
-mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, bg.model = "light gray") %>%
+mspace(shapes, mag = 1, nh = 5, nv = 4, bg.model = "light gray") %>%
   proj_shapes(shapes = shapes, col = species) %>%
   proj_groups(shapes = shapes, groups = species)
 title("Morphospace")
@@ -352,7 +352,7 @@ for(i in 1:nlevels(species)) {
   proj_axis(obj = pls_list[[i]], mspace = msp, lwd = 3, col = i, type = "b",
             cex = c(1,2), axis = 1, pipe = FALSE)
 }
-legend("topright", inset = c(-0.25, 0), legend = paste0("P. ", levels(species)), 
+legend("topright", inset = c(-0.25, 0), legend = paste0("S. ", levels(species)), 
        cex = 0.7, pch = 16, col = 1:nlevels(species), bty = "n", text.font = 3)
 title("Refined morphospace")
 ```
@@ -379,7 +379,7 @@ par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 
 plot_mspace(amsp, x = sizes, axes = 1, col.points = species, points = FALSE, 
             xlab = "log-size", xlim = range(sizes), adj_frame = c(0.9, 0.85))
-legend("topright", inset = c(-0.25, 0), legend = paste0("P. ", levels(species)), 
+legend("topright", inset = c(-0.25, 0), legend = paste0("S. ", levels(species)), 
        cex = 0.7, pch = 16, col = 1:nlevels(species), bty = "n", text.font = 3)
 title(' "Allomorphospace "')
 for(i in 1:nlevels(species)) {
