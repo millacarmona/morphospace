@@ -23,7 +23,7 @@ options(rgl.useNULL=TRUE)
 `morphospace` has been built to work with the most common types of geometric morphometrics data that can be found in the paleobiological and evolutionary biology literature. Below, the general capabilities of this package are showcased using three data sets representing these data types and various spatio-temporal scales that are typically addressed when studying evolutionary variation.
 
 
-## 2D Landmark data
+### 2D Landmark data
 
 
 Most of the capabilities for 2D landmark data visualization has been already covered in the 'General usage' vignette. This section will quickly show how to use a curve or set of curves outlining aspects of the phenotype not captured by the chosen landmarks to improve visualizations via TPS interpolation. To do so we use the `wings` data set, which has been taken from Soto et al. (2012) and includes wing shape data from 263 experimentally bred specimens belonging to two recently diverged cactophilic *Drosophila* species, *D. koepferae* and *D. buzzattii*. These two species show preference to different host cacti (columnar cacti from the genus *Trichocereus* and prickly pears from the genus *Opuntia*, respectively) and are considered morphologically cryptic (usually, they can be recognized only from genital morphology). The data set include the centroid size of each wing, as well as information on the host cacti each specimen was bred on, its species, sex, isofemale line, and replica. Also included is a template containing a series of curves describing wing outline and veins (created using `build_template2d`), which will be warped using TPS interpolation and used to generate fancy shape models for our morphospace.
@@ -80,7 +80,7 @@ between_cactus_dk <- bg_prcomp(x = two.d.array(detr_shapes[,,species == "Dk"]),
 
 # Generate morphospace using the refined variation, magnify transformation
 omar <- par("mar")
-par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
+par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 
 mspace(detr_shapes, template = curvs, col.ldm = "red", cex.ldm = 5, mag = 3) %>%
   proj_shapes(shapes = detr_shapes, col = c("blue", "orange")[species], pch = c(1,16)[cactus]) %>%
@@ -100,7 +100,7 @@ title("'Refined' morphospace using template\n+ between-cacti axes")
 So, after 'cleaning' the raw variation interspecific differences become apparent with each species occupying different regions of wing morphospace (elongated and more triangular in *D. koepferae*, relatively higher and more rounded in *D. buzzattii*). Also, morphological variation asssociated to host cacti seems to be similar in both species (the projected axes are largely parallel), although *D. buzzattii* shows a more marked differentiation with flies bred on *Opuntia* further displaced to the region of rounded wings.
 
 
-## Closed outlines
+### Closed outlines
 
 
 `morphospace` can also handle closed outline data in the form of Fourier coefficients resulting from an elliptic Fourier analysis. For the purposes of import, normalize and and analize this data we rely on the `Momocs` package, and use its `"OutCoe"` format for storing closed outlines as starting point. Below the `mspace %>% proj_*` workflow is applied to the `shells` data set taken from Milla Carmona et al. (2018). This include data from 137 specimens belonging to 4 species of the extinct bivalve genus *Ptychomya*, tracking their shape changes through a 5 million years interval from the Lower Cretaceous of Argentina. The data set includes the information about the shape (measured using 7 harmonics), centroid size, geochronologic age (both relative and absolute), geographic provenance, and taxonomic classification of each specimen.
@@ -182,7 +182,7 @@ msp <- mspace(shapes, nh = 5, nv = 4, bg.model = "light gray") %>%
 ```{r}
 # Plot time axis vs first PC, add legend
 omar <- par("mar")
-par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
+par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 
 plot_mspace(mspace = msp, x = ages, axes = 1, nh = 5, nv = 4, xlab = "Time (MA)",
             col.points = species,  phylo = FALSE, groups = FALSE, mshapes = TRUE)
@@ -203,7 +203,7 @@ From these plots we can say that, regarding the shell outline, 1) *P esbelta* is
 
 
 
-## 3D Landmark data
+### 3D Landmark data
 
 
 Last but not least, `morphospace` can also deal with 3D landmark data (my personal preference for importing and normalizing 3D landmark data are the functions from `Morpho`, but other packages can do this too). To show how to apply the `mspace %>% proj_*` workflow we use the `shells3D` data set taken from Milla Carmona et al. (2021), which gathers longitudinal ontogenetic data from 67 specimens belonging to 7 species of the extinct bivalve genus *Steinmanella* from the Lower Cretaceous of Argentina. The shape of these specimens was registered at different sizes using growth lines, and so the data set includes a total of 278 shapes quantified using 90 surface semilandmarks. Also included are the corresponding centroid sizes, the id of the specimen each shape was taken from, and information about biostratigraphic age, taxonomic classification and geographic provenance of each specimen. The surface mesh corresponding to the specimen closest to the consensus of the sample (found using `geomorph::findMeanSpec`) is also included.
@@ -390,7 +390,7 @@ knitr::include_graphics("vignette-unnamed-chunk-28-1.png")
 A quick assessment of these plots tells us that there are two main groups of ontogenies: those from *S. quintucoensis* and *S. subquadrata* (which go from roughly quadrate shells with expanded posteriors to more rectangular shells) and the rest of the species, whose ontogenetic trajectories seem to be very similar in terms of orientation and magnitude (all of them go from more oval-like shells to more triangular ones, although the position of the trajectory differs). The exception is *S. vacaensis*, which show a protracted trajectory which reach some very elongated shell shapes. It is also apparent that the common trend is one of anteroposterior elongation, which seems to be more marked for the two species reaching larger sizes (*S. pehuenmapuensis* and *S. vacaensis*).
 
 
-## References
+### References
 
 Milla Carmona P.S, Lazo D.G., & Soto I.M. (2018). *Morphological evolution of the bivalve* Ptychomya *through the Lower Cretaceous of Argentina*. Paleobiology, 44(1), 101-117 <https://doi.org/10.1017/pab.2017.32>.
 

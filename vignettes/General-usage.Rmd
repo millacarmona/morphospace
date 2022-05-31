@@ -49,7 +49,7 @@ phy <- tails$tree
 ```
 
 
-## Workflow
+### Workflow
 
 
 Morphometric variation is assumed to be already free of variation due to differences in orientation, position and scale. This standardization can be readily performed using a number of functions provided by the aforementioned R packages This package provide some functions that perform basic operations with shape variables, such as the calculation of mean shapes or the analytical removal of undesired sources of variation (functions `consensus` and `detr_shapes`, respectively). Suppose for example we want to get rid of sexual dimorphism before moving forward into our analysis.
@@ -121,7 +121,7 @@ title("Morphospace\n+ PC1 and PC2 of NDF species projected")
 ```
 
 
-## Ordination methods
+### Ordination methods
 
 The default settings of `mspace` rely on the `prcomp` function from the `stats` package to build the synthetic morphometric space. However, `morphospace` also includes functions for supervised ordination, namely phylogenetic PCA (Revell 2009; borrowed from `phytools`, Revell 2012), between-groups PCA (`bg_prcomp`), and both ordinary and phylgenetic versions of Partial Least Squares (PLS) (`pls_shapes` [an user-friendly wrapper of `pls2b`, which is used in the following chunk]). These have been styled/wrapped to share format with `prcomp`, and both bgPCA and PLS functions allow for leave-one-out cross-validation (LOOCV), which alleviates some spurious patterns that arise when the number of variables exceeds the number of samples (as it is common in geometric morphometric analyses; see Cardini et al. 2019 and Cardini & Polly 2020).
 
@@ -183,7 +183,7 @@ legend("topright", inset = c(-0.22, 0), legend = levels(spp),
 
 # Phylogenetic PCA for all species, adding projection of intrapspecific variation,
 # add legend
-par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
+par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
        xlim = c(-0.25, 0.15), ylim = c(-0.2, 0.15), cex.ldm = 5) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
@@ -196,7 +196,7 @@ legend("topright", inset = c(-0.22, 0), legend = levels(spp),
 ```
 
 
-## Flexible visualization
+### Flexible visualization
 
 
 Finally, `"mspace"` objects created using the `mspace %>% proj_*` pipeline can be regenerated/modified with `plot_mspace`, which adds further graphical flexibility. By plotting a `"mspace"` object using this function we can select a different set of axes to plot, colors and symbols for points, groups, etc (or not). In addition, this function can also allow combining morphometric axes with other non-shape variables to produce 'hybrid' morphospaces. 
@@ -206,7 +206,7 @@ For example, PC1 can be plotted against size to explore allometric patterns:
 
 ```{r}
 # Plot PC1 against log-size, add legend
-par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
+par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 
 plot_mspace(msp3, x = sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size", groups = TRUE)
@@ -220,7 +220,7 @@ Or we can combine PC2 with the phylogenetic tree to create a phenogram:
 
 ```{r}
 # Plot vertical phenogram using PC2, add a legend
-par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
+par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 
 plot_mspace(msp3, y = phy, axes = 2, nh = 6, nv = 6, cex.ldm = 4, 
             col.groups = 1:nlevels(spp), ylab = "Time")
@@ -229,7 +229,7 @@ legend("topright", inset = c(-0.22, 0), legend = levels(spp),
 ```
 
 
-## References
+### References
 
 Adams D.C., Collyer M.L., Kaliontzopoulou A., & Baken E.K. (2021). *geomorph: Software for geometric morphometric analyses*. R package version 4.0.2. <https://cran.r-project.org/package=geomorph>.
 
