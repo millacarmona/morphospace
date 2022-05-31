@@ -98,6 +98,9 @@
 <span class="va">sex</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">sex</span>
 <span class="va">wf</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">links</span>
 <span class="va">phy</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">tree</span></code></pre></div>
+<div class="section level2">
+<h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
+</h2>
 <p>Morphometric variation is assumed to be already free of variation due to differences in orientation, position and scale. This standardization can be readily performed using a number of functions provided by the aforementioned R packages This package provide some functions that perform basic operations with shape variables, such as the calculation of mean shapes or the analytical removal of undesired sources of variation (functions <code>consensus</code> and <code>detr_shapes</code>, respectively). Suppose for example we want to get rid of sexual dimorphism before moving forward into our analysis.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Remove variation associated with sexual dimorphism and compute the consensus shape</span>
@@ -162,6 +165,7 @@
   <span class="fu"><a href="../reference/proj_axis.html">proj_axis</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">pca</span>, axis <span class="op">=</span> <span class="fl">2</span>, mag <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">"red"</span>, lwd <span class="op">=</span> <span class="fl">3</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/title.html" class="external-link">title</a></span><span class="op">(</span><span class="st">"Morphospace\n+ PC1 and PC2 of NDF species projected"</span><span class="op">)</span></code></pre></div>
 <p><img src="General-usage_files/figure-html/unnamed-chunk-6-1.png" width="100%"></p>
+</div>
 <div class="section level2">
 <h2 id="ordination-methods">Ordination methods<a class="anchor" aria-label="anchor" href="#ordination-methods"></a>
 </h2>
@@ -231,6 +235,10 @@
 <span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, inset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.22</span>, <span class="fl">0</span><span class="op">)</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">spp</span><span class="op">)</span>, 
        cex <span class="op">=</span> <span class="fl">0.7</span>, pch <span class="op">=</span> <span class="fl">16</span>, col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">spp</span><span class="op">)</span>, bty <span class="op">=</span> <span class="st">"n"</span>, text.font <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></code></pre></div>
 <p><img src="General-usage_files/figure-html/unnamed-chunk-8-2.png" width="100%"></p>
+</div>
+<div class="section level2">
+<h2 id="flexible-visualization">Flexible visualization<a class="anchor" aria-label="anchor" href="#flexible-visualization"></a>
+</h2>
 <p>Finally, <code>"mspace"</code> objects created using the <code>mspace %&gt;% proj_*</code> pipeline can be regenerated/modified with <code>plot_mspace</code>, which adds further graphical flexibility. By plotting a <code>"mspace"</code> object using this function we can select a different set of axes to plot, colors and symbols for points, groups, etc (or not). In addition, this function can also allow combining morphometric axes with other non-shape variables to produce ‘hybrid’ morphospaces.</p>
 <p>For example, PC1 can be plotted against size to explore allometric patterns:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
