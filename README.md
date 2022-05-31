@@ -63,11 +63,12 @@ phy <- tails$tree
 mspace(shapes, links = wf, cex.ldm = 5)
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" /> This
-ordination is used as a reference in which different elements such as
-scatter points, groups centroids, convex hulls, a phylogeny or a set of
-morphometric axes can be projected using the `proj_*` functions and the
-pipeline operator:
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
+The ordination produced by `mspace` is used as a reference in which
+different elements such as scatter points, groups centroids, convex
+hulls, a phylogeny or a set of morphometric axes can be projected using
+the `proj_*` functions and the pipeline operator:
 
 ``` r
 # Get mean shapes of each species
@@ -122,8 +123,10 @@ landmark data, perform some useful shape operations, and use TPS
 interpolation of curves/meshes to improve visualizations. It also
 supports a variety of multivariate methods (bgPCA, phylogenetic PCA,
 PLS, phylogenetic PLS) to produce ordinations. For these and other
-options and details, see the ‘General usage’ and ‘Worked examples’
-vignettes.
+options and details, see the [General
+usage](https://millacarmona.github.io/morphospace/articles/General-usage.html)
+and [Worked
+examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
 
 ## References
 

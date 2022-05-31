@@ -7,7 +7,7 @@ template:
 reference:
   - title: "morphospace workflow"
     desc: >
-      "functions for generating, populating, and regenerating morphospaces"
+      functions for generating, populating, and regenerating morphospaces
     contents:
     - mspace
     - proj_shapes
@@ -19,7 +19,7 @@ reference:
 
   - title: "multivariate methods"
     desc: >
-      "functions to perform ordination of multivariate data"
+      functions to perform ordination of multivariate data
     contents:
     - phy_prcomp
     - bg_prcomp
@@ -29,7 +29,7 @@ reference:
 
   - title: "shape operations"
     desc: >
-      "funtions to perform transformations/manipulations of shape data"
+      funtions to perform transformations/manipulations of shape data
     contents:
     - consensus
     - detrend_shapes
@@ -37,7 +37,7 @@ reference:
     - expected_shapes
     - ax_transformation
 
-  - title: "miscellaneous"
+  - title: miscellaneous
     contents:
     - pile_shapes
     - hulls_by_group_2D
@@ -46,6 +46,7 @@ reference:
 
   - title: "data"
     desc: >
+      sample shape data
     contents:
     - tails
     - wings
@@ -54,7 +55,7 @@ reference:
 
   - title: "internal functions"
     desc: >
-      "functions used internally"
+      functions used internally
     contents:
     - rev_eigen
     - proj_eigen
