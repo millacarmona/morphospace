@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   out.width = "100%",
   fig.width = 7,
   fig.height = 4.73,
-  dpi = 250
+  dpi = 300
 )
 options(rgl.useNULL=TRUE) 
 ```
@@ -36,8 +36,8 @@ library(magrittr)
 ```
 
 ```{r}
-# Load wing data and extract shapes, centroid sizes, classification of sex and species,
-# links between landmarks, template, and phylogenetic tree
+# Load wing data and extract shapes, centroid sizes, classification 
+# of sex and species, links between landmarks, template, and phylogeny
 data("wings")
 
 shapes <- wings$shapes
@@ -56,7 +56,8 @@ pile_shapes(shapes, wings$links)
 
 # Generate morphospace but use warped wings as background models
 mspace(shapes, template = curvs, col.ldm = "red", cex.ldm = 5) %>%
-  proj_shapes(shapes = shapes, col = c("blue", "orange")[species], pch = c(1,16)[cactus]) %>%
+  proj_shapes(shapes = shapes, col = c("blue", "orange")[species], 
+              pch = c(1,16)[cactus]) %>%
   proj_groups(groups = species, col = c("blue", "orange"))
 title("Morphospace using template")
 ```
@@ -83,15 +84,16 @@ omar <- par("mar")
 par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 
 mspace(detr_shapes, template = curvs, col.ldm = "red", cex.ldm = 5, mag = 3) %>%
-  proj_shapes(shapes = detr_shapes, col = c("blue", "orange")[species], pch = c(1,16)[cactus]) %>%
-  proj_groups(groups = species:cactus, 
-              col = rep(c("blue", "orange"), each= 2), lty = rep(c(2,1), 2)) %>%
+  proj_shapes(shapes = detr_shapes, col = c("blue", "orange")[species], 
+              pch = c(1,16)[cactus]) %>%
+  proj_groups(groups = species:cactus, col = rep(c("blue", "orange"), each= 2), 
+              lty = rep(c(2,1), 2)) %>%
   proj_axis(obj = between_cactus_db, col = c("blue"), lwd = 2) %>%
   proj_axis(obj = between_cactus_dk, col = c("orange"), lwd = 2)
 
-legend("topright", inset = c(-0.25, 0), legend = c("D. buzzattii", "D. koepferae"), 
+legend("topright", inset = c(-0.2, 0), legend = c("D. buzzattii", "D. koepferae"), 
        cex = 0.7, pch = 16, col = c("blue", "orange"), bty = "n", text.font = 3)
-legend("topright", inset = c(-0.25, 0.2), legend = c("Opuntia", "Trichocereus"), 
+legend("topright", inset = c(-0.2, 0.2), legend = c("Opuntia", "Trichocereus"), 
        cex = 0.7, pch = c(1, 16), bty = "n", text.font = 3)
 title("'Refined' morphospace using template\n+ between-cacti axes")
 ```
@@ -110,8 +112,8 @@ So, after 'cleaning' the raw variation interspecific differences become apparent
 #Load Momocs
 library(Momocs)
 
-# Load data from shells, extract shapes, sizes and classification into species, absolute and relative
-# age and locality
+# Load data from shells, extract shapes, sizes and classification into 
+# species, absolute and relative age and locality
 data("shells")
 
 shapes <- shells$shapes$coe
@@ -141,8 +143,8 @@ In this case, we might be interested in the anagenetic variation shown by each s
 
 
 ```{r}
-# 'Clean' shapes separately for each species, removing 1) variation associated
-# to geographic provenance and 2) allometric variation
+# 'Clean' shapes separately for each species, removing 1) variation 
+#associated to geographic provenance and 2) allometric variation
 detr_shapes <- shapes * 0
 for(i in 1:nlevels(species)) {
   index <- species == levels(species)[i]
@@ -166,8 +168,8 @@ Now we can use `plot_mspace` again to create a more complex hybrid plot combinin
 
 
 ```{r, fig.show='hide'}
-# Combine species and biozones factors, then compute the mean shapes of the resulting
-# groups
+# Combine species and biozones factors, then compute the mean shapes 
+# of the resulting groups
 sp.bz <- factor(species:bzones)
 mshapes_agesxspecies <- consensus(shapes, sp.bz)
 
@@ -184,9 +186,11 @@ msp <- mspace(shapes, nh = 5, nv = 4, bg.model = "light gray") %>%
 omar <- par("mar")
 par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 
-plot_mspace(mspace = msp, x = ages, axes = 1, nh = 5, nv = 4, xlab = "Time (MA)",
-            col.points = species,  phylo = FALSE, groups = FALSE, mshapes = TRUE)
-# Compute and arrange absolute ages for each group, then use it to add and connect mean shapes
+plot_mspace(mspace = msp, x = ages, axes = 1, nh = 5, nv = 4, 
+            col.points = species, xlab = "Time (MA)", 
+            phylo = FALSE, groups = FALSE, mshapes = TRUE)
+# Compute and arrange absolute ages for each group, then 
+# use it to add and connect mean shapes
 xy <- cbind(tapply(ages, sp.bz, mean), msp$gr_centroids[,1])
 xy <- xy[order(xy[,1]),]
 for(i in 1:4) {
@@ -260,8 +264,8 @@ title("Morphospace")
 ```
 
 ```{r echo = FALSE, warning=FALSE}
-#I just couln't find how to make knitr to generate these figures right so my apologies this is the
-#best way I found to show them :(
+# * I just couln't find how to make knitr to generate these figures right 
+#so my apologies this is the best way I found to show them :(
 knitr::include_graphics("vignette-unnamed-chunk-24-1.png")
 ```
 
@@ -270,28 +274,29 @@ We can now focus on ontogenetic shape variation, which was the intention with wh
 
 
 ```{r eval = F}
-# Remove nuisance variation from the sample, for each species (a couple were registered
-# in a single biozone and/or locality, which require little adjustments)
+# Remove nuisance variation from the sample, for each species (a couple 
+# were registered in a single biozone and/or locality, which require little 
+# adjustments)
 detr_shapes <- shapes * 0
 for(i in 1:nlevels(species)) {
   index <- species == levels(species)[i]
-  subshapes <- shapes[,,index]
+  subshapes_mat <- two.d.array(shapes[,,index])
   subind <- ind[index]
   subloc <- locality[index]
   subzone <- bzones[index]
 
   if(!any(i == c(4, 5))) {
     detr_shapes[,,index] <- arrayspecs(
-      detrend_shapes(model = lm(two.d.array(subshapes) ~ subind * subzone * subloc)),
+      detrend_shapes(model = lm(subshapes_mat ~ subind * subzone * subloc)),
       p = nrow(shapes), k = ncol(shapes))
   } else {
     if(i == 4){
       detr_shapes[,,index] <- arrayspecs(
-        detrend_shapes(model = lm(two.d.array(subshapes) ~ subind)),
+        detrend_shapes(model = lm(subshapes_mat ~ subind)),
       p = nrow(shapes), k = ncol(shapes))
     } else {
       detr_shapes[,,index] <- arrayspecs(
-        detrend_shapes(model = lm(two.d.array(subshapes) ~ subind * subloc)),
+        detrend_shapes(model = lm(subshapes_mat ~ subind * subloc)),
       p = nrow(shapes), k = ncol(shapes))
     }
   }
@@ -303,18 +308,20 @@ As with 2D landmarks we can include a template to improve interpretability, alth
 
 
 ```{r eval = F}
-# Generate morphospace using raw variation, but with a mesh template that improves
-# visualization:
+# Generate morphospace using raw variation, but with a mesh template that 
+# improves visualization:
 
-# First, get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec,
+# First, get shape corresponding to shells3D$mesh_meanspec using 
+# geomorph::findMeanSpec,
 meanspec_id<- findMeanSpec(shapes)
 meanspec_shape <- shapes[,,meanspec_id]
 
 
-# Then get consensus shape and warp the mean spec mesh to get the mesh corresponding to the
-# consensus using Morpho::tps3d
+# Then get consensus shape and warp the mean spec mesh to get the mesh 
+# corresponding to the consensus using Morpho::tps3d
 detr_meanshape <- consensus(detr_shapes)
-detr_meanmesh <- tps3d(x = mesh_meanspec , refmat = meanspec_shape, tarmat = detr_meanshape)
+detr_meanmesh <- tps3d(x = mesh_meanspec , refmat = meanspec_shape, 
+                       tarmat = detr_meanshape)
 ```
 
 
@@ -333,7 +340,8 @@ pls_list <- lapply(1:nlevels(species), function(i) {
 })
 
 
-# Generate morphospace from refined variation and project allometric axis, add legend
+# Generate morphospace from refined variation and project allometric 
+# axis, add legend
 omar <- par("mar")
 par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 
@@ -360,10 +368,12 @@ We could use `plot_mspace` to plot the allometric axis (computed as a PLS of sha
 ```{r eval = F}
 # Create allomorphospace (I'm just making up names at this point) using PLS 
 # to emphasize allometric variation (this could take a while)
-amsp <- mspace((detr_shapes), FUN = pls_shapes, X = sizes, LOOCV = TRUE, axes = c(1,1),
-                   bg.model = "gray", cex.ldm = 0, template = meanmesh, invax = 1, plot = FALSE)
+amsp <- mspace(detr_shapes, FUN = pls_shapes, X = sizes, LOOCV = TRUE, 
+               axes = c(1,1), bg.model = "gray", cex.ldm = 0, template = meanmesh, 
+               invax = 1, plot = FALSE)
 
-# Use plot_mspace to create hybrid morphospace with shape against logsize, add legend
+# Use plot_mspace to create hybrid morphospace with shape against logsize, 
+# add legend
 omar <- par("mar")
 par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 

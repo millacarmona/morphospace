@@ -6,14 +6,14 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The aim of `morphospace` is to enhance representation and heuristic
+The goal of `morphospace` is to enhance representation and heuristic
 exploration of multivariate ordinations of shape data. This package can
 handle the most common types of shape data working in integration with
-other widely used R packages covering more essential steps from the
-geometric morphometrics pipeline (e.g. importation, normalization,
-statistical analysis) such as `Morpho` (Schlager 2017), `geomorph`
-(Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et
-al. 2014).
+other widely used R packages such as `Morpho` (Schlager 2017),
+`geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs`
+(Bonhome et al. 2014), which cover essential steps in the geometric
+morphometrics pipeline (e.g. importation, normalization, statistical
+analysis)
 
 ## Installation
 
@@ -27,22 +27,22 @@ devtools::install_github("millacarmona/morphospace")
 
 ## Concept
 
-The basic idea behind the `morphospace` workflow is to build empirical
-morphospaces using multivariate methods, then use the resulting
-ordination as a reference in which to project elements representing
-different aspects of morphometric variation. These elements are added to
-both graphic representations and objects as consecutive ‘layers’ and
-list slots, respectively, using the `%>%` pipe operator from `magrittr`
-(Bache & Wickham 2022).
+The basic idea behind `morphospace` is to build empirical morphospaces
+using multivariate ordination methods, then use the resulting ordination
+as a reference in which to project elements representing different
+aspects of morphometric variation. These elements are added to both
+graphic representations and objects as consecutive ‘layers’ and list
+slots, respectively, using the `%>%` pipe operator from `magrittr`
+(Bache & Wickham 2022)..
 
 The starting point of the `morphospace` workflow is a set of shapes
 (i.e. morphometric data that is already free of variation due to
-differences in orientation, position and scale). These shapes are
-feeeded to the `mspace` function, which generates a morphospace using a
-variety of multivariate methods (PCA and the like). This general
-workflow is outlined below using the `tails` data set from Fasanelli et
-al. (2022), which contains tail shapes from 281 specimens belonging to
-13 species of the genus *Tyrannus*.
+differences in orientation, position and scale). These are feeeded to
+the `mspace` function, which generates a morphospace using a variety of
+multivariate methods related to Principal Component Analysis. This
+general workflow is outlined below using the `tails` data set from
+Fasanelli et al. (2022), which contains tail shapes from 281 specimens
+belonging to 13 species of the genus *Tyrannus*.
 
 ``` r
 library(morphospace)
@@ -65,10 +65,9 @@ mspace(shapes, links = wf, cex.ldm = 5)
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
-The ordination produced by `mspace` is used as a reference in which
-different elements such as scatter points, groups centroids, convex
-hulls, a phylogeny or a set of morphometric axes can be projected using
-the `proj_*` functions and the pipeline operator:
+The ordination produced by `mspace` is used as a reference frame in
+which scatter points, groups centroids, convex hulls, a phylogeny or a
+set of morphometric axes can be projected using the `proj_*` functions:
 
 ``` r
 # Get mean shapes of each species
@@ -76,27 +75,32 @@ spp_shapes <- consensus(shapes = tails$shapes, index = tails$data$species)
 
 # Generate morphospace and project:
 msp <- mspace(shapes = shapes, links = wf, cex.ldm = 5) %>% 
-  proj_shapes(shapes = shapes, col = spp) %>% # scatter points
-  proj_consensus(shapes = spp_shapes, bg = 1:nlevels(spp), pch = 21) %>% # groups centroids (mean shapes)
-  proj_groups(groups = spp) %>% # convex hulls enclosing groups
-  proj_phylogeny(tree = phy, lwd = 1.5) # phylogenetic relationships
+  # scatter points
+  proj_shapes(shapes = shapes, col = spp) %>% 
+  # groups centroids (mean shapes)
+  proj_consensus(shapes = spp_shapes, bg = 1:nlevels(spp), pch = 21) %>% 
+  # convex hulls enclosing groups
+  proj_groups(groups = spp) %>% 
+  # phylogenetic relationships
+  proj_phylogeny(tree = phy, lwd = 1.5) 
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
 Once the `"mspace"` object is in place, the `plot_mspace` function can
-be used to either regenerate/modify the plot or to produce ‘hybrid’
-morphospaces. For example, PC1 can be plotted against size to explore
-allometric patterns (or any other conventional non-shape variable). The
-standard `graphics` tools work here, so we manipulate the margins a bit
-to add a legend.
+be used to either regenerate/modify the plot or to combine morphometric
+axes with other, non-shape variables to produce ‘hybrid’ morphospaces.
+For example, PC1 can be plotted against size to explore allometric
+patterns (the standard `graphics` tools work here, so we manipulate the
+margins a bit to add a legend).
 
 ``` r
 # Plot PC1 against log-size, add legend
 par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
 
 plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
-            col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size", groups = TRUE)
+            col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size", 
+            groups = TRUE)
 legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
        cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
 ```
@@ -118,16 +122,15 @@ legend("topright", inset = c(-0.22, 0), legend = levels(spp),
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
-`morphospace` can also handle elliptic Fourier coefficients and 3D
-landmark data, perform some useful shape operations, and use TPS
-interpolation of curves/meshes to improve visualizations. It also
-supports a variety of multivariate methods (bgPCA, phylogenetic PCA,
-PLS, phylogenetic PLS) to produce ordinations. For these and other
-options and details, see the [General
+`morphospace` can handle elliptic Fourier coefficients and 3D landmark
+data, perform some useful shape operations, and use TPS interpolation of
+curves/meshes to improve visualizations. It also supports a variety of
+multivariate methods (bgPCA, phylogenetic PCA, PLS, phylogenetic PLS) to
+produce ordinations. For these and other options and details, go to
+[General
 usage](https://millacarmona.github.io/morphospace/articles/General-usage.html)
 and [Worked
-examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html)
-pages.
+examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
 
 ## References
 

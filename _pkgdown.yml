@@ -1,6 +1,5 @@
 url: https://millacarmona.github.io/morphospace/
 template:
-  bootstrap: 5
   bootswatch: journal
 
 
@@ -19,7 +18,7 @@ reference:
 
   - title: "multivariate methods"
     desc: >
-      functions to perform ordination of multivariate data
+      functions for ordination of multivariate data
     contents:
     - phy_prcomp
     - bg_prcomp
@@ -29,7 +28,7 @@ reference:
 
   - title: "shape operations"
     desc: >
-      funtions to perform transformations/manipulations of shape data
+      funtions to perform various transformations/manipulations of shape data
     contents:
     - consensus
     - detrend_shapes
@@ -46,7 +45,7 @@ reference:
 
   - title: "data"
     desc: >
-      sample shape data
+      sample data
     contents:
     - tails
     - wings
@@ -55,7 +54,7 @@ reference:
 
   - title: "internal functions"
     desc: >
-      functions used internally
+      functions used internally by morphospace
     contents:
     - rev_eigen
     - proj_eigen
