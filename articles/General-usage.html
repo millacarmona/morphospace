@@ -98,9 +98,9 @@
 <span class="va">sex</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">sex</span>
 <span class="va">wf</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">links</span>
 <span class="va">phy</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">tree</span></code></pre></div>
-<div class="section level2">
-<h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
-</h2>
+<div class="section level3">
+<h3 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
+</h3>
 <p>Morphometric variation is assumed to be already free of variation due to differences in orientation, position and scale. This standardization can be readily performed using a number of functions provided by the aforementioned R packages This package provide some functions that perform basic operations with shape variables, such as the calculation of mean shapes or the analytical removal of undesired sources of variation (functions <code>consensus</code> and <code>detr_shapes</code>, respectively). Suppose for example we want to get rid of sexual dimorphism before moving forward into our analysis.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Remove variation associated with sexual dimorphism and compute the consensus shape</span>
@@ -166,9 +166,9 @@
 <span class="fu"><a href="https://rdrr.io/r/graphics/title.html" class="external-link">title</a></span><span class="op">(</span><span class="st">"Morphospace\n+ PC1 and PC2 of NDF species projected"</span><span class="op">)</span></code></pre></div>
 <p><img src="General-usage_files/figure-html/unnamed-chunk-6-1.png" width="100%"></p>
 </div>
-<div class="section level2">
-<h2 id="ordination-methods">Ordination methods<a class="anchor" aria-label="anchor" href="#ordination-methods"></a>
-</h2>
+<div class="section level3">
+<h3 id="ordination-methods">Ordination methods<a class="anchor" aria-label="anchor" href="#ordination-methods"></a>
+</h3>
 <p>The default settings of <code>mspace</code> rely on the <code>prcomp</code> function from the <code>stats</code> package to build the synthetic morphometric space. However, <code>morphospace</code> also includes functions for supervised ordination, namely phylogenetic PCA (Revell 2009; borrowed from <code>phytools</code>, Revell 2012), between-groups PCA (<code>bg_prcomp</code>), and both ordinary and phylgenetic versions of Partial Least Squares (PLS) (<code>pls_shapes</code> [an user-friendly wrapper of <code>pls2b</code>, which is used in the following chunk]). These have been styled/wrapped to share format with <code>prcomp</code>, and both bgPCA and PLS functions allow for leave-one-out cross-validation (LOOCV), which alleviates some spurious patterns that arise when the number of variables exceeds the number of samples (as it is common in geometric morphometric analyses; see Cardini et al. 2019 and Cardini &amp; Polly 2020).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Simulate 100 random normal distributions, and add an artificial classification and</span>
@@ -224,7 +224,7 @@
 <code class="sourceCode R">
 <span class="co"># Phylogenetic PCA for all species, adding projection of intrapspecific variation,</span>
 <span class="co"># add legend</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">4.1</span>, <span class="fl">6</span><span class="op">)</span>, xpd <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">4.1</span>, <span class="fl">6.5</span><span class="op">)</span>, xpd <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="fu"><a href="../reference/mspace.html">mspace</a></span><span class="op">(</span><span class="va">sp_shapes</span>, FUN <span class="op">=</span> <span class="va">phy_prcomp</span>, tree <span class="op">=</span> <span class="va">phy</span>, links <span class="op">=</span> <span class="va">wf</span>,
        xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.25</span>, <span class="fl">0.15</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.2</span>, <span class="fl">0.15</span><span class="op">)</span>, cex.ldm <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
   <span class="fu"><a href="../reference/proj_shapes.html">proj_shapes</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">detr_shapes</span>, col <span class="op">=</span> <span class="va">spp</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
@@ -236,14 +236,14 @@
        cex <span class="op">=</span> <span class="fl">0.7</span>, pch <span class="op">=</span> <span class="fl">16</span>, col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">spp</span><span class="op">)</span>, bty <span class="op">=</span> <span class="st">"n"</span>, text.font <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></code></pre></div>
 <p><img src="General-usage_files/figure-html/unnamed-chunk-8-2.png" width="100%"></p>
 </div>
-<div class="section level2">
-<h2 id="flexible-visualization">Flexible visualization<a class="anchor" aria-label="anchor" href="#flexible-visualization"></a>
-</h2>
+<div class="section level3">
+<h3 id="flexible-visualization">Flexible visualization<a class="anchor" aria-label="anchor" href="#flexible-visualization"></a>
+</h3>
 <p>Finally, <code>"mspace"</code> objects created using the <code>mspace %&gt;% proj_*</code> pipeline can be regenerated/modified with <code>plot_mspace</code>, which adds further graphical flexibility. By plotting a <code>"mspace"</code> object using this function we can select a different set of axes to plot, colors and symbols for points, groups, etc (or not). In addition, this function can also allow combining morphometric axes with other non-shape variables to produce ‘hybrid’ morphospaces.</p>
 <p>For example, PC1 can be plotted against size to explore allometric patterns:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Plot PC1 against log-size, add legend</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">4.1</span>, <span class="fl">6</span><span class="op">)</span>, xpd <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">4.1</span>, <span class="fl">6.5</span><span class="op">)</span>, xpd <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/plot_mspace.html">plot_mspace</a></span><span class="op">(</span><span class="va">msp3</span>, x <span class="op">=</span> <span class="va">sizes</span>, axes <span class="op">=</span> <span class="fl">1</span>, nh <span class="op">=</span> <span class="fl">6</span>, nv <span class="op">=</span> <span class="fl">6</span>, cex.ldm <span class="op">=</span> <span class="fl">4</span>, 
             col.points <span class="op">=</span> <span class="va">spp</span>, col.groups <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">spp</span><span class="op">)</span>, xlab <span class="op">=</span> <span class="st">"Log-size"</span>, groups <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
@@ -253,7 +253,7 @@
 <p>Or we can combine PC2 with the phylogenetic tree to create a phenogram:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Plot vertical phenogram using PC2, add a legend</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">4.1</span>, <span class="fl">6</span><span class="op">)</span>, xpd <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">4.1</span>, <span class="fl">6.5</span><span class="op">)</span>, xpd <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/plot_mspace.html">plot_mspace</a></span><span class="op">(</span><span class="va">msp3</span>, y <span class="op">=</span> <span class="va">phy</span>, axes <span class="op">=</span> <span class="fl">2</span>, nh <span class="op">=</span> <span class="fl">6</span>, nv <span class="op">=</span> <span class="fl">6</span>, cex.ldm <span class="op">=</span> <span class="fl">4</span>, 
             col.groups <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">spp</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="st">"Time"</span><span class="op">)</span>
@@ -261,9 +261,9 @@
        cex <span class="op">=</span> <span class="fl">0.7</span>, pch <span class="op">=</span> <span class="fl">16</span>, col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">spp</span><span class="op">)</span>, bty <span class="op">=</span> <span class="st">"n"</span>, text.font <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></code></pre></div>
 <p><img src="General-usage_files/figure-html/unnamed-chunk-10-1.png" width="100%"></p>
 </div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
+<div class="section level3">
+<h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h3>
 <p>Adams D.C., Collyer M.L., Kaliontzopoulou A., &amp; Baken E.K. (2021). <em>geomorph: Software for geometric morphometric analyses</em>. R package version 4.0.2. <a href="https://cran.r-project.org/package=geomorph" class="external-link uri">https://cran.r-project.org/package=geomorph</a>.</p>
 <p>Bache S.F., &amp; Wickham H. (2022). m<em>agrittr: A Forward-Pipe Operator for R</em>. R package version 2.0.3. <a href="https://CRAN.R-project.org/package=magrittr" class="external-link uri">https://CRAN.R-project.org/package=magrittr</a>.</p>
 <p>Bonhomme V., Picq S., Gaucherel C., &amp; Claude J. (2014). <em>Momocs: Outline Analysis Using R</em>. Journal of Statistical Software, 56(13), 1-24. <a href="http://www.jstatsoft.org/v56/i13/" class="external-link uri">http://www.jstatsoft.org/v56/i13/</a>.</p>
@@ -275,8 +275,7 @@
 <p>Revell, L.J. (2012). <em>phytools: An R package for phylogenetic comparative biology (and other things)</em>. Methods in Ecology and Evolution 3, 217-223. <a href="https://doi.org/10.1111/j.2041-210X.2011.00169.x" class="external-link uri">https://doi.org/10.1111/j.2041-210X.2011.00169.x</a>.</p>
 <p>Schlager S. (2017). <em>Morpho and Rvcg - Shape Analysis in R</em>. In Zheng G., Li S., Szekely G. (eds.), <em>Statistical Shape and Deformation Analysis</em>, 217-256. Academic Press. <a href="https://doi.org/10.1016/B978-0-12-810493-4.00011-0" class="external-link uri">https://doi.org/10.1016/B978-0-12-810493-4.00011-0</a>.</p>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
-    </nav></aside>
+  </main>
 </div>
 
 
