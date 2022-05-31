@@ -172,13 +172,13 @@ These methods can be used instead of regular PCA for building morphospaces via t
 ```{r}
 # Between group PCA - all species (invert both axes for easier comparison with previous 
 # plots), add legend
-par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
+par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
        links = wf, invax = c(1,2), cex.ldm = 5) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp)
 title("Morphospace emphasizing interspecific variation")
-legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
+legend("topright", inset = c(-0.25, 0), legend = levels(spp), 
        cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
 
 # Phylogenetic PCA for all species, adding projection of intrapspecific variation,
@@ -191,7 +191,7 @@ mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
   proj_consensus(shapes = sp_shapes, col = "black", pch = 16) %>%
   proj_phylogeny(tree = phy, pch = 16)
 title("Phylogenetic morphospace\n+ samples")
-legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
+legend("topright", inset = c(-0.25, 0), legend = levels(spp), 
        cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
 ```
 
@@ -210,7 +210,7 @@ par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 
 plot_mspace(msp3, x = sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size", groups = TRUE)
-legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
+legend("topright", inset = c(-0.25, 0), legend = levels(spp), 
        cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
 ```
 
@@ -224,7 +224,7 @@ par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 
 plot_mspace(msp3, y = phy, axes = 2, nh = 6, nv = 6, cex.ldm = 4, 
             col.groups = 1:nlevels(spp), ylab = "Time")
-legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
+legend("topright", inset = c(-0.25, 0), legend = levels(spp), 
        cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
 ```
 

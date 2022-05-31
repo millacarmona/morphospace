@@ -89,9 +89,9 @@ mspace(detr_shapes, template = curvs, col.ldm = "red", cex.ldm = 5, mag = 3) %>%
   proj_axis(obj = between_cactus_db, col = c("blue"), lwd = 2) %>%
   proj_axis(obj = between_cactus_dk, col = c("orange"), lwd = 2)
 
-legend("topright", inset = c(-0.19, 0), legend = c("D. buzzattii", "D. koepferae"), 
+legend("topright", inset = c(-0.25, 0), legend = c("D. buzzattii", "D. koepferae"), 
        cex = 0.7, pch = 16, col = c("blue", "orange"), bty = "n", text.font = 3)
-legend("topright", inset = c(-0.2, 0.2), legend = c("Opuntia", "Trichocereus"), 
+legend("topright", inset = c(-0.25, 0.2), legend = c("Opuntia", "Trichocereus"), 
        cex = 0.7, pch = c(1, 16), bty = "n", text.font = 3)
 title("'Refined' morphospace using template\n+ between-cacti axes")
 ```
@@ -195,7 +195,7 @@ for(i in 1:4) {
   points(xy[index,], pch = 21, bg = i)
 }
 title(' "Stratomorphospace" ')
-legend("topright", inset = c(-0.22, 0), legend = paste0("P. ", levels(species)), 
+legend("topright", inset = c(-0.25, 0), legend = paste0("P. ", levels(species)), 
        cex = 0.7, pch = 16, col = 1:nlevels(species), bty = "n", text.font = 3)
 ```
 
