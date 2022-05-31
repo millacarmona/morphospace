@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   out.width = "100%",
   fig.width = 7,
   fig.height = 4.73,
-  dpi = 200
+  dpi = 250
 )
 ```
 
@@ -47,6 +47,9 @@ sex <- tails$data$sex
 wf <- tails$links
 phy <- tails$tree
 ```
+
+
+## Workflow
 
 
 Morphometric variation is assumed to be already free of variation due to differences in orientation, position and scale. This standardization can be readily performed using a number of functions provided by the aforementioned R packages This package provide some functions that perform basic operations with shape variables, such as the calculation of mean shapes or the analytical removal of undesired sources of variation (functions `consensus` and `detr_shapes`, respectively). Suppose for example we want to get rid of sexual dimorphism before moving forward into our analysis.
@@ -191,6 +194,9 @@ title("Phylogenetic morphospace\n+ samples")
 legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
        cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
 ```
+
+
+## Flexible visualization
 
 
 Finally, `"mspace"` objects created using the `mspace %>% proj_*` pipeline can be regenerated/modified with `plot_mspace`, which adds further graphical flexibility. By plotting a `"mspace"` object using this function we can select a different set of axes to plot, colors and symbols for points, groups, etc (or not). In addition, this function can also allow combining morphometric axes with other non-shape variables to produce 'hybrid' morphospaces. 

@@ -100,7 +100,7 @@ legend("topright", inset = c(-0.22, 0), legend = levels(spp),
 ```
 
 
-`morphospace` can also handle elliptic Fourier coefficients and 3D landmark data, perform some useful shape operations, and use TPS interpolation of curves/meshes to improve visualizations. It also supports a variety of multivariate methods (bgPCA, phylogenetic PCA, PLS, phylogenetic PLS) to produce ordinations. For these and other options and details, see the [General usage](https://millacarmona.github.io/morphospace/articles/General-usage.html) and [Worked examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
+`morphospace` can also handle elliptic Fourier coefficients and 3D landmark data, perform some useful shape operations, and use TPS interpolation of curves/meshes to improve visualizations. It also supports a variety of multivariate methods (bgPCA, phylogenetic PCA, PLS, phylogenetic PLS) to produce ordinations. For these and other options and details, see the [General usage](https://millacarmona.github.io/morphospace/articles/General-usage.html) and [Worked examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html) pages.
 
 
 

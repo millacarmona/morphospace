@@ -126,7 +126,8 @@ PLS, phylogenetic PLS) to produce ordinations. For these and other
 options and details, see the [General
 usage](https://millacarmona.github.io/morphospace/articles/General-usage.html)
 and [Worked
-examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
+examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html)
+pages.
 
 ## References
 
