@@ -4,6 +4,8 @@
 # morphospace <img src="man/figures/morphosp_hex.png" align="right" width="200"/>
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of `morphospace` is to enhance representation and heuristic
@@ -11,9 +13,9 @@ exploration of multivariate ordinations of shape data. This package can
 handle the most common types of shape data working in integration with
 other widely used R packages such as `Morpho` (Schlager 2017),
 `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs`
-(Bonhome et al. 2014), which cover essential steps in the geometric
-morphometrics pipeline (e.g. importation, normalization, statistical
-analysis)
+(Bonhome et al. 2014), which cover other more essential steps in the
+geometric morphometrics pipeline (e.g. importation, normalization,
+statistical analysis)
 
 ## Installation
 
@@ -33,7 +35,7 @@ as a reference in which to project elements representing different
 aspects of morphometric variation. These elements are added to both
 graphic representations and objects as consecutive ‘layers’ and list
 slots, respectively, using the `%>%` pipe operator from `magrittr`
-(Bache & Wickham 2022)..
+(Bache & Wickham 2022).
 
 The starting point of the `morphospace` workflow is a set of shapes
 (i.e. morphometric data that is already free of variation due to
