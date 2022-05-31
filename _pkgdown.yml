@@ -44,6 +44,14 @@ reference:
     - hulls_by_group_3D
     - build_template2d
 
+  - title: "data"
+    desc: >
+    contents:
+    - tails
+    - wings
+    - shells
+    - shells3D
+
   - title: "internal functions"
     desc: >
       "functions used internally"
