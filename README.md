@@ -39,8 +39,8 @@ slots, respectively, using the `%>%` pipe operator from `magrittr`
 
 The starting point of the `morphospace` workflow is a set of shapes
 (i.e. morphometric data that is already free of variation due to
-differences in orientation, position and scale). These are feeeded to
-the `mspace` function, which generates a morphospace using a variety of
+differences in orientation, position and scale). These are fed to the
+`mspace` function, which generates a morphospace using a variety of
 multivariate methods related to Principal Component Analysis. This
 general workflow is outlined below using the `tails` data set from
 Fasanelli et al. (2022), which contains tail shapes from 281 specimens

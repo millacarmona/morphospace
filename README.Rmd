@@ -37,7 +37,7 @@ devtools::install_github("millacarmona/morphospace")
 
 The basic idea behind `morphospace` is to build empirical morphospaces using multivariate ordination methods, then use the resulting ordination as a reference in which elements representing different aspects of morphometric variation are projected. These elements are added to both graphic representations and objects as consecutive 'layers' and list slots, respectively, using the `%>%` pipe operator from `magrittr` (Bache & Wickham 2022).
 
-The starting point of the `morphospace` workflow is a set of shapes (i.e. morphometric data that is already free of variation due to differences in orientation, position and scale). These are feeeded to the `mspace` function, which generates a morphospace using a variety of multivariate methods related to Principal Component Analysis. This general workflow is outlined below using the `tails` data set from Fasanelli et al. (2022), which contains tail shapes from 281 specimens belonging to 13 species of the genus *Tyrannus*.
+The starting point of the `morphospace` workflow is a set of shapes (i.e. morphometric data that is already free of variation due to differences in orientation, position and scale). These are fed to the `mspace` function, which generates a morphospace using a variety of multivariate methods related to Principal Component Analysis. This general workflow is outlined below using the `tails` data set from Fasanelli et al. (2022), which contains tail shapes from 281 specimens belonging to 13 species of the genus *Tyrannus*.
 
 
 ```{r, message = FALSE}
