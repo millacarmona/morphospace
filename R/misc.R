@@ -222,8 +222,9 @@ hulls_by_group_3D<-function(xyz, fac, col = 1:nlevels(fac), ...) {
 #'   to decide when the curve is ready (press the 'Finish' button in the top-right
 #'   corner of the Plots pane).
 #'
-#' @return A 2-column matrix of the landmarks followed by the coordinates defining
-#'   the curves drawn, separated by \code{NA}s.
+#' @return A 2-column matrix with the landmark configuration (standardized for scale
+#'   and position) followed by the coordinates defining the curves drawn, separated by
+#'   \code{NA}s.
 #'
 #' @export
 #'
@@ -266,6 +267,8 @@ build_template2d <- function(image, nlands, ncurves) {
 
   template <- cbind(c(lands$x, unlist(lapply(curves, function(x) {c(NA, x$x)}))),
                     c(lands$y, unlist(lapply(curves, function(x) {c(NA, x$y)}))))
+  template_trans <- t(t(rbind(template)) - colMeans(template, na.rm = TRUE))
+  template_trans_scald <- template_trans / Morpho::cSize(template_trans[1:nlands,])
 
-  return(template)
+  return(template_trans_scald)
 }

@@ -14,8 +14,9 @@ build_template2d(image, nlands, ncurves)
 \item{ncurves}{Numeric; the number of curves to be drawn.}
 }
 \value{
-A 2-column matrix of the landmarks followed by the coordinates defining
-the curves drawn, separated by \code{NA}s.
+A 2-column matrix with the landmark configuration (standardized for scale
+and position) followed by the coordinates defining the curves drawn, separated by
+\code{NA}s.
 }
 \description{
 Create a template (i.e. a set of curves describing the structure
