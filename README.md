@@ -15,7 +15,7 @@ other widely used R packages such as `Morpho` (Schlager 2017),
 `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs`
 (Bonhome et al. 2014), which cover other more essential steps in the
 geometric morphometrics pipeline (e.g. importation, normalization,
-statistical analysis)
+statistical analysis).
 
 ## Installation
 
@@ -31,8 +31,8 @@ devtools::install_github("millacarmona/morphospace")
 
 The basic idea behind `morphospace` is to build empirical morphospaces
 using multivariate ordination methods, then use the resulting ordination
-as a reference in which to project elements representing different
-aspects of morphometric variation. These elements are added to both
+as a reference in which elements representing different aspects of
+morphometric variation are projected. These elements are added to both
 graphic representations and objects as consecutive ‘layers’ and list
 slots, respectively, using the `%>%` pipe operator from `magrittr`
 (Bache & Wickham 2022).
