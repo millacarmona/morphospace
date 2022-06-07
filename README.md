@@ -49,7 +49,10 @@ belonging to 13 species of the genus *Tyrannus*.
 ``` r
 library(morphospace)
 library(geomorph)
+library(Morpho)
+library(Momocs)
 library(magrittr)
+library(rgl)
 ```
 
 ``` r
@@ -109,14 +112,14 @@ legend("topright", inset = c(-0.22, 0), legend = levels(spp),
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
-Ordination axes can be also combined with a phylogenetic tree to create
+Or ordination axes could be combined with a phylogenetic tree to create
 a phenogram:
 
 ``` r
 # Plot vertical phenogram using PC2, add a legend
 par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
 
-plot_mspace(msp, y = phy, axes = 2, nh = 6, nv = 6, cex.ldm = 4, 
+plot_mspace(msp, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             col.groups = 1:nlevels(spp), ylab = "Time")
 legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
        cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
@@ -124,12 +127,58 @@ legend("topright", inset = c(-0.22, 0), legend = levels(spp),
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
-`morphospace` can handle elliptic Fourier coefficients and 3D landmark
-data, perform some useful shape operations, and use TPS interpolation of
-curves/meshes to improve visualizations. It also supports a variety of
-multivariate methods (bgPCA, phylogenetic PCA, PLS, phylogenetic PLS) to
-produce ordinations. For these and other options and details, go to
-[General
+`morphospace` can also handle closed outlines (in the form of elliptic
+Fourier coefficients) and 3D landmark data, as shown below briefly using
+the `shells` and `shells3D`data sets:
+
+``` r
+# Load data
+data("shells")
+
+shapes <- shells$shapes
+spp <- shells$data$species
+
+# Generate morphospace
+mspace(shapes, mag = 1, nh = 5, nv = 4, bg.model = "light gray") %>%
+  proj_shapes(shapes = shapes, col = spp) %>%
+  proj_groups(shapes = shapes, groups = spp)
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+
+``` r
+# Load data
+data("shells3D")
+
+shapes <- shells3D$shapes
+spp <- shells3D$data$species
+mesh_meanspec <- shells3D$mesh_meanspec
+
+# Generate surface mesh template
+meanspec_shape <- shapes[,,findMeanSpec(shapes)]
+meanmesh <- tps3d(x = mesh_meanspec, 
+                  refmat = meanspec_shape, 
+                  tarmat = consensus(shapes))
+
+# Generate morphospace
+mspace(shapes, mag = 1, bg.model = "gray", cex.ldm = 0, template = meanmesh, 
+       adj_frame = c(0.9, 0.85)) %>%
+  proj_shapes(shapes = shapes, col = spp, pch = 16) %>%
+  proj_groups(shapes = shapes, groups = spp)
+#> Preparing for snapshot: rotate mean shape to the desired orientation
+#>  (don't close or minimize the rgl device).Press <Enter> in the console to continue:
+#> This will take a minute...
+#> DONE.
+```
+
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+
+Aside from working with these types of morphometric data, `morphospace`
+provides functions to perform some useful shape operations, use TPS
+interpolation of curves/meshes to improve visualizations, and supports a
+variety of multivariate methods (bgPCA, phylogenetic PCA, PLS,
+phylogenetic PLS) to produce ordinations. For these and other options
+and details, go to [General
 usage](https://millacarmona.github.io/morphospace/articles/General-usage.html)
 and [Worked
 examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
