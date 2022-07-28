@@ -179,24 +179,33 @@ examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.ht
 
 Changes: - Different behavior for `proj_shapes` (now replaces `mspace$x`
 with the actual scores being projected) and `proj_axis` (now adds one or
-more axes into an `mspace$shapes_axis`). - New `ellipses_by_groups_2D`
-(uses `car::ellipse`) function as an option for `proj_groups` and
-`plot_mspace`. - Morphospaces without background shape models are now an
-option (for both `mspace` and `plot_mspace`). - `plot_mspace` now
-regenerates the original mspace plot by default (`proj_*` functions were
-modified such that all the relevant graphical parameters are inherited
-downstream to `plot_mspace`), has further flexibility regarding hybrid
-morphospaces (`plot_phenogram` has been updated) and allows adding a
-legend (and some various bugs were fixed as well). - Univariate
-morphospaces and associated density distributions are now an option (all
-the `mspace` workflow functions have been modified accordingly,
-especially `proj_shapes` and `proj_groups`). - `consensus` and
-`expected_shapes` have been merged in a single function (the name
-`expected_shapes` was retained as the former was clashing with
-`ape::consensus`), which can handle both factors and numerics. - Both
-`detrend_shapes` and `expected_shapes` can now calculate
-phylogenetically-corrected coefficients for interspecific data sets
-(Revell 2009).
+more axes into an `mspace$shapes_axis`).
+
+-   New `ellipses_by_groups_2D` (uses `car::ellipse`) function as an
+    option for `proj_groups` and `plot_mspace`.
+
+-   Morphospaces without background shape models are now an option (for
+    both `mspace` and `plot_mspace`).
+
+-   `plot_mspace` now regenerates the original mspace plot by default
+    (`proj_*` functions were modified such that all the relevant
+    graphical parameters are inherited downstream to `plot_mspace`), has
+    further flexibility regarding hybrid morphospaces (`plot_phenogram`
+    has been updated) and allows adding a legend (and some various bugs
+    were fixed as well).
+
+-   Univariate morphospaces and associated density distributions are now
+    an option (all the `mspace` workflow functions have been modified
+    accordingly, especially `proj_shapes` and `proj_groups`).
+
+-   `consensus` and `expected_shapes` have been merged in a single
+    function (the name `expected_shapes` was retained as the former was
+    clashing with `ape::consensus`), which can handle both factors and
+    numerics.
+
+-   Both `detrend_shapes` and `expected_shapes` can now calculate
+    phylogenetically-corrected coefficients for interspecific data sets
+    (Revell 2009).
 
 ## References
 

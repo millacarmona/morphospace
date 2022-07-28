@@ -37,5 +37,6 @@ LazyData: true
 Suggests: 
     jpeg,
     testthat (>= 3.0.0),
-    caper
+    caper,
+    rmarkdown
 Config/testthat/edition: 3
