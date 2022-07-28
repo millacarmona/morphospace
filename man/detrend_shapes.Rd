@@ -54,8 +54,8 @@ at a time.
 
 If a phylogenetic tree is supplied for interspecific shape data, the procedure
 is performed using the phylogenetically-corrected regression coefficients (and
-the phylogenetic mean is used instead of the grand mean for re-centering data);
-see Revell (2009) assuming a Brownian motion model of evolution.
+the phylogenetic mean is used instead of the grand mean for re-centering data;
+see Revell, 2009) assuming a Brownian motion model of evolution.
 }
 \examples{
  #### Landmark data
