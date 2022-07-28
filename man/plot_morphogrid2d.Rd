@@ -22,7 +22,8 @@ plot_morphogrid2d(
   col.models,
   lwd.models,
   bg.models,
-  plot = TRUE
+  plot = TRUE,
+  models = TRUE
 )
 }
 \arguments{
@@ -71,6 +72,8 @@ models.}
 \item{bg.models}{Background color for outlines.}
 
 \item{plot}{Logical; whether to plot morphospace.}
+
+\item{models}{Logical; whether to plot background shape models.}
 }
 \description{
 Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 2-dimensional morphometric

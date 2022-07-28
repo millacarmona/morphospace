@@ -55,7 +55,7 @@ test_that(desc = "testing mspace, prcomp", code = {
 
   pca <- prcomp(geomorph::two.d.array(shapes))
   bgpca <- bg_prcomp(geomorph::two.d.array(shapes), species)
-  phypca <- phy_prcomp(geomorph::two.d.array(consensus(shapes, species)), tree)
+  phypca <- phy_prcomp(geomorph::two.d.array(expected_shapes(shapes, species)), tree)
   pls <- pls_shapes(shapes = geomorph::two.d.array(shapes), X = model.matrix(~species)[,-1])
 
   msp1 <- mspace(shapes, mag = 0.7, axes = c(1,2), plot = FALSE)
@@ -107,9 +107,9 @@ test_that(desc = "testing mspace, phy_prcomp", code = {
   shapes <- tails$shapes
   species <- tails$data$species
   tree <- tails$tree
-  phypca <- phy_prcomp(geomorph::two.d.array(consensus(shapes, species)), tree)
+  phypca <- phy_prcomp(geomorph::two.d.array(expected_shapes(shapes, species)), tree)
 
-  msp1 <- mspace(consensus(shapes, species), FUN = phy_prcomp, tree = tree, mag = 0.7, axes = c(1,2), plot = FALSE)
+  msp1 <- mspace(expected_shapes(shapes, species), FUN = phy_prcomp, tree = tree, mag = 0.7, axes = c(1,2), plot = FALSE)
   result1 <- msp1$ordtype == "phy_prcomp"
   result2 <- all(msp1$x == phypca$x)
   result3 <- all(msp1$rotation == phypca$rotation)
@@ -144,11 +144,11 @@ test_that(desc = "testing mspace, phylogenetic pls_shapes", code = {
   species <- tails$data$species
   tree <- tails$tree
   sp_sizes <- cbind(tapply(tails$sizes,species,mean))
-  phypls <- pls_shapes(shapes = geomorph::two.d.array(consensus(shapes, species)),
+  phypls <- pls_shapes(shapes = geomorph::two.d.array(expected_shapes(shapes, species)),
                        X = sp_sizes, tree = tree)
 
-  msp1 <- mspace(consensus(shapes,species), FUN = pls_shapes, X = sp_sizes, tree = tree,
-                 mag = 0.7, axes = c(1,1), plot = FALSE)
+  msp1 <- mspace(expected_shapes(shapes,species), FUN = pls_shapes, X = sp_sizes, tree = tree,
+                 mag = 0.7, axes = 1, plot = FALSE)
   result1 <- msp1$ordtype == "phy_pls_shapes"
   result2 <- all(msp1$x == phypls$x)
   result3 <- all(msp1$rotation == phypls$rotation)
@@ -168,9 +168,15 @@ test_that(desc = "testing proj_shapes", code = {
   msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
     proj_shapes(shapes = shapes)
 
-  result <- all(names(msp1) %in% c("x", "rotation","center","datype","ordtype","plotinfo"))
+  result1 <- all(names(msp1) %in% c("x", "rotation","center","datype","ordtype","plotinfo"))
 
-  expect_true(result)
+  n <- 10
+  msp2 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
+    proj_shapes(shapes = shapes[,,1:n])
+
+  result2 <- nrow(msp2$x) == n
+
+  expect_true(all(result1,result2))
 
 })
 
@@ -181,7 +187,7 @@ test_that(desc = "testing proj_consensus", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
-  sp_shapes <- consensus(shapes, species)
+  sp_shapes <- expected_shapes(shapes, species)
 
   msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
     proj_consensus(shapes = sp_shapes)
@@ -201,7 +207,7 @@ test_that(desc = "testing proj_consensus", code = {
 
 ###########################################################
 
-test_that(desc = "testing proj_groups", code = {
+test_that(desc = "testing proj_groups, hulls", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
@@ -216,13 +222,28 @@ test_that(desc = "testing proj_groups", code = {
 })
 
 
+test_that(desc = "testing proj_groups", code = {
+  data("tails")
+  shapes <- tails$shapes
+  species <- tails$data$species
+
+  msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
+    proj_groups(groups = species, ellipse = TRUE)
+
+  result1 <- all(names(msp1) %in% c("x", "rotation","center","datype","ordtype","plotinfo","gr_class"))
+  result2 <- all(msp1$gr_class == species)
+
+  expect_true(all(result1,result2))
+})
+
+
 ###########################################################
 
 test_that(desc = "testing proj_phylogeny", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
-  sp_shapes <- consensus(shapes, species)
+  sp_shapes <- expected_shapes(shapes, species)
   tree <- tails$tree
 
   msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
@@ -250,13 +271,13 @@ test_that(desc = "testing proj_axis", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
-  sp_shapes <- consensus(shapes, species)
+  sp_shapes <- expected_shapes(shapes, species)
   pca <- prcomp(geomorph::two.d.array(shapes))
 
   msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
     proj_axis(obj = pca)
 
-  result1 <- all(names(msp1) %in% c("x", "rotation","center","datype","ordtype","plotinfo"))
+  result1 <- all(names(msp1) %in% c("x", "rotation","center","datype","ordtype","plotinfo","shape_axis"))
 
   sc1 <- proj_axis(obj = pca, axis = 1, mspace = msp1, pipe = FALSE)
   sc2 <- range(msp1$x[,1])

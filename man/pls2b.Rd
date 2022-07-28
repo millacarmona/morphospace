@@ -13,7 +13,7 @@ rows, representing the first block.}
 \item{y}{A matrix with one or more variables as columns and observations as
 rows, representing the second block.}
 
-\item{tree}{A \code{"phy"} object containing a phylogenetic tree. Tip labels
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
 should match the row number and names from \code{x} and \code{y}.}
 
 \item{LOOCV}{Logical; whether to apply leave-one-out cross-validation.}
@@ -43,7 +43,7 @@ variables from the second block.}
 }
 }
 \description{
-Performs phylogenetic 2B Partial Least Squares allowing for leave-one-out cross-validation
+Performs 2B Partial Least Squares allowing for leave-one-out cross-validation
 and removal of phylogenetic covariation (experimental).
 }
 \details{
@@ -68,7 +68,7 @@ covariation among blocks accounted by phylogenetic history (assuming a
 Brownian model of evolution and 100\% phylogenetic signal, which is
 equivalent to setting \code{method = "BM"} in \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}}).
 
-The phylogenetic version of \code{pls2b} displays the same variational
+The phylogenetic version of \code{\link[=pls2b]{pls2b()}} displays the same variational
 properties than phylogenetic PCA (i.e. centering on the phylogenetic mean;
 orientation of scores reflect non-phylogenetic covariation but their variance
 is not scaled and thus contain phylogenetic information; for the latter
@@ -83,7 +83,7 @@ data("tails")
 #extract mean log sizes and shapes for all species, as well as the phylogenetic tree
 shapes <- tails$shapes
 sizes <- log(tails$sizes)
-sp_shapes <- consensus(shapes = shapes, index = tails$data$species)
+sp_shapes <- expected_shapes(shapes = shapes, x = tails$data$species)
 sp_sizes <- tapply(X = sizes, INDEX = tails$data$species, FUN = mean)
 tree <- tails$tree
 

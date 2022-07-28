@@ -2,11 +2,11 @@
 % Please edit documentation in R/mspace_workflow.R
 \name{plot_mspace}
 \alias{plot_mspace}
-\title{Plot morphospaces and combine them with other elements}
+\title{Plot morphospaces and combine them with other variables}
 \usage{
 plot_mspace(
   mspace,
-  axes,
+  axes = NULL,
   links = NULL,
   template = NULL,
   x = NULL,
@@ -17,9 +17,13 @@ plot_mspace(
   invax = NULL,
   adj_frame = c(1, 1),
   points = TRUE,
-  mshapes = FALSE,
-  groups = FALSE,
-  phylo = FALSE,
+  models = TRUE,
+  mshapes = TRUE,
+  groups = TRUE,
+  phylo = TRUE,
+  shapeax = TRUE,
+  legend = FALSE,
+  cex.legend = 1,
   asp = NA,
   xlab,
   ylab,
@@ -36,11 +40,25 @@ plot_mspace(
   col.ldm,
   pch.points = 1,
   col.points = 1,
+  bg.points = 1,
   cex.points = 1,
+  density.points = TRUE,
   col.groups = 1,
+  bg.groups = 1,
   pch.groups = 16,
   cex.groups = 1,
-  lwd.branches = 1
+  ellipse.groups = mspace$plotinfo$ellipse.groups,
+  conflev.groups = 0.95,
+  lwd.groups = 1,
+  lty.groups = 1,
+  alpha.groups = 0,
+  density.groups = TRUE,
+  lwd.phylo = 1,
+  lty.phylo = 1,
+  col.phylo = 1,
+  lwd.axis = 1,
+  lty.axis = 1,
+  col.axis = 1
 )
 }
 \arguments{
@@ -60,10 +78,10 @@ interpolation to produce the set of background shell models (see
 \code{\link{build_template2d}}).}
 
 \item{x}{Optional vector with a non-morphometric variable to be plotted in
-the x axis. Alternatively, a \code{"phy"} object can be provided.}
+the x axis. Alternatively, a \code{"phylo"} object can be provided.}
 
 \item{y}{Optional vector with a non-morphometric variable to be plotted in
-the y axis. Alternatively, a \code{"phy"} object can be provided.}
+the y axis. Alternatively, a \code{"phylo"} object can be provided.}
 
 \item{nh}{Numeric; the number of shape models along the x axis.}
 
@@ -81,67 +99,110 @@ factors for the width and height of the frame, respectively.}
 \item{points}{Logical; whether to plot the scatter points corresponding to
 the sampled shapes stored in \code{mspace$x}.}
 
+\item{models}{Logical; whether to plot background shape models.}
+
 \item{mshapes}{Logical; whether to plot the scatter points corresponding to
 groups' mean shapes stored in \code{mspace$gr_centroids}.}
 
-\item{groups}{Logical; whether to plot the convex hulls enclosing the groups
-stored in \code{mspace$gr_class}}
+\item{groups}{Logical; whether to plot the convex hulls/confidence ellipses
+enclosing the groups stored in \code{mspace$gr_class}.}
 
-\item{phylo}{Logical; whether to plot the phylogenetic relationships stored
-in \code{mspace$phylo}}
+\item{phylo}{Logical; whether to plot phylogenetic relationships stored
+in \code{mspace$phylo}.}
 
-\item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic plot
+\item{shapeax}{Logical; whether to plot morphometric axes stored in
+\code{mspace$shape_axis}.}
+
+\item{legend}{Logical; whether to show legend for groups (\code{mspace$gr_class}).}
+
+\item{cex.legend}{Numeric; size of legend labels/symbols.}
+
+\item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic \code{\link[graphics:plot.default]{graphics::plot()}}
 function.}
 
 \item{size.models}{Numeric; size factor for shape models.}
 
-\item{asp.models}{Numeric; the y/x aspect ratio of shape models.}
+\item{asp.models}{Numeric; y/x aspect ratio of shape models.}
 
 \item{rot.models}{Numeric; angle (in degrees) to rotate shape models.}
 
-\item{col.models}{The color for wireframes/outlines.}
+\item{col.models}{Color for wireframes/outlines.}
 
 \item{bg.models}{Background color for outlines/meshes.}
 
-\item{lwd.models}{Numeric; the width of the lines in wireframes/outlines.}
+\item{lwd.models}{Numeric; width of the lines in wireframes/outlines.}
 
 \item{alpha.models}{Numeric; transparency factor for background models (3D only).}
 
 \item{cex.ldm}{Numeric; size of landmarks/semilandmarks in the background
 models.}
 
-\item{col.ldm}{The color of landmarks/semilandmarks in the background models.}
+\item{col.ldm}{Color of landmarks/semilandmarks in the background models.}
 
-\item{pch.points}{Numeric; the symbol of the scatter points corresponding to
+\item{pch.points}{Numeric; symbol of the scatter points corresponding to
 sampled shapes.}
 
-\item{col.points}{The color of the scatter points corresponding to sampled
+\item{col.points}{Color of the scatter points corresponding to sampled
 shapes.}
 
-\item{cex.points}{Numeric; the size of the scatter points corresponding to
+\item{bg.points}{Background color of the scatter points corresponding
+to sampled shapes.}
+
+\item{cex.points}{Numeric; size of the scatter points corresponding to
 sampled shapes.}
 
-\item{col.groups}{The color of the scatter points corresponding to groups
-mean shapes.}
+\item{density.points}{Logical; whether to add density distribution for points
+(univariate ordinations only).}
 
-\item{pch.groups}{Numeric; the symbol of the scatter points corresponding to
+\item{col.groups}{Color of the hulls/ellipses and/or scatter points corresponding
+to groups mean shapes.}
+
+\item{bg.groups}{Background color of the scatter points corresponding
+to groups mean shapes.}
+
+\item{pch.groups}{Numeric; symbol of the scatter points corresponding to
 groups mean shapes.}
 
-\item{cex.groups}{Numeric; the size of the scatter points corresponding to
+\item{cex.groups}{Numeric; size of the scatter points corresponding to
 groups mean shapes.}
 
-\item{lwd.branches}{Numeric; the width of the lines depicting phylogenetic
+\item{ellipse.groups}{Logical; whether to plot confidence ellipses (if \code{FALSE},
+convex hulls will be used instead).}
+
+\item{conflev.groups}{Numeric; confidence level used for confidence ellipse(s).}
+
+\item{lwd.groups}{Numeric; width of the lines in groups' ellipses/hulls.}
+
+\item{lty.groups}{Numeric; type of the lines in groups' ellipses/hulls.}
+
+\item{alpha.groups}{Numeric; transparency factor for groups' ellipses/hulls/density
+distributions.}
+
+\item{density.groups}{Logical; whether to add density distribution for groups
+(univariate ordinations only).}
+
+\item{lwd.phylo}{Numeric; width of the lines depicting phylogenetic
 branches.}
+
+\item{lty.phylo}{Numeric; type of the lines depicting phylogenetic branches.}
+
+\item{col.phylo}{Numeric; color of the lines depicting phylogenetic branches.}
+
+\item{lwd.axis}{Numeric; width of the lines depicting morphometric axis.}
+
+\item{lty.axis}{Numeric; type of the lines depicting  morphometric axis.}
+
+\item{col.axis}{Numeric; color of the lines depicting morphometric axis.}
 }
 \description{
 Flexible representation of morphospaces, including their combination
 with other variables or a phylogeny.
 }
 \details{
-This function allows to plot the morphospace contained in \code{mspace}
-objects already in existence, either preserving the graphical attributes stamped
-at during the pipeline or modifying one or more of them, so there is no need to
-execute the pipeline every time morphospaces need to be visualized and/or changed.
+This function allows to regenerate morphospaces contained in \code{mspace}
+objects already in existence, either preserving the graphical attributes used
+during the pipeline or modifying one or more of them (so there is no need to
+execute the pipeline every time morphospaces need to be visualized and/or changed).
 
 Also, \code{plot_mspace} expands the range of graphical options available
 beyond 'pure' morphospaces. If a numeric non-shape variable (assumed to have
@@ -149,7 +210,7 @@ been measured for the same specimens in \code{mspace$x}) is feeded to one of
 \code{x} or \code{y}, a 'hybrid' morphospace is produced (i.e. the bivariate
 plot will be constructed from the combination of \code{x} or \code{y} and a
 morphometric axis; shape models in the background will represent variation
-only for the latter). If instead a \code{"phy"} object (assumed to describe
+only for the latter). If instead a \code{"phylo"} object (assumed to describe
 the phylogenetic relationships among tips scores stored in
 \code{mspace$phylo_scores}) is feeded to one of \code{x} or \code{y}, a vertical
 or horizontal phenogram will be deployed (the x/y axis range will correspond to
@@ -162,7 +223,7 @@ data("tails")
 shapes <- tails$shapes
 species <- tails$data$species
 sizes <- tails$sizes
-sp_shapes <- consensus(shapes, species)
+sp_shapes <- expected_shapes(shapes, species)
 sp_sizes <- cbind(tapply(sizes, species, mean))
 tree <- tails$tree
 links <- tails$links

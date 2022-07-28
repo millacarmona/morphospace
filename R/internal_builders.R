@@ -88,7 +88,7 @@ rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + ce
 #' points(newscores, col = "black")
 #'
 #' #compute and project species' mean shapes
-#' meanshapes_arr <- consensus(tails$shapes, index = tails$data$species)
+#' meanshapes_arr <- expected_shapes(tails$shapes, x = tails$data$species)
 #' meanshapes_mat <- two.d.array(meanshapes_arr)
 #' meanscores <- proj_eigen(x = meanshapes_mat,
 #'                         vectors = pca$rotation,
@@ -107,7 +107,7 @@ proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors
 #'
 #' @param x First block of variables
 #' @param y Second block of variables
-#' @param tree An optional \code{"phy"} object containing a phylogenetic
+#' @param tree An optional \code{"phylo"} object containing a phylogenetic
 #'   tree whose tip.labels match rownames of \code{x} and \code{y}.
 #'
 #' @return Mimics the [svd()] output.
@@ -123,7 +123,7 @@ proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors
 #' sizes <- tails$sizes
 #' species <- tails$data$species
 #' tree <- tails$tree
-#' sp_shapes <- consensus(shapes, species)[,,tree$tip.label]
+#' sp_shapes <- expected_shapes(shapes, species)[,,tree$tip.label]
 #' sp_sizes <- cbind(tapply(sizes, species, mean))[tree$tip.label,]
 #'
 #' #perform partial svd
@@ -142,13 +142,13 @@ svd_block <- function(x, y, tree = NULL) {
     Clambda <- phytools::phyl.vcv(xy, C, 1)$C
 
     R <- phytools::phyl.vcv(xy, Clambda, 1)$R
-    part_R <- R[1:ncol(x), (ncol(x) + 1):(ncol(x) + ncol(y))]
+    part_R <- R[seq_len(ncol(x)), (ncol(x) + 1):(ncol(x) + ncol(y))]
 
     svd <- svd(part_R)
 
   } else {
     vcv <- stats::cov(cbind(x,y))
-    part_vcv <- vcv[1:ncol(x), (ncol(x) + 1):(ncol(x) + ncol(y))]
+    part_vcv <- vcv[seq_len(ncol(x)), (ncol(x) + 1):(ncol(x) + ncol(y))]
 
     svd <- svd(part_vcv)
 
@@ -156,13 +156,13 @@ svd_block <- function(x, y, tree = NULL) {
   }
 
   ndims <- min(nrow(x), ncol(x), ncol(y))
-  sdev <- (svd$d)[1:ndims]
+  sdev <- (svd$d)[seq_len(ndims)]
   if(ncol(x) != ncol(y)) {
     rotations <- list(svd$v, svd$u)
     whichy <- which(unlist(lapply(rotations, nrow)) == ncol(y))
     whichx <- which(unlist(lapply(rotations, nrow)) == ncol(x))
-    y_rotation <- cbind(rotations[[whichy]][,1:ndims])
-    x_rotation <- cbind(rotations[[whichx]][,1:ndims])
+    y_rotation <- cbind(rotations[[whichy]][,seq_len(ndims)])
+    x_rotation <- cbind(rotations[[whichx]][,seq_len(ndims)])
   } else {
     x_rotation <- svd$u
     y_rotation <- svd$v
@@ -176,7 +176,7 @@ svd_block <- function(x, y, tree = NULL) {
 
 #' Iverse Fourier transform
 #'
-#' @description A wrapper for [efourier_i()] from \code{Momocs} to transform a
+#' @description A wrapper for [Momocs::efourier_i()] to transform a
 #'   set of Fourier coefficients into (x,y) coordinates. Used internally.
 #'
 #' @param coe A vector with Fourier coefficients.
@@ -207,7 +207,7 @@ inv_efourier <- function(coe, nb.pts = 120) {
   nb.h <- length(coe) / 4
   coords <- matrix(0, nrow = nb.pts, ncol = 2)
 
-  a <- c(coe[1:nb.h])
+  a <- c(coe[seq_len(nb.h)])
   b <- c(coe[(nb.h + 1):(nb.h * 2)])
   c <- c(coe[((nb.h * 2) + 1):(nb.h * 3)])
   d <- c(coe[((nb.h * 3) + 1):(nb.h * 4)])
@@ -330,7 +330,7 @@ shapes_mat <- function(shapes) {
 #' }
 #'
 #' #calculate width and height of consensus shape
-#' wh <- abs(apply(apply(consensus(shapes_grid0$models_arr), 2, range), 2, diff))
+#' wh <- abs(apply(apply(expected_shapes(shapes_grid0$models_arr), 2, range), 2, diff))
 #'
 #' #ajust grid to new frame and plot
 #' adj_grid <- adjust_models2d(models = shapes_grid0$models_arr, frame = newframe,
@@ -342,7 +342,7 @@ adjust_models2d <- function(models, frame, model_width, model_height) {
   frame_width <- frame_xydiffrange[1]
   frame_height <- frame_xydiffrange[2]
 
-  models_adj_l <- lapply(1:dim(models)[3], function(i) {
+  models_adj_l <- lapply(seq_len(dim(models)[3]), function(i) {
 
     model <- models[,,i]
     if(frame_width >= frame_height) {
@@ -363,10 +363,10 @@ adjust_models2d <- function(models, frame, model_width, model_height) {
   models_adj <- abind::abind(models_adj_l, along = 3)
 
 
-  model_width2  <- abs(apply(apply(consensus(models_adj), 2, range), 2, diff))[1]
-  model_height2 <- abs(apply(apply(consensus(models_adj), 2, range), 2, diff))[2]
+  model_width2  <- abs(apply(apply(expected_shapes(models_adj), 2, range), 2, diff))[1]
+  model_height2 <- abs(apply(apply(expected_shapes(models_adj), 2, range), 2, diff))[2]
 
-  models_adj_l2 <- lapply(1:dim(models)[3], function(i) {
+  models_adj_l2 <- lapply(seq_len(dim(models)[3]), function(i) {
 
     model <- models_adj[,,i]
 
@@ -458,9 +458,9 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
   mw_std <- (mw/max(mw)) * (fw / N) * (size.models * 7)
   mh_std <- (mh/max(mh)) * (fh / N) * (size.models * 7) * asp.models
 
-  xlim_min <- xlim_max <- ylim_min <- ylim_max <- c()
+  xlim_min <- xlim_max <- ylim_min <- ylim_max <- NULL
   model_frames <- list()
-  for(i in 1:nrow(frame)) {
+  for(i in seq_len(nrow(frame))) {
 
     pw_min <- frame[i,1] - (mw_std[i] / 2)
     pw_max <- frame[i,1] + (mw_std[i] / 2)
@@ -639,24 +639,24 @@ morphogrid <- function(ordination,
 
   sh_mat <- rev_eigen(gridcoords_mag, vectors, center)
   if(datype == "fcoef") {
-    coords_l <- lapply(1:nrow(sh_mat), function(i) {
+    coords_l <- lapply(seq_len(nrow(sh_mat)), function(i) {
       sh <- inv_efourier(coe = sh_mat[i,], nb.pts = p)
       sh / Morpho::cSize(sh)
     })
     sh_arr <- abind::abind(coords_l, along = 3)
   } else {
     sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k)
-    for(i in 1:dim(sh_arr)[3]) sh_arr[,,i] <- sh_arr[,,i] / Morpho::cSize(sh_arr[,,i])
+    for(i in seq_len(dim(sh_arr)[3])) sh_arr[,,i] <- sh_arr[,,i] / Morpho::cSize(sh_arr[,,i])
   }
 
 
-  if(rot.models != 0) for(i in 1:dim(sh_arr)[3]) {
+  if(rot.models != 0) for(i in seq_len(dim(sh_arr)[3])) {
     sh_arr[,,i] <- spdep::Rotation(sh_arr[,,i], rot.models * 0.0174532925199)
   }
 
 
   if(k < 3) {
-    wh <- abs(apply(apply(consensus(sh_arr), 2, range), 2, diff))
+    wh <- abs(apply(apply(expected_shapes(sh_arr), 2, range), 2, diff))
     sh_arr <- adjust_models2d(sh_arr, gridcoords, wh[1], wh[2])
 
     sh_arr[,2,] <- sh_arr[,2,] * asp.models
@@ -667,13 +667,13 @@ morphogrid <- function(ordination,
   if(!is.null(template)) {
     centroid <- matrix(rev_eigen(0, ordination$rotation[,1], ordination$center), ncol = 2, byrow = TRUE)
     temp_cent<-rbind(centroid,
-                     Momocs::tps2d(template[-(1:p),],
-                                   template[1:p,],
+                     Momocs::tps2d(template[-(seq_len(p)),],
+                                   template[(seq_len(p)),],
                                    centroid))
 
     temp_warpd_list <- lapply(1:dim(sh_arr)[3],
-                              function(i) {Momocs::tps2d(temp_cent[-(1:p),],
-                                                         temp_cent[1:p,],
+                              function(i) {Momocs::tps2d(temp_cent[-(seq_len(p)),],
+                                                         temp_cent[(seq_len(p)),],
                                                          sh_arr[,,i])})
     temp_warpd_arr <- abind::abind(temp_warpd_list, along = 3)
     sh_arr <- abind::abind(sh_arr, temp_warpd_arr, along = 1)
@@ -681,9 +681,9 @@ morphogrid <- function(ordination,
   }
 
 
-  models_mat <- c()
+  models_mat <- NULL
   models_arr <- sh_arr * 0
-  for(i in 1:nrow(gridcoords)) {
+  for(i in seq_len(nrow(gridcoords))) {
     descentmat <- matrix(rep(gridcoords[i,], p), p, 2, byrow = TRUE)
     if(k > 2) descentmat <- cbind(descentmat, 0)
     models_arr[,,i] <- (sh_arr[,,i]) + descentmat
@@ -731,6 +731,7 @@ morphogrid <- function(ordination,
 #' @param bg.models Background color for outlines.
 #' @param lwd.models Numeric; the width of the lines in wireframes/outlines.
 #' @param plot Logical; whether to plot morphospace.
+#' @param models Logical; whether to plot background shape models.
 #' @param xlab,ylab Standard arguments passed to the generic plot function.
 #'
 #' @export
@@ -779,7 +780,8 @@ plot_morphogrid2d <- function(x = NULL,
                               col.models,
                               lwd.models,
                               bg.models,
-                              plot = TRUE) {
+                              plot = TRUE,
+                              models = TRUE) {
 
 
   xlim <- range(c(stats::na.omit(morphogrid$models_mat[,1])))
@@ -839,22 +841,25 @@ plot_morphogrid2d <- function(x = NULL,
 
     plot(morphogrid$models_mat, type = "n", xlim = xlim, ylim = ylim , xlab = xlab, ylab = ylab)
 
-    for(i in 1:dim(morphogrid$models_arr)[3]) {
-      if(datype == "landm") {
-        graphics::points(morphogrid$models_arr[1:p,,i],
-                         pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
+    if(models == TRUE) {
 
-        if(!is.null(template)) {
-          graphics::lines(morphogrid$models_arr[-c(1:p),,i],
-                          col = col.models, lwd = lwd.models)
+      for(i in seq_len(dim(morphogrid$models_arr)[3])) {
+        if(datype == "landm") {
+          graphics::points(morphogrid$models_arr[seq_len(p),,i],
+                           pch = 16, cex = cex.ldm * 0.1, col = col.ldm)
+
+          if(!is.null(template)) {
+            graphics::lines(morphogrid$models_arr[-c(seq_len(p)),,i],
+                            col = col.models, lwd = lwd.models)
+          } else {
+            for(l in seq_len(length(links))) graphics::lines(morphogrid$models_arr[,,i][links[[l]],],
+                                                      col = col.models, lwd = lwd.models)
+          }
+
         } else {
-          for(l in 1:length(links)) graphics::lines(morphogrid$models_arr[,,i][links[[l]],],
-                                                    col = col.models, lwd = lwd.models)
+          graphics::polygon(morphogrid$models_arr[,,i], pch = 16,
+                            col = bg.models, border = col.models, lwd = lwd.models)
         }
-
-      } else {
-        graphics::polygon(morphogrid$models_arr[,,i], pch = 16,
-                          col = bg.models, border = col.models, lwd = lwd.models)
       }
     }
   }
@@ -896,6 +901,7 @@ plot_morphogrid2d <- function(x = NULL,
 #' @param alpha.models Numeric; transparency factor for background models.
 #' @param asp.models Numeric; the y/x aspect ratio of shape models.
 #' @param plot Logical; whether to plot morphospace.
+#' @param models Logical; whether to plot background shape models.
 #' @param xlim,ylim,xlab,ylab Standard arguments passed to the generic plot
 #'   function.
 #'
@@ -927,7 +933,7 @@ plot_morphogrid2d <- function(x = NULL,
 #'                           nh = 2, nv = 2)
 #'
 #' #get meanshape
-#' meanshape <- consensus(shapes)
+#' meanshape <- expected_shapes(shapes)
 #'
 #' \dontrun{
 #' #plot grid (shape coordinates only)
@@ -969,8 +975,10 @@ plot_morphogrid3d <- function(x = NULL,
                               alpha.models = 1,
                               bg.models,
                               asp.models,
-                              plot = TRUE) {
+                              plot = TRUE,
+                              models = TRUE) {
 
+  plot.models <- models
 
   if(is.null(xlim)) xlim <- range(c(morphogrid$models_mat[,1]))
   if(is.null(ylim)) ylim <- range(c(morphogrid$models_mat[,2]))
@@ -1034,7 +1042,7 @@ plot_morphogrid3d <- function(x = NULL,
       rgl::plot3d(refshape, col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
                   xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm, add = TRUE)
 
-      for(l in 1:length(links)) rgl::lines3d(refshape[links[[l]],],
+      for(l in seq_len(length(links))) rgl::lines3d(refshape[links[[l]],],
                                              col = col.models, lwd = lwd.models)
 
       cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close or minimize the rgl device).")
@@ -1046,7 +1054,7 @@ plot_morphogrid3d <- function(x = NULL,
       cat("This will take a minute...")
     }
 
-    for(i in 1:dim(morphogrid$models_arr)[3]) {
+    for(i in seq_len(dim(morphogrid$models_arr)[3])) {
       modelmesh <- Morpho::tps3d(x = refmesh , refmat = refshape, tarmat = morphogrid$models_arr[,,i])
 
       rgl::plot3d(modelmesh, col = bg.models, specular = "black", axes = FALSE, aspect = FALSE,
@@ -1055,7 +1063,7 @@ plot_morphogrid3d <- function(x = NULL,
       rgl::plot3d(morphogrid$models_arr[,,i], col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
                   xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm, add = TRUE)
 
-      for(l in 1:length(links)) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
+      for(l in seq_len(length(links))) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
                                              col = col.models, lwd = lwd.models)
 
       rgl::rgl.snapshot(paste0(wd, "model", i, ".png"))
@@ -1067,7 +1075,7 @@ plot_morphogrid3d <- function(x = NULL,
       rgl::plot3d(refshape, col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
                   xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm)
 
-      for(l in 1:length(links)) rgl::lines3d(refshape[links[[l]],],
+      for(l in seq_len(length(links))) rgl::lines3d(refshape[links[[l]],],
                                              col = col.models, lwd = lwd.models)
 
       cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close or minimize the rgl device).")
@@ -1078,12 +1086,12 @@ plot_morphogrid3d <- function(x = NULL,
 
     }
 
-    for(i in 1:dim(morphogrid$models_arr)[3]) {
+    for(i in seq_len(dim(morphogrid$models_arr)[3])) {
       rgl::plot3d(morphogrid$models_arr[,,i], col = col.ldm, specular = "black",
                   axes = FALSE, aspect = FALSE, xlab = "", ylab = "", zlab = "",
                   type = "s", size = cex.ldm)
 
-      for(l in 1:length(links)) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
+      for(l in seq_len(length(links))) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
                                              col = col.models, lwd = lwd.models)
 
       rgl::rgl.snapshot(paste0(wd, "model", i, ".png"))
@@ -1091,14 +1099,14 @@ plot_morphogrid3d <- function(x = NULL,
   }
 
 
-  for(i in 1:(dim(morphogrid$models_arr)[3] + 1)) {
+  for(i in seq_len((dim(morphogrid$models_arr)[3] + 1))) {
     model_i <- magick::image_read(paste0(wd, "model", i, ".png"))
     model_i_clean <- magick::image_fill(model_i, color = "transparent", refcolor = "white", fuzz = 4, point = "+1+1")
     magick::image_write(model_i_clean, path = paste0(wd,"model",i,".png"), format = "png")
   }
 
 
-  models <- lapply(1:(dim(morphogrid$models_arr)[3] + 1), function (i) {
+  models <- lapply(seq_len((dim(morphogrid$models_arr)[3] + 1)), function (i) {
     model_i <- png::readPNG(paste0(wd, "model", i, ".png"), native = TRUE)
   })
 
@@ -1117,9 +1125,12 @@ plot_morphogrid3d <- function(x = NULL,
   if(plot == TRUE) {
     plot(0, type = "n", xlim = new_xlim, ylim = new_ylim, xlab = xlab, ylab = ylab)
 
-    for(i in 1:(length(models) - 1)) {
+    if(plot.models == TRUE) {
+
+      for(i in seq_len((length(models) - 1))) {
       graphics::rasterImage(models[[i]], model_frames[[i]][1,1], model_frames[[i]][1,2],
                   model_frames[[i]][2,1], model_frames[[i]][2,2])
+    }
     }
   }
 }
@@ -1159,15 +1170,15 @@ rotate_fcoef <- function(fcoef) {
   fcoef <- rbind(fcoef)
   nb.h <- ncol(fcoef) / 4
 
-  a <- rbind(fcoef[,1:nb.h])
+  a <- rbind(fcoef[,seq_len(nb.h)])
   b <- rbind(fcoef[,(nb.h + 1):(nb.h * 2)])
   c <- rbind(fcoef[,((nb.h * 2) + 1):(nb.h * 3)])
   d <- rbind(fcoef[,((nb.h * 3) + 1):(nb.h * 4)])
 
-  a[,1:nb.h %% 2 == 0] <- a[,1:nb.h %% 2 == 0] * -1
-  b[,1:nb.h %% 2 == 0] <- b[,1:nb.h %% 2 == 0] * -1
-  c[,1:nb.h %% 2 == 0] <- c[,1:nb.h %% 2 == 0] * -1
-  d[,1:nb.h %% 2 == 0] <- d[,1:nb.h %% 2 == 0] * -1
+  a[,seq_len(nb.h) %% 2 == 0] <- a[,seq_len(nb.h) %% 2 == 0] * -1
+  b[,seq_len(nb.h) %% 2 == 0] <- b[,seq_len(nb.h) %% 2 == 0] * -1
+  c[,seq_len(nb.h) %% 2 == 0] <- c[,seq_len(nb.h) %% 2 == 0] * -1
+  d[,seq_len(nb.h) %% 2 == 0] <- d[,seq_len(nb.h) %% 2 == 0] * -1
 
   rot_fcoef <- rbind(cbind(a, b, c, d))
   colnames(rot_fcoef) <- paste0(rep(c("A", "B", "C", "D"), each = nb.h), 1:nb.h)
@@ -1176,7 +1187,6 @@ rotate_fcoef <- function(fcoef) {
 
 
 ##########################################################################################
-
 
 #' Plot phenogram
 #'
@@ -1187,16 +1197,24 @@ rotate_fcoef <- function(fcoef) {
 #'   the x axis.
 #' @param y Optional vector with a non-morphometric variable to be plotted in
 #'   the y axis.
-#' @param tree A \code{"phy"} object containing a phylogenetic tree. Tip labels
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
 #'   should match the row names from \code{x} or \code{y}.
 #' @param phylo_scores A matrix containing the scores from tips and nodes of
 #'   the phylogeny provided in \code{tree}.
-#' @param axes Numeric of length 2, indicating the axes to be plotted.
+#' @param axis Numeric; the axis to be plotted.
+#' @param pch.groups Numeric; the symbol of the scatter points corresponding to
+#'   groups mean shapes.
 #' @param col.groups The color of the scatter points corresponding to groups
 #'   mean shapes.
+#' @param bg.groups The background color of the scatter points corresponding
+#'   to groups mean shapes.
 #' @param cex.groups Numeric; the size of the scatter points corresponding to
 #'   groups mean shapes.
-#' @param lwd.branches Numeric; the width of the lines depicting phylogenetic
+#' @param lwd.phylo Numeric; the width of the lines depicting phylogenetic
+#'   branches.
+#' @param lty.phylo Numeric; the type of the lines depicting phylogenetic
+#'   branches.
+#' @param col.phylo Numeric; the color of the lines depicting phylogenetic
 #'   branches.
 #' @param points Logical; whether to plot the scatter points.
 #'
@@ -1208,7 +1226,7 @@ rotate_fcoef <- function(fcoef) {
 #' data("tails")
 #' shapes <- tails$shapes
 #' species <- tails$data$species
-#' sp_shapes <- consensus(shapes, species)
+#' sp_shapes <- expected_shapes(shapes, species)
 #' tree <- tails$tree
 #' links <- tails$links
 #'
@@ -1226,27 +1244,39 @@ rotate_fcoef <- function(fcoef) {
 #' #plot simple phengram
 #' plot(node_heights, msp$phylo_scores[,1])
 #' plot_phenogram(tree = tree, x = node_heights, phylo_scores = msp$phylo_scores,
-#'                axes = 1, lwd.branches = 1, cex.groups = 1, col.groups = 1, points = TRUE)
+#'                axis = 1, lwd.phylo = 1, lty.phylo = 1, col.phylo = 1, cex.groups = 1,
+#'                col.groups = 1, pch.groups = 1, points = TRUE)
 plot_phenogram <- function(x = NULL,
                            y = NULL,
                            tree,
                            phylo_scores,
-                           axes,
-                           lwd.branches,
+                           axis,
+                           lwd.phylo,
+                           lty.phylo,
+                           col.phylo,
                            cex.groups,
+                           pch.groups,
                            col.groups,
+                           bg.groups,
                            points) {
 
-  for(i in 1:nrow(tree$edge)) {
-    phyloxy <- cbind(x, phylo_scores[,axes[1]], y)
+  for(i in seq_len(nrow(tree$edge))) {
+    phyloxy <- cbind(x, phylo_scores[,axis[1]], y)
     graphics::lines(rbind(phyloxy[tree$edge[i, 1],],
-                          phyloxy[tree$edge[i, 2],]), lwd = lwd.branches)
+                          phyloxy[tree$edge[i, 2],]),
+                    lwd = lwd.phylo, lty = lty.phylo, col = col.phylo)
   }
   if(points == TRUE) {
     ntips <- length(tree$tip.label)
-    graphics::points(phyloxy[-c(1:ntips),], pch = 16)
-    graphics::points(phyloxy[c(1:ntips),][rownames(phylo_scores)[1:ntips],],
-                     bg = col.groups, pch = 21, cex = cex.groups)
+    graphics::points(phyloxy[-c(seq_len(ntips)),], pch = 16)
+
+    if(any(pch.groups %in% c(21:25))) {
+      graphics::points(phyloxy[seq_len(ntips),][rownames(phylo_scores)[seq_len(ntips)],],
+                       bg = bg.groups, pch = pch.groups, cex = cex.groups)
+    } else {
+      graphics::points(phyloxy[seq_len(ntips),][rownames(phylo_scores)[seq_len(ntips)],],
+                       col = col.groups, pch = pch.groups, cex = cex.groups)
+    }
 
   }
 }

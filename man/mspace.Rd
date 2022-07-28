@@ -33,6 +33,7 @@ mspace(
   cex.ldm = 1,
   col.ldm = "black",
   plot = TRUE,
+  models = TRUE,
   ...
 )
 }
@@ -62,9 +63,9 @@ landmarks/semilandmarks (for landmark data only).}
 variation. Usual alternatives include \code{\link[stats]{prcomp}},
 \code{\link{bg_prcomp}} and \code{\link{phy_prcomp}}.}
 
-\item{nh}{Numeric; the number of shape models along the x axis.}
+\item{nh}{Numeric; number of shape models along the x axis.}
 
-\item{nv}{Numeric; the number of shape models along the y axis.}
+\item{nv}{Numeric; number of shape models along the y axis.}
 
 \item{mag}{Numeric; magnifying factor for shape models.}
 
@@ -84,11 +85,11 @@ factors for the width and height of the frame, respectively.}
 
 \item{asp.models}{Numeric; the y/x aspect ratio of shape models.}
 
-\item{col.models}{The color for wireframes/outlines.}
+\item{col.models}{Color for wireframes/outlines.}
 
 \item{bg.models}{Background color for outlines/meshes.}
 
-\item{lwd.models}{Numeric; the width of the lines in wireframes/outlines.}
+\item{lwd.models}{Numeric; width of the lines in wireframes/outlines.}
 
 \item{alpha.models}{Numeric; transparency factor for background models (3D only).}
 
@@ -97,9 +98,11 @@ factors for the width and height of the frame, respectively.}
 \item{cex.ldm}{Numeric; size of landmarks/semilandmarks in the background
 models.}
 
-\item{col.ldm}{The color of landmarks/semilandmarks in the background models.}
+\item{col.ldm}{Color of landmarks/semilandmarks in the background models.}
 
 \item{plot}{Logical; whether to plot morphospace.}
+
+\item{models}{Logical; whether to plot background shape models.}
 
 \item{...}{Further arguments passed to \code{FUN}.}
 }
@@ -115,7 +118,7 @@ An object of class \code{"mspace"}, which is a list containing:
 }
 }
 \description{
-Create an empirical morphospace as an ordination comprising set
+Create an empirical morphospace as an ordination comprising a set
 of axes synthesizing shape variation. Allows a variety of multivariate methods
 for building the ordination.
 }
@@ -127,7 +130,7 @@ PLS, and their phylogenetic versions) and generates shape models depicting
 the range of realized variation, retaining the information necessary to
 project and retrieve new compatible shapes. The output of \code{mspace} is
 meant to be expanded using the \code{proj_*} family of functions and the
-\code{\%>\%} operator from \code{maggritr}.
+\code{\%>\%} operator from \code{magrittr}.
 }
 \examples{
 
@@ -158,7 +161,7 @@ mspace(shapes, links = links, FUN = bg_prcomp, groups = species, mag = 0.7,
 #generate morphospace using species' consensus shapes and phylogenetic tree,
 #phylogenetic PCA as ordination method, and links between landmarks for backround
 #models
-sp_shapes <- consensus(shapes, species)
+sp_shapes <- expected_shapes(shapes, species)
 mspace(sp_shapes, links = links, FUN = phy_prcomp, tree = tree, mag = 0.7,
        axes = c(1,2), points = TRUE)
 
@@ -201,7 +204,7 @@ meanspec_shape <- shapes[,,meanspec_id]
 
 #then get the consensus shape and warp the sample mesh to get the mesh corresponding to the
 #consensus using Morpho::tps3d
-meanshape <- consensus(shapes)
+meanshape <- expected_shapes(shapes)
 meanmesh <- tps3d(x = mesh_meanspec , refmat = meanspec_shape, tarmat = meanshape)
 
 #finally, generate morphospace providing template (this function used the mesh warped to

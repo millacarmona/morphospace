@@ -31,7 +31,7 @@ devtools::install_github("millacarmona/morphospace")
 
 The basic idea behind `morphospace` is to build empirical morphospaces
 using multivariate ordination methods, then use the resulting ordination
-as a reference in which elements representing different aspects of
+as a reference frame in which elements representing different aspects of
 morphometric variation are projected. These elements are added to both
 graphic representations and objects as consecutive ‘layers’ and list
 slots, respectively, using the `%>%` pipe operator from `magrittr`
@@ -42,9 +42,9 @@ The starting point of the `morphospace` workflow is a set of shapes
 differences in orientation, position and scale). These are fed to the
 `mspace` function, which generates a morphospace using a variety of
 multivariate methods related to Principal Component Analysis. This
-general workflow is outlined below using the `tails` data set from
-Fasanelli et al. (2022), which contains tail shapes from 281 specimens
-belonging to 13 species of the genus *Tyrannus*.
+general workflow is broadly outlined below using the `tails` data set
+from Fasanelli et al. (2022), which contains tail shapes from 281
+specimens belonging to 13 species of the genus *Tyrannus*.
 
 ``` r
 library(morphospace)
@@ -71,12 +71,13 @@ mspace(shapes, links = wf, cex.ldm = 5)
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
 The ordination produced by `mspace` is used as a reference frame in
-which scatter points, groups centroids, convex hulls, a phylogeny or a
-set of morphometric axes can be projected using the `proj_*` functions:
+which scatter points, groups centroids, convex hulls, confidence
+ellipses, a phylogeny, or a set of morphometric axes can be projected
+using the `proj_*` functions:
 
 ``` r
 # Get mean shapes of each species
-spp_shapes <- consensus(shapes = tails$shapes, index = tails$data$species)
+spp_shapes <- expected_shapes(shapes = tails$shapes, x = tails$data$species)
 
 # Generate morphospace and project:
 msp <- mspace(shapes = shapes, links = wf, cex.ldm = 5) %>% 
@@ -85,29 +86,24 @@ msp <- mspace(shapes = shapes, links = wf, cex.ldm = 5) %>%
   # groups centroids (mean shapes)
   proj_consensus(shapes = spp_shapes, bg = 1:nlevels(spp), pch = 21) %>% 
   # convex hulls enclosing groups
-  proj_groups(groups = spp) %>% 
+  proj_groups(groups = spp, alpha = 0.5) %>% 
   # phylogenetic relationships
   proj_phylogeny(tree = phy, lwd = 1.5) 
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
-Once the `"mspace"` object is in place, the `plot_mspace` function can
-be used to either regenerate/modify the plot or to combine morphometric
-axes with other, non-shape variables to produce ‘hybrid’ morphospaces.
-For example, PC1 can be plotted against size to explore allometric
-patterns (the standard `graphics` tools work here, so we manipulate the
-margins a bit to add a legend).
+Once the `"mspace"` object has been created, the `plot_mspace` function
+can be used to either regenerate/modify the plot, add a legend, or to
+combine morphometric axes with other non-shape variables to produce
+‘hybrid’ morphospaces. For example, PC1 can be plotted against size to
+explore allometric patterns.
 
 ``` r
 # Plot PC1 against log-size, add legend
-par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
-
 plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
-            col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size", 
-            groups = TRUE)
-legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
-       cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
+            alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
+            phylo = FALSE, xlab = "Log-size", legend = TRUE)
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
@@ -116,13 +112,9 @@ Or ordination axes could be combined with a phylogenetic tree to create
 a phenogram:
 
 ``` r
-# Plot vertical phenogram using PC2, add a legend
-par(mar = c(5.1, 4.1, 4.1, 6), xpd = TRUE)
-
+# Plot vertical phenogram using PC1, add a legend
 plot_mspace(msp, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
-            col.groups = 1:nlevels(spp), ylab = "Time")
-legend("topright", inset = c(-0.22, 0), legend = levels(spp), 
-       cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
+            col.groups = 1:nlevels(spp), ylab = "Time", legend = TRUE)
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
@@ -141,7 +133,7 @@ spp <- shells$data$species
 # Generate morphospace
 mspace(shapes, mag = 1, nh = 5, nv = 4, bg.model = "light gray") %>%
   proj_shapes(shapes = shapes, col = spp) %>%
-  proj_groups(shapes = shapes, groups = spp)
+  proj_groups(shapes = shapes, groups = spp, alpha = 0.5, ellipse = TRUE)
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
@@ -158,13 +150,13 @@ mesh_meanspec <- shells3D$mesh_meanspec
 meanspec_shape <- shapes[,,findMeanSpec(shapes)]
 meanmesh <- tps3d(x = mesh_meanspec, 
                   refmat = meanspec_shape, 
-                  tarmat = consensus(shapes))
+                  tarmat = expected_shapes(shapes))
 
 # Generate morphospace
 mspace(shapes, mag = 1, bg.model = "gray", cex.ldm = 0, template = meanmesh, 
        adj_frame = c(0.9, 0.85)) %>%
   proj_shapes(shapes = shapes, col = spp, pch = 16) %>%
-  proj_groups(shapes = shapes, groups = spp)
+  proj_groups(shapes = shapes, groups = spp, alpha = 0.3)
 #> Preparing for snapshot: rotate mean shape to the desired orientation
 #>  (don't close or minimize the rgl device).Press <Enter> in the console to continue:
 #> This will take a minute...
@@ -182,6 +174,29 @@ and details, go to [General
 usage](https://millacarmona.github.io/morphospace/articles/General-usage.html)
 and [Worked
 examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
+
+## Update (August 2022)
+
+Changes: - Different behavior for `proj_shapes` (now replaces `mspace$x`
+with the actual scores being projected) and `proj_axis` (now adds one or
+more axes into an `mspace$shapes_axis`). - New `ellipses_by_groups_2D`
+(uses `car::ellipse`) function as an option for `proj_groups` and
+`plot_mspace`. - Morphospaces without background shape models are now an
+option (for both `mspace` and `plot_mspace`). - `plot_mspace` now
+regenerates the original mspace plot by default (`proj_*` functions were
+modified such that all the relevant graphical parameters are inherited
+downstream to `plot_mspace`), has further flexibility regarding hybrid
+morphospaces (`plot_phenogram` has been updated) and allows adding a
+legend (and some various bugs were fixed as well). - Univariate
+morphospaces and associated density distributions are now an option (all
+the `mspace` workflow functions have been modified accordingly,
+especially `proj_shapes` and `proj_groups`). - `consensus` and
+`expected_shapes` have been merged in a single function (the name
+`expected_shapes` was retained as the former was clashing with
+`ape::consensus`), which can handle both factors and numerics. - Both
+`detrend_shapes` and `expected_shapes` can now calculate
+phylogenetically-corrected coefficients for interspecific data sets
+(Revell 2009).
 
 ## References
 
@@ -205,6 +220,10 @@ Fasanelli M.N., Milla Carmona P.S., Soto I.M., & Tuero, D.T. (2022).
 shaped the evolution of exaggerated sexual traits within the genus*
 Tyrannus. Journal of Evolutionary Biology, in press.
 <https://doi.org/10.1111/jeb.14000>.
+
+Revell, L.J. (2009). *Size-correction and principal components for
+interspecific comparative studies*. Evolution, 63, 3258-3268
+<https://doi.org/10.1111/j.1558-5646.2009.00804.x>.
 
 Schlager S. (2017). *Morpho and Rvcg - Shape Analysis in R*. In Zheng
 G., Li S., Szekely G. (eds.), *Statistical Shape and Deformation

@@ -26,7 +26,8 @@ plot_morphogrid3d(
   alpha.models = 1,
   bg.models,
   asp.models,
-  plot = TRUE
+  plot = TRUE,
+  models = TRUE
 )
 }
 \arguments{
@@ -79,6 +80,8 @@ models.}
 \item{asp.models}{Numeric; the y/x aspect ratio of shape models.}
 
 \item{plot}{Logical; whether to plot morphospace.}
+
+\item{models}{Logical; whether to plot background shape models.}
 }
 \description{
 Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 3-dimensional morphometric
@@ -109,7 +112,7 @@ shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
                           nh = 2, nv = 2)
 
 #get meanshape
-meanshape <- consensus(shapes)
+meanshape <- expected_shapes(shapes)
 
 \dontrun{
 #plot grid (shape coordinates only)

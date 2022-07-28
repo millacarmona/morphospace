@@ -4,28 +4,33 @@
 \alias{proj_shapes}
 \title{Project shapes into morphospace}
 \usage{
-proj_shapes(shapes, mspace, pipe = TRUE, ...)
+proj_shapes(mspace, shapes, density = TRUE, pipe = TRUE, ...)
 }
 \arguments{
+\item{mspace}{An \code{"mspace"} object.}
+
 \item{shapes}{Shape data.}
 
-\item{mspace}{An \code{"mspace"} object.}
+\item{density}{Logical; whether to add density distribution for points
+(univariate ordinations only).}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
-\item{...}{Further arguments passed to \code{\link[=points]{points()}}.}
+\item{...}{Further arguments passed to \code{\link[graphics:points]{graphics::points()}}.}
 }
 \value{
 If a plot device with a morphospace is open, shapes feeded to
 \code{shapes} are projected into morphospace. If \code{pipe = FALSE}
-those scores are returned invisibly. If \code{pipe = TRUE} the feeded
-\code{mspace} object is returned unchanged and invisibly.
+those scores are returned invisibly. If \code{pipe = TRUE} the supplied
+\code{mspace} object will be modified by replacing the original
+\code{$x} slot as well as adding some graphical parameters, and returned
+invisibly.
 }
 \description{
 Project a set of shapes into an existing morphospace.
 }
 \details{
-The purpose of this function is to mantain morphospace
+The purpose of this function is to maintain morphospace
 generation and sample representation as independent affairs, and
 to add flexibility to graphical representation of scatter points.
 }

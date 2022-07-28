@@ -9,10 +9,14 @@ plot_phenogram(
   y = NULL,
   tree,
   phylo_scores,
-  axes,
-  lwd.branches,
+  axis,
+  lwd.phylo,
+  lty.phylo,
+  col.phylo,
   cex.groups,
+  pch.groups,
   col.groups,
+  bg.groups,
   points
 )
 }
@@ -23,22 +27,34 @@ the x axis.}
 \item{y}{Optional vector with a non-morphometric variable to be plotted in
 the y axis.}
 
-\item{tree}{A \code{"phy"} object containing a phylogenetic tree. Tip labels
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
 should match the row names from \code{x} or \code{y}.}
 
 \item{phylo_scores}{A matrix containing the scores from tips and nodes of
 the phylogeny provided in \code{tree}.}
 
-\item{axes}{Numeric of length 2, indicating the axes to be plotted.}
+\item{axis}{Numeric; the axis to be plotted.}
 
-\item{lwd.branches}{Numeric; the width of the lines depicting phylogenetic
+\item{lwd.phylo}{Numeric; the width of the lines depicting phylogenetic
+branches.}
+
+\item{lty.phylo}{Numeric; the type of the lines depicting phylogenetic
+branches.}
+
+\item{col.phylo}{Numeric; the color of the lines depicting phylogenetic
 branches.}
 
 \item{cex.groups}{Numeric; the size of the scatter points corresponding to
 groups mean shapes.}
 
+\item{pch.groups}{Numeric; the symbol of the scatter points corresponding to
+groups mean shapes.}
+
 \item{col.groups}{The color of the scatter points corresponding to groups
 mean shapes.}
+
+\item{bg.groups}{The background color of the scatter points corresponding
+to groups mean shapes.}
 
 \item{points}{Logical; whether to plot the scatter points.}
 }
@@ -52,7 +68,7 @@ library(magrittr)
 data("tails")
 shapes <- tails$shapes
 species <- tails$data$species
-sp_shapes <- consensus(shapes, species)
+sp_shapes <- expected_shapes(shapes, species)
 tree <- tails$tree
 links <- tails$links
 
@@ -70,5 +86,6 @@ node_heights <- c(rep(max(heights), length(tree$tip.label)), unique(heights[,1])
 #plot simple phengram
 plot(node_heights, msp$phylo_scores[,1])
 plot_phenogram(tree = tree, x = node_heights, phylo_scores = msp$phylo_scores,
-               axes = 1, lwd.branches = 1, cex.groups = 1, col.groups = 1, points = TRUE)
+               axis = 1, lwd.phylo = 1, lty.phylo = 1, col.phylo = 1, cex.groups = 1,
+               col.groups = 1, pch.groups = 1, points = TRUE)
 }

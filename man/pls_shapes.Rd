@@ -14,7 +14,7 @@ representing the external variables that supervise ordination
 \item{shapes}{Shape data (corresponding to the second block of
 \code{pls2b}.}
 
-\item{tree}{A \code{"phy"} object containing a phylogenetic tree. Tip labels
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
 should match the row number and names from \code{x} and \code{y}.}
 
 \item{LOOCV}{Logical; whether to apply leave-one-out cross-validation.}
@@ -65,7 +65,7 @@ data("tails")
 #extract shapes and sizes, compute mean shapes and sizes for all species, extract tree
 shapes <- tails$shapes
 sizes <- log(tails$sizes)
-sp_shapes <- consensus(shapes, tails$data$species)
+sp_shapes <- expected_shapes(shapes, tails$data$species)
 sp_sizes <- tapply(X = log(sizes), INDEX = tails$data$species, FUN = mean)
 tree <- tails$tree
 

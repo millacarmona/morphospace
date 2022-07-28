@@ -4,23 +4,24 @@
 \alias{proj_consensus}
 \title{Project consensus shape(s) into morphospace}
 \usage{
-proj_consensus(shapes, mspace, pipe = TRUE, ...)
+proj_consensus(mspace, shapes, pipe = TRUE, ...)
 }
 \arguments{
-\item{shapes}{Shapes data.}
-
 \item{mspace}{An \code{"mspace"} object.}
+
+\item{shapes}{Shapes data.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
-\item{...}{Further arguments passed to \code{\link[=points]{points()}}.}
+\item{...}{Further arguments passed to \code{\link[graphics:points]{graphics::points()}}.}
 }
 \value{
 If a plot device with a morphospace is open, shapes feeded to
 \code{shapes} are projected into morphospace. If \code{pipe = FALSE} the
 corresponding scores are returned invisibly. If \code{pipe = TRUE} the
 supplied \code{mspace} object will be modified by adding a new
-\code{$gr_centroids} slot, and returned invisibly.
+\code{$gr_centroids} slot as well as a number of graphical parameters,
+and returned invisibly.
 }
 \description{
 Project one or more mean shapes into an existing morphospace.
@@ -36,7 +37,7 @@ library(magrittr)
 data("shells")
 shapes <- shells$shapes
 species <- shells$data$species
-sp_shapes <- consensus(shapes, species)
+sp_shapes <- expected_shapes(shapes, species)
 
 #generate basic morphospace, add sampled and consensus shapes
 mspace(shapes, mag = 0.7, axes = c(1,2), bg.model = "light gray") \%>\%
@@ -44,5 +45,5 @@ mspace(shapes, mag = 0.7, axes = c(1,2), bg.model = "light gray") \%>\%
   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:4, cex = 2)
 }
 \seealso{
-\code{\link{consensus}}
+\code{\link{expected_shapes}}
 }

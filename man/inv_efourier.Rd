@@ -17,7 +17,7 @@ A \code{nb.pts x 2} matrix of (x,y) cartesian coordinates defining
 single outline shape.
 }
 \description{
-A wrapper for \code{\link[=efourier_i]{efourier_i()}} from \code{Momocs} to transform a
+A wrapper for \code{\link[Momocs:efourier_i]{Momocs::efourier_i()}} to transform a
 set of Fourier coefficients into (x,y) coordinates. Used internally.
 }
 \examples{

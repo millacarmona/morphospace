@@ -1,4 +1,3 @@
-
 #############################################################################################
 
 #' Pile shapes
@@ -9,7 +8,7 @@
 #' @param links An optional list with the indices of the coordinates defining
 #'   the wireframe (following the format used in \code{Morpho}).
 #' @param mshape Logical; whether to plot the mean configuration.
-#' @param ... Additional arguments passed to [plot()] or [rgl::points3d()].
+#' @param ... Additional arguments passed to [graphics::plot()] or [rgl::points3d()].
 #'
 #' @export
 #'
@@ -50,7 +49,8 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
   dat <- shapes_mat(shapes)
 
   if(dat$datype == "fcoef") {
-    coords_l <- lapply(1:nrow(dat$data2d), function(i){
+    # coords_l <- lapply(1:nrow(dat$data2d), function(i) {
+    coords_l <- lapply(seq_len(nrow(dat$data2d)), function(i) {
       inv_efourier(coe = dat$data2d[i,], nb.pts = 300)
     })
     shapes_coord <- abind::abind(coords_l, along = 3)
@@ -58,8 +58,8 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
     shapes_coord <- shapes
   }
 
-  longlist <- c()
-  for(i in 1:dim(shapes_coord)[3]) longlist <- rbind(longlist, shapes_coord[,,i])
+  longlist <- NULL
+  for(i in seq_len(dim(shapes_coord)[3])) longlist <- rbind(longlist, shapes_coord[,,i])
 
   if(dat$datype == "landm") {
 
@@ -67,17 +67,17 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
       plot(longlist, type = "n", axes = FALSE, xlab = "", ylab = "", ...)
 
       if(!is.null(links)) {
-        for(i in 1:dim(shapes_coord)[3]){
-          for(l in 1:length(links)) graphics::lines(shapes_coord[links[[l]],,i], col = "gray")
+        for(i in seq_len(dim(shapes_coord)[3])) {
+          for(l in seq_len(length(links))) graphics::lines(shapes_coord[links[[l]],,i], col = "gray")
         }
       }
 
       graphics::points(longlist, col = "#708095")
 
       if(mshape == TRUE) {
-        graphics::points(consensus(shapes_coord), pch = 16, ...)
+        graphics::points(expected_shapes(shapes_coord), pch = 16, ...)
         if(!is.null(links)) {
-          for(l in 1:length(links)) graphics::lines(consensus(shapes_coord)[links[[l]],])
+          for(l in seq_len(length(links))) graphics::lines(expected_shapes(shapes_coord)[links[[l]],])
         }
       }
 
@@ -86,15 +86,15 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
                   xlab = "", ylab = "", zlab = "", size = 5, ...)
 
       if(!is.null(links)) {
-        for(i in 1:dim(shapes_coord)[3]){
-          for(l in 1:length(links)) rgl::lines3d(shapes_coord[links[[l]],,i], col = "gray", ...)
+        for(i in seq_len(dim(shapes_coord)[3])) {
+          for(l in seq_len(length(links))) rgl::lines3d(shapes_coord[links[[l]],,i], col = "gray", ...)
         }
       }
 
       if(mshape == TRUE) {
-        rgl::points3d(consensus(shapes_coord), size = 10)
+        rgl::points3d(expected_shapes(shapes_coord), size = 10)
         if(!is.null(links)) {
-          for(l in 1:length(links)) rgl::lines3d(consensus(shapes_coord)[links[[l]],])
+          for(l in seq_len(length(links))) rgl::lines3d(expected_shapes(shapes_coord)[links[[l]],])
         }
       }
 
@@ -103,10 +103,10 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
   } else {
     plot(longlist, axes = FALSE, xlab = "", ylab = "", type = "n")
 
-    for(i in 1:dim(shapes_coord)[3]) graphics::lines(shapes_coord[,,i], col = "#708095")
+    for(i in seq_len(dim(shapes_coord)[3])) graphics::lines(shapes_coord[,,i], col = "#708095")
 
     if(mshape == TRUE) {
-      graphics::lines(consensus(shapes_coord), lwd = 4)
+      graphics::lines(expected_shapes(shapes_coord), lwd = 4)
     }
   }
 
@@ -118,21 +118,22 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 #' Plot 2D convex hulls for a series of groups
 #'
 #' @description Plot convex hulls for different groups in 2D scatterplots
-#'   created using the generic [plot()] function. Used internally (mostly).
+#'   created using the generic [graphics::plot()] function. Used internally (mostly).
 #'
 #' @param xy Coordinates of the scatterplot.
 #' @param fac A factor grouping data points.
 #' @param col A vector (either character or numeric) indicating the colors used
 #'   for each group.
-#' @param lty A vector (either character or numeric) indicating the type of line
-#'   used to draw hulls.
+#' @param lty A numeric vector indicating the type of line used to draw hulls.
+#' @param alpha Numeric; transparency factor for hulls.
+#' @param ... Further arguments passed to [graphics::polygon()].
 #'
-#' @param ... Further arguments passed to [polygon()].
+#' @seealso \code{\link{ellipses_by_group_2D}}, \code{\link{hulls_by_group_3D}}
 #'
 #' @export
 #'
 #' @examples
-#' #load landmark data and nencessary packages
+#' #load landmark data and necessary packages
 #' library(geomorph)
 #' data("tails")
 #' shapes <- tails$shapes
@@ -144,17 +145,71 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 #' #plot and add convex hulls
 #' plot(pca$x)
 #' hulls_by_group_2D(pca$x, fac = species, col = "black")
-hulls_by_group_2D <- function(xy, fac, col = 1:nlevels(fac), lty = 1, ...) {
+hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
+                              lty = 1, alpha = 0, ...) {
 
   if(length(col) == 1) col <- rep(col, nlevels(fac))
   if(length(lty) == 1) lty <- rep(lty, nlevels(fac))
 
-  for(i in 1:nlevels(fac)) {
+  for(i in seq_len(nlevels(fac))) {
     x <- xy[fac == levels(fac)[i], 1]
     y <- xy[fac == levels(fac)[i], 2]
     hullp <- grDevices::chull(x = x, y = y)
-    graphics::polygon(x[hullp], y[hullp], border = col[i], lty = lty[i], ...)
-    }
+    graphics::polygon(x[hullp], y[hullp], border = col[i],
+                      col = grDevices::adjustcolor(col[i], alpha.f = alpha), lty = lty[i], ...)
+  }
+}
+
+
+
+#############################################################################################
+
+#' Plot 2D confidence ellipses for a series of groups
+#'
+#' @description Plot confidence ellipses for different groups in 2D scatterplots
+#'   created using the generic [graphics::plot()] function. Used internally (mostly).
+#'
+#' @param xy Coordinates of the scatterplot.
+#' @param fac A factor grouping data points.
+#' @param col A vector (either character or numeric) indicating the colors used
+#'   for each group.
+#' @param lty A numeric vector indicating the type of line used to draw ellipses.
+#' @param alpha Numeric; transparency factor for ellipses.
+#' @param conflev Numeric, specifying the confidence level for drawing ellipses.
+#' @param ... Further arguments passed to [graphics::polygon()].
+#'
+#' @seealso \code{\link{hulls_by_group_2D}}, \code{\link[car]{ellipse}}
+#'
+#' @export
+#'
+#' @examples
+#' #load landmark data and necessary packages
+#' library(geomorph)
+#' data("wings")
+#' shapes <- wings$shapes
+#' species <- wings$data$species
+#'
+#' #perform PCA
+#' pca <- prcomp(two.d.array(shapes))
+#'
+#' #plot and add 95% confidence ellipses
+#' plot(pca$x)
+#' ellipses_by_group_2D(pca$x, fac = species, col = "black", conflev = 0.95)
+ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
+                                 lty = 1, conflev = 0.95, alpha = 0, ...) {
+
+  if(length(col) == 1) col <- rep(col, nlevels(fac))
+  if(length(lty) == 1) lty <- rep(lty, nlevels(fac))
+
+  for(i in seq_len(nlevels(fac))) {
+    cent <- colMeans(xy[fac == levels(fac)[i], 1:2])
+    vcv <- stats::var(xy[fac == levels(fac)[i], 1:2])
+    ell <- car::ellipse(center = cent, shape = vcv,
+                        radius = stats::qnorm((1 - conflev) / 2, lower.tail = F),
+                        draw = FALSE)
+    graphics::polygon(ell, border = col[i],
+                      col = grDevices::adjustcolor(col[i], alpha.f = alpha), lty = lty[i], ...)
+  }
 }
 
 
@@ -191,11 +246,11 @@ hulls_by_group_2D <- function(xy, fac, col = 1:nlevels(fac), lty = 1, ...) {
 #' hulls_by_group_3D(pca$x, fac = species, col = "gray")
 #'
 #' }
-hulls_by_group_3D<-function(xyz, fac, col = 1:nlevels(fac), ...) {
+hulls_by_group_3D<-function(xyz, fac, col = seq_len(nlevels(fac)), ...) {
 
   if(length(col) == 1) col <- rep(col, nlevels(fac))
 
-  for(i in 1:nlevels(fac)) {
+  for(i in seq_len(nlevels(fac))) {
     matsp <- xyz[fac == levels(fac)[i], 1:3]
     surf <- t(geometry::convhulln(matsp))
     convex <- rgl::rgl.triangles(matsp[surf, 1], matsp[surf, 2], matsp[surf, 3], col = col[i], ...)
@@ -259,7 +314,7 @@ build_template2d <- function(image, nlands, ncurves) {
   lands <- graphics::locator(nlands, type = "p", pch = 8, col = "white")
   cat(paste0("Place the ", nlands, " landmarks"))
 
-  curves <- lapply(1:ncurves, function(i) {
+  curves <- lapply(seq_len(ncurves), function(i) {
     cat(paste0("\nWhen the ", i,
                " curve is ready click Finish (top-right corner of Plots pane) or enter <Esc> in the console"))
     graphics::locator(type = "l", pch = 8, col = i)
@@ -268,7 +323,7 @@ build_template2d <- function(image, nlands, ncurves) {
   template <- cbind(c(lands$x, unlist(lapply(curves, function(x) {c(NA, x$x)}))),
                     c(lands$y, unlist(lapply(curves, function(x) {c(NA, x$y)}))))
   template_trans <- t(t(rbind(template)) - colMeans(template, na.rm = TRUE))
-  template_trans_scald <- template_trans / Morpho::cSize(template_trans[1:nlands,])
+  template_trans_scald <- template_trans / Morpho::cSize(template_trans[seq_len(nlands),])
 
   return(template_trans_scald)
 }

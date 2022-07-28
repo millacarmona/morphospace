@@ -30,15 +30,15 @@ reference:
     desc: >
       funtions to perform various transformations/manipulations of shape data
     contents:
-    - consensus
+    - expected_shapes
     - detrend_shapes
     - correct_efourier
-    - expected_shapes
     - ax_transformation
 
   - title: miscellaneous
     contents:
     - pile_shapes
+    - ellipses_by_group2D
     - hulls_by_group_2D
     - hulls_by_group_3D
     - build_template2d

@@ -18,6 +18,7 @@ BugReports: https://github.com/millacarmona/morphospace/issues
 Imports: 
     abind,
     ape,
+    car,
     geometry,
     geomorph,
     graphics,
@@ -35,5 +36,6 @@ Depends:
 LazyData: true
 Suggests: 
     jpeg,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    caper
 Config/testthat/edition: 3

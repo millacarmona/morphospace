@@ -20,7 +20,7 @@ options(rgl.useNULL=TRUE)
 ```
 
 
-`morphospace` has been built to work in intergration with other widely used R packages that cover other more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis) such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014).
+`morphospace` has been built to work in intergration with other widely used R packages covering other more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis) such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014).
 
 
 ```{r, message = FALSE}
@@ -30,7 +30,7 @@ library(magrittr)
 ```
 
 
-The basic idea behind `morphospace` is to build empirical morphospaces using multivariate methods, then use the resulting ordination as a reference in which elements representing different aspects of morphometric variation are projected into. This workflow is outlined below using the `tails` data set from Fasanelli et al. (2022), which contains a sample of tail shapes from the 13 species of the genus *Tyrannus*. Two of these (*T. savana* and *T. forficatus*) display exaggeratedly elongated tails, as well as a considerable allometric variation and sexual dimorphism. The `tails` data set contains landmark data and centroid sizes from the tails of 281 specimens, their classification to species and sex, and the phylogenetic relationships between *Tyrannus* species (see Fasanelli et al. 2022 and references therein). The links between landmarks have been also included to improve visualization.
+The basic idea behind `morphospace` is to build empirical morphospaces using multivariate methods, then use the resulting ordination as a reference frame in which elements representing different aspects of morphometric variation can projected. This workflow is outlined below using the `tails` data set from Fasanelli et al. (2022), which contains a sample of tail shapes from the 13 species of the genus *Tyrannus* (kingbirds and flycatchers). Two of these (the flycatchers *T. savana* and *T. forficatus*) display exaggeratedly elongated tails, as well as a considerable allometric variation and sexual dimorphism. The `tails` data set contains landmark data and centroid sizes from the tails of 281 specimens, their classification to species, sex and type (deep-forked, DF or non deep-forked, NDF), and their phylogenetic relationships (see Fasanelli et al. 2022 and references therein). The links between landmarks have been also included to improve visualization.
 
 
 
@@ -51,19 +51,20 @@ phy <- tails$tree
 ### Workflow
 
 
-The starting point of this workflow is morphometric data that is already free of differences in orientation, position and scale (this standardization can be done using functions provided by the aforementioned R packages). `morphospace` provide some alternatives to perform some basic operations on shape data, such as the calculation of mean shapes or the analytical removal of undesired sources of variation (functions `consensus` and `detr_shapes`, respectively). For example, we can to get rid of sexual dimorphism before moving forward into our analysis.
+The starting point of this workflow is morphometric data that is already free of differences in orientation, position and scale (this standardization can be implemented using functions provided by the aforementioned R packages). However, `morphospace` provide some alternatives to perform some basic operations on shape data, such as the calculation of mean shapes or the analytical removal of undesired sources of variation (functions `expected_shapes` and `detrend_shapes`, respectively). For example, we can to get rid of sexual dimorphism before moving forward.
 
 
 ```{r}
 # Remove variation associated with sexual dimorphism and compute the 
 # consensus shape of each species
-detr_shapes <- arrayspecs(detrend_shapes(model = lm(two.d.array(shapes) ~ sex)),
-                          p = nrow(shapes), k = ncol(shapes))
-sp_shapes <- consensus(shapes = detr_shapes, index = spp)
+model <- lm(two.d.array(shapes) ~ sex)
+detr_shapes <- detrend_shapes(model) %>% 
+  arrayspecs(p = nrow(shapes), k = ncol(shapes))
+sp_shapes <- expected_shapes(shapes = detr_shapes, x = spp)
 ```
 
 
-Once the shape data is ready, we build a morphospace using the `mspace` function, then use the resulting ordination as a reference in which to project different elements depicting various aspects of morphometric variation (scatter points, groups centroids, convex hulls, a phylogeny, etc). These elements are added both to the plot and the `"mspace"` object as consecutive 'layers' and list slots, respectively, using the `proj_*` functions and the `%>%` pipe operator from `magrittr` (Bache & Wickham 2022).
+Once the shape data is ready, we build a morphospace using the `mspace` function and then use the resulting ordination as a canvas in which to project different elements depicting various aspects of morphometric variation (scatter points, groups centroids, convex hulls, confidence ellipses, a phylogeny, etc). These elements are added both to the plot and the `"mspace"` object as consecutive 'layers' and list slots, respectively, using the `proj_*` family of functions and the `%>%` pipe operator from the `magrittr` package (Bache & Wickham 2022).
 
 
 ```{r}
@@ -102,7 +103,7 @@ names(msp3)
 ```
 
 
-Another potentially interesting element that can be projected into morphospaces are morphometric axes, i.e. synthetic axes built as linear combinations of shape variables. For example, we can project the first two PC axes resulting from a PCA of NDF specimens data into our morphospace.
+Another potentially interesting element that can be projected into morphospaces are morphometric axes or phenotypic change vectors, i.e. synthetic axes built as linear combinations of shape variables that describe a linear path across the morphospace. For example, we can project the first two PC axes resulting from a PCA of NDF specimens data into our morphospace.
 
 
 ```{r}
@@ -122,7 +123,7 @@ title("Morphospace\n+ PC1 and PC2 of NDF species projected")
 
 ### Ordination methods
 
-The default settings of `mspace` rely on the `prcomp` function from the `stats` package to build the synthetic morphometric space. However, `morphospace` also includes functions for 'supervised' ordination, namely phylogenetic PCA (Revell 2009; borrowed from `phytools`, Revell 2012), between-groups PCA (`bg_prcomp`), and both ordinary and phylgenetic versions of Partial Least Squares (PLS) (`pls_shapes` [an user-friendly wrapper of `pls2b`, which is used in the following chunk]). These have been styled/wrapped to share format with `prcomp`, and both bgPCA and PLS functions allow for leave-one-out cross-validation (LOOCV), which alleviates some spurious patterns that arise when the number of variables exceeds the number of samples (as it is common in geometric morphometric analyses; see Cardini et al. 2019 and Cardini & Polly 2020).
+The default settings of `mspace` rely on the `prcomp` function from the `stats` package to build the synthetic morphometric space. However, `morphospace` also provides functions for 'supervised' ordination, namely phylogenetic PCA (Revell 2009) (implemented through the `phy_prcomp` function, which wraps `phyl.pca` from `phytools`, Revell 2012), between-groups PCA (`bg_prcomp` function), and both ordinary and phylgenetic versions of Partial Least Squares (PLS) (`pls_shapes` function [an user-friendly wrapper of `pls2b`, which is used in the following chunk]). These have been styled/wrapped to share format with `prcomp`, and both bgPCA and PLS functions allow for leave-one-out cross-validation (LOOCV), which alleviates some spurious patterns that arise when the number of variables exceeds the number of samples (as it is common in geometric morphometric analyses; see Cardini et al. 2019 and Cardini & Polly 2020).
 
 
 ```{r}
@@ -166,67 +167,54 @@ title("PLS\n with LOOCV")
 ```
 
 
-These methods can be used instead of regular PCA for building morphospaces via the `FUN` and `...` arguments (adding the argument `groups` for `bg_prcomp`, `tree` for `phy_prcomp`, and `X` [and potentially also a `tree`] for `pls_shapes`) of the `mspace` function. The resulting morphospace can be combined with the `proj_*` functions in the same way as before; we also take advantage of the `graphics` tools to do a bit of margin manipulation and add a legend.
+These methods can be used instead of regular PCA for building morphospaces via the `FUN` and `...` arguments (adding the argument `groups` for `bg_prcomp`, `tree` for `phy_prcomp`, and `X` [and potentially also a `tree`] for `pls_shapes`, respectively) of the `mspace` function. The resulting morphospace can be combined with the `proj_*` functions in the same way as before.
 
 
 ```{r}
 # Between group PCA - all species (invert both axes for easier comparison with 
-# previous plots), add legend
-par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
+# previous plots). We'll use plot_mspace to add a legend:
 mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
-       links = wf, invax = c(1,2), cex.ldm = 5) %>%
+       links = wf, invax = c(1,2), cex.ldm = 5, plot = FALSE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
-  proj_groups(shapes = detr_shapes, groups = spp)
+  proj_groups(shapes = detr_shapes, groups = spp) %>%
+  plot_mspace(legend = TRUE)
 title("Morphospace emphasizing interspecific variation")
-legend("topright", inset = c(-0.25, 0), legend = levels(spp), 
-       cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
 
 # Phylogenetic PCA for all species, adding projection of intrapspecific variation,
 # add legend
-par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
 mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
-       xlim = c(-0.25, 0.15), ylim = c(-0.2, 0.15), cex.ldm = 5) %>%
+       xlim = c(-0.25, 0.15), ylim = c(-0.2, 0.15), cex.ldm = 5, plot = FALSE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
   proj_consensus(shapes = sp_shapes, col = "black", pch = 16) %>%
-  proj_phylogeny(tree = phy, pch = 16)
+  plot_mspace(legend = TRUE)
 title("Phylogenetic morphospace\n+ samples")
-legend("topright", inset = c(-0.25, 0), legend = levels(spp), 
-       cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
 ```
 
 
 ### Flexible visualization
 
 
-Finally, `"mspace"` objects created using the `mspace %>% proj_*` pipeline can be regenerated/modified with `plot_mspace`, which adds further graphical flexibility. By plotting a `"mspace"` object using this function we can select a different set of axes to plot, colors and symbols for points, groups, etc (or not). In addition, this function can also allow combining morphometric axes with other non-shape variables to produce 'hybrid' morphospaces. 
+Finally, `"mspace"` objects created using the `mspace %>% proj_*` pipeline can be regenerated/modified with the `plot_mspace` function, which adds further graphical flexibility. By plotting a `"mspace"` object using this function we can regenerate an existing morphospace as it was created; alternatively, we can select a different set of axes to plot, choose other colors and symbols for points, groups, etc (or not), or add a legend (see chunk above). In addition, this function also allow combining morphometric axes with other non-shape variables to produce 'hybrid' morphospaces. 
 
 For example, PC1 can be plotted against size to explore allometric patterns:
 
 
 ```{r}
 # Plot PC1 against log-size, add legend
-par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
-
 plot_mspace(msp3, x = sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size", 
-            groups = TRUE)
-legend("topright", inset = c(-0.25, 0), legend = levels(spp), 
-       cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
+            legend = TRUE)
 ```
 
 
-Or we can combine PC2 with the phylogenetic tree to create a phenogram:
+Or we can combine PC1 (or any other PC axis) with the phylogenetic tree to create a phenogram:
 
 
 ```{r}
-# Plot vertical phenogram using PC2, add a legend
-par(mar = c(5.1, 4.1, 4.1, 6.5), xpd = TRUE)
-
+# Plot vertical phenogram using PC1, add a legend
 plot_mspace(msp3, y = phy, axes = 2, nh = 6, nv = 6, cex.ldm = 4, 
-            col.groups = 1:nlevels(spp), ylab = "Time")
-legend("topright", inset = c(-0.25, 0), legend = levels(spp), 
-       cex = 0.7, pch = 16, col = 1:nlevels(spp), bty = "n", text.font = 3)
+            col.groups = 1:nlevels(spp), ylab = "Time", legend = TRUE)
 ```
 
 

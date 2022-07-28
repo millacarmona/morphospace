@@ -3,7 +3,7 @@
 test_that(desc = "testing phy_prcomp, general behavior", code = {
   data(tails)
 
-  Y <- geomorph::two.d.array(consensus(tails$shapes, tails$data$species))
+  Y <- geomorph::two.d.array(expected_shapes(tails$shapes, tails$data$species))
   tree <- tails$tree
   ppca <- phy_prcomp(Y, tree)
 
@@ -132,7 +132,7 @@ test_that(desc = "testing pls2b, general behavior (with loocv)", code = {
 test_that(desc = "testing pls2b, general behavior", code = {
   data(tails)
 
-  Y <- geomorph::two.d.array(consensus(tails$shapes, tails$data$species))
+  Y <- geomorph::two.d.array(expected_shapes(tails$shapes, tails$data$species))
   X <- tapply(tails$sizes, tails$data$species, mean)
   tree <- tails$tree
   ppls <- pls2b(y = Y, x = X, tree)
@@ -163,7 +163,7 @@ test_that(desc = "testing pls2b, general behavior", code = {
 test_that(desc = "testing pls2b, general behavior (with loocv)", code = {
   data(tails)
 
-  Y <- geomorph::two.d.array(consensus(tails$shapes, tails$data$species))
+  Y <- geomorph::two.d.array(expected_shapes(tails$shapes, tails$data$species))
   X <- tapply(tails$sizes, tails$data$species, mean)
   tree <- tails$tree
   ppls <- pls2b(y = Y, x = X, tree, LOOCV = TRUE)

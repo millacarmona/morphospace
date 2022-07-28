@@ -11,7 +11,7 @@ phy_prcomp(x, tree, corr = FALSE, ...)
 rows. Row must be named and match tip labels from the phylogenetic
 \code{tree}.}
 
-\item{tree}{A \code{"phy"} object containing a phylogenetic tree. Tip labels
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
 should match the row names from \code{x}.}
 
 \item{corr}{Logical; whether to use correlation instead of covariance matrix
@@ -39,7 +39,7 @@ of the model; see \code{\link[phytools]{phyl.pca}}.}
 A wrapper for \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}}.
 }
 \details{
-Phylogenetic PCA finds the linear combination of variables (in the
+Phylogenetic PCA finds the linear combination of variables (in
 the context of \code{morphospace} will generally be a series of shapes
 arranged as 2-margin matrix) maximizing the residual variation left after
 removing covariation explained by phylogenetic history (i.e. they reflect
@@ -70,7 +70,7 @@ library(geomorph)
 data("tails")
 
 #compute mean shapes for all species and extract the phylogenetic tree
-sp_shapes <- consensus(shapes = tails$shapes, index = tails$data$species)
+sp_shapes <- expected_shapes(shapes = tails$shapes, x = tails$data$species)
 tree <- tails$tree
 
 #perform phylogenetic PCA

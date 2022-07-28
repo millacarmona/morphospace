@@ -9,7 +9,7 @@ ax_transformation(obj, axis = 1, mag = 1)
 \arguments{
 \item{obj}{An object containing either a multivariate ordination of class
 \code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes"} or
-\code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using \code{\link[=lm]{lm()}}.}
+\code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using \code{\link[stats:lm]{stats::lm()}}.}
 
 \item{axis}{An optional numeric value specifying the axis of the multivariate
 ordination which is to be represented.}
@@ -27,7 +27,7 @@ the extremes of a morphometric axis, which can be supplied as an object
 containing a linear model or a multivariate ordination analysis.
 }
 \details{
-If an object of class \code{mlm} fitting shape to a factor (only two
+If an object of class \code{"mlm"} fitting shape to a factor (only two
 levels allowed) is supplied in \code{obj}, magnification of the axis range
 is attained through bgPCA.
 }

@@ -1,4 +1,3 @@
-
 ########################################################################################
 
 #' Phylogenetic Principal Component Analysis
@@ -8,13 +7,13 @@
 #' @param x A matrix with one or more variables as columns and observations as
 #'   rows. Row must be named and match tip labels from the phylogenetic
 #'   \code{tree}.
-#' @param tree A \code{"phy"} object containing a phylogenetic tree. Tip labels
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
 #'   should match the row names from \code{x}.
 #' @param corr Logical; whether to use correlation instead of covariance matrix
 #'   as input.
 #' @param ... Further arguments passed to [phytools::phyl.pca()].
 #'
-#' @details Phylogenetic PCA finds the linear combination of variables (in the
+#' @details Phylogenetic PCA finds the linear combination of variables (in
 #'   the context of \code{morphospace} will generally be a series of shapes
 #'   arranged as 2-margin matrix) maximizing the residual variation left after
 #'   removing covariation explained by phylogenetic history (i.e. they reflect
@@ -78,7 +77,7 @@
 #' data("tails")
 #'
 #' #compute mean shapes for all species and extract the phylogenetic tree
-#' sp_shapes <- consensus(shapes = tails$shapes, index = tails$data$species)
+#' sp_shapes <- expected_shapes(shapes = tails$shapes, x = tails$data$species)
 #' tree <- tails$tree
 #'
 #' #perform phylogenetic PCA
@@ -234,8 +233,8 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
   svd <- svd(x = vcv_g)
 
   ndims <- min(nrow(x), nlevels(groups) - 1)
-  rotation <- svd$v[,1:ndims]
-  values <- svd$d[1:ndims]
+  rotation <- svd$v[,seq_len(ndims)]
+  values <- svd$d[seq_len(ndims)]
 
   if(LOOCV == FALSE) {
 
@@ -245,7 +244,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 
     refaxis <- rotation[, 1]
 
-    scores_l <- lapply(1:nrow(x), function(i) {
+    scores_l <- lapply(seq_len(nrow(x)), function(i) {
       subx <- x[-i,]
       subgroups <- groups[-i]
 
@@ -261,7 +260,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
       subvcv_g <- stats::cov.wt(subgroupmeans, wt = subwts, cor = corr)$cov
       subsvd <- svd(subvcv_g)
 
-      subrotation <- subsvd$v[,1:ndims]
+      subrotation <- subsvd$v[,seq_len(ndims)]
 
       iscore <- proj_eigen(x[i,], subrotation, center = colMeans(x)) *
         sign(stats::cor(subrotation[,1], refaxis))
@@ -286,14 +285,14 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 
 #' Two-blocks Partial Least Squares
 #'
-#' Performs phylogenetic 2B Partial Least Squares allowing for leave-one-out cross-validation
+#' @description Performs 2B Partial Least Squares allowing for leave-one-out cross-validation
 #'   and removal of phylogenetic covariation (experimental).
 #'
 #' @param x A matrix with one or more variables as columns and observations as
 #'   rows, representing the first block.
 #' @param y A matrix with one or more variables as columns and observations as
 #'   rows, representing the second block.
-#' @param tree A \code{"phy"} object containing a phylogenetic tree. Tip labels
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
 #'   should match the row number and names from \code{x} and \code{y}.
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
@@ -321,7 +320,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'   Brownian model of evolution and 100% phylogenetic signal, which is
 #'   equivalent to setting \code{method = "BM"} in [phytools::phyl.pca()]).
 #'
-#'   The phylogenetic version of \code{pls2b} displays the same variational
+#'   The phylogenetic version of [pls2b()] displays the same variational
 #'   properties than phylogenetic PCA (i.e. centering on the phylogenetic mean;
 #'   orientation of scores reflect non-phylogenetic covariation but their variance
 #'   is not scaled and thus contain phylogenetic information; for the latter
@@ -382,7 +381,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' #extract mean log sizes and shapes for all species, as well as the phylogenetic tree
 #' shapes <- tails$shapes
 #' sizes <- log(tails$sizes)
-#' sp_shapes <- consensus(shapes = shapes, index = tails$data$species)
+#' sp_shapes <- expected_shapes(shapes = shapes, x = tails$data$species)
 #' sp_sizes <- tapply(X = sizes, INDEX = tails$data$species, FUN = mean)
 #' tree <- tails$tree
 #'
@@ -425,8 +424,8 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
   x <- cbind(x)
   y <- cbind(y)
 
-  if(is.null(rownames(x))) rownames(x) <- 1:nrow(x)
-  if(is.null(rownames(y))) rownames(y) <- 1:nrow(y)
+  if(is.null(rownames(x))) rownames(x) <- seq_len(nrow(x))
+  if(is.null(rownames(y))) rownames(y) <- seq_len(nrow(y))
 
   namesx <- rownames(x)
   namesy <- rownames(y)
@@ -445,7 +444,7 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
     }
 
     anc <- apply(cbind(x, y), 2, phytools::fastAnc, tree = tree)[1,]
-    x_center <- anc[1:ncol(x)]
+    x_center <- anc[seq_len(ncol(x))]
     y_center <- anc[(ncol(x) + 1):(ncol(x) + ncol(y))]
 
   } else {
@@ -471,13 +470,14 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 
   } else {
 
-    yscores <- c()
-    xscores <- c()
+    yscores <- NULL
+    xscores <- NULL
+
 
     refyaxis <- y_rotation[,1]
     refxaxis <- x_rotation[,1]
 
-    for(i in 1:nrow(y)) {
+    for(i in seq_len(nrow(y))) {
 
       subx <- cbind(x[-i,])
       suby <- cbind(y[-i,])
@@ -560,7 +560,7 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 #'   (corresponding to the first block).
 #' @param shapes Shape data (corresponding to the second block of
 #' \code{pls2b}.
-#' @param tree A \code{"phy"} object containing a phylogenetic tree. Tip labels
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
 #'   should match the row number and names from \code{x} and \code{y}.
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
@@ -619,7 +619,7 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 #' #extract shapes and sizes, compute mean shapes and sizes for all species, extract tree
 #' shapes <- tails$shapes
 #' sizes <- log(tails$sizes)
-#' sp_shapes <- consensus(shapes, tails$data$species)
+#' sp_shapes <- expected_shapes(shapes, tails$data$species)
 #' sp_sizes <- tapply(X = log(sizes), INDEX = tails$data$species, FUN = mean)
 #' tree <- tails$tree
 #'
@@ -739,7 +739,7 @@ exp_var <- function(ordination) {
   if(class(ordination) == "pls_shapes") axname <- "PLS-"
   if(class(ordination) == "phy_pls_shapes") axname <- "phyPLS-"
 
-  rownames(tab) <- paste0(axname, 1:nrow(tab))
+  rownames(tab) <- paste0(axname, seq_len(nrow(tab)))
   return(tab)
 
 }

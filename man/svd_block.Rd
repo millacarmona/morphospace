@@ -11,7 +11,7 @@ svd_block(x, y, tree = NULL)
 
 \item{y}{Second block of variables}
 
-\item{tree}{An optional \code{"phy"} object containing a phylogenetic
+\item{tree}{An optional \code{"phylo"} object containing a phylogenetic
 tree whose tip.labels match rownames of \code{x} and \code{y}.}
 }
 \value{
@@ -31,7 +31,7 @@ shapes <- tails$shapes
 sizes <- tails$sizes
 species <- tails$data$species
 tree <- tails$tree
-sp_shapes <- consensus(shapes, species)[,,tree$tip.label]
+sp_shapes <- expected_shapes(shapes, species)[,,tree$tip.label]
 sp_sizes <- cbind(tapply(sizes, species, mean))[tree$tip.label,]
 
 #perform partial svd

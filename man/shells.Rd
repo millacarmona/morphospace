@@ -30,7 +30,7 @@ The \code{shells} data contain data from 137 specimens belonging to
 4 species of the extinct bivalve genus \emph{Ptychomya}, tracking their
 morphological changes through a 5 million years interval from the Lower
 Cretaceous of west-central Argentina (approximately 140 million years ago).
-The data set includes the information about the extrernal shell shape (measured
+The data set includes the information about the external shell shape (measured
 using Fourier coefficients from 7 harmonics), centroid size, age (both relative,
 taken from ammonoid biozones, and absolute, estimated using a combination
 of the former, absolute dates, and stratigraphic data), geographic provenance,

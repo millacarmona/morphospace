@@ -51,7 +51,7 @@ for(i in 1:dim(shapes_grid0$models_arr)[3]) {
 }
 
 #calculate width and height of consensus shape
-wh <- abs(apply(apply(consensus(shapes_grid0$models_arr), 2, range), 2, diff))
+wh <- abs(apply(apply(expected_shapes(shapes_grid0$models_arr), 2, range), 2, diff))
 
 #ajust grid to new frame and plot
 adj_grid <- adjust_models2d(models = shapes_grid0$models_arr, frame = newframe,

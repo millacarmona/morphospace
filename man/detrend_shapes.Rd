@@ -4,18 +4,23 @@
 \alias{detrend_shapes}
 \title{Remove shape variation associated to external variables}
 \usage{
-detrend_shapes(model, xvalue = NULL, newx = NULL, newy = NULL)
+detrend_shapes(model, xvalue = NULL, tree = NULL, newdata = NULL)
 }
 \arguments{
-\item{model}{A \code{mlm} object created using \code{\link[=lm]{lm()}}.}
+\item{model}{A \code{"mlm"} object created using \code{\link[stats:lm]{stats::lm()}}.}
 
 \item{xvalue}{A value (numeric) or level (character) at which shape data is
 to be standardized (i.e. centered); If NULL, the mean of the complete
 sample is used.}
 
-\item{newx, newy}{New data to be standardized instead of the used in
-\code{model}. Coefficients are taken from the linear model and applied to
-the new data to predict shapes at the desired \code{xvalue}.}
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
+should match row names from \code{x}.}
+
+\item{newdata}{New data to be standardized instead of the used in \code{model},
+provided as a \code{"mlm"} object created using \code{\link[stats:lm]{stats::lm()}}. Explanatory
+variables must be the same as those from \code{model}. Coefficients are taken
+from the linear model from \code{model} and applied to the new data to predict
+shapes at the desired \code{xvalue}.}
 }
 \value{
 A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
@@ -25,7 +30,8 @@ landmark data and \code{n x (4 x nb.h)} for the case of Fourer data (where
 \description{
 Detrend shape data using the functional relationship between
 shape data and some external explanatory variable(s) (works for both
-factors and numerics), estimated using a linear model.
+factors and numerics), estimated using a linear model (and potentially
+corrected using phylogenetic relationships).
 }
 \details{
 This function detrends (or standardizes, or corrects) shapes
@@ -36,169 +42,182 @@ taken for larndmark data in order to retrieve configurations in 3-margins
 array format) corresponding to the detrended versions of the shapes
 specified in the left size of the formula in \code{model}.
 
-However, if \code{newx} and \code{newy} are provided, the function will
-instead return the shapes provided in \code{newy}, detrended using the
-relationship described in \code{model}.
+However, if \code{newdata} is provided, the function will instead return
+the shapes provided in the new model, detrended using the relationship described
+in \code{model}.
 
 The grand mean of the sample of shapes is used by default to center shape
 variation, although a \code{xvalue} specifying a level or numeric value of
 the explanatory variable in \code{model} to center shapes at can be
-provided. This 'displacement' can only be applied for one explanatory
-variable at the time.
+provided. This shift can only be applied for one explanatory variable
+at a time.
+
+If a phylogenetic tree is supplied for interspecific shape data, the procedure
+is performed using the phylogenetically-corrected regression coefficients (and
+the phylogenetic mean is used instead of the grand mean for re-centering data);
+see Revell (2009) assuming a Brownian motion model of evolution.
 }
 \examples{
-#### Landmark data
+ #### Landmark data
 
-#load tails data and packages
-library(geomorph)
-data(tails)
-shapes <- tails$shapes
-species <- tails$data$species
-sex <- tails$data$sex
-logsizes <- log(tails$sizes)
-msp <- mspace(shapes, links = tails$links, points = TRUE)
-hulls_by_group_2D(msp$x, fac = species)
-
-
-### For numeric variables
-
-#fit linear model between shapes and sizes, then center at the grand mean of the sample
-model <- lm(two.d.array(shapes) ~ logsizes)
-detr_shapes_mat <- detrend_shapes(model)
-
-detr_shapes_nosize <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
-
-msp_nosize <- mspace(detr_shapes_nosize, links = tails$links, points = TRUE)
-hulls_by_group_2D(msp_nosize$x, fac = species)
-
-## Using xvalue
-
-#fit linear model between shapes and sizes, then center at the shape corresponding to the
-#maximum size of the sample
-model <- lm(two.d.array(shapes) ~ logsizes)
-detr_shapes_mat2 <- detrend_shapes(model,
-                                   xvalue = max(logsizes))
-
-detr_shapes_nosize2 <- arrayspecs(detr_shapes_mat2, k = 2, p = 9)
-
-msp_nosize2 <- mspace(detr_shapes_nosize2, links = tails$links, points = TRUE)
-hulls_by_group_2D(msp_nosize2$x, fac = species)
-
-## Using newx, newy
-
-#fit linear model between shapes and sizes for NDF species, then use the NDF allometry to
-#detrend DF shapes from alometric variation
-#maximum size of the sample
-index <- tails$data$type == "NDF"
-shapes_ndf <- shapes[,,index]
-logsizes_ndf <- logsizes[index]
-shapes_df <- shapes[,,!index]
-logsizes_df <- logsizes[!index]
-
-model <- lm(two.d.array(shapes_ndf) ~ logsizes_ndf)
-detr_shapes_mat3 <- detrend_shapes(model,
-                                   newx = logsizes_df,
-                                   newy = two.d.array(shapes_df))
-
-detr_shapes_nosize3 <- arrayspecs(detr_shapes_mat3, k = 2, p = 9)
-
-msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links, points = TRUE)
-hulls_by_group_2D(msp_nosize3$x, fac = factor(species[!index]))
+ #load tails data and packages
+ library(geomorph)
+ data(tails)
+ shapes <- tails$shapes
+ species <- tails$data$species
+ sex <- tails$data$sex
+ logsizes <- log(tails$sizes)
+ msp <- mspace(shapes, links = tails$links, points = TRUE)
+ hulls_by_group_2D(msp$x, fac = species)
 
 
-### For factors
+ ### For numeric variables
 
-#fit linear model between shapes and species, then center at the grand mean of the sample
-model <- lm(two.d.array(shapes) ~ species)
-detr_shapes_mat <- detrend_shapes(model)
+ #fit linear model between shapes and sizes, then center at the grand mean of the sample
+ model <- lm(two.d.array(shapes) ~ logsizes)
+ detr_shapes_mat <- detrend_shapes(model)
 
-detr_shapes_nospp <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
+ detr_shapes_nosize <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
 
-msp_nospp <- mspace(detr_shapes_nospp, links = tails$links, points = TRUE)
-hulls_by_group_2D(msp_nospp$x, fac = species)
+ msp_nosize <- mspace(detr_shapes_nosize, links = tails$links, points = TRUE)
+ hulls_by_group_2D(msp_nosize$x, fac = species)
 
-## Using xvalue
+ ## using (phylogenetic) tree
 
-#fit linear model between shapes and species, then center at the shape corresponding to
-#the mean shape of T. savana
-model <- lm(two.d.array(shapes) ~ species)
-detr_shapes_mat2 <- detrend_shapes(model,
-                                   xvalue = "T. savana")
+ #fit linear model between shapes and sizes, then center at the shape corresponding to the
+ #maximum size of the sample
+ sp_shapes <- expected_shapes(shapes, species)
+ sp_logsizes <- c(tapply(logsizes, species, mean))
+ model <- lm(two.d.array(sp_shapes) ~ sp_logsizes)
+ detr_shapes_mat1 <- detrend_shapes(model)
 
-detr_shapes_nospp2 <- arrayspecs(detr_shapes_mat2, k = 2, p = 9)
+ detr_shapes_nosize1 <- arrayspecs(detr_shapes_mat1, k = 2, p = 9)
 
-msp_nospp2 <- mspace(detr_shapes_nospp2, links = tails$links, points = TRUE)
-hulls_by_group_2D(msp_nospp2$x, fac = species)
+ msp_nosize1 <- mspace(detr_shapes_nosize1, links = tails$links, points = TRUE)
+ points(msp_nosize1$x, pch = 21, bg = c(1:13)[species])
 
-## Using newx, newy
+ ## Using xvalue
 
-#fit linear model between shapes and sex for NDF species, then use the NDF sexual
-#dimorphism to detrend DF shapes from variation between sexes
-#maximum size of the sample
-index <- tails$data$type == "NDF"
-shapes_ndf <- shapes[,,index]
-sex_ndf <- sex[index]
-shapes_df <- shapes[,,!index]
-sex_df <- sex[!index]
+ #fit linear model between shapes and sizes, then center at the shape corresponding to the
+ #maximum size of the sample
+ model <- lm(two.d.array(shapes) ~ logsizes)
+ detr_shapes_mat2 <- detrend_shapes(model,
+                                    xvalue = max(logsizes))
 
-model_ndf <- lm(two.d.array(shapes_ndf) ~ sex_ndf)
-detr_shapes_mat3 <- detrend_shapes(model_ndf,
-                                   newx = sex_df,
-                                   newy = two.d.array(shapes_df))
+ detr_shapes_nosize2 <- arrayspecs(detr_shapes_mat2, k = 2, p = 9)
 
-detr_shapes_nosize3 <- arrayspecs(detr_shapes_mat3, k = 2, p = 9)
+ msp_nosize2 <- mspace(detr_shapes_nosize2, links = tails$links, points = TRUE)
+ hulls_by_group_2D(msp_nosize2$x, fac = species)
 
-msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links, points = TRUE)
-hulls_by_group_2D(msp_nosize3$x, fac = factor(species[!index]))
+ ## Using newdata
 
-#### Fourier data (quick demo)
+ #fit linear model between shapes and sizes for NDF species, then use the NDF allometry to
+ #detrend DF shapes from alometric variation
+ #maximum size of the sample
+ index <- tails$data$type == "NDF"
+ shapes_ndf <- shapes[,,index]
+ logsizes_ndf <- logsizes[index]
+ shapes_df <- shapes[,,!index]
+ logsizes_df <- logsizes[!index]
 
-#load shells data
-data(shells)
-shapes <- shells$shapes$coe
-species <- shells$data$species
-logsizes <- log(shells$sizes)
-msp <- mspace(shapes, mag = 0.5, size.models = 0.4, asp.models = 0.5, points = TRUE)
-hulls_by_group_2D(msp$x, fac = species)
+ model_ndf <- lm(two.d.array(shapes_ndf) ~ logsizes_ndf)
+ model_df <- lm(two.d.array(shapes_df) ~ logsizes_df)
+ detr_shapes_mat3 <- detrend_shapes(model_ndf, newdata = model_df)
 
-#fit linear model between shapes and sizes, then center at the shape corresponding to
-#the grand mean
-model <- lm(shapes ~ logsizes)
-detr_shapes_nosize <- detrend_shapes(model)
+ detr_shapes_nosize3 <- arrayspecs(detr_shapes_mat3, k = 2, p = 9)
 
-msp_nosize <- mspace(detr_shapes_nosize, mag = 0.5, size.models = 0.4,
-                    asp.models = 0.5, points = TRUE)
-hulls_by_group_2D(msp_nosize$x, fac = species)
+ msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links, points = TRUE)
+ hulls_by_group_2D(msp_nosize3$x, fac = factor(species[!index]))
 
-#fit linear model between shapes and sizes, then center at the shape corresponding
-#to the maximum size
-model <- lm(shapes ~ logsizes)
-detr_shapes_nosize2 <- detrend_shapes(model,
-                                      xvalue = max(logsizes))
+ ### For factors
 
-msp_nosize2 <- mspace(detr_shapes_nosize2, mag = 0.5, size.models = 0.4,
-                      asp.models = 0.5, points = TRUE)
-hulls_by_group_2D(msp_nosize2$x, fac = species)
+ #fit linear model between shapes and species, then center at the grand mean of the sample
+ model <- lm(two.d.array(shapes) ~ species)
+ detr_shapes_mat <- detrend_shapes(model)
 
-#fit linear model between shapes and sizes, then center at the maximum size
-shapes_koeneni <- shapes[species == "koeneni",]
-logsizes_koeneni <- logsizes[species == "koeneni"]
-shapes_esbelta <- shapes[species == "esbelta",]
-logsizes_esbelta <- logsizes[species == "esbelta"]
+ detr_shapes_nospp <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
 
-model_koeneni <- lm(shapes_koeneni ~ logsizes_koeneni)
-detr_shapes_nosize3 <- detrend_shapes(model_koeneni,
-                                      newx = logsizes_esbelta,
-                                      newy = shapes_esbelta)
+ msp_nospp <- mspace(detr_shapes_nospp, links = tails$links, points = TRUE)
+ hulls_by_group_2D(msp_nospp$x, fac = species)
 
-msp_nosize3 <- mspace(shapes_esbelta, mag = 0.5, size.models = 0.15,
-                      asp.models = 0.7, points = TRUE)
-title("raw P. esbelta morphospace")
-msp_nosize4 <- mspace(detr_shapes_nosize3, mag = 0.5, size.models = 0.15,
-                       asp.models = 0.7, points = TRUE)
-title("P. esbelta morphospace, refined using \n allometric variation from P. koeneni")
+ ## Using xvalue
+
+ #fit linear model between shapes and species, then center at the shape corresponding to
+ #the mean shape of T. savana
+ model <- lm(two.d.array(shapes) ~ species)
+ detr_shapes_mat2 <- detrend_shapes(model,
+                                    xvalue = "T. savana")
+
+ detr_shapes_nospp2 <- arrayspecs(detr_shapes_mat2, k = 2, p = 9)
+
+ msp_nospp2 <- mspace(detr_shapes_nospp2, links = tails$links, points = TRUE)
+ hulls_by_group_2D(msp_nospp2$x, fac = species)
+
+ ## Using newdata
+
+ #fit linear model between shapes and sex for NDF species, then use the NDF sexual
+ #dimorphism to detrend DF shapes from variation between sexes
+ #maximum size of the sample
+ index <- tails$data$type == "NDF"
+ shapes_ndf <- shapes[,,index]
+ sex_ndf <- sex[index]
+ shapes_df <- shapes[,,!index]
+ sex_df <- sex[!index]
+
+ model_ndf <- lm(two.d.array(shapes_ndf) ~ sex_ndf)
+ detr_shapes_mat3 <- detrend_shapes(model_ndf, newdata = model_df)
+
+ detr_shapes_nosize3 <- arrayspecs(detr_shapes_mat3, k = 2, p = 9)
+
+ msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links, points = TRUE)
+ hulls_by_group_2D(msp_nosize3$x, fac = factor(species[!index]))
+
+ #### Fourier data (quick demo)
+
+ #load shells data
+ data(shells)
+ shapes <- shells$shapes$coe
+ species <- shells$data$species
+ logsizes <- log(shells$sizes)
+ msp <- mspace(shapes, mag = 0.5, points = TRUE)
+ hulls_by_group_2D(msp$x, fac = species)
+
+ #fit linear model between shapes and sizes, then center at the shape corresponding to
+ #the grand mean
+ model <- lm(shapes ~ logsizes)
+ detr_shapes_nosize <- detrend_shapes(model)
+
+ msp_nosize <- mspace(detr_shapes_nosize, mag = 0.5, points = TRUE)
+ hulls_by_group_2D(msp_nosize$x, fac = species)
+
+ #fit linear model between shapes and sizes, then center at the shape corresponding
+ #to the maximum size
+ model <- lm(shapes ~ logsizes)
+ detr_shapes_nosize2 <- detrend_shapes(model,
+                                       xvalue = max(logsizes))
+
+ msp_nosize2 <- mspace(detr_shapes_nosize2, mag = 0.5, points = TRUE)
+ hulls_by_group_2D(msp_nosize2$x, fac = species)
+
+ #fit linear model between shapes and sizes, then center at the maximum size
+ shapes_koeneni <- shapes[species == "koeneni",]
+ logsizes_koeneni <- logsizes[species == "koeneni"]
+ shapes_esbelta <- shapes[species == "esbelta",]
+ logsizes_esbelta <- logsizes[species == "esbelta"]
+
+ model_koeneni <- lm(shapes_koeneni ~ logsizes_koeneni)
+ model_esbelta <- lm(shapes_esbelta ~ logsizes_esbelta)
+ detr_shapes_nosize3 <- detrend_shapes(model_koeneni, newdata = model_esbelta)
+
+ msp_nosize3 <- mspace(shapes_esbelta, mag = 0.5, points = TRUE)
+ title("raw P. esbelta morphospace")
+ msp_nosize4 <- mspace(detr_shapes_nosize3, mag = 0.5, points = TRUE)
+ title("P. esbelta morphospace, refined using \n allometric variation from P. koeneni")
 }
 \references{
+Revell, L. J. (2009). \emph{Size-correction and principal components
+for interspecific comparative studies}. Evolution, 63, 3258-3268.
+
 Klingenberg, C. P. (2016). \emph{Size, shape, and form: concepts
 of allometry in geometric morphometrics}. Development Genes and Evolution,
 226(3), 113-137.

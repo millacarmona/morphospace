@@ -2,16 +2,16 @@
 % Please edit documentation in R/mspace_workflow.R
 \name{proj_axis}
 \alias{proj_axis}
-\title{Project morphometric axis into morphospace}
+\title{Project a morphometric axis into morphospace}
 \usage{
-proj_axis(obj, mspace, axis = 1, mag = 1, pipe = TRUE, ...)
+proj_axis(mspace, obj, axis = 1, mag = 1, pipe = TRUE, ...)
 }
 \arguments{
+\item{mspace}{An \code{"mspace"} object.}
+
 \item{obj}{An object containing either a multivariate ordination of class
 \code{"prcomp", "bg_prcomp", "phy_prcomp"} or \code{"pls_shape"} or a
-\code{"mlm"} object fitted using \code{\link[=lm]{lm()}}.}
-
-\item{mspace}{An \code{"mspace"} object.}
+\code{"mlm"} object fitted using \code{\link[stats:lm]{stats::lm()}}.}
 
 \item{axis}{An optional vector indicating the axis from \code{obj} to be
 projected.}
@@ -20,25 +20,26 @@ projected.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
-\item{...}{Further arguments passed to \code{\link[=lines]{lines()}}.}
+\item{...}{Further arguments passed to \code{\link[graphics:lines]{graphics::lines()}}.}
 }
 \value{
 If a plot device with a morphospace is open, a straight line marking the
 scores representing shapes at the extremes of the morphometric axis is projected
 into morphospace. If \code{pipe = FALSE} those scores are returned invisibly.
-If \code{pipe = TRUE} the feeded \code{mspace} object is returned unchanged
-and invisibly.
+If \code{pipe = TRUE} the supplied \code{mspace} object will be modified by adding
+a new \code{$shape_axis} slot as well as a number of graphical parameters, and
+returned invisibly.
 }
 \description{
 Project one or more morphometric axes (i.e., linear combinations
-of shape variables) into an existing morphospace.
+of shape variables) into an existing bivariate morphospace.
 }
 \details{
 This function is primarily aimed at the graphical representation
 of morphometric axes (estimated using either linear models or multivariate
 ordination methods) into an existing morphospace for heuristic exploration
 of patterns in the data. It can also be used to extract theoretical shapes
-at the extremes of those axes, although \code{ax_transformation()} does the
+at the extremes of those axes, although \code{\link[=ax_transformation]{ax_transformation()}} does the
 same thing in a more flexible and straightforward way.
 
 Axes computed from linear models and from supervised multivariate ordinations
@@ -49,7 +50,7 @@ the former will not be necessarily centered.
 
 For statistical analysis of axes (e.g., trajectory analysis) their vector
 coefficients can be extracted directly from slope coefficients stored in
-\code{mlm} objects or eigenvector coefficients stored in the \code{$rotation}
+\code{"mlm"} objects or eigenvector coefficients stored in the \code{$rotation}
 slot returned by multivariate ordination methods.
 }
 \examples{
@@ -69,8 +70,9 @@ detr_shapes <- arrayspecs(
 intrasp_allo_mod <- lm(two.d.array(detr_shapes) ~ logsizes)
 intrasp_allo_pls <- pls_shapes(shapes = two.d.array(detr_shapes), X = logsizes)
 
-#compute intraspecific allometric axis using consensus, tapply, lm and pls_shapes
-sp_shapes <- consensus(shapes, species)
+#compute intraspecific allometric axis using expected_shapes, tapply, lm and
+#pls_shapes
+sp_shapes <- expected_shapes(shapes, species)
 sp_logsizes <- tapply(logsizes, species, max)
 intersp_allo_mod <- lm(two.d.array(sp_shapes) ~ sp_logsizes)
 intersp_allo_pls <- pls_shapes(shapes = two.d.array(sp_shapes), X = sp_logsizes)

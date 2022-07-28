@@ -2,49 +2,110 @@
 % Please edit documentation in R/shapes_operations.R
 \name{expected_shapes}
 \alias{expected_shapes}
-\title{Compute shapes expected by a linear model}
+\title{Compute mean/expected shape(s)}
 \usage{
-expected_shapes(model, xvalue)
+expected_shapes(shapes, x = NULL, xvalue = NULL, tree = NULL)
 }
 \arguments{
-\item{model}{A \code{mlm} object created using \code{\link[=lm]{lm()}}.}
+\item{shapes}{Shape data.}
 
-\item{xvalue}{A numeric value or values of \code{x} in the \code{model} at
-which calculate expected shape(s).}
+\item{x}{A vector or column vector containing a single explanatory variable
+(can be either a factor or a numeric). If \code{NULL}, the grand mean of
+the entire sample is computed.}
+
+\item{xvalue}{One or more numeric value(s) or factor level(s) of \code{x} at
+which calculate expected shape(s). If \code{NULL}, all the value(s) or
+level(s) are used.}
+
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
+should match names in \code{x} and \code{shapes}.}
 }
 \value{
-A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
-landmark data (where \code{n} is the number of shapes provided in the left
-side of the formula in \code{model}) and \code{n x (4 x nb.h)} for the case
-of Fourer data (where nb. h is the number of harmonics used in elliptic
-Fourier analysis).
+For landmark data, either a \code{p x k} matrix defining a single
+mean shape or a \code{p x k x n} array containing \code{n} mean shapes.
+For Fourier data, a \code{n x (4 x nb.h)} matrix of Fourier coefficients
+(with \code{nb.h} being the number of harmonics used during elliptic Fourier
+analysis).
 }
 \description{
-This function calculates and returns shapes expected under a
-linear model, at one or more specific values of a numeric explanatory
-variable.
-}
-\details{
-Similar in spirit to \code{\link[=consensus]{consensus()}} but for continuous covariates
-instead of levels of a factor (and with a different usage).
+Compute the mean shape from the entire sample, or the shape(s)
+expected for one or more levels (factors) or values (numerics) of an external
+explanatory variable as fitted by a linear model.
 }
 \examples{
-#load data
+#load tails data and packages
+library(Morpho)
+library(Momocs)
+data("tails")
+shapes <- tails$shapes
+sizes <- log(tails$sizes)
+species <- tails$data$species
+type <- tails$data$type
+tree <- tails$tree
+
+#compute and plot mean shape of the entire sample
+mshape <- expected_shapes(shapes)
+plot(mshape)
+lineplot(mshape, tails$links)
+
+#getting mean shapes for the levels of a factor: compute and plot the mean shape
+#of each of the 13 species
+sp_shapes <- expected_shapes(shapes, x = species)
+pile_shapes(sp_shapes, links = tails$links, mshape = FALSE)
+
+#getting the mean shape for a specific level of a factor: compute and plot the
+#mean shape of deep-forked specimens
+df_shape <- expected_shapes(shapes, x = type, xvalue = "DF")
+plot(df_shape)
+lineplot(df_shape, tails$links)
+
+#getting the mean shape for a specific level of a factor, correcting for phylogeny:
+#compute and plot mean the shape of deep-forked species
+sp_type <- factor(c(tapply(as.character(type), species, unique)))
+df_sp_shape <- expected_shapes(sp_shapes, x = sp_type, xvalue = "DF", tree = tree)
+plot(df_sp_shape)
+lineplot(df_sp_shape, tails$links)
+
+#getting the shapes expected for a covariate: compute and plot the shapes expected
+#under the linear regression size on of shape
+exp_shapes <- expected_shapes(shapes, x = sizes)
+pile_shapes(exp_shapes, links = tails$links, mshape = FALSE)
+
+#getting the shape expected for specific values of a covariate: compute and plot the
+#shapes expected at the maximum size
+large_shape <- expected_shapes(shapes, x = sizes, xvalue = max(sizes))
+plot(large_shape)
+lineplot(large_shape, tails$links)
+
+#getting the shape expected for specific values of a covariate, correcting for phylogeny:
+#compute and plot the shapes expected at the maximum size
+sp_sizes <- c(tapply(sizes, species, mean))
+large_sp_shape <- expected_shapes(sp_shapes, x = sp_sizes, xvalue = max(sp_sizes), tree = tree)
+plot(large_sp_shape)
+lineplot(large_sp_shape, tails$links)
+
+
+#quick demo for Fourier data:
 data("shells")
+shapes <- shells$shapes
 
-#compute shape expected at all the empiric values of size
-mod <- lm(shells$shapes$coe ~ log(shells$sizes))
-predshapes <- expected_shapes(mod, xvalue = log(shells$sizes))
-pile_shapes(predshapes, mshape = FALSE)
+#mean shape of the entire sample
+mshape <- expected_shapes(shapes)
+plot(inv_efourier(mshape, nb.pts = 200), type = "l")
 
-#compute shape expected at the maximum and maximum sizes
-mod <- lm(shells$shapes$coe ~ log(shells$sizes))
-bigshape <- expected_shapes(mod, xvalue = max(log(shells$sizes)))
-smallshape <- expected_shapes(mod, xvalue = min(log(shells$sizes)))
+#mean shape of each of the four species
+sp_shapes <- expected_shapes(shapes, x = shells$data$species)
+pile_shapes(sp_shapes, mshape = FALSE)
 
-plot(inv_efourier(bigshape, 300), type = "l", lwd = 2)
-plot(inv_efourier(smallshape, 300), type = "l", lwd = 2)
-}
-\seealso{
-\code{\link{consensus}}
+#mean shape of P. esbelta
+esbelta_shape <- expected_shapes(shapes, x = shells$data$species, xvalue = "esbelta")
+plot(inv_efourier(esbelta_shape, nb.pts = 200), type = "l")
+
+#shapes expected by the linear regression of size on shape
+exp_shapes <- expected_shapes(shapes, x = shells$sizes)
+pile_shapes(exp_shapes, mshape = FALSE)
+
+#shapes expected at the minimum size
+large_shape <- expected_shapes(shapes, x = shells$sizes, xvalue = min(shells$sizes))
+plot(inv_efourier(large_shape, nb.pts = 200), type = "l")
 }

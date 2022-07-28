@@ -4,7 +4,7 @@
 \alias{hulls_by_group_3D}
 \title{Plot 3D convex hulls for a series of groups}
 \usage{
-hulls_by_group_3D(xyz, fac, col = 1:nlevels(fac), ...)
+hulls_by_group_3D(xyz, fac, col = seq_len(nlevels(fac)), ...)
 }
 \arguments{
 \item{xyz}{Coordinates for the scatterplot}

@@ -26,9 +26,9 @@ test_that(desc = "testing rev_eigen, single empiric case", code = {
 })
 
 
-test_that(desc = "testing rev_eigen (and consensus!), single theoretic case", code = {
+test_that(desc = "testing rev_eigen (and expected_shapes!), single theoretic case", code = {
   data(tails)
-  meanshape <- consensus(tails$shapes)
+  meanshape <- expected_shapes(tails$shapes)
   pca <- prcomp(geomorph::two.d.array(tails$shapes))
 
   backshapes_mat <- rev_eigen(scores = rep(0, length.out = ncol(pca$x)),
@@ -40,10 +40,10 @@ test_that(desc = "testing rev_eigen (and consensus!), single theoretic case", co
 })
 
 
-test_that(desc = "testing rev_eigen (and consensus!), single vector", code = {
+test_that(desc = "testing rev_eigen (and expected_shapes!), single vector", code = {
   data(tails)
   pca <- prcomp(geomorph::two.d.array(tails$shapes))
-  mshape <- consensus(tails$shapes)
+  mshape <- expected_shapes(tails$shapes)
 
   newshape_mat <- rev_eigen(scores = 0, vectors = pca$rotation[,1], center = pca$center)
   newshape_arr <- matrix (newshape_mat, ncol = 2, byrow = TRUE)
@@ -78,9 +78,9 @@ test_that(desc = "testing proj_eigen, single empiric case", code = {
 })
 
 
-test_that(desc = "testing proj_eigen (and consensus!), single theoretic case", code = {
+test_that(desc = "testing proj_eigen (and expected_shapes!), single theoretic case", code = {
   data(tails)
-  meanshape <- consensus(tails$shapes)
+  meanshape <- expected_shapes(tails$shapes)
   pca <- prcomp(geomorph::two.d.array(tails$shapes))
 
   centroid <- proj_eigen(x = matrix(t(meanshape), nrow = 1),
@@ -91,10 +91,10 @@ test_that(desc = "testing proj_eigen (and consensus!), single theoretic case", c
 })
 
 
-test_that(desc = "testing proj_eigen (and consensus!), single vector", code = {
+test_that(desc = "testing proj_eigen (and expected_shapes!), single vector", code = {
   data(tails)
   pca <- prcomp(geomorph::two.d.array(tails$shapes))
-  mshape <- consensus(tails$shapes)
+  mshape <- expected_shapes(tails$shapes)
 
   newscore <- proj_eigen(x = matrix(t(mshape), nrow = 1, byrow = TRUE), vectors = pca$rotation[,1], center = pca$center)
 

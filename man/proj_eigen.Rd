@@ -42,7 +42,7 @@ plot(pca$x, pch = 16, col = "gray")
 points(newscores, col = "black")
 
 #compute and project species' mean shapes
-meanshapes_arr <- consensus(tails$shapes, index = tails$data$species)
+meanshapes_arr <- expected_shapes(tails$shapes, x = tails$data$species)
 meanshapes_mat <- two.d.array(meanshapes_arr)
 meanscores <- proj_eigen(x = meanshapes_mat,
                         vectors = pca$rotation,
