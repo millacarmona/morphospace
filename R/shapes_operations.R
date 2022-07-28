@@ -16,6 +16,10 @@
 #' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
 #'   should match names in \code{x} and \code{shapes}.
 #'
+#' @details If a phylogenetic tree is supplied for interspecific shape data, the
+#'   procedure is performed using the phylogenetically-corrected regression coefficients
+#'   (see Revell, 2009) assuming a Brownian motion model of evolution.
+#'
 #' @return For landmark data, either a \code{p x k} matrix defining a single
 #'   mean shape or a \code{p x k x n} array containing \code{n} mean shapes.
 #'   For Fourier data, a \code{n x (4 x nb.h)} matrix of Fourier coefficients
@@ -23,6 +27,9 @@
 #'   analysis).
 #'
 #' @export
+#'
+#' @references Revell, L. J. (2009). \emph{Size-correction and principal components
+#'   for interspecific comparative studies}. Evolution, 63, 3258-3268.
 #'
 #' @examples
 #' #load tails data and packages
@@ -210,8 +217,8 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
 #'
 #'   If a phylogenetic tree is supplied for interspecific shape data, the procedure
 #'   is performed using the phylogenetically-corrected regression coefficients (and
-#'   the phylogenetic mean is used instead of the grand mean for re-centering data);
-#'   see Revell (2009) assuming a Brownian motion model of evolution.
+#'   the phylogenetic mean is used instead of the grand mean for re-centering data;
+#'   see Revell, 2009) assuming a Brownian motion model of evolution.
 #'
 #' @return A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
 #'   landmark data and \code{n x (4 x nb.h)} for the case of Fourer data (where
