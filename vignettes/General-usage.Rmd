@@ -170,7 +170,7 @@ title("PLS\n with LOOCV")
 These methods can be used instead of regular PCA for building morphospaces via the `FUN` and `...` arguments (adding the argument `groups` for `bg_prcomp`, `tree` for `phy_prcomp`, and `X` [and potentially also a `tree`] for `pls_shapes`, respectively) of the `mspace` function. The resulting morphospace can be combined with the `proj_*` functions in the same way as before.
 
 
-```{r}
+```{r, eval = FALSE}
 # Between group PCA - all species (invert both axes for easier comparison with 
 # previous plots). We'll use plot_mspace to add a legend:
 mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
@@ -179,7 +179,23 @@ mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
   proj_groups(shapes = detr_shapes, groups = spp) %>%
   plot_mspace(legend = TRUE)
 title("Morphospace emphasizing interspecific variation")
+```
 
+```{r, echo = FALSE, fig.show='hide'}
+# Between group PCA - all species (invert both axes for easier comparison with 
+# previous plots). We'll use plot_mspace to add a legend:
+msp <- mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
+       links = wf, invax = c(1,2), cex.ldm = 5, plot = TRUE) %>%
+  proj_shapes(shapes = detr_shapes, col = spp) %>%
+  proj_groups(shapes = detr_shapes, groups = spp)
+```
+
+```{r, echo = FALSE}
+plot_mspace(msp, legend = TRUE)
+title("Morphospace emphasizing interspecific variation")
+```
+
+```{r, eval = FALSE}
 # Phylogenetic PCA for all species, adding projection of intrapspecific variation,
 # add legend
 mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
@@ -188,6 +204,21 @@ mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
   proj_groups(shapes = detr_shapes, groups = spp) %>%
   proj_consensus(shapes = sp_shapes, col = "black", pch = 16) %>%
   plot_mspace(legend = TRUE)
+title("Phylogenetic morphospace\n+ samples")
+```
+
+```{r, echo = FALSE, fig.show='hide'}
+# Phylogenetic PCA for all species, adding projection of intrapspecific variation,
+# add legend
+msp <- mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
+       xlim = c(-0.25, 0.15), ylim = c(-0.2, 0.15), cex.ldm = 5, plot = TRUE) %>%
+  proj_shapes(shapes = detr_shapes, col = spp) %>%
+  proj_groups(shapes = detr_shapes, groups = spp) %>%
+  proj_consensus(shapes = sp_shapes, col = "black", pch = 16)
+```
+
+```{r, echo = FALSE}
+plot_mspace(msp, legend = TRUE)
 title("Phylogenetic morphospace\n+ samples")
 ```
 
@@ -213,7 +244,7 @@ Or we can combine PC1 (or any other PC axis) with the phylogenetic tree to creat
 
 ```{r}
 # Plot vertical phenogram using PC1, add a legend
-plot_mspace(msp3, y = phy, axes = 2, nh = 6, nv = 6, cex.ldm = 4, 
+plot_mspace(msp3, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             col.groups = 1:nlevels(spp), ylab = "Time", legend = TRUE)
 ```
 

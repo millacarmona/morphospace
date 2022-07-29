@@ -1,75 +1,64 @@
 url: https://millacarmona.github.io/morphospace/
 template:
   bootswatch: journal
-
-
 reference:
-  - title: "morphospace workflow"
-    desc: >
-      functions for generating, populating, and regenerating morphospaces
-    contents:
-    - mspace
-    - proj_shapes
-    - proj_consensus
-    - proj_groups
-    - proj_phylogeny
-    - proj_axis
-    - plot_mspace
-
-  - title: "multivariate methods"
-    desc: >
-      functions for ordination of multivariate data
-    contents:
-    - phy_prcomp
-    - bg_prcomp
-    - pls2b
-    - pls_shapes
-    - exp_var
-
-  - title: "shape operations"
-    desc: >
-      funtions to perform various transformations/manipulations of shape data
-    contents:
-    - expected_shapes
-    - detrend_shapes
-    - correct_efourier
-    - ax_transformation
-
-  - title: miscellaneous
-    contents:
-    - pile_shapes
-    - ellipses_by_group_2D
-    - hulls_by_group_2D
-    - hulls_by_group_3D
-    - build_template2d
-
-  - title: "data"
-    desc: >
-      sample data
-    contents:
-    - tails
-    - wings
-    - shells
-    - shells3D
-
-  - title: "internal functions"
-    desc: >
-      functions used internally by morphospace
-    contents:
-    - rev_eigen
-    - proj_eigen
-    - svd_block
-    - inv_efourier
-    - shapes_mat
-    - adjust_models2d
-    - adjust_models3d
-    - morphogrid
-    - plot_morphogrid2d
-    - plot_morphogrid3d
-    - rotate_fcoef
-    - plot_phenogram
-
-
-
-
+- title: morphospace workflow
+  desc: |
+    functions for generating, populating, and regenerating morphospaces
+  contents:
+  - mspace
+  - proj_shapes
+  - proj_consensus
+  - proj_groups
+  - proj_phylogeny
+  - proj_axis
+  - plot_mspace
+- title: multivariate methods
+  desc: |
+    functions for ordination of multivariate data
+  contents:
+  - phy_prcomp
+  - bg_prcomp
+  - pls2b
+  - pls_shapes
+  - exp_var
+- title: shape operations
+  desc: |
+    funtions to perform various transformations/manipulations of shape data
+  contents:
+  - expected_shapes
+  - detrend_shapes
+  - correct_efourier
+  - ax_transformation
+- title: miscellaneous
+  contents:
+  - pile_shapes
+  - ellipses_by_group_2D
+  - hulls_by_group_2D
+  - hulls_by_group_3D
+  - build_template2d
+- title: data
+  desc: |
+    sample data
+  contents:
+  - tails
+  - wings
+  - shells
+  - shells3D
+- title: internal functions
+  desc: |
+    functions used internally by morphospace
+  contents:
+  - rev_eigen
+  - proj_eigen
+  - svd_block
+  - inv_efourier
+  - shapes_mat
+  - adjust_models2d
+  - adjust_models3d
+  - morphogrid
+  - plot_morphogrid2d
+  - plot_morphogrid3d
+  - rotate_fcoef
+  - plot_phenogram
 

@@ -52,8 +52,9 @@ curvs <- wings$template
 
 # Inspect shapes using links
 pile_shapes(shapes, wings$links)
+```
 
-
+```{r, eval = FALSE}
 # Generate morphospace but use warped wings as background models
 spxcac <- species:cactus
 mspace(shapes, template = curvs, col.ldm = "black", cex.ldm = 5, plot = FALSE) %>%
@@ -69,6 +70,27 @@ mspace(shapes, template = curvs, col.ldm = "black", cex.ldm = 5, plot = FALSE) %
   plot_mspace(legend = TRUE, cex.legend = 1.5)
 title("Morphospace using template")
 ```
+
+```{r, echo = FALSE, fig.show='hide'}
+# Generate morphospace but use warped wings as background models
+spxcac <- species:cactus
+msp <- mspace(shapes, template = curvs, col.ldm = "black", cex.ldm = 5, plot = TRUE) %>%
+  proj_shapes(shapes = shapes, 
+              col = rep(c("blue", "orange"), each = 2)[spxcac], 
+              pch = rep(c(16, 1), times = 2)[spxcac]) %>%
+  proj_groups(groups = spxcac, ellipse = TRUE, 
+              col = rep(c("blue", "orange"), each = 2), 
+              lty = rep(c(1, 2), times = 2), lwd = 2) %>%
+  proj_consensus(shapes = expected_shapes(shapes, spxcac), 
+                 bg = rep(c("blue", "orange"), each = 2), 
+                 pch = rep(c(16, 1), times = 2), cex = 3)
+```
+
+```{r, echo = FALSE}
+plot_mspace(msp, legend = TRUE, cex.legend = 1.5)
+title("Morphospace using template")
+```
+
 
 Assume for a second we are interested in exploring whether we can identify morphological differences between species. The pattern we are seeing suggets that variation in wing morphology is very subtle, that wings of these two species are basically indistinguishable, and that cactus has a large effect on wing morphology. However, there is a lot of 'noise' (i.e. sexual dimorphism, allometric variation, genetic variation, even host cactus) we can get rid of using `detrend_shapes`. We do this species-wise, so that patterns of interspecific variation are not blurred.
 
@@ -101,7 +123,7 @@ for(i in 1:2) {
 Once shape variation has been 'refined', we can ordinate it again, and magnify variation so the representation can be more easily interpreted using the `mag` argument.
 
 
-```{r}
+```{r, eval = FALSE}
 mspace(detr_shapes, template = curvs, col.ldm = "black",
        cex.ldm = 5, mag = 2, plot = FALSE) %>%
   proj_shapes(shapes = detr_shapes, 
@@ -114,6 +136,24 @@ mspace(detr_shapes, template = curvs, col.ldm = "black",
                  bg = rep(c("blue", "orange"), each = 2), 
                  pch = rep(c(1, 16), times = 2), cex = 3) %>%
   plot_mspace(legend = TRUE, cex.legend = 1.5)
+```
+
+```{r, echo = FALSE, fig.show = 'hide'}
+msp <- mspace(detr_shapes, template = curvs, col.ldm = "black",
+       cex.ldm = 5, mag = 2, plot = TRUE) %>%
+  proj_shapes(shapes = detr_shapes, 
+              col = rep(c("blue", "orange"), each = 2)[spxcac], 
+              pch = rep(c(16, 1), times = 2)[spxcac]) %>%
+  proj_groups(groups = spxcac, ellipse = TRUE, 
+              col = rep(c("blue", "orange"), each = 2), 
+              lty = rep(c(1, 2), times = 2), lwd = 2) %>%
+  proj_consensus(shapes = expected_shapes(detr_shapes, spxcac), 
+                 bg = rep(c("blue", "orange"), each = 2), 
+                 pch = rep(c(1, 16), times = 2), cex = 3)
+```
+
+```{r, echo = FALSE}
+plot_mspace(msp, legend = TRUE, cex.legend = 1.5)
 ```
 
 
@@ -146,14 +186,28 @@ bzones <- shells$data$zone
 
 # Pile shapes
 pile_shapes(shapes)
+```
 
-
+```{r, eval=FALSE}
 # Generate morphospace using raw variation
 mspace(shapes, bg.model = "light gray", plot = FALSE) %>%
   proj_shapes(shapes = shapes, col = species) %>%
   proj_groups(shapes = shapes, groups = species, alpha = 0.5) %>% 
   proj_consensus(shapes = expected_shapes(shapes, species), col = 1:4, pch = 21) %>% 
   plot_mspace(legend = TRUE, cex.legend = 1)
+title("Morphospace")
+```
+
+```{r, echo=FALSE, fig.show='hide'}
+# Generate morphospace using raw variation
+msp <- mspace(shapes, bg.model = "light gray", plot = TRUE) %>%
+  proj_shapes(shapes = shapes, col = species) %>%
+  proj_groups(shapes = shapes, groups = species, alpha = 0.5) %>% 
+  proj_consensus(shapes = expected_shapes(shapes, species), col = 1:4, pch = 21)
+```
+
+```{r, echo = FALSE}
+plot_mspace(msp, legend = TRUE, cex.legend = 1.5)
 title("Morphospace")
 ```
 
