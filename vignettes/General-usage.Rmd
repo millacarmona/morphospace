@@ -71,7 +71,7 @@ Once the shape data is ready, we build a morphospace using the `mspace` function
 # Generate morphospace using detrended shapes, project specimens
 msp1 <- mspace(detr_shapes, links = wf, cex.ldm = 5) %>%
   proj_shapes(shapes = detr_shapes)
-title("Morphospace")
+title("Morphospace", cex.main = 1)
 
 
 # Generate morphospace, project specimens and delimit species' ranges 
@@ -79,7 +79,7 @@ title("Morphospace")
 msp2 <- mspace(detr_shapes, links = wf, cex.ldm = 5) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp)
-title("Morphospace\n+ species differentiation")
+title("Morphospace\n+ species differentiation", cex.main = 1)
 
 
 # Generate morphospace, project specimens, species' mean shapes and 
@@ -90,7 +90,7 @@ msp3 <- mspace(shapes = detr_shapes, links = wf, cex.ldm = 5) %>%
   proj_consensus(shapes = sp_shapes, bg = 1:nlevels(spp), pch = 21) %>%
   proj_groups(groups = spp) %>% 
   proj_phylogeny(tree = phy, lwd = 1.5)
-title("Morphospace\n+ groups + phylogeny")
+title("Morphospace\n+ groups + phylogeny", cex.main = 1)
 
 
 # Check the elements of each mspace object, note the slots corresponding to 
@@ -117,7 +117,7 @@ mspace(detr_shapes, links = wf, cex.ldm = 5) %>%
   proj_phylogeny(tree = phy, pch = 16) %>%
   proj_axis(obj = pca, axis = 1, mag = 1, col = "red", lwd = 3, lty = 1) %>%
   proj_axis(obj = pca, axis = 2, mag = 1, col = "red", lwd = 3, lty = 2)
-title("Morphospace\n+ PC1 and PC2 of NDF species projected")
+title("Morphospace\n+ PC1 and PC2 of NDF species projected", cex.main = 1)
 ```
 
 
@@ -141,13 +141,13 @@ layout(rbind(c(1,2)))
 bgpca1 <- bg_prcomp(x = random_y, groups = class)
 plot(bgpca1$x, col = c(1:3)[class])
 hulls_by_group_2D(bgpca1$x, class)
-title("bgPCA\n without LOOCV")
+title("bgPCA\n without LOOCV", cex.main = 1)
 
 
 bgpca2 <- bg_prcomp(x = random_y, groups = class, LOOCV = TRUE)
 plot(bgpca2$x, col = c(1:3)[class])
 hulls_by_group_2D(bgpca2$x, class)
-title("bgPCA\n with LOOCV")
+title("bgPCA\n with LOOCV", cex.main = 1)
 
 
 # Perform PLS on the set of random variables to look for the PLS axis maximzing 
@@ -156,13 +156,13 @@ layout(rbind(c(1,2)))
 pls1 <- pls2b(x = random_x, y = random_y)
 plot(pls1$xscores, pls1$yscores)
 abline(lm(pls1$yscores ~ pls1$xscores), col = "red")
-title("PLS\n without LOOCV")
+title("PLS\n without LOOCV", cex.main = 1)
 
 
 pls2 <- pls2b(x = random_x, y = random_y, LOOCV = TRUE)
 plot(pls2$xscores, pls2$yscores)
 abline(lm(pls2$yscores ~ pls2$xscores), col = "red")
-title("PLS\n with LOOCV")
+title("PLS\n with LOOCV", cex.main = 1)
 
 ```
 
@@ -177,8 +177,9 @@ mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
        links = wf, invax = c(1,2), cex.ldm = 5, plot = FALSE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
+  proj_consensus(shapes = sp_shapes, col = "black", pch = 16) %>%
   plot_mspace(legend = TRUE)
-title("Morphospace emphasizing interspecific variation")
+title("Morphospace emphasizing interspecific variation", cex.main = 1)
 ```
 
 ```{r, echo = FALSE, fig.show='hide'}
@@ -187,12 +188,13 @@ title("Morphospace emphasizing interspecific variation")
 msp <- mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
        links = wf, invax = c(1,2), cex.ldm = 5, plot = TRUE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
-  proj_groups(shapes = detr_shapes, groups = spp)
+  proj_groups(shapes = detr_shapes, groups = spp) %>%
+  proj_consensus(shapes = sp_shapes, col = "black", pch = 16)
 ```
 
 ```{r, echo = FALSE}
 plot_mspace(msp, legend = TRUE)
-title("Morphospace emphasizing interspecific variation")
+title("Morphospace emphasizing interspecific variation", cex.main = 1)
 ```
 
 ```{r, eval = FALSE}
@@ -204,7 +206,7 @@ mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
   proj_groups(shapes = detr_shapes, groups = spp) %>%
   proj_consensus(shapes = sp_shapes, col = "black", pch = 16) %>%
   plot_mspace(legend = TRUE)
-title("Phylogenetic morphospace\n+ samples")
+title("Phylogenetic morphospace + samples", cex.main = 1)
 ```
 
 ```{r, echo = FALSE, fig.show='hide'}
@@ -219,7 +221,7 @@ msp <- mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
 
 ```{r, echo = FALSE}
 plot_mspace(msp, legend = TRUE)
-title("Phylogenetic morphospace\n+ samples")
+title("Phylogenetic morphospace + samples", cex.main = 1)
 ```
 
 

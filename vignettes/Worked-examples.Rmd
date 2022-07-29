@@ -207,7 +207,7 @@ msp <- mspace(shapes, bg.model = "light gray", plot = TRUE) %>%
 ```
 
 ```{r, echo = FALSE}
-plot_mspace(msp, legend = TRUE, cex.legend = 1.5)
+plot_mspace(msp, legend = TRUE, cex.legend = 1.2)
 title("Morphospace")
 ```
 
@@ -228,7 +228,7 @@ for(i in 1:nlevels(species)) {
 
 *Note that we don't need* `arrayspecs` *when using* `detrend_shapes` *here, that's because Fourier coefficients are already stored in matrix format)*.
 
-Now we can use `plot_mspace` again to create a more complex hybrid plot combining shape changes associated to PC1 against the time axis. To do so, we do a bit of variable manipulation first to obtain the classification of each specimen to the combination of (relative) age and species, then build the morphospace, then use `plot_mspace` to plot geochronologic age against shape. Finally, we calculate the (absolute) ages from each combination, bind them to the groups means, order them and use that to depict the mean shape changes of each species through time:
+Now we can use `plot_mspace` again to create a more complex hybrid plot combining shape changes associated to PC1 against the time axis. To do so, we do a bit of variable manipulation first to obtain the classification of each specimen to the combination of (relative) age and species, then build the morphospace (this time, using detrended shapes and between-groups PCA), and then use `plot_mspace` to plot geochronologic age against shape. Finally, we calculate the (absolute) ages from each combination, bind them to the groups means, order them and use that to depict the mean shape changes of each species through time:
 
 
 ```{r}
@@ -244,6 +244,9 @@ strmsp <- mspace(detr_shapes, FUN = bg_prcomp, groups = species,
   proj_groups(shapes = detr_shapes, groups = species, alpha = 0.2) %>%
   proj_consensus(shapes = shapes_agesxspecies, pch = 16) %>%
   proj_groups(shapes = detr_shapes, groups = sp.bz, col = adjustcolor(1, alpha.f = 0))
+
+
+#plot anagenetic trajectory in morphospace
 for(i in 1:4) {
   index <- grepl(x = rownames(strmsp$gr_centroids), pattern = levels(species)[i])
   points(strmsp$gr_centroids[index,], type = "l", lwd = 2, col = i)
@@ -254,6 +257,8 @@ for(i in 1:4) {
 # Plot time axis vs first PC
 plot_mspace(mspace = strmsp, x = ages, axes = 1, col.points = species, xlab = "Time (MA)",
             groups = FALSE, mshapes = TRUE)
+
+
 # Compute and arrange absolute ages for each group, then
 # use it to add and connect mean shapes
 xy <- cbind(tapply(ages, sp.bz, mean), strmsp$gr_centroids[,1])
@@ -445,6 +450,9 @@ plot_mspace(allomsp2, x = sizes, axes = 1, col.points = species,
             xlab = "log-size", xlim = range(sizes), adj_frame = c(0.9, 0.85), 
             points = FALSE, groups = FALSE)
 title(' "Allomorphospace"')
+
+
+# Add fitted values for each specimen
 for(i in 1:nlevels(species)) {
   index <- species == levels(species)[i]
   mod <- lm(allomsp2$x[index,1] ~ sizes[index])
