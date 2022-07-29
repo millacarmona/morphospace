@@ -69,38 +69,54 @@ groups).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">bg_prcomp</span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">groups</span>,
-  gweights <span class="op">=</span> <span class="cn">TRUE</span>,
-  LOOCV <span class="op">=</span> <span class="cn">FALSE</span>,
-  recompute <span class="op">=</span> <span class="cn">FALSE</span>,
-  corr <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bg_prcomp</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">groups</span>,</span>
+<span>  gweights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  LOOCV <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  recompute <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  corr <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A matrix with variables as columns and observations as rows.</p></dd>
+
+
 <dt>groups</dt>
 <dd><p>Factor; classification of observations of <code>x</code> into a
 priori groups.</p></dd>
+
+
 <dt>gweights</dt>
 <dd><p>Logical; whether to weight each group by its number of
 observations.</p></dd>
+
+
 <dt>LOOCV</dt>
 <dd><p>Logical; whether to apply leave-one-out cross-validation.</p></dd>
+
+
 <dt>recompute</dt>
 <dd><p>Logical; whether to re-compute rotation matrix using the
 scores resulting from LOOCV.</p></dd>
+
+
 <dt>corr</dt>
 <dd><p>Logical; whether to use correlation instead of covariance matrix
 as input.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A <code>"bg_prcomp"</code> object formatted following the <code>"prcomp"</code>class:</p><ul><li><p><code>$sdev:</code> the standard deviations of the principal components
+    
+
+<p>A <code>"bg_prcomp"</code> object formatted following the <code>"prcomp"</code></p>
+
+
+<p>class:</p><ul><li><p><code>$sdev:</code> the standard deviations of the principal components
 (i.e. the square roots of the eigenvalues of the covariance/correlation
 matrix).</p></li>
 <li><p><code>$rotation:</code> a <code>n x (g - 1)</code> matrix of eigenvector
@@ -156,26 +172,26 @@ the spurious groups problem in between-group PCA</em>. Evolutionary Biology, 48(
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#load data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#extract species classification and shapes</span></span>
-<span class="r-in"><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">shells</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span></span>
-<span class="r-in"><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">shells</span><span class="op">$</span><span class="va">shapes</span><span class="op">$</span><span class="va">coe</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#perform between-groups PCA</span></span>
-<span class="r-in"><span class="va">bgpca</span> <span class="op">&lt;-</span> <span class="fu">bg_prcomp</span><span class="op">(</span>x <span class="op">=</span> <span class="va">shapes</span>, groups <span class="op">=</span> <span class="va">species</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#look at the results</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">bgpca</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#load data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#extract species classification and shapes</span></span></span>
+<span class="r-in"><span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">shells</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span></span></span>
+<span class="r-in"><span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">shells</span><span class="op">$</span><span class="va">shapes</span><span class="op">$</span><span class="va">coe</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#perform between-groups PCA</span></span></span>
+<span class="r-in"><span><span class="va">bgpca</span> <span class="op">&lt;-</span> <span class="fu">bg_prcomp</span><span class="op">(</span>x <span class="op">=</span> <span class="va">shapes</span>, groups <span class="op">=</span> <span class="va">species</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#look at the results</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">bgpca</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "sdev"      "rotation"  "x"         "center"    "grcenters" "totvar"   </span>
-<span class="r-in"><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">bgpca</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span>
+<span class="r-in"><span><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">bgpca</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       variance cummulative</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> bgPC1 88.52150    88.52150</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> bgPC2  4.67040    93.19190</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> bgPC3  2.80097    95.99287</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bgpca</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span>
-<span class="r-in"><span class="fu"><a href="hulls_by_group_2D.html">hulls_by_group_2D</a></span><span class="op">(</span><span class="va">bgpca</span><span class="op">$</span><span class="va">x</span>, <span class="va">species</span><span class="op">)</span> <span class="co">#add convex hulls for species</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bgpca</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="hulls_by_group_2D.html">hulls_by_group_2D</a></span><span class="op">(</span><span class="va">bgpca</span><span class="op">$</span><span class="va">x</span>, <span class="va">species</span><span class="op">)</span> <span class="co">#add convex hulls for species</span></span></span>
 <span class="r-plt img"><img src="bg_prcomp-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
@@ -191,7 +207,7 @@ the spurious groups problem in between-group PCA</em>. Evolutionary Biology, 48(
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

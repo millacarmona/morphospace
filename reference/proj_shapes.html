@@ -63,54 +63,73 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">proj_shapes</span><span class="op">(</span><span class="va">shapes</span>, <span class="va">mspace</span>, pipe <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">proj_shapes</span><span class="op">(</span><span class="va">mspace</span>, <span class="va">shapes</span>, density <span class="op">=</span> <span class="cn">TRUE</span>, pipe <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>shapes</dt>
-<dd><p>Shape data.</p></dd>
-<dt>mspace</dt>
+    <dl><dt>mspace</dt>
 <dd><p>An <code>"mspace"</code> object.</p></dd>
+
+
+<dt>shapes</dt>
+<dd><p>Shape data.</p></dd>
+
+
+<dt>density</dt>
+<dd><p>Logical; whether to add density distribution for points
+(univariate ordinations only).</p></dd>
+
+
 <dt>pipe</dt>
 <dd><p>Logical; is the function being included in a pipe?</p></dd>
+
+
 <dt>...</dt>
-<dd><p>Further arguments passed to <code><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points()</a></code>.</p></dd>
+<dd><p>Further arguments passed to <code><a href="https://rdrr.io/r/graphics/points.html" class="external-link">graphics::points()</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>If a plot device with a morphospace is open, shapes feeded to
-<code>shapes</code> are projected into morphospace. If <code>pipe = FALSE</code>those scores are returned invisibly. If <code>pipe = TRUE</code> the feeded
-<code>mspace</code> object is returned unchanged and invisibly.</p>
+    
+
+<p>If a plot device with a morphospace is open, shapes feeded to
+<code>shapes</code> are projected into morphospace. If <code>pipe = FALSE</code></p>
+
+
+<p>those scores are returned invisibly. If <code>pipe = TRUE</code> the supplied
+<code>mspace</code> object will be modified by replacing the original
+<code>$x</code> slot as well as adding some graphical parameters, and returned
+invisibly.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>The purpose of this function is to mantain morphospace
+    <p>The purpose of this function is to maintain morphospace
 generation and sample representation as independent affairs, and
 to add flexibility to graphical representation of scatter points.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#load and extract relevant data, packages and information</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"wings"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">wings</span><span class="op">$</span><span class="va">shapes</span></span>
-<span class="r-in"><span class="va">cactus</span> <span class="op">&lt;-</span> <span class="va">wings</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">sex</span></span>
-<span class="r-in"><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">wings</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span></span>
-<span class="r-in"><span class="va">template</span> <span class="op">&lt;-</span> <span class="va">wings</span><span class="op">$</span><span class="va">template</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#generate basic morphospace, add sampled shapes</span></span>
-<span class="r-in"><span class="fu"><a href="mspace.html">mspace</a></span><span class="op">(</span><span class="va">shapes</span>, template <span class="op">=</span> <span class="va">template</span>, mag <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu">proj_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#load and extract relevant data, packages and information</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"wings"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">wings</span><span class="op">$</span><span class="va">shapes</span></span></span>
+<span class="r-in"><span><span class="va">cactus</span> <span class="op">&lt;-</span> <span class="va">wings</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">sex</span></span></span>
+<span class="r-in"><span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">wings</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span></span></span>
+<span class="r-in"><span><span class="va">template</span> <span class="op">&lt;-</span> <span class="va">wings</span><span class="op">$</span><span class="va">template</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#generate basic morphospace, add sampled shapes</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="mspace.html">mspace</a></span><span class="op">(</span><span class="va">shapes</span>, template <span class="op">=</span> <span class="va">template</span>, mag <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">proj_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in shapes_mat(shapes):</span> object 'data2d' not found</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#change colors, symbols, etc for the scatter</span></span>
-<span class="r-in"><span class="fu"><a href="mspace.html">mspace</a></span><span class="op">(</span><span class="va">shapes</span>, template <span class="op">=</span> <span class="va">template</span>, mag <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu">proj_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span><span class="op">[</span>,,<span class="va">species</span> <span class="op">==</span> <span class="st">"Db"</span><span class="op">]</span>,  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"green"</span><span class="op">)</span>,</span>
-<span class="r-in">              pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">16</span><span class="op">)</span><span class="op">[</span><span class="va">cactus</span><span class="op">[</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Db"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu">proj_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span><span class="op">[</span>,,<span class="va">species</span> <span class="op">==</span> <span class="st">"Dk"</span><span class="op">]</span>,  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span><span class="op">)</span>,</span>
-<span class="r-in">              pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">16</span><span class="op">)</span><span class="op">[</span><span class="va">cactus</span><span class="op">[</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Dk"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#change colors, symbols, etc for the scatter</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="mspace.html">mspace</a></span><span class="op">(</span><span class="va">shapes</span>, template <span class="op">=</span> <span class="va">template</span>, mag <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">proj_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span><span class="op">[</span>,,<span class="va">species</span> <span class="op">==</span> <span class="st">"Db"</span><span class="op">]</span>,  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"green"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>              pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">16</span><span class="op">)</span><span class="op">[</span><span class="va">cactus</span><span class="op">[</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Db"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">proj_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span><span class="op">[</span>,,<span class="va">species</span> <span class="op">==</span> <span class="st">"Dk"</span><span class="op">]</span>,  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>              pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">16</span><span class="op">)</span><span class="op">[</span><span class="va">cactus</span><span class="op">[</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Dk"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in shapes_mat(shapes):</span> object 'data2d' not found</span>
 </code></pre></div>
     </div>
@@ -126,7 +145,7 @@ to add flexibility to graphical representation of scatter points.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

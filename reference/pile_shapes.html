@@ -63,57 +63,64 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, links <span class="op">=</span> <span class="cn">NULL</span>, mshape <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, links <span class="op">=</span> <span class="cn">NULL</span>, mshape <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>shapes</dt>
 <dd><p>Shape data.</p></dd>
+
+
 <dt>links</dt>
 <dd><p>An optional list with the indices of the coordinates defining
 the wireframe (following the format used in <code>Morpho</code>).</p></dd>
+
+
 <dt>mshape</dt>
 <dd><p>Logical; whether to plot the mean configuration.</p></dd>
+
+
 <dt>...</dt>
-<dd><p>Additional arguments passed to <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or <code><a href="https://dmurdoch.github.io/rgl/dev/reference/3dobjects.html" class="external-link">rgl::points3d()</a></code>.</p></dd>
+<dd><p>Additional arguments passed to <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">graphics::plot()</a></code> or <code><a href="https://dmurdoch.github.io/rgl/dev/reference/3dobjects.html" class="external-link">rgl::points3d()</a></code>.</p></dd>
+
 </dl></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#load 2D landmark data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"tails"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">shapes</span></span>
-<span class="r-in"><span class="va">links</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">links</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#pile shapes</span></span>
-<span class="r-in"><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co">#bare</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#load 2D landmark data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"tails"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">shapes</span></span></span>
+<span class="r-in"><span><span class="va">links</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">links</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#pile shapes</span></span></span>
+<span class="r-in"><span><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co">#bare</span></span></span>
 <span class="r-plt img"><img src="pile_shapes-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span>, links <span class="op">=</span> <span class="va">links</span><span class="op">)</span> <span class="co">#with links</span></span>
-<span class="r-in"><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">TRUE</span>, links <span class="op">=</span> <span class="va">links</span><span class="op">)</span> <span class="co">#with links and mean shape</span></span>
+<span class="r-in"><span><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span>, links <span class="op">=</span> <span class="va">links</span><span class="op">)</span> <span class="co">#with links</span></span></span>
+<span class="r-in"><span><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">TRUE</span>, links <span class="op">=</span> <span class="va">links</span><span class="op">)</span> <span class="co">#with links and mean shape</span></span></span>
 <span class="r-plt img"><img src="pile_shapes-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#load 3D landmark data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells3D"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">shells3D</span><span class="op">$</span><span class="va">shapes</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co">#pile shapes</span></span>
-<span class="r-in"><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co">#bare</span></span>
-<span class="r-in"><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span>, links <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span> <span class="co">#with false links (just as an example)</span></span>
-<span class="r-in"><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">TRUE</span>, links <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span> <span class="co">#with false links and mean shape</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#load outline data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">shells</span><span class="op">$</span><span class="va">shapes</span></span>
-<span class="r-in"><span class="va">links</span> <span class="op">&lt;-</span> <span class="va">shells</span><span class="op">$</span><span class="va">links</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#pile shapes</span></span>
-<span class="r-in"><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co">#bare</span></span>
-<span class="r-in"><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">TRUE</span>, links <span class="op">=</span> <span class="va">links</span><span class="op">)</span> <span class="co">#with mean shape</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#load 3D landmark data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells3D"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">shells3D</span><span class="op">$</span><span class="va">shapes</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co">#pile shapes</span></span></span>
+<span class="r-in"><span><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co">#bare</span></span></span>
+<span class="r-in"><span><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span>, links <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span> <span class="co">#with false links (just as an example)</span></span></span>
+<span class="r-in"><span><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">TRUE</span>, links <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span> <span class="co">#with false links and mean shape</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#load outline data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">shells</span><span class="op">$</span><span class="va">shapes</span></span></span>
+<span class="r-in"><span><span class="va">links</span> <span class="op">&lt;-</span> <span class="va">shells</span><span class="op">$</span><span class="va">links</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#pile shapes</span></span></span>
+<span class="r-in"><span><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co">#bare</span></span></span>
+<span class="r-in"><span><span class="fu">pile_shapes</span><span class="op">(</span><span class="va">shapes</span>, mshape <span class="op">=</span> <span class="cn">TRUE</span>, links <span class="op">=</span> <span class="va">links</span><span class="op">)</span> <span class="co">#with mean shape</span></span></span>
 <span class="r-plt img"><img src="pile_shapes-3.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
@@ -129,7 +136,7 @@ the wireframe (following the format used in <code>Morpho</code>).</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

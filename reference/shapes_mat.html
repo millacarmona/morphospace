@@ -67,29 +67,32 @@ used as input for multivariate analysis. Used internally.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">shapes_mat</span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">shapes_mat</span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>shapes</dt>
 <dd><p>Shape data.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of length 2 containing:</p><ul><li><p><code>$datype:</code> the type of geometric morphometrics data.</p></li>
+    
+
+<p>A list of length 2 containing:</p><ul><li><p><code>$datype:</code> the type of geometric morphometrics data.</p></li>
 <li><p><code>$data2d:</code> the shape descriptors arranged in 2-margins matrix
 format.</p></li>
 </ul></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#apply on shells dataset</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">dat1</span> <span class="op">&lt;-</span> <span class="fu">shapes_mat</span><span class="op">(</span><span class="va">shells</span><span class="op">$</span><span class="va">shapes</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#inspect results</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat1</span><span class="op">$</span><span class="va">data2d</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#apply on shells dataset</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dat1</span> <span class="op">&lt;-</span> <span class="fu">shapes_mat</span><span class="op">(</span><span class="va">shells</span><span class="op">$</span><span class="va">shapes</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#inspect results</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat1</span><span class="op">$</span><span class="va">data2d</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           A1          A2         A3            A4         A5            A6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> b1'_V76-1  1 0.009847538 0.08337886  0.0039761185 0.02061273 -1.493843e-03</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> b1_A12     1 0.005227513 0.07848772  0.0016269021 0.02297933 -8.905190e-04</span>
@@ -125,15 +128,15 @@ format.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> b3'_SS-1  -0.06635582 -0.013844481 -0.002831830 -0.0029792588 -0.0005790466</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> b3_SS-1   -0.04477262 -0.007091290 -0.005358318 -0.0025769483 -0.0025821962</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> b4_SM-1   -0.04797558 -0.013992735 -0.004527085  0.0032399782 -0.0054770544</span>
-<span class="r-in"><span class="va">dat1</span><span class="op">$</span><span class="va">datype</span></span>
+<span class="r-in"><span><span class="va">dat1</span><span class="op">$</span><span class="va">datype</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "fcoef"</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#aply on tails dataset</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"tails"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu">shapes_mat</span><span class="op">(</span><span class="va">tails</span><span class="op">$</span><span class="va">shapes</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#inspect results</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat2</span><span class="op">$</span><span class="va">data2d</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#aply on tails dataset</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"tails"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu">shapes_mat</span><span class="op">(</span><span class="va">tails</span><span class="op">$</span><span class="va">shapes</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#inspect results</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat2</span><span class="op">$</span><span class="va">data2d</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        [,1]        [,2]      [,3]       [,4]      [,5]        [,6]      [,7]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.3086977 -0.06602077 0.3086977 0.06602080 0.2657952 -0.07281554 0.2657952</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.3022522 -0.06086812 0.3022522 0.06086816 0.2628490 -0.06628239 0.2628490</span>
@@ -155,7 +158,7 @@ format.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 -2.442124e-08 -0.1407362 0.1624070 -0.4443930 0.3670733</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5 -3.931407e-08 -0.1422530 0.1817729 -0.4602320 0.3545009</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 -2.052660e-08 -0.1428490 0.1957889 -0.4111111 0.4102675</span>
-<span class="r-in"><span class="va">dat2</span><span class="op">$</span><span class="va">datype</span></span>
+<span class="r-in"><span><span class="va">dat2</span><span class="op">$</span><span class="va">datype</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "landm"</span>
 </code></pre></div>
     </div>
@@ -171,7 +174,7 @@ format.</p></li>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

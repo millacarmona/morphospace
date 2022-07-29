@@ -65,7 +65,7 @@ covariation between shape data and other external, non-shape variable(s).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">pls_shapes</span><span class="op">(</span><span class="va">X</span>, <span class="va">shapes</span>, tree <span class="op">=</span> <span class="cn">NULL</span>, LOOCV <span class="op">=</span> <span class="cn">FALSE</span>, recompute <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pls_shapes</span><span class="op">(</span><span class="va">X</span>, <span class="va">shapes</span>, tree <span class="op">=</span> <span class="cn">NULL</span>, LOOCV <span class="op">=</span> <span class="cn">FALSE</span>, recompute <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -74,21 +74,32 @@ covariation between shape data and other external, non-shape variable(s).</p>
 <dd><p>A matrix with variables as columns and observations as rows,
 representing the external variables that supervise ordination
 (corresponding to the first block).</p></dd>
+
+
 <dt>shapes</dt>
 <dd><p>Shape data (corresponding to the second block of
 <code>pls2b</code>.</p></dd>
+
+
 <dt>tree</dt>
-<dd><p>A <code>"phy"</code> object containing a phylogenetic tree. Tip labels
+<dd><p>A <code>"phylo"</code> object containing a phylogenetic tree. Tip labels
 should match the row number and names from <code>x</code> and <code>y</code>.</p></dd>
+
+
 <dt>LOOCV</dt>
 <dd><p>Logical; whether to apply leave-one-out cross-validation.</p></dd>
+
+
 <dt>recompute</dt>
 <dd><p>Logical; whether to re-compute rotation matrix using the
 scores resulting from LOOCV.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A <code>"pls_shapes"</code> or <code>"phy_pls_shapes"</code> object formatted
+    
+
+<p>A <code>"pls_shapes"</code> or <code>"phy_pls_shapes"</code> object formatted
 following the <code>"prcomp"</code> class:</p><ul><li><p><code>$sdev:</code> the standard deviation of the PLS axis/axis of the
 shape block.</p></li>
 <li><p><code>$rotation:</code> a matrix of vector coefficients for the shape
@@ -135,62 +146,62 @@ components analysis in geometric morphometrics</em>. Evolutionary Biology, 46(4)
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#load data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"tails"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#extract shapes and sizes, compute mean shapes and sizes for all species, extract tree</span></span>
-<span class="r-in"><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">shapes</span></span>
-<span class="r-in"><span class="va">sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">tails</span><span class="op">$</span><span class="va">sizes</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">sp_shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="consensus.html">consensus</a></span><span class="op">(</span><span class="va">shapes</span>, <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">sp_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span>X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">sizes</span><span class="op">)</span>, INDEX <span class="op">=</span> <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span>, FUN <span class="op">=</span> <span class="va">mean</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">tree</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">tree</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#perform PLS between shape and size</span></span>
-<span class="r-in"><span class="va">pls</span> <span class="op">&lt;-</span> <span class="fu">pls_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, X <span class="op">=</span> <span class="va">sizes</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#inspect results</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pls</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#load data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"tails"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#extract shapes and sizes, compute mean shapes and sizes for all species, extract tree</span></span></span>
+<span class="r-in"><span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">shapes</span></span></span>
+<span class="r-in"><span><span class="va">sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">tails</span><span class="op">$</span><span class="va">sizes</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sp_shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="expected_shapes.html">expected_shapes</a></span><span class="op">(</span><span class="va">shapes</span>, <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sp_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span>X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">sizes</span><span class="op">)</span>, INDEX <span class="op">=</span> <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span>, FUN <span class="op">=</span> <span class="va">mean</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">tree</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#perform PLS between shape and size</span></span></span>
+<span class="r-in"><span><span class="va">pls</span> <span class="op">&lt;-</span> <span class="fu">pls_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, X <span class="op">=</span> <span class="va">sizes</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#inspect results</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pls</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "sdev"     "rotation" "x"        "x2"       "center"   "totvar"  </span>
-<span class="r-in"><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">pls</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span>
+<span class="r-in"><span><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">pls</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       variance cummulative</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> PLS-1 74.05123    74.05123</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pls</span><span class="op">$</span><span class="va">x2</span>, <span class="va">pls</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pls</span><span class="op">$</span><span class="va">x2</span>, <span class="va">pls</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span></span>
 <span class="r-plt img"><img src="pls_shapes-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#perform PLS between shape and size with leave-one-out CV</span></span>
-<span class="r-in"><span class="va">pls_cv</span> <span class="op">&lt;-</span> <span class="fu">pls_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, X <span class="op">=</span> <span class="va">sizes</span>, LOOCV <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#inspect results</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pls_cv</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#perform PLS between shape and size with leave-one-out CV</span></span></span>
+<span class="r-in"><span><span class="va">pls_cv</span> <span class="op">&lt;-</span> <span class="fu">pls_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, X <span class="op">=</span> <span class="va">sizes</span>, LOOCV <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#inspect results</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pls_cv</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "sdev"     "rotation" "x"        "x2"       "center"   "totvar"  </span>
-<span class="r-in"><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">pls_cv</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span>
+<span class="r-in"><span><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">pls_cv</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       variance cummulative</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> PLS-1 73.48807    73.48807</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pls_cv</span><span class="op">$</span><span class="va">x2</span>, <span class="va">pls_cv</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pls_cv</span><span class="op">$</span><span class="va">x2</span>, <span class="va">pls_cv</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span></span>
 <span class="r-plt img"><img src="pls_shapes-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#perform phylogenetic PLS between shape and size (for species means)</span></span>
-<span class="r-in"><span class="va">ppls</span> <span class="op">&lt;-</span> <span class="fu">pls_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">sp_shapes</span>, X <span class="op">=</span> <span class="va">sp_sizes</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#inspect results</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#perform phylogenetic PLS between shape and size (for species means)</span></span></span>
+<span class="r-in"><span><span class="va">ppls</span> <span class="op">&lt;-</span> <span class="fu">pls_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">sp_shapes</span>, X <span class="op">=</span> <span class="va">sp_sizes</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#inspect results</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "sdev"     "rotation" "x"        "x2"       "center"   "totvar"  </span>
-<span class="r-in"><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span>
+<span class="r-in"><span><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          variance cummulative</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> phyPLS-1 75.10454    75.10454</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">$</span><span class="va">x2</span>, <span class="va">ppls</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">$</span><span class="va">x2</span>, <span class="va">ppls</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span></span>
 <span class="r-plt img"><img src="pls_shapes-3.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#perform phylogenetic PLS between shape and size with leave-one-out CV</span></span>
-<span class="r-in"><span class="va">ppls</span> <span class="op">&lt;-</span> <span class="fu">pls_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">sp_shapes</span>, X <span class="op">=</span> <span class="va">sp_sizes</span>, tree <span class="op">=</span> <span class="va">tree</span>, LOOCV <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#inspect results</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#perform phylogenetic PLS between shape and size with leave-one-out CV</span></span></span>
+<span class="r-in"><span><span class="va">ppls</span> <span class="op">&lt;-</span> <span class="fu">pls_shapes</span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">sp_shapes</span>, X <span class="op">=</span> <span class="va">sp_sizes</span>, tree <span class="op">=</span> <span class="va">tree</span>, LOOCV <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#inspect results</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "sdev"     "rotation" "x"        "x2"       "center"   "totvar"  </span>
-<span class="r-in"><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span>
+<span class="r-in"><span><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          variance cummulative</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> phyPLS-1  49.9805     49.9805</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">$</span><span class="va">x2</span>, <span class="va">ppls</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ppls</span><span class="op">$</span><span class="va">x2</span>, <span class="va">ppls</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span></span>
 <span class="r-plt img"><img src="pls_shapes-4.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
@@ -206,7 +217,7 @@ components analysis in geometric morphometrics</em>. Evolutionary Biology, 46(4)
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

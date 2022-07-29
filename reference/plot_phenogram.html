@@ -65,17 +65,21 @@ Used internally.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_phenogram</span><span class="op">(</span>
-  x <span class="op">=</span> <span class="cn">NULL</span>,
-  y <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">tree</span>,
-  <span class="va">phylo_scores</span>,
-  <span class="va">axes</span>,
-  <span class="va">lwd.branches</span>,
-  <span class="va">cex.groups</span>,
-  <span class="va">col.groups</span>,
-  <span class="va">points</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_phenogram</span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  y <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">tree</span>,</span>
+<span>  <span class="va">phylo_scores</span>,</span>
+<span>  <span class="va">axis</span>,</span>
+<span>  <span class="va">lwd.phylo</span>,</span>
+<span>  <span class="va">lty.phylo</span>,</span>
+<span>  <span class="va">col.phylo</span>,</span>
+<span>  <span class="va">cex.groups</span>,</span>
+<span>  <span class="va">pch.groups</span>,</span>
+<span>  <span class="va">col.groups</span>,</span>
+<span>  <span class="va">bg.groups</span>,</span>
+<span>  <span class="va">points</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -83,59 +87,97 @@ Used internally.</p>
     <dl><dt>x</dt>
 <dd><p>Optional vector with a non-morphometric variable to be plotted in
 the x axis.</p></dd>
+
+
 <dt>y</dt>
 <dd><p>Optional vector with a non-morphometric variable to be plotted in
 the y axis.</p></dd>
+
+
 <dt>tree</dt>
-<dd><p>A <code>"phy"</code> object containing a phylogenetic tree. Tip labels
+<dd><p>A <code>"phylo"</code> object containing a phylogenetic tree. Tip labels
 should match the row names from <code>x</code> or <code>y</code>.</p></dd>
+
+
 <dt>phylo_scores</dt>
 <dd><p>A matrix containing the scores from tips and nodes of
 the phylogeny provided in <code>tree</code>.</p></dd>
-<dt>axes</dt>
-<dd><p>Numeric of length 2, indicating the axes to be plotted.</p></dd>
-<dt>lwd.branches</dt>
+
+
+<dt>axis</dt>
+<dd><p>Numeric; the axis to be plotted.</p></dd>
+
+
+<dt>lwd.phylo</dt>
 <dd><p>Numeric; the width of the lines depicting phylogenetic
 branches.</p></dd>
+
+
+<dt>lty.phylo</dt>
+<dd><p>Numeric; the type of the lines depicting phylogenetic
+branches.</p></dd>
+
+
+<dt>col.phylo</dt>
+<dd><p>Numeric; the color of the lines depicting phylogenetic
+branches.</p></dd>
+
+
 <dt>cex.groups</dt>
 <dd><p>Numeric; the size of the scatter points corresponding to
 groups mean shapes.</p></dd>
+
+
+<dt>pch.groups</dt>
+<dd><p>Numeric; the symbol of the scatter points corresponding to
+groups mean shapes.</p></dd>
+
+
 <dt>col.groups</dt>
 <dd><p>The color of the scatter points corresponding to groups
 mean shapes.</p></dd>
+
+
+<dt>bg.groups</dt>
+<dd><p>The background color of the scatter points corresponding
+to groups mean shapes.</p></dd>
+
+
 <dt>points</dt>
 <dd><p>Logical; whether to plot the scatter points.</p></dd>
+
 </dl></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#load and extract relevant data, packages and information</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"tails"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">shapes</span></span>
-<span class="r-in"><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span></span>
-<span class="r-in"><span class="va">sp_shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="consensus.html">consensus</a></span><span class="op">(</span><span class="va">shapes</span>, <span class="va">species</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">tree</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">tree</span></span>
-<span class="r-in"><span class="va">links</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">links</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#generate basic morphospace, add sampled shapes, species mean shapes, and</span></span>
-<span class="r-in"><span class="co">#phylogenetic structure</span></span>
-<span class="r-in"><span class="va">msp</span> <span class="op">&lt;-</span> <span class="fu"><a href="mspace.html">mspace</a></span><span class="op">(</span><span class="va">shapes</span>, mag <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, cex.ldm <span class="op">=</span> <span class="fl">0</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="proj_shapes.html">proj_shapes</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span><span class="op">[</span><span class="va">species</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">1</span>, cex <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="proj_consensus.html">proj_consensus</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">sp_shapes</span>, pch <span class="op">=</span> <span class="fl">21</span>, bg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">13</span>, cex <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="proj_phylogeny.html">proj_phylogeny</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#load and extract relevant data, packages and information</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"tails"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">shapes</span></span></span>
+<span class="r-in"><span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span></span></span>
+<span class="r-in"><span><span class="va">sp_shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="expected_shapes.html">expected_shapes</a></span><span class="op">(</span><span class="va">shapes</span>, <span class="va">species</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">tree</span></span></span>
+<span class="r-in"><span><span class="va">links</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">links</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#generate basic morphospace, add sampled shapes, species mean shapes, and</span></span></span>
+<span class="r-in"><span><span class="co">#phylogenetic structure</span></span></span>
+<span class="r-in"><span><span class="va">msp</span> <span class="op">&lt;-</span> <span class="fu"><a href="mspace.html">mspace</a></span><span class="op">(</span><span class="va">shapes</span>, mag <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, cex.ldm <span class="op">=</span> <span class="fl">0</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="proj_shapes.html">proj_shapes</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span><span class="op">[</span><span class="va">species</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">1</span>, cex <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="proj_consensus.html">proj_consensus</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">sp_shapes</span>, pch <span class="op">=</span> <span class="fl">21</span>, bg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">13</span>, cex <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="proj_phylogeny.html">proj_phylogeny</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot.xy(xy.coords(x, y), type = type, ...):</span> plot.new has not been called yet</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#get node heights</span></span>
-<span class="r-in"><span class="va">heights</span> <span class="op">&lt;-</span> <span class="fu">phytools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/phytools/man/nodeHeights.html" class="external-link">nodeHeights</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">node_heights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">heights</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">heights</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#plot simple phengram</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">node_heights</span>, <span class="va">msp</span><span class="op">$</span><span class="va">phylo_scores</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#get node heights</span></span></span>
+<span class="r-in"><span><span class="va">heights</span> <span class="op">&lt;-</span> <span class="fu">phytools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/phytools/man/nodeHeights.html" class="external-link">nodeHeights</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">node_heights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">heights</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">heights</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#plot simple phengram</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">node_heights</span>, <span class="va">msp</span><span class="op">$</span><span class="va">phylo_scores</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in xy.coords(x, y, xlabel, ylabel, log):</span> object 'msp' not found</span>
-<span class="r-in"><span class="fu">plot_phenogram</span><span class="op">(</span>tree <span class="op">=</span> <span class="va">tree</span>, x <span class="op">=</span> <span class="va">node_heights</span>, phylo_scores <span class="op">=</span> <span class="va">msp</span><span class="op">$</span><span class="va">phylo_scores</span>,</span>
-<span class="r-in">               axes <span class="op">=</span> <span class="fl">1</span>, lwd.branches <span class="op">=</span> <span class="fl">1</span>, cex.groups <span class="op">=</span> <span class="fl">1</span>, col.groups <span class="op">=</span> <span class="fl">1</span>, points <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in cbind(x, phylo_scores[, axes[1]], y):</span> object 'msp' not found</span>
+<span class="r-in"><span><span class="fu">plot_phenogram</span><span class="op">(</span>tree <span class="op">=</span> <span class="va">tree</span>, x <span class="op">=</span> <span class="va">node_heights</span>, phylo_scores <span class="op">=</span> <span class="va">msp</span><span class="op">$</span><span class="va">phylo_scores</span>,</span></span>
+<span class="r-in"><span>               axis <span class="op">=</span> <span class="fl">1</span>, lwd.phylo <span class="op">=</span> <span class="fl">1</span>, lty.phylo <span class="op">=</span> <span class="fl">1</span>, col.phylo <span class="op">=</span> <span class="fl">1</span>, cex.groups <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>               col.groups <span class="op">=</span> <span class="fl">1</span>, pch.groups <span class="op">=</span> <span class="fl">1</span>, points <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in cbind(x, phylo_scores[, axis[1]], y):</span> object 'msp' not found</span>
 </code></pre></div>
     </div>
   </div>
@@ -150,7 +192,7 @@ mean shapes.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

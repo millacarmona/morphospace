@@ -65,21 +65,26 @@ closed outline shapes.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">correct_efourier</span><span class="op">(</span><span class="va">ef</span>, index <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">correct_efourier</span><span class="op">(</span><span class="va">ef</span>, index <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>ef</dt>
 <dd><p>An <code>"OutCoe"</code> object.</p></dd>
+
+
 <dt>index</dt>
 <dd><p>An optional numeric vector providing the indices identifying the
 shapes to be rotated. If declared, overrides interative selection of
 shapes.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An <code>"OutCoe"</code> object containing the corrected outlines.</p>
+    
+
+<p>An <code>"OutCoe"</code> object containing the corrected outlines.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -97,22 +102,22 @@ Fourier descriptors</em>. Journal of Heredity, 93(5), 384-385.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#load shells data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">ef</span> <span class="op">&lt;-</span> <span class="va">shells</span><span class="op">$</span><span class="va">shapes</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#correct first 3 shapes automatically with index</span></span>
-<span class="r-in"><span class="va">ef_corr1</span> <span class="op">&lt;-</span> <span class="fu">correct_efourier</span><span class="op">(</span><span class="va">ef</span>, index <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#load shells data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ef</span> <span class="op">&lt;-</span> <span class="va">shells</span><span class="op">$</span><span class="va">shapes</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#correct first 3 shapes automatically with index</span></span></span>
+<span class="r-in"><span><span class="va">ef_corr1</span> <span class="op">&lt;-</span> <span class="fu">correct_efourier</span><span class="op">(</span><span class="va">ef</span>, index <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="correct_efourier-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="fu"><a href="pile_shapes.html">pile_shapes</a></span><span class="op">(</span><span class="va">ef_corr1</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="pile_shapes.html">pile_shapes</a></span><span class="op">(</span><span class="va">ef_corr1</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="correct_efourier-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#correct interactively (the process will remain open until</span></span>
-<span class="r-in"><span class="co">#you click 'finish' or press the Esc key)</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ef_corr2</span> <span class="op">&lt;-</span> <span class="fu">correct_efourier</span><span class="op">(</span><span class="va">ef_corr1</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#correct interactively (the process will remain open until</span></span></span>
+<span class="r-in"><span><span class="co">#you click 'finish' or press the Esc key)</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ef_corr2</span> <span class="op">&lt;-</span> <span class="fu">correct_efourier</span><span class="op">(</span><span class="va">ef_corr1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -127,7 +132,7 @@ Fourier descriptors</em>. Journal of Heredity, 93(5), 384-385.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

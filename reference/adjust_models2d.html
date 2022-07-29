@@ -65,70 +65,79 @@ of x and y axes. Used internally.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">adjust_models2d</span><span class="op">(</span><span class="va">models</span>, <span class="va">frame</span>, <span class="va">model_width</span>, <span class="va">model_height</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">adjust_models2d</span><span class="op">(</span><span class="va">models</span>, <span class="va">frame</span>, <span class="va">model_width</span>, <span class="va">model_height</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>models</dt>
 <dd><p>An array containing the background shape models.</p></dd>
+
+
 <dt>frame</dt>
 <dd><p>The frame in which shape models are to be plotted.</p></dd>
+
+
 <dt>model_width</dt>
 <dd><p>Numeric; the width of a reference shape model (usually the consensus).</p></dd>
+
+
 <dt>model_height</dt>
 <dd><p>Numeric; the height of a reference shape model (usually the consensus).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An array containing the adjusted shape models.</p>
+    
+
+<p>An array containing the adjusted shape models.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#load package and data</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/geomorphR/geomorph" class="external-link">geomorph</a></span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#load package and data</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/geomorphR/geomorph" class="external-link">geomorph</a></span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: RRPP</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: rgl</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: Matrix</span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/zarquon42b/Morpho" class="external-link">Morpho</a></span><span class="op">)</span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/zarquon42b/Morpho" class="external-link">Morpho</a></span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘Morpho’</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> The following object is masked from ‘package:RRPP’:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     classify</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"wings"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">wings</span><span class="op">$</span><span class="va">shapes</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#perform pca, extract ranges for PC1 and 2 and plot</span></span>
-<span class="r-in"><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">xlim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">ylim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">x</span>, col <span class="op">=</span> <span class="st">"gray"</span>, xlim <span class="op">=</span> <span class="va">xlim</span>, ylim <span class="op">=</span> <span class="va">ylim</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#calculate and plot shape grid</span></span>
-<span class="r-in"><span class="va">shapes_grid0</span> <span class="op">&lt;-</span> <span class="fu"><a href="morphogrid.html">morphogrid</a></span><span class="op">(</span>ordination <span class="op">=</span> <span class="va">pca</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, datype <span class="op">=</span> <span class="st">"landm"</span>,</span>
-<span class="r-in">                          k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>, p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>,</span>
-<span class="r-in">                          nh <span class="op">=</span> <span class="fl">4</span>, nv <span class="op">=</span> <span class="fl">4</span>, xlim <span class="op">=</span> <span class="va">xlim</span>, ylim <span class="op">=</span> <span class="va">ylim</span><span class="op">)</span></span>
-<span class="r-in"><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span><span class="op">[</span>,,<span class="va">i</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"l"</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"wings"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">wings</span><span class="op">$</span><span class="va">shapes</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#perform pca, extract ranges for PC1 and 2 and plot</span></span></span>
+<span class="r-in"><span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">xlim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ylim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">x</span>, col <span class="op">=</span> <span class="st">"gray"</span>, xlim <span class="op">=</span> <span class="va">xlim</span>, ylim <span class="op">=</span> <span class="va">ylim</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#calculate and plot shape grid</span></span></span>
+<span class="r-in"><span><span class="va">shapes_grid0</span> <span class="op">&lt;-</span> <span class="fu"><a href="morphogrid.html">morphogrid</a></span><span class="op">(</span>ordination <span class="op">=</span> <span class="va">pca</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, datype <span class="op">=</span> <span class="st">"landm"</span>,</span></span>
+<span class="r-in"><span>                          k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>, p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                          nh <span class="op">=</span> <span class="fl">4</span>, nv <span class="op">=</span> <span class="fl">4</span>, xlim <span class="op">=</span> <span class="va">xlim</span>, ylim <span class="op">=</span> <span class="va">ylim</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span><span class="op">[</span>,,<span class="va">i</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"l"</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-plt img"><img src="adjust_models2d-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#amplify range of x axis and replot grid</span></span>
-<span class="r-in"><span class="va">newframe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span> <span class="op">*</span> <span class="fl">20</span>, <span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">newframe</span>, col <span class="op">=</span> <span class="st">"gray"</span><span class="op">)</span></span>
-<span class="r-in"><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span><span class="op">[</span>,,<span class="va">i</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"l"</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#calculate width and height of consensus shape</span></span>
-<span class="r-in"><span class="va">wh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="fu"><a href="consensus.html">consensus</a></span><span class="op">(</span><span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span><span class="op">)</span>, <span class="fl">2</span>, <span class="va">range</span><span class="op">)</span>, <span class="fl">2</span>, <span class="va">diff</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#ajust grid to new frame and plot</span></span>
-<span class="r-in"><span class="va">adj_grid</span> <span class="op">&lt;-</span> <span class="fu">adjust_models2d</span><span class="op">(</span>models <span class="op">=</span> <span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span>, frame <span class="op">=</span> <span class="va">newframe</span>,</span>
-<span class="r-in">                            model_width <span class="op">=</span> <span class="va">wh</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, model_height <span class="op">=</span> <span class="va">wh</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-in"><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">adj_grid</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">adj_grid</span><span class="op">[</span>,,<span class="va">i</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"l"</span>, col <span class="op">=</span> <span class="st">"blue"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#amplify range of x axis and replot grid</span></span></span>
+<span class="r-in"><span><span class="va">newframe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span> <span class="op">*</span> <span class="fl">20</span>, <span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">newframe</span>, col <span class="op">=</span> <span class="st">"gray"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span><span class="op">[</span>,,<span class="va">i</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"l"</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#calculate width and height of consensus shape</span></span></span>
+<span class="r-in"><span><span class="va">wh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="fu"><a href="expected_shapes.html">expected_shapes</a></span><span class="op">(</span><span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span><span class="op">)</span>, <span class="fl">2</span>, <span class="va">range</span><span class="op">)</span>, <span class="fl">2</span>, <span class="va">diff</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#ajust grid to new frame and plot</span></span></span>
+<span class="r-in"><span><span class="va">adj_grid</span> <span class="op">&lt;-</span> <span class="fu">adjust_models2d</span><span class="op">(</span>models <span class="op">=</span> <span class="va">shapes_grid0</span><span class="op">$</span><span class="va">models_arr</span>, frame <span class="op">=</span> <span class="va">newframe</span>,</span></span>
+<span class="r-in"><span>                            model_width <span class="op">=</span> <span class="va">wh</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, model_height <span class="op">=</span> <span class="va">wh</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">adj_grid</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">adj_grid</span><span class="op">[</span>,,<span class="va">i</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"l"</span>, col <span class="op">=</span> <span class="st">"blue"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="adjust_models2d-2.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
@@ -144,7 +153,7 @@ of x and y axes. Used internally.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -65,30 +65,31 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_morphogrid3d</span><span class="op">(</span>
-  x <span class="op">=</span> <span class="cn">NULL</span>,
-  y <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">morphogrid</span>,
-  <span class="va">refshape</span>,
-  template <span class="op">=</span> <span class="cn">NULL</span>,
-  links <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">ordtype</span>,
-  <span class="va">axes</span>,
-  xlim <span class="op">=</span> <span class="cn">NULL</span>,
-  ylim <span class="op">=</span> <span class="cn">NULL</span>,
-  xlab <span class="op">=</span> <span class="cn">NULL</span>,
-  ylab <span class="op">=</span> <span class="cn">NULL</span>,
-  adj_frame <span class="op">=</span> <span class="fl">1</span>,
-  <span class="va">cex.ldm</span>,
-  <span class="va">col.ldm</span>,
-  <span class="va">col.models</span>,
-  <span class="va">lwd.models</span>,
-  <span class="va">size.models</span>,
-  alpha.models <span class="op">=</span> <span class="fl">1</span>,
-  <span class="va">bg.models</span>,
-  <span class="va">asp.models</span>,
-  plot <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_morphogrid3d</span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  y <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">morphogrid</span>,</span>
+<span>  <span class="va">refshape</span>,</span>
+<span>  template <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  links <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">ordtype</span>,</span>
+<span>  <span class="va">axes</span>,</span>
+<span>  xlim <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ylim <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ylab <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  adj_frame <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">cex.ldm</span>,</span>
+<span>  <span class="va">col.ldm</span>,</span>
+<span>  <span class="va">col.models</span>,</span>
+<span>  <span class="va">lwd.models</span>,</span>
+<span>  <span class="va">size.models</span>,</span>
+<span>  alpha.models <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">bg.models</span>,</span>
+<span>  <span class="va">asp.models</span>,</span>
+<span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  models <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -96,53 +97,94 @@
     <dl><dt>x</dt>
 <dd><p>Optional vector with a non-morphometric variable to be plotted in
 the x axis.</p></dd>
+
+
 <dt>y</dt>
 <dd><p>Optional vector with a non-morphometric variable to be plotted in
 the y axis.</p></dd>
+
+
 <dt>morphogrid</dt>
 <dd><p>An object containing the output of <code>morphogrid</code>.</p></dd>
+
+
 <dt>refshape</dt>
 <dd><p>reference shape (i.e., the mean landmark configuration)
 corresponding to the mesh provided in <code>template</code>.</p></dd>
+
+
 <dt>template</dt>
 <dd><p>An optional <code>"mesh3d"</code> object containing
 geometry of the structure the landmarks were placed on (for 3D shape data),
 corresponding to the mean shape of the sample, which will be warped using
 TPS interpolation to produce the set of background shell models.</p></dd>
+
+
 <dt>links</dt>
 <dd><p>A list with the indices of the coordinates defining the
 wireframe (following the format used in <code>Morpho</code>).</p></dd>
+
+
 <dt>ordtype</dt>
 <dd><p>Character; method used for multivariate ordination
 (<code>"prcomp"</code>, <code>"bg_prcomp"</code>, <code>"phy_prcomp"</code>, <code>"pls_shapes"</code>
 or <code>"phy_pls_shapes"</code>).</p></dd>
+
+
 <dt>axes</dt>
 <dd><p>Numeric of length 2, indicating the axes to be plotted.</p></dd>
+
+
 <dt>xlim, ylim, xlab, ylab</dt>
 <dd><p>Standard arguments passed to the generic plot
 function.</p></dd>
+
+
 <dt>adj_frame</dt>
 <dd><p>Numeric of length 2, providing <em>a posteriori</em> scaling
 factors for the width and height of the frame, respectively.</p></dd>
+
+
 <dt>cex.ldm</dt>
 <dd><p>Numeric; size of landmarks/semilandmarks in the background
 models.</p></dd>
+
+
 <dt>col.ldm</dt>
 <dd><p>The color of landmarks/semilandmarks in the background models.</p></dd>
+
+
 <dt>col.models</dt>
 <dd><p>The color for wireframes/outlines.</p></dd>
+
+
 <dt>lwd.models</dt>
 <dd><p>Numeric; the width of the lines in wireframes/outlines.</p></dd>
+
+
 <dt>size.models</dt>
 <dd><p>Numeric; size factor for shape models.</p></dd>
+
+
 <dt>alpha.models</dt>
 <dd><p>Numeric; transparency factor for background models.</p></dd>
+
+
 <dt>bg.models</dt>
 <dd><p>Background color for meshes.</p></dd>
+
+
 <dt>asp.models</dt>
 <dd><p>Numeric; the y/x aspect ratio of shape models.</p></dd>
+
+
 <dt>plot</dt>
 <dd><p>Logical; whether to plot morphospace.</p></dd>
+
+
+<dt>models</dt>
+<dd><p>Logical; whether to plot background shape models.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -161,42 +203,42 @@ than <code>1</code>.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#load data and packages</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/geomorphR/geomorph" class="external-link">geomorph</a></span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells3D"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">shells3D</span><span class="op">$</span><span class="va">shapes</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#perform pca on tails shapes</span></span>
-<span class="r-in"><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#generate grid of shape models sampling the range of variation</span></span>
-<span class="r-in"><span class="co">#at 4 locations (the 4 corners of the scatterplot)</span></span>
-<span class="r-in"><span class="va">shapes_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="morphogrid.html">morphogrid</a></span><span class="op">(</span>ordination <span class="op">=</span> <span class="va">pca</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, datype <span class="op">=</span> <span class="st">"landm"</span>,</span>
-<span class="r-in">                          k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>, p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>,</span>
-<span class="r-in">                          nh <span class="op">=</span> <span class="fl">2</span>, nv <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#get meanshape</span></span>
-<span class="r-in"><span class="va">meanshape</span> <span class="op">&lt;-</span> <span class="fu"><a href="consensus.html">consensus</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co">#plot grid (shape coordinates only)</span></span>
-<span class="r-in"><span class="fu">plot_morphogrid3d</span><span class="op">(</span>morphogrid <span class="op">=</span> <span class="va">shapes_grid</span>, refshape <span class="op">=</span> <span class="va">meanshape</span>,</span>
-<span class="r-in">                  ordtype <span class="op">=</span> <span class="st">"prcomp"</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, col.ldm <span class="op">=</span> <span class="fl">1</span>, cex.ldm <span class="op">=</span> <span class="fl">1</span>,</span>
-<span class="r-in">                  col.models <span class="op">=</span> <span class="fl">1</span>, lwd.models <span class="op">=</span> <span class="fl">1</span>, bg.models <span class="op">=</span> <span class="st">"gray"</span>, size.models <span class="op">=</span> <span class="fl">2</span>,</span>
-<span class="r-in">                  asp.models <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec,</span></span>
-<span class="r-in"><span class="co">#then get mesh corresponding to mean shape using Morpho::tps3d</span></span>
-<span class="r-in"><span class="va">meanspec_id</span><span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/findMeanSpec.html" class="external-link">findMeanSpec</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">meanspec_shape</span> <span class="op">&lt;-</span> <span class="va">shapes</span><span class="op">[</span>,,<span class="va">meanspec_id</span><span class="op">]</span></span>
-<span class="r-in"><span class="va">meanmesh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Morpho/man/tps3d.html" class="external-link">tps3d</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">shells3D</span><span class="op">$</span><span class="va">mesh_meanspec</span> , refmat <span class="op">=</span> <span class="va">meanspec_shape</span>, tarmat <span class="op">=</span> <span class="va">meanshape</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#plot grid (includinh mesh template)</span></span>
-<span class="r-in"><span class="fu">plot_morphogrid3d</span><span class="op">(</span>morphogrid <span class="op">=</span> <span class="va">shapes_grid</span>, template <span class="op">=</span> <span class="va">meanmesh</span>, refshape <span class="op">=</span> <span class="va">meanshape</span>,</span>
-<span class="r-in">                  ordtype <span class="op">=</span> <span class="st">"prcomp"</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, col.ldm <span class="op">=</span> <span class="fl">1</span>, cex.ldm <span class="op">=</span> <span class="fl">1</span>,</span>
-<span class="r-in">                  col.models <span class="op">=</span> <span class="fl">1</span>, lwd.models <span class="op">=</span> <span class="fl">1</span>, bg.models <span class="op">=</span> <span class="st">"gray"</span>, size.models <span class="op">=</span> <span class="fl">2</span>,</span>
-<span class="r-in">                  asp.models <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#load data and packages</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/geomorphR/geomorph" class="external-link">geomorph</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells3D"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">shells3D</span><span class="op">$</span><span class="va">shapes</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#perform pca on tails shapes</span></span></span>
+<span class="r-in"><span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#generate grid of shape models sampling the range of variation</span></span></span>
+<span class="r-in"><span><span class="co">#at 4 locations (the 4 corners of the scatterplot)</span></span></span>
+<span class="r-in"><span><span class="va">shapes_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="morphogrid.html">morphogrid</a></span><span class="op">(</span>ordination <span class="op">=</span> <span class="va">pca</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, datype <span class="op">=</span> <span class="st">"landm"</span>,</span></span>
+<span class="r-in"><span>                          k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>, p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                          nh <span class="op">=</span> <span class="fl">2</span>, nv <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#get meanshape</span></span></span>
+<span class="r-in"><span><span class="va">meanshape</span> <span class="op">&lt;-</span> <span class="fu"><a href="expected_shapes.html">expected_shapes</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co">#plot grid (shape coordinates only)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_morphogrid3d</span><span class="op">(</span>morphogrid <span class="op">=</span> <span class="va">shapes_grid</span>, refshape <span class="op">=</span> <span class="va">meanshape</span>,</span></span>
+<span class="r-in"><span>                  ordtype <span class="op">=</span> <span class="st">"prcomp"</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, col.ldm <span class="op">=</span> <span class="fl">1</span>, cex.ldm <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>                  col.models <span class="op">=</span> <span class="fl">1</span>, lwd.models <span class="op">=</span> <span class="fl">1</span>, bg.models <span class="op">=</span> <span class="st">"gray"</span>, size.models <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>                  asp.models <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec,</span></span></span>
+<span class="r-in"><span><span class="co">#then get mesh corresponding to mean shape using Morpho::tps3d</span></span></span>
+<span class="r-in"><span><span class="va">meanspec_id</span><span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/findMeanSpec.html" class="external-link">findMeanSpec</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">meanspec_shape</span> <span class="op">&lt;-</span> <span class="va">shapes</span><span class="op">[</span>,,<span class="va">meanspec_id</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">meanmesh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Morpho/man/tps3d.html" class="external-link">tps3d</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">shells3D</span><span class="op">$</span><span class="va">mesh_meanspec</span> , refmat <span class="op">=</span> <span class="va">meanspec_shape</span>, tarmat <span class="op">=</span> <span class="va">meanshape</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#plot grid (includinh mesh template)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_morphogrid3d</span><span class="op">(</span>morphogrid <span class="op">=</span> <span class="va">shapes_grid</span>, template <span class="op">=</span> <span class="va">meanmesh</span>, refshape <span class="op">=</span> <span class="va">meanshape</span>,</span></span>
+<span class="r-in"><span>                  ordtype <span class="op">=</span> <span class="st">"prcomp"</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, col.ldm <span class="op">=</span> <span class="fl">1</span>, cex.ldm <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>                  col.models <span class="op">=</span> <span class="fl">1</span>, lwd.models <span class="op">=</span> <span class="fl">1</span>, bg.models <span class="op">=</span> <span class="st">"gray"</span>, size.models <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>                  asp.models <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -211,7 +253,7 @@ than <code>1</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

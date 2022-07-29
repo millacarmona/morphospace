@@ -67,39 +67,46 @@ using <code>ape</code> and <code>phytools</code> functions. Used internally.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">svd_block</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, tree <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">svd_block</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, tree <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>First block of variables</p></dd>
+
+
 <dt>y</dt>
 <dd><p>Second block of variables</p></dd>
+
+
 <dt>tree</dt>
-<dd><p>An optional <code>"phy"</code> object containing a phylogenetic
+<dd><p>An optional <code>"phylo"</code> object containing a phylogenetic
 tree whose tip.labels match rownames of <code>x</code> and <code>y</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Mimics the <code><a href="https://rdrr.io/r/base/svd.html" class="external-link">svd()</a></code> output.</p>
+    
+
+<p>Mimics the <code><a href="https://rdrr.io/r/base/svd.html" class="external-link">svd()</a></code> output.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#laod data and packages</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/geomorphR/geomorph" class="external-link">geomorph</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"tails"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">shapes</span></span>
-<span class="r-in"><span class="va">sizes</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">sizes</span></span>
-<span class="r-in"><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span></span>
-<span class="r-in"><span class="va">tree</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">tree</span></span>
-<span class="r-in"><span class="va">sp_shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="consensus.html">consensus</a></span><span class="op">(</span><span class="va">shapes</span>, <span class="va">species</span><span class="op">)</span><span class="op">[</span>,,<span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">]</span></span>
-<span class="r-in"><span class="va">sp_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">sizes</span>, <span class="va">species</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span>,<span class="op">]</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#perform partial svd</span></span>
-<span class="r-in"><span class="fu">svd_block</span><span class="op">(</span>x <span class="op">=</span> <span class="va">sizes</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#laod data and packages</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/geomorphR/geomorph" class="external-link">geomorph</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"tails"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">shapes</span></span></span>
+<span class="r-in"><span><span class="va">sizes</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">sizes</span></span></span>
+<span class="r-in"><span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">species</span></span></span>
+<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="va">tails</span><span class="op">$</span><span class="va">tree</span></span></span>
+<span class="r-in"><span><span class="va">sp_shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="expected_shapes.html">expected_shapes</a></span><span class="op">(</span><span class="va">shapes</span>, <span class="va">species</span><span class="op">)</span><span class="op">[</span>,,<span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">sp_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">sizes</span>, <span class="va">species</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span>,<span class="op">]</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#perform partial svd</span></span></span>
+<span class="r-in"><span><span class="fu">svd_block</span><span class="op">(</span>x <span class="op">=</span> <span class="va">sizes</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $d</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 42.92575</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -128,9 +135,9 @@ tree whose tip.labels match rownames of <code>x</code> and <code>y</code>.</p></
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#perform partial svd on phylogenetic structure</span></span>
-<span class="r-in"><span class="fu">svd_block</span><span class="op">(</span>x <span class="op">=</span> <span class="va">sp_sizes</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">sp_shapes</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#perform partial svd on phylogenetic structure</span></span></span>
+<span class="r-in"><span><span class="fu">svd_block</span><span class="op">(</span>x <span class="op">=</span> <span class="va">sp_sizes</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">sp_shapes</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $d</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 17.05874</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -173,7 +180,7 @@ tree whose tip.labels match rownames of <code>x</code> and <code>y</code>.</p></
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
