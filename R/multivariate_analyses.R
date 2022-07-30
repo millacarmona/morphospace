@@ -181,7 +181,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #' components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
 #' 271-302.
 #'
-#' Cardini, A., O’Higgins, P., & Rohlf, F. J. (2019). \emph{Seeing distinct
+#' Cardini, A., O'Higgins, P., & Rohlf, F. J. (2019). \emph{Seeing distinct
 #' groups where there are none: spurious patterns from between-group PCA}.
 #' Evolutionary Biology, 46(4), 303-316.
 #'

@@ -117,7 +117,7 @@
 #' @references
 #'   Milla Carmona, P. S., Lazo, D. G., & Soto, I. M. (2021). \emph{Ontogeny in
 #'   the steinmanellines (Bivalvia: Trigoniida): an intra- and interspecific
-#'   appraisal using the Early Cretaceous faunas from the Neuquén Basin as a
+#'   appraisal using the Early Cretaceous faunas from the Neuquen Basin as a
 #'   case study}. Paleobiology, in press.
 "shells3D"
 
