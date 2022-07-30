@@ -1438,7 +1438,7 @@ plot_mspace <- function(mspace,
               meany <- NULL
             }
 
-            meanxy <- cbind(meanx, mspace$gr_centroids[,args$axes[1]], meany)
+            meanxy <- cbind(meanx, mspace$gr_centroids[,args$axes[1]], meany)[mspace$phylo$tip.label,]
             nodesxy <- apply(meanxy[mspace$phylo$tip.label,], 2, phytools::fastAnc, tree = mspace$phylo)
             phyloxy <- rbind(meanxy, nodesxy)
 
@@ -1468,7 +1468,7 @@ plot_mspace <- function(mspace,
             meany <- NULL
           }
 
-          meanxy <- cbind(meanx, mspace$gr_centroids[,args$axes[1]], meany)[mspace$phylo$tip.label,]
+          meanxy <- cbind(meanx, mspace$gr_centroids[,args$axes[1]], meany)
 
           if(any(args$pch.groups %in% c(21:25))) {
             graphics::points(meanxy, bg = args$bg.groups, pch = args$pch.groups,
