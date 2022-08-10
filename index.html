@@ -188,8 +188,8 @@
 <div class="section level2">
 <h2 id="update-august-2022">Update (August 2022)<a class="anchor" aria-label="anchor" href="#update-august-2022"></a>
 </h2>
-<p>Changes: - Different behavior for <code>proj_shapes</code> (now replaces <code>mspace$x</code> with the actual scores being projected) and <code>proj_axis</code> (now adds one or more axes into an <code>mspace$shapes_axis</code>).</p>
 <ul>
+<li><p>Different behavior for <code>proj_shapes</code> (now replaces <code>mspace$x</code> with the actual scores being projected) and <code>proj_axis</code> (now adds one or more axes into an <code>mspace$shapes_axis</code>).</p></li>
 <li><p>New <code>ellipses_by_groups_2D</code> (uses <code><a href="https://rdrr.io/pkg/car/man/Ellipses.html" class="external-link">car::ellipse</a></code>) function as an option for <code>proj_groups</code> and <code>plot_mspace</code>.</p></li>
 <li><p>Morphospaces without background shape models are now an option (for both <code>mspace</code> and <code>plot_mspace</code>).</p></li>
 <li><p><code>plot_mspace</code> now regenerates the original mspace plot by default (<code>proj_*</code> functions were modified such that all the relevant graphical parameters are inherited downstream to <code>plot_mspace</code>), has further flexibility regarding hybrid morphospaces (<code>plot_phenogram</code> has been updated) and allows adding a legend (and some various bugs were fixed as well).</p></li>
