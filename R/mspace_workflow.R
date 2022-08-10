@@ -449,6 +449,7 @@ proj_consensus <- function(mspace, shapes, pipe = TRUE, ...) {
 
 
   mspace$gr_centroids <- gr_centroids
+  mspace$plotinfo$col.groups <- args$col
   mspace$plotinfo$pch.groups <- args$pch
   mspace$plotinfo$cex.groups <- args$cex
 
@@ -986,7 +987,7 @@ plot_mspace <- function(mspace,
                         nv,
                         mag,
                         invax = NULL,
-                        adj_frame = c(1, 1),
+                        adj_frame = c(1,1),
                         points = TRUE,
                         models = TRUE,
                         mshapes = TRUE,
@@ -1381,6 +1382,7 @@ plot_mspace <- function(mspace,
 
       if(length(args$cex.groups) == 1) args$cex.groups <- rep(args$cex.groups, nlevels(mspace$gr_class))
       if(length(args$pch.groups) == 1) args$pch.groups <- rep(args$pch.groups, nlevels(mspace$gr_class))
+      if(length(args$col.groups) == 1) args$col.groups <- rep(args$col.groups, nrow(mspace$gr_centroids))
 
       maptips <-  order(match(rownames(mspace$gr_centroids), tree$tip.label))
       plot_phenogram(x = x, y = y, tree = tree, axis = args$axes, points = points,

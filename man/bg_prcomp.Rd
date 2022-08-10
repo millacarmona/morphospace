@@ -96,7 +96,7 @@ Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
 components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
 271-302.
 
-Cardini, A., O’Higgins, P., & Rohlf, F. J. (2019). \emph{Seeing distinct
+Cardini, A., O'Higgins, P., & Rohlf, F. J. (2019). \emph{Seeing distinct
 groups where there are none: spurious patterns from between-group PCA}.
 Evolutionary Biology, 46(4), 303-316.
 

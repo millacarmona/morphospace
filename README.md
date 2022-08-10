@@ -177,9 +177,9 @@ examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.ht
 
 ## Update (August 2022)
 
-Changes: - Different behavior for `proj_shapes` (now replaces `mspace$x`
-with the actual scores being projected) and `proj_axis` (now adds one or
-more axes into an `mspace$shapes_axis`).
+-   Different behavior for `proj_shapes` (now replaces `mspace$x` with
+    the actual scores being projected) and `proj_axis` (now adds one or
+    more axes into an `mspace$shapes_axis`).
 
 -   New `ellipses_by_groups_2D` (uses `car::ellipse`) function as an
     option for `proj_groups` and `plot_mspace`.
