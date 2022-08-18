@@ -233,7 +233,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
   svd <- svd(x = vcv_g)
 
   ndims <- min(nrow(x), nlevels(groups) - 1)
-  rotation <- svd$v[,seq_len(ndims)]
+  rotation <- cbind(svd$v[,seq_len(ndims)])
   values <- svd$d[seq_len(ndims)]
 
   if(LOOCV == FALSE) {
@@ -260,7 +260,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
       subvcv_g <- stats::cov.wt(subgroupmeans, wt = subwts, cor = corr)$cov
       subsvd <- svd(subvcv_g)
 
-      subrotation <- subsvd$v[,seq_len(ndims)]
+      subrotation <- cbind(subsvd$v[,seq_len(ndims)])
 
       iscore <- proj_eigen(x[i,], subrotation, center = colMeans(x)) *
         sign(stats::cor(subrotation[,1], refaxis))
@@ -274,7 +274,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 
   }
 
-  results <- list(sdev = sqrt(values), rotation = cbind(rotation), x = cbind(scores),
+  results <- list(sdev = sqrt(values), rotation = rotation, x = cbind(scores),
                   center = grandmean, grcenters = groupmeans, totvar = totvar)
   class(results) <- "bg_prcomp"
   return(results)
