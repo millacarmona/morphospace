@@ -328,7 +328,7 @@ meant to be expanded using the <code>proj_*</code> family of functions and the
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#generate morphospace using a mesh template that improves visualization:</span></span></span>
 <span class="r-in"><span><span class="co">#first, get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec</span></span></span>
-<span class="r-in"><span><span class="va">meanspec_id</span><span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/findMeanSpec.html" class="external-link">findMeanSpec</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">meanspec_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/findMeanSpec.html" class="external-link">findMeanSpec</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">meanspec_shape</span> <span class="op">&lt;-</span> <span class="va">shapes</span><span class="op">[</span>,,<span class="va">meanspec_id</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#then get the consensus shape and warp the sample mesh to get the mesh corresponding to the</span></span></span>
