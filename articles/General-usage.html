@@ -88,12 +88,31 @@
 
     
     
-<p><code>morphospace</code> has been built to work in intergration with other widely used R packages covering other more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis) such as <code>Morpho</code> (Schlager 2017), <code>geomorph</code> (Adams et al. 2021), <code>shapes</code> (Dryden 2019), and <code>Momocs</code> (Bonhome et al. 2014).</p>
+<p><code>morphospace</code> has been built to work in intergration with
+other widely used R packages covering other more essential steps in the
+geometric morphometrics pipeline (e.g. importation, normalization,
+statistical analysis) such as <code>Morpho</code> (Schlager 2017),
+<code>geomorph</code> (Adams et al. 2021), <code>shapes</code> (Dryden
+2019), and <code>Momocs</code> (Bonhome et al. 2014).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/millacarmona/morphospace" class="external-link">morphospace</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/geomorphR/geomorph" class="external-link">geomorph</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span></code></pre></div>
-<p>The basic idea behind <code>morphospace</code> is to build empirical morphospaces using multivariate methods, then use the resulting ordination as a reference frame in which elements representing different aspects of morphometric variation can projected. This workflow is outlined below using the <code>tails</code> data set from Fasanelli et al. (2022), which contains a sample of tail shapes from the 13 species of the genus <em>Tyrannus</em> (kingbirds and flycatchers). Two of these (the flycatchers <em>T. savana</em> and <em>T. forficatus</em>) display exaggeratedly elongated tails, as well as a considerable allometric variation and sexual dimorphism. The <code>tails</code> data set contains landmark data and centroid sizes from the tails of 281 specimens, their classification to species, sex and type (deep-forked, DF or non deep-forked, NDF), and their phylogenetic relationships (see Fasanelli et al. 2022 and references therein). The links between landmarks have been also included to improve visualization.</p>
+<p>The basic idea behind <code>morphospace</code> is to build empirical
+morphospaces using multivariate methods, then use the resulting
+ordination as a reference frame in which elements representing different
+aspects of morphometric variation can projected. This workflow is
+outlined below using the <code>tails</code> data set from Fasanelli et
+al. (2022), which contains a sample of tail shapes from the 13 species
+of the genus <em>Tyrannus</em> (kingbirds and flycatchers). Two of these
+(the flycatchers <em>T. savana</em> and <em>T. forficatus</em>) display
+exaggeratedly elongated tails, as well as a considerable allometric
+variation and sexual dimorphism. The <code>tails</code> data set
+contains landmark data and centroid sizes from the tails of 281
+specimens, their classification to species, sex and type (deep-forked,
+DF or non deep-forked, NDF), and their phylogenetic relationships (see
+Fasanelli et al. 2022 and references therein). The links between
+landmarks have been also included to improve visualization.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load tail data and extract shapes, centroid sizes, classification of sex </span></span>
 <span><span class="co"># and species, links between landmarks, and phylogenetic tree</span></span>
@@ -108,7 +127,15 @@
 <div class="section level3">
 <h3 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
 </h3>
-<p>The starting point of this workflow is morphometric data that is already free of differences in orientation, position and scale (this standardization can be implemented using functions provided by the aforementioned R packages). However, <code>morphospace</code> provide some alternatives to perform some basic operations on shape data, such as the calculation of mean shapes or the analytical removal of undesired sources of variation (functions <code>expected_shapes</code> and <code>detrend_shapes</code>, respectively). For example, we can to get rid of sexual dimorphism before moving forward.</p>
+<p>The starting point of this workflow is morphometric data that is
+already free of differences in orientation, position and scale (this
+standardization can be implemented using functions provided by the
+aforementioned R packages). However, <code>morphospace</code> provide
+some alternatives to perform some basic operations on shape data, such
+as the calculation of mean shapes or the analytical removal of undesired
+sources of variation (functions <code>expected_shapes</code> and
+<code>detrend_shapes</code>, respectively). For example, we can to get
+rid of sexual dimorphism before moving forward.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Remove variation associated with sexual dimorphism and compute the </span></span>
 <span><span class="co"># consensus shape of each species</span></span>
@@ -116,7 +143,15 @@
 <span><span class="va">detr_shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detrend_shapes.html">detrend_shapes</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/arrayspecs.html" class="external-link">arrayspecs</a></span><span class="op">(</span>p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>, k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sp_shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expected_shapes.html">expected_shapes</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">detr_shapes</span>, x <span class="op">=</span> <span class="va">spp</span><span class="op">)</span></span></code></pre></div>
-<p>Once the shape data is ready, we build a morphospace using the <code>mspace</code> function and then use the resulting ordination as a canvas in which to project different elements depicting various aspects of morphometric variation (scatter points, groups centroids, convex hulls, confidence ellipses, a phylogeny, etc). These elements are added both to the plot and the <code>"mspace"</code> object as consecutive ‘layers’ and list slots, respectively, using the <code>proj_*</code> family of functions and the <code>%&gt;%</code> pipe operator from the <code>magrittr</code> package (Bache &amp; Wickham 2022).</p>
+<p>Once the shape data is ready, we build a morphospace using the
+<code>mspace</code> function and then use the resulting ordination as a
+canvas in which to project different elements depicting various aspects
+of morphometric variation (scatter points, groups centroids, convex
+hulls, confidence ellipses, a phylogeny, etc). These elements are added
+both to the plot and the <code>"mspace"</code> object as consecutive
+‘layers’ and list slots, respectively, using the <code>proj_*</code>
+family of functions and the <code>%&gt;%</code> pipe operator from the
+<code>magrittr</code> package (Bache &amp; Wickham 2022).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate morphospace using detrended shapes, project specimens</span></span>
 <span><span class="va">msp1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspace.html">mspace</a></span><span class="op">(</span><span class="va">detr_shapes</span>, links <span class="op">=</span> <span class="va">wf</span>, cex.ldm <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -159,7 +194,12 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">msp3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "x"            "rotation"     "center"       "datype"       "ordtype"     </span></span>
 <span><span class="co">#&gt;  [6] "plotinfo"     "gr_centroids" "gr_class"     "phylo_scores" "phylo"</span></span></code></pre></div>
-<p>Another potentially interesting element that can be projected into morphospaces are morphometric axes or phenotypic change vectors, i.e. synthetic axes built as linear combinations of shape variables that describe a linear path across the morphospace. For example, we can project the first two PC axes resulting from a PCA of NDF specimens data into our morphospace.</p>
+<p>Another potentially interesting element that can be projected into
+morphospaces are morphometric axes or phenotypic change vectors,
+i.e. synthetic axes built as linear combinations of shape variables that
+describe a linear path across the morphospace. For example, we can
+project the first two PC axes resulting from a PCA of NDF specimens data
+into our morphospace.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># perform PCA of refined shape variables, create morphospace, and project </span></span>
 <span><span class="co"># the first 2 axes from the former into  the latter</span></span>
@@ -177,7 +217,22 @@
 <div class="section level3">
 <h3 id="ordination-methods">Ordination methods<a class="anchor" aria-label="anchor" href="#ordination-methods"></a>
 </h3>
-<p>The default settings of <code>mspace</code> rely on the <code>prcomp</code> function from the <code>stats</code> package to build the synthetic morphometric space. However, <code>morphospace</code> also provides functions for ‘supervised’ ordination, namely phylogenetic PCA (Revell 2009) (implemented through the <code>phy_prcomp</code> function, which wraps <code>phyl.pca</code> from <code>phytools</code>, Revell 2012), between-groups PCA (<code>bg_prcomp</code> function), and both ordinary and phylgenetic versions of Partial Least Squares (PLS) (<code>pls_shapes</code> function [an user-friendly wrapper of <code>pls2b</code>, which is used in the following chunk]). These have been styled/wrapped to share format with <code>prcomp</code>, and both bgPCA and PLS functions allow for leave-one-out cross-validation (LOOCV), which alleviates some spurious patterns that arise when the number of variables exceeds the number of samples (as it is common in geometric morphometric analyses; see Cardini et al. 2019 and Cardini &amp; Polly 2020).</p>
+<p>The default settings of <code>mspace</code> rely on the
+<code>prcomp</code> function from the <code>stats</code> package to
+build the synthetic morphometric space. However,
+<code>morphospace</code> also provides functions for ‘supervised’
+ordination, namely phylogenetic PCA (Revell 2009) (implemented through
+the <code>phy_prcomp</code> function, which wraps <code>phyl.pca</code>
+from <code>phytools</code>, Revell 2012), between-groups PCA
+(<code>bg_prcomp</code> function), and both ordinary and phylgenetic
+versions of Partial Least Squares (PLS) (<code>pls_shapes</code>
+function [an user-friendly wrapper of <code>pls2b</code>, which is used
+in the following chunk]). These have been styled/wrapped to share format
+with <code>prcomp</code>, and both bgPCA and PLS functions allow for
+leave-one-out cross-validation (LOOCV), which alleviates some spurious
+patterns that arise when the number of variables exceeds the number of
+samples (as it is common in geometric morphometric analyses; see Cardini
+et al. 2019 and Cardini &amp; Polly 2020).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simulate 100 random normal distributions, and add an artificial classification </span></span>
 <span><span class="co"># and an artificial covariate</span></span>
@@ -218,7 +273,14 @@
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">pls2</span><span class="op">$</span><span class="va">yscores</span> <span class="op">~</span> <span class="va">pls2</span><span class="op">$</span><span class="va">xscores</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/title.html" class="external-link">title</a></span><span class="op">(</span><span class="st">"PLS\n with LOOCV"</span>, cex.main <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="General-usage_files/figure-html/unnamed-chunk-7-2.png" width="100%"></p>
-<p>These methods can be used instead of regular PCA for building morphospaces via the <code>FUN</code> and <code>...</code> arguments (adding the argument <code>groups</code> for <code>bg_prcomp</code>, <code>tree</code> for <code>phy_prcomp</code>, and <code>X</code> [and potentially also a <code>tree</code>] for <code>pls_shapes</code>, respectively) of the <code>mspace</code> function. The resulting morphospace can be combined with the <code>proj_*</code> functions in the same way as before.</p>
+<p>These methods can be used instead of regular PCA for building
+morphospaces via the <code>FUN</code> and <code>...</code> arguments
+(adding the argument <code>groups</code> for <code>bg_prcomp</code>,
+<code>tree</code> for <code>phy_prcomp</code>, and <code>X</code> [and
+potentially also a <code>tree</code>] for <code>pls_shapes</code>,
+respectively) of the <code>mspace</code> function. The resulting
+morphospace can be combined with the <code>proj_*</code> functions in
+the same way as before.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Between group PCA - all species (invert both axes for easier comparison with </span></span>
 <span><span class="co"># previous plots). We'll use plot_mspace to add a legend:</span></span>
@@ -240,21 +302,68 @@
 <span>  <span class="fu"><a href="../reference/proj_consensus.html">proj_consensus</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">sp_shapes</span>, col <span class="op">=</span> <span class="st">"black"</span>, pch <span class="op">=</span> <span class="fl">16</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/plot_mspace.html">plot_mspace</a></span><span class="op">(</span>legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/title.html" class="external-link">title</a></span><span class="op">(</span><span class="st">"Phylogenetic morphospace + samples"</span>, cex.main <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in sqrt(V[i, i] * obj$Eval[j, j]): NaNs produced</span></span>
+<span><span class="co">#&gt; Warning in sqrt(phypca$Eval): NaNs produced</span></span></code></pre>
 <p><img src="General-usage_files/figure-html/unnamed-chunk-13-1.png" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="flexible-visualization">Flexible visualization<a class="anchor" aria-label="anchor" href="#flexible-visualization"></a>
 </h3>
-<p>Finally, <code>"mspace"</code> objects created using the <code>mspace %&gt;% proj_*</code> pipeline can be regenerated/modified with the <code>plot_mspace</code> function, which adds further graphical flexibility. By plotting a <code>"mspace"</code> object using this function we can regenerate an existing morphospace as it was created; alternatively, we can select a different set of axes to plot, choose other colors and symbols for points, groups, etc (or not), or add a legend (see chunk above). In addition, this function also allow combining morphometric axes with other non-shape variables to produce ‘hybrid’ morphospaces.</p>
-<p>For example, PC1 can be plotted against size to explore allometric patterns:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<p>Finally, <code>"mspace"</code> objects created using the
+<code>mspace %&gt;% proj_*</code> pipeline can be regenerated/modified
+with the <code>plot_mspace</code> function, which adds further graphical
+flexibility. By plotting a <code>"mspace"</code> object using this
+function we can regenerate an existing morphospace as it was created;
+alternatively, we can select a different set of axes to plot, choose
+other colors and symbols for points, groups, etc (or not), or add a
+legend (see chunk above). In addition, this function also allow
+combining morphometric axes with other non-shape variables to produce
+‘hybrid’ morphospaces.</p>
+<p>For example, PC1 can be plotted against size to explore allometric
+patterns:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot PC1 against log-size, add legend</span></span>
 <span><span class="fu"><a href="../reference/plot_mspace.html">plot_mspace</a></span><span class="op">(</span><span class="va">msp3</span>, x <span class="op">=</span> <span class="va">sizes</span>, axes <span class="op">=</span> <span class="fl">1</span>, nh <span class="op">=</span> <span class="fl">6</span>, nv <span class="op">=</span> <span class="fl">6</span>, cex.ldm <span class="op">=</span> <span class="fl">4</span>, </span>
 <span>            col.points <span class="op">=</span> <span class="va">spp</span>, col.groups <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">spp</span><span class="op">)</span>, xlab <span class="op">=</span> <span class="st">"Log-size"</span>, </span>
 <span>            legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="General-usage_files/figure-html/unnamed-chunk-14-1.png" width="100%"></p>
-<p>Or we can combine PC1 (or any other PC axis) with the phylogenetic tree to create a phenogram:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<p>Or we can combine PC1 (or any other PC axis) with the phylogenetic
+tree to create a phenogram:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot vertical phenogram using PC1, add a legend</span></span>
 <span><span class="fu"><a href="../reference/plot_mspace.html">plot_mspace</a></span><span class="op">(</span><span class="va">msp3</span>, y <span class="op">=</span> <span class="va">phy</span>, axes <span class="op">=</span> <span class="fl">1</span>, nh <span class="op">=</span> <span class="fl">6</span>, nv <span class="op">=</span> <span class="fl">6</span>, cex.ldm <span class="op">=</span> <span class="fl">4</span>, </span>
 <span>            col.groups <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">spp</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="st">"Time"</span>, legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -263,16 +372,34 @@
 <div class="section level3">
 <h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
-<p>Adams D.C., Collyer M.L., Kaliontzopoulou A., &amp; Baken E.K. (2021). <em>geomorph: Software for geometric morphometric analyses</em>. R package version 4.0.2. <a href="https://cran.r-project.org/package=geomorph" class="external-link uri">https://cran.r-project.org/package=geomorph</a>.</p>
-<p>Bache S.F., &amp; Wickham H. (2022). m<em>agrittr: A Forward-Pipe Operator for R</em>. R package version 2.0.3. <a href="https://CRAN.R-project.org/package=magrittr" class="external-link uri">https://CRAN.R-project.org/package=magrittr</a>.</p>
-<p>Bonhomme V., Picq S., Gaucherel C., &amp; Claude J. (2014). <em>Momocs: Outline Analysis Using R</em>. Journal of Statistical Software, 56(13), 1-24. <a href="http://www.jstatsoft.org/v56/i13/" class="external-link uri">http://www.jstatsoft.org/v56/i13/</a>.</p>
-<p>Cardini A., O’Higgins P., &amp; Rohlf F.J. (2019). <em>Seeing distinct groups where there are none: spurious patterns from between-group PCA</em>. Evolutionary Biology, 46(4), 303-316. <a href="https://doi.org/10.1007/s11692-019-09487-5" class="external-link uri">https://doi.org/10.1007/s11692-019-09487-5</a>.</p>
-<p>Cardini A., &amp; Polly P. D. (2020). <em>Cross-validated between group PCA scatterplots: A solution to spurious group separation?</em>. Evolutionary Biology, 47(1), 85-95. <a href="https://doi.org/10.1007/s11692-020-09494-x" class="external-link uri">https://doi.org/10.1007/s11692-020-09494-x</a>.</p>
-<p>Dryden, I.L. (2019). <em>shapes: statistical shape analysis</em>. R package version 1.2.5. <a href="https://CRAN.R-project.org/package=shapes" class="external-link uri">https://CRAN.R-project.org/package=shapes</a>.</p>
-<p>Fasanelli M.N., Milla Carmona P.S., Soto I.M., &amp; Tuero, D.T. (2022). <em>Allometry, sexual selection and evolutionary lines of least resistance shaped the evolution of exaggerated sexual traits within the genus</em> Tyrannus. Journal of Evolutionary Biology, in press. <a href="https://doi.org/10.1111/jeb.14000" class="external-link uri">https://doi.org/10.1111/jeb.14000</a>.</p>
-<p>Revell, L.J. (2009). <em>Size-correction and principal components for interspecific comparative studies</em>. Evolution, 63, 3258-3268 <a href="https://doi.org/10.1111/j.1558-5646.2009.00804.x" class="external-link uri">https://doi.org/10.1111/j.1558-5646.2009.00804.x</a>.</p>
-<p>Revell, L.J. (2012). <em>phytools: An R package for phylogenetic comparative biology (and other things)</em>. Methods in Ecology and Evolution 3, 217-223. <a href="https://doi.org/10.1111/j.2041-210X.2011.00169.x" class="external-link uri">https://doi.org/10.1111/j.2041-210X.2011.00169.x</a>.</p>
-<p>Schlager S. (2017). <em>Morpho and Rvcg - Shape Analysis in R</em>. In Zheng G., Li S., Szekely G. (eds.), <em>Statistical Shape and Deformation Analysis</em>, 217-256. Academic Press. <a href="https://doi.org/10.1016/B978-0-12-810493-4.00011-0" class="external-link uri">https://doi.org/10.1016/B978-0-12-810493-4.00011-0</a>.</p>
+<p>Adams D.C., Collyer M.L., Kaliontzopoulou A., &amp; Baken E.K.
+(2021). <em>geomorph: Software for geometric morphometric analyses</em>.
+R package version 4.0.2. <a href="https://cran.r-project.org/package=geomorph" class="external-link uri">https://cran.r-project.org/package=geomorph</a>.</p>
+<p>Bache S.F., &amp; Wickham H. (2022). m<em>agrittr: A Forward-Pipe
+Operator for R</em>. R package version 2.0.3. <a href="https://CRAN.R-project.org/package=magrittr" class="external-link uri">https://CRAN.R-project.org/package=magrittr</a>.</p>
+<p>Bonhomme V., Picq S., Gaucherel C., &amp; Claude J. (2014).
+<em>Momocs: Outline Analysis Using R</em>. Journal of Statistical
+Software, 56(13), 1-24. <a href="http://www.jstatsoft.org/v56/i13/" class="external-link uri">http://www.jstatsoft.org/v56/i13/</a>.</p>
+<p>Cardini A., O’Higgins P., &amp; Rohlf F.J. (2019). <em>Seeing
+distinct groups where there are none: spurious patterns from
+between-group PCA</em>. Evolutionary Biology, 46(4), 303-316. <a href="https://doi.org/10.1007/s11692-019-09487-5" class="external-link uri">https://doi.org/10.1007/s11692-019-09487-5</a>.</p>
+<p>Cardini A., &amp; Polly P. D. (2020). <em>Cross-validated between
+group PCA scatterplots: A solution to spurious group separation?</em>.
+Evolutionary Biology, 47(1), 85-95. <a href="https://doi.org/10.1007/s11692-020-09494-x" class="external-link uri">https://doi.org/10.1007/s11692-020-09494-x</a>.</p>
+<p>Dryden, I.L. (2019). <em>shapes: statistical shape analysis</em>. R
+package version 1.2.5. <a href="https://CRAN.R-project.org/package=shapes" class="external-link uri">https://CRAN.R-project.org/package=shapes</a>.</p>
+<p>Fasanelli M.N., Milla Carmona P.S., Soto I.M., &amp; Tuero, D.T.
+(2022). <em>Allometry, sexual selection and evolutionary lines of least
+resistance shaped the evolution of exaggerated sexual traits within the
+genus</em> Tyrannus. Journal of Evolutionary Biology, in press. <a href="https://doi.org/10.1111/jeb.14000" class="external-link uri">https://doi.org/10.1111/jeb.14000</a>.</p>
+<p>Revell, L.J. (2009). <em>Size-correction and principal components for
+interspecific comparative studies</em>. Evolution, 63, 3258-3268 <a href="https://doi.org/10.1111/j.1558-5646.2009.00804.x" class="external-link uri">https://doi.org/10.1111/j.1558-5646.2009.00804.x</a>.</p>
+<p>Revell, L.J. (2012). <em>phytools: An R package for phylogenetic
+comparative biology (and other things)</em>. Methods in Ecology and
+Evolution 3, 217-223. <a href="https://doi.org/10.1111/j.2041-210X.2011.00169.x" class="external-link uri">https://doi.org/10.1111/j.2041-210X.2011.00169.x</a>.</p>
+<p>Schlager S. (2017). <em>Morpho and Rvcg - Shape Analysis in R</em>.
+In Zheng G., Li S., Szekely G. (eds.), <em>Statistical Shape and
+Deformation Analysis</em>, 217-256. Academic Press. <a href="https://doi.org/10.1016/B978-0-12-810493-4.00011-0" class="external-link uri">https://doi.org/10.1016/B978-0-12-810493-4.00011-0</a>.</p>
 </div>
   </div>
 
@@ -291,7 +418,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
