@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 # morphospace <img src="man/figures/morphosp_hex.png" align="right" width="200"/>
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of `morphospace` is to enhance representation and heuristic exploration of multivariate ordinations of shape data. This package can handle the most common types of shape data working in integration with other widely used R packages such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014), which cover other more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis).

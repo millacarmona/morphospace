@@ -4,8 +4,7 @@
 # morphospace <img src="man/figures/morphosp_hex.png" align="right" width="200"/>
 
 <!-- badges: start -->
-
-[![R-CMD-check](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of `morphospace` is to enhance representation and heuristic
