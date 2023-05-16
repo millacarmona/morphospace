@@ -229,10 +229,14 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
     wts <- rep(1, nlevels(groups))
   }
 
-  vcv_g <- stats::cov.wt(groupmeans, wt = wts, cor = corr)$cov
+  if(corr == TRUE) {
+    vcv_g <- stats::cov.wt(groupmeans, wt = wts, cor = corr)$cor
+  } else {
+    vcv_g <- stats::cov.wt(groupmeans, wt = wts, cor = corr)$cov
+  }
   svd <- svd(x = vcv_g)
 
-  ndims <- min(nrow(x), nlevels(groups) - 1)
+  ndims <- min(nrow(x), ncol(x), nlevels(groups) - 1)
   rotation <- cbind(svd$v[,seq_len(ndims)])
   values <- svd$d[seq_len(ndims)]
 
@@ -257,7 +261,13 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
         subwts <- rep(1, nlevels(subgroups))
       }
 
-      subvcv_g <- stats::cov.wt(subgroupmeans, wt = subwts, cor = corr)$cov
+      if(corr == TRUE) {
+        subvcv_g <- stats::cov.wt(subgroupmeans, wt = subwts,
+                                  cor = corr)$cor
+      } else {
+        subvcv_g <- stats::cov.wt(subgroupmeans, wt = subwts,
+                                  cor = corr)$cov
+      }
       subsvd <- svd(subvcv_g)
 
       subrotation <- cbind(subsvd$v[,seq_len(ndims)])
