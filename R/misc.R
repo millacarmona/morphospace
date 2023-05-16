@@ -224,7 +224,7 @@ ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 #' @param fac A factor grouping data points.
 #' @param col A vector (either character or numeric) indicating the colors used
 #'   for each group.
-#' @param ... Further arguments passed to [rgl::rgl.triangles()] (e.g.
+#' @param ... Further arguments passed to [rgl::triangles3d()] (e.g.
 #'   \code{specular}, \code{alpha}).
 #'
 #' @export
@@ -253,7 +253,7 @@ hulls_by_group_3D<-function(xyz, fac, col = seq_len(nlevels(fac)), ...) {
   for(i in seq_len(nlevels(fac))) {
     matsp <- xyz[fac == levels(fac)[i], 1:3]
     surf <- t(geometry::convhulln(matsp))
-    convex <- rgl::rgl.triangles(matsp[surf, 1], matsp[surf, 2], matsp[surf, 3], col = col[i], ...)
+    convex <- rgl::triangles3d(matsp[surf, 1], matsp[surf, 2], matsp[surf, 3], col = col[i], ...)
     }
 }
 

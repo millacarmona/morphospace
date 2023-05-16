@@ -199,7 +199,7 @@ mspace(shapes, mag = 1, axes = c(1,2), col.ldm = "black", cex.ldm = 2, points = 
 
 #generate morphospace using a mesh template that improves visualization:
 #first, get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec
-meanspec_id<- findMeanSpec(shapes)
+meanspec_id <- findMeanSpec(shapes)
 meanspec_shape <- shapes[,,meanspec_id]
 
 #then get the consensus shape and warp the sample mesh to get the mesh corresponding to the

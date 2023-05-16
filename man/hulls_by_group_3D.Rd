@@ -14,7 +14,7 @@ hulls_by_group_3D(xyz, fac, col = seq_len(nlevels(fac)), ...)
 \item{col}{A vector (either character or numeric) indicating the colors used
 for each group.}
 
-\item{...}{Further arguments passed to \code{\link[rgl:primitive]{rgl::rgl.triangles()}} (e.g.
+\item{...}{Further arguments passed to \code{\link[rgl:primitives]{rgl::triangles3d()}} (e.g.
 \code{specular}, \code{alpha}).}
 }
 \description{

@@ -11,7 +11,7 @@ Description: 'morphospace' provide functions aimed at building, visualizing, and
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 URL: https://github.com/millacarmona/morphospace,
     https://millacarmona.github.io/morphospace/
 BugReports: https://github.com/millacarmona/morphospace/issues

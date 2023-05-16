@@ -141,7 +141,7 @@
 #'
 #' #generate morphospace using a mesh template that improves visualization:
 #' #first, get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec
-#' meanspec_id<- findMeanSpec(shapes)
+#' meanspec_id <- findMeanSpec(shapes)
 #' meanspec_shape <- shapes[,,meanspec_id]
 #'
 #' #then get the consensus shape and warp the sample mesh to get the mesh corresponding to the
@@ -303,6 +303,8 @@ mspace <- function(shapes,
 #'   \code{mspace} object will be modified by replacing the original
 #'   \code{$x} slot as well as adding some graphical parameters, and returned
 #'   invisibly.
+#'
+#' @importFrom magrittr %>%
 #'
 #' @export
 #'
