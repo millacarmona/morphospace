@@ -522,12 +522,14 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #' @param asp.models Numeric; the y/x aspect ratio of shape models.
 #' @param xlim,ylim,asp Standard arguments passed to the generic plot function
 #'
-#' @return A list of length 2 containing:
+#' @return A list of length 3 containing:
 #' \itemize{
 #'   \item \code{$models_mat:} {a 2-column matrix with the (x,y) coordinates of
 #'   all the shape models in the background.}
 #'   \item \code{$models_arr:} {same as \code{models_mat} but in 3-margins array
 #'   format.}
+#'   \item \code{$grid:} {coordinates marking the centroid of each shape model.
+#'   Intended for internal use.}
 #' }
 #'
 #' @export
@@ -691,7 +693,7 @@ morphogrid <- function(ordination,
   }
 
 
-  return(list(models_mat = models_mat, models_arr = models_arr))
+  return(list(models_mat = models_mat, models_arr = models_arr, grid = gridcoords))
 
 }
 

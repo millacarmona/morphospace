@@ -268,7 +268,8 @@ mspace <- function(shapes,
   plotinfo <- list(p = p, k = k, links = links, template = template, axes = axes, nh = nh, nv = nv, mag = mag,
                    asp = asp, adj_frame = adj_frame, asp.models = asp.models, rot.models = rot.models,
                    size.models = size.models, lwd.models = lwd.models, bg.models = bg.models, col.models = col.models,
-                   alpha.models = alpha.models, cex.ldm = cex.ldm, col.ldm = col.ldm, models = models)
+                   alpha.models = alpha.models, cex.ldm = cex.ldm, col.ldm = col.ldm, models = models,
+                   shapemodels = shapemodels)
 
   results <- list(x = ordination$x, rotation = ordination$rotation, center = ordination$center,
                   datype = datype, ordtype = ordtype, plotinfo = plotinfo)
@@ -705,7 +706,7 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, ...) {
 #' Project phylogenetic structure into morphospace
 #'
 #' @description Project phylogenetic relationships among a set of shapes
-#'   (representing the consensuses of phhylogenetic terminals) into an existing
+#'   (representing the consensuses of phylogenetic terminals) into an existing
 #'   bivariate morphospace.
 #'
 #' @param tree A \code{"phylo"} object containing a phylogenetic tree.
@@ -785,6 +786,76 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
     return(invisible(mspace))
   }
 
+}
+
+
+###############################################################################################
+
+#' Project landscape into morphospace
+#'
+#' @description Compute and project functional landscape into an existing morphospace.
+#'   Experimental.
+#'
+#' @param mspace An \code{"mspace"} object.
+#' @param FUN A function to be applied to an array of shapes (the background models) along
+#'       its third margin, and returning a single numeric value from each. These values will
+#'       be interpolate to generate the landscape surface.
+#' @param method Method used for interpolation. For now, the only option is \code{"interp"},
+#'          which calls the function [akima::interp()].
+#' @param palette Color palette to use in landscape surface representation.
+#' @param n =
+#' @param nlevels =
+#' @param drawlabels =
+#' @param expand = Magnification factor to extend (adjust) the reach of the landscape.
+#' @param pipe = Logical; is the function being included in a pipe?
+#' @param ... = Further arguments passed to \code{FUN}.
+#'
+#' @details description
+#'
+#' @return values
+#'
+#' @export
+#'
+#' @examples find one
+proj_landscape <- function(mspace, FUN, method = "interp", palette = heat.colors,
+                           n = 50, nlevels = 50, drawlabels = FALSE, expand = 1,
+                           pipe = TRUE, ...) {
+
+  args <- c(as.list(environment()), list(...))
+
+  if(.Device != "null device") {
+    models <- mspace$plotinfo$shapemodels$models_arr
+    grid <- mspace$plotinfo$shapemodels$grid * expand
+    axes <- mspace$plotinfo$axes
+
+    models_values <- apply(X = models, MARGIN = 3, FUN = FUN, ...)
+    if(method == "interp") {
+
+      landscape <- suppressWarnings({akima::interp(x = grid[, axes[1]],
+                                                   y = grid[, axes[2]],
+                                                   z = models_values)
+      })
+    }
+
+    graphics::contour(x = landscape$x, y = landscape$y, z = landscape$z,
+                      col=rev(palette(n = n)), nlevels = nlevels,
+                      drawlabels = drawlabels, add = TRUE, lwd = 2)
+    box()
+
+  }
+
+  mspace$landscape <- landscape
+  mspace$plotinfo$palette.landscape <- palette
+  mspace$plotinfo$n.landscape <- n
+  mspace$plotinfo$nlevels.landscape <- nlevels
+  mspace$plotinfo$drawlabels.landscape <- drawlabels
+
+
+  if(pipe == FALSE) {
+    return(invisible(landscape))
+  } else {
+    return(invisible(mspace))
+  }
 }
 
 
