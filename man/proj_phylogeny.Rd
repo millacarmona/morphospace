@@ -19,13 +19,14 @@ proj_phylogeny(mspace, tree, pipe = TRUE, ...)
 If a plot device with a morphospace is open, shapes representing the nodes
 of the phylogenetic tree and lines connecting them and tips are projected into
 morphospace. If \code{pipe = FALSE} scores for nodes and tips of the phylogeny
-are returned invisibly. If \code{pipe = TRUE} the supplied \code{mspace}
+are returned invisibly. If \code{pipe = TRUE} the supplied \code{"mspace"}
 object will be modified by adding a new \code{$phylo_scores} and \code{$phylo}
-slots as well as a number of graphical parameters, and returned invisibly.
+slots as well as a number of graphical parameters (stored into the
+\code{$plotinfo} slot), and returned invisibly.
 }
 \description{
 Project phylogenetic relationships among a set of shapes
-(representing the consensuses of phhylogenetic terminals) into an existing
+(representing the consensuses of phylogenetic terminals) into an existing
 bivariate morphospace.
 }
 \details{
@@ -33,7 +34,7 @@ The purpose of this function is twofold. First, it is meant to transform
 a morphospace into a phylomorphospace by infusing  phylogenetic structure into
 the former. To this end, a \code{$gr_centroids} slot matching the tip labels
 from \code{tree} needs to be present (either upstream in the pipeline or already
-incorporated into an existing \code{mspace} object). Second, this function can be
+incorporated into an existing \code{"mspace"} object). Second, this function can be
 used to retrieve the scores corresponding to nodes of the phylogenetic tree, which
 can in turn be used to compute the associated shapes using \code{\link[=rev_eigen]{rev_eigen()}}. The
 position of these shapes in morphospace is estimated using the squared-changes

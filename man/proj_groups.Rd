@@ -39,8 +39,9 @@ convex hulls will be used instead).}
 If a plot device with a morphospace is open, convex hulls or
 confidence ellipses enclosing the scores corresponding to \code{groups}
 are projected into morphospace. If \code{pipe = TRUE} the supplied
-\code{mspace} object will be modified by adding a new \code{$gr_class}
-slot as well as a number of graphical parameters, and returned invisibly.
+\code{"mspace"} object will be modified by adding a new \code{$gr_class}
+slot as well as a number of graphical parameters (stored into the
+\code{$plotinfo} slot), and returned invisibly.
 }
 \description{
 Project convex hulls or confidence ellipses enclosing \emph{a priori}
@@ -48,7 +49,7 @@ groups into an existing morphospace.
 }
 \details{
 The purpose of this function is to add a classification
-for shapes populating the morphospace to \code{mspace} objects
+for shapes populating the morphospace to \code{"mspace"} objects
 during pipeline, as well as to facilitate group visualization.
 Otherwise, it is just a wrapper for \code{hulls_by_group_2D} and
 \code{ellipses_by_group_2D}.

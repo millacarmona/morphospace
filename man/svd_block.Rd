@@ -19,7 +19,7 @@ Mimics the \code{\link[=svd]{svd()}} output.
 }
 \description{
 Just a wrapper for \code{\link[=svd]{svd()}} that returns an adequate output
-when used for blocks of variables. Can deal with phylogenetic data too
+when used on blocks of variables. Can deal with phylogenetic data too
 using \code{ape} and \code{phytools} functions. Used internally.
 }
 \examples{

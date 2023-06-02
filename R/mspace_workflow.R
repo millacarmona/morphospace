@@ -1089,7 +1089,7 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "interp",
 #'   in \code{mspace$phylo}.
 #' @param shapeax Logical; whether to plot morphometric axes stored in
 #'   \code{mspace$shape_axis}.
-#' @param shapeax Logical; whether to plot landscape surface stored in
+#' @param landsc Logical; whether to plot landscape surface stored in
 #'   \code{mspace$landsc}.
 #' @param legend Logical; whether to show legend for groups (\code{mspace$gr_class}).
 #' @param cex.legend Numeric; size of legend labels/symbols.

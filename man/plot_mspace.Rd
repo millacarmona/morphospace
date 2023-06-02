@@ -22,6 +22,7 @@ plot_mspace(
   groups = TRUE,
   phylo = TRUE,
   shapeax = TRUE,
+  landsc = TRUE,
   legend = FALSE,
   cex.legend = 1,
   asp = NA,
@@ -58,7 +59,13 @@ plot_mspace(
   col.phylo = 1,
   lwd.axis = 1,
   lty.axis = 1,
-  col.axis = 1
+  col.axis = 1,
+  palette.landsc = heat.colors,
+  ncols.landsc = 50,
+  nlevels.landsc = 50,
+  drawlabels.landsc = FALSE,
+  lty.landsc = 1,
+  lwd.landsc = 1
 )
 }
 \arguments{
@@ -112,6 +119,9 @@ in \code{mspace$phylo}.}
 
 \item{shapeax}{Logical; whether to plot morphometric axes stored in
 \code{mspace$shape_axis}.}
+
+\item{landsc}{Logical; whether to plot landscape surface stored in
+\code{mspace$landsc}.}
 
 \item{legend}{Logical; whether to show legend for groups (\code{mspace$gr_class}).}
 
@@ -193,6 +203,20 @@ branches.}
 \item{lty.axis}{Numeric; type of the lines depicting  morphometric axis.}
 
 \item{col.axis}{Numeric; color of the lines depicting morphometric axis.}
+
+\item{palette.landsc}{Color palette to use for landscape representation.}
+
+\item{ncols.landsc}{Number of colors to use for landscape representation.}
+
+\item{nlevels.landsc}{Number of levels (i.e. contours) to use in landscape representation.}
+
+\item{drawlabels.landsc}{Logical; should the labels indicating the value of each surface contour be plotted?}
+
+\item{lty.landsc}{Numeric; type of the lines depicting surface contour.}
+
+\item{lwd.landsc}{Numeric; width of the lines depicting surface contour.}
+
+\item{expand.landsc}{Numeric; Magnification factor to extend (adjust) the reach of the landscape.}
 }
 \description{
 Flexible representation of morphospaces, including their combination

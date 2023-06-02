@@ -19,16 +19,16 @@ proj_consensus(mspace, shapes, pipe = TRUE, ...)
 If a plot device with a morphospace is open, shapes feeded to
 \code{shapes} are projected into morphospace. If \code{pipe = FALSE} the
 corresponding scores are returned invisibly. If \code{pipe = TRUE} the
-supplied \code{mspace} object will be modified by adding a new
-\code{$gr_centroids} slot as well as a number of graphical parameters,
-and returned invisibly.
+supplied \code{"mspace"} object will be modified by adding a new
+\code{$gr_centroids} slot as well as a number of graphical parameters
+(stored into the \code{$plotinfo} slot), and returned invisibly.
 }
 \description{
 Project one or more mean shapes into an existing morphospace.
 }
 \details{
 The purpose of this function is to add the scores corresponding
-to groups' mean shapes to \code{mspace} objects during pipeline. Otherwise,
+to groups' mean shapes to \code{"mspace"} objects during pipeline. Otherwise,
 it does the same than \code{proj_shapes}.
 }
 \examples{

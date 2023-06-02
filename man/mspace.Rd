@@ -70,7 +70,7 @@ variation. Usual alternatives include \code{\link[stats]{prcomp}},
 \item{mag}{Numeric; magnifying factor for shape models.}
 
 \item{invax}{Optional numeric indicating which of the axes provided in
-\code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
+\code{axes} needs to be inverted (options are \code{1}, \code{2} or
 \code{c(1,2)}).}
 
 \item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic plot

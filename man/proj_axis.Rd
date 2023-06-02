@@ -26,9 +26,9 @@ projected.}
 If a plot device with a morphospace is open, a straight line marking the
 scores representing shapes at the extremes of the morphometric axis is projected
 into morphospace. If \code{pipe = FALSE} those scores are returned invisibly.
-If \code{pipe = TRUE} the supplied \code{mspace} object will be modified by adding
-a new \code{$shape_axis} slot as well as a number of graphical parameters, and
-returned invisibly.
+If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified by adding
+a new \code{$shape_axis} slot as well as a number of graphical parameters(stored
+into the \code{$plotinfo} slot), and returned invisibly.
 }
 \description{
 Project one or more morphometric axes (i.e., linear combinations

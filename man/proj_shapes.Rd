@@ -22,9 +22,9 @@ proj_shapes(mspace, shapes, density = TRUE, pipe = TRUE, ...)
 If a plot device with a morphospace is open, shapes feeded to
 \code{shapes} are projected into morphospace. If \code{pipe = FALSE}
 those scores are returned invisibly. If \code{pipe = TRUE} the supplied
-\code{mspace} object will be modified by replacing the original
-\code{$x} slot as well as adding some graphical parameters, and returned
-invisibly.
+\code{"mspace"} object will be modified by replacing the original
+\code{$x} slot as well as adding some graphical parameters (stored into
+the \code{$plotinfo} slot), and returned invisibly.
 }
 \description{
 Project a set of shapes into an existing morphospace.
