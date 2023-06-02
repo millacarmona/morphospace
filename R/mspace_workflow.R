@@ -367,6 +367,8 @@ proj_shapes <- function(mspace, shapes, density = TRUE, pipe = TRUE, ...) {
 
   }
 
+  if(is.null(args$col)) args$col <- 1
+
   mspace$x <- scores
   mspace$plotinfo$pch.points <- args$pch
   mspace$plotinfo$col.points <- args$col
@@ -810,8 +812,8 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 #' @param ncols Number of colors to use for landscape representation.
 #' @param nlevels Number of levels (i.e. contours) to use in landscape representation.
 #' @param drawlabels Logical; should the labels indicating the value of each surface contour be plotted?
-#' @param lty.landsc Numeric; type of the lines depicting surface contour.
-#' @param lwd.landsc Numeric; width of the lines depicting surface contour.
+#' @param lty Numeric; type of the lines depicting surface contour.
+#' @param lwd Numeric; width of the lines depicting surface contour.
 #' @param expand Numeric; Magnification factor to extend (adjust) the reach of the landscape.
 #' @param pipe Logical; is the function being included in a pipe?
 #' @param ... Further arguments passed to \code{FUN}.
@@ -825,10 +827,10 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 #'
 #'   If the \code{FUN} argument is used, the function provided must include a \code{model} argument
 #'   feeding the ad hoc function with a single shape, and return a single numeric value computed
-#'   for that shape. If the \code{X} argument is used instead, values should be provided in the same
-#'   order than the background shape models are plotted (i.e. from left to right and from bottom to
-#'   top; see \code{\link{morphogrid}}, \code{\link{plot_morphogrid2d}} and \code{\link{plot_morphogrid3d}}).
-#'   See examples below.
+#'   for (or from) that shape. If the \code{X} argument is used instead, values should be provided
+#'   in the same order than the background shape models are plotted (i.e. from left to right and from
+#'   bottom to top; see \code{\link{morphogrid}}, \code{\link{plot_morphogrid2d}} and
+#'   \code{\link{plot_morphogrid3d}}). See examples below.
 #'
 #' @return If a plot device with a morphospace is open, the landscape surface is projected
 #'   into it as a contour map using [akima::interp()]. If \code{pipe = FALSE}, a list of
@@ -844,7 +846,6 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 #' library(geomorph)
 #' library(Morpho)
 #' library(Momocs)
-#' library(morphospace)
 #'
 #' data("tails")
 #' shapes <- tails$shapes
@@ -997,7 +998,7 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "interp",
                            palette = heat.colors, ncols = 50, nlevels = 50,
                            drawlabels = FALSE, expand = 1, pipe = TRUE,
-                           lwd.landsc = 1, lty.landsc = 1, ...) {
+                           lwd = 1, lty = 1, ...) {
 
   args <- c(as.list(environment()), list(...))
 
@@ -1024,7 +1025,7 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "interp",
     graphics::contour(x = landscape$x, y = landscape$y, z = landscape$z,
                       col = rev(palette(n = ncols)), nlevels = nlevels,
                       drawlabels = drawlabels, add = TRUE,
-                      lwd = lwd.landsc, lty = lty.landsc)
+                      lwd = lwd, lty = lty)
     box()
 
   }
@@ -1034,8 +1035,9 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "interp",
   mspace$plotinfo$ncols.landsc <- ncols
   mspace$plotinfo$nlevels.landsc <- nlevels
   mspace$plotinfo$drawlabels.landsc <- drawlabels
-  mspace$plotinfo$lty.landsc <- lty.landsc
-  mspace$plotinfo$lwd.landsc <- lwd.landsc
+  mspace$plotinfo$lty.landsc <- lty
+  mspace$plotinfo$lwd.landsc <- lwd
+  mspace$plotinfo$expand.landsc <- expand
 
 
   if(pipe == FALSE) {
@@ -1072,7 +1074,7 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "interp",
 #' @param nv Numeric; the number of shape models along the y axis.
 #' @param mag Numeric; magnifying factor for shape models.
 #' @param invax Optional numeric indicating which of the axes provided in
-#'   \code{axes} needs to be inverted (options are \code{1}, \code{2} or
+#'   \code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
 #'   \code{c(1,2)}).
 #' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
 #'   factors for the width and height of the frame, respectively.
@@ -1087,6 +1089,8 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "interp",
 #'   in \code{mspace$phylo}.
 #' @param shapeax Logical; whether to plot morphometric axes stored in
 #'   \code{mspace$shape_axis}.
+#' @param shapeax Logical; whether to plot landscape surface stored in
+#'   \code{mspace$landsc}.
 #' @param legend Logical; whether to show legend for groups (\code{mspace$gr_class}).
 #' @param cex.legend Numeric; size of legend labels/symbols.
 #' @param size.models Numeric; size factor for shape models.
@@ -1133,10 +1137,17 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "interp",
 #' @param lwd.axis Numeric; width of the lines depicting morphometric axis.
 #' @param lty.axis Numeric; type of the lines depicting  morphometric axis.
 #' @param col.axis Numeric; color of the lines depicting morphometric axis.
+#' @param palette.landsc Color palette to use for landscape representation.
+#' @param ncols.landsc Number of colors to use for landscape representation.
+#' @param nlevels.landsc Number of levels (i.e. contours) to use in landscape representation.
+#' @param drawlabels.landsc Logical; should the labels indicating the value of each surface contour be plotted?
+#' @param lty.landsc Numeric; type of the lines depicting surface contour.
+#' @param lwd.landsc Numeric; width of the lines depicting surface contour.
+#' @param expand.landsc Numeric; Magnification factor to extend (adjust) the reach of the landscape.
 #' @param xlim,ylim,xlab,ylab,asp Standard arguments passed to the generic [graphics::plot()]
 #'   function.
 #'
-#' @details This function allows to regenerate morphospaces contained in \code{"mspace"}
+#' @details This function allows to regenerate morphospaces contained in \code{mspace}
 #'   objects already in existence, either preserving the graphical attributes used
 #'   during the pipeline or modifying one or more of them (so there is no need to
 #'   execute the pipeline every time morphospaces need to be visualized and/or changed).
@@ -1147,11 +1158,11 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "interp",
 #'   \code{x} or \code{y}, a 'hybrid' morphospace is produced (i.e. the bivariate
 #'   plot will be constructed from the combination of \code{x} or \code{y} and a
 #'   morphometric axis; shape models in the background will represent variation
-#'   only for the latter). If instead a \code{"phylo"} object (describing phylogenetic
-#'   relationships among tips scores stored in \code{mspace$phylo_scores}) is fed to
-#'   one of \code{x} or \code{y}, a vertical or horizontal phenogram will be deployed
-#'   (the x/y axis range will correspond to branch lengths, so caution should be
-#'   exercised when interpreting the output).
+#'   only for the latter). If instead a \code{"phylo"} object (assumed to describe
+#'   the phylogenetic relationships among tips scores stored in
+#'   \code{mspace$phylo_scores}) is feeded to one of \code{x} or \code{y}, a vertical
+#'   or horizontal phenogram will be deployed (the x/y axis range will correspond to
+#'   branch lengths, so caution should be exercised when interpreting the output).
 #'
 #' @export
 #'
@@ -1254,6 +1265,7 @@ plot_mspace <- function(mspace,
                         groups = TRUE,
                         phylo = TRUE,
                         shapeax = TRUE,
+                        landsc = TRUE,
                         legend = FALSE,
                         cex.legend = 1,
                         asp = NA,
@@ -1290,7 +1302,13 @@ plot_mspace <- function(mspace,
                         col.phylo = 1,
                         lwd.axis = 1,
                         lty.axis = 1,
-                        col.axis = 1) {
+                        col.axis = 1,
+                        palette.landsc = heat.colors,
+                        ncols.landsc = 50,
+                        nlevels.landsc = 50,
+                        drawlabels.landsc = FALSE,
+                        lty.landsc = 1,
+                        lwd.landsc = 1) {
 
 
   supplied <- names(as.list(match.call()))[-1]
@@ -1560,6 +1578,21 @@ plot_mspace <- function(mspace,
         }
       } else {
         print("\nmorphometric axes are omitted from univariate morphospaces")
+      }
+    }
+
+    if(landsc == TRUE & !is.null(mspace$landsc)) {
+      if(length(args$axes) > 1) {
+
+
+        graphics::contour(x = mspace$landsc$x, y = mspace$landsc$y, z = mspace$landsc$z,
+                          col = rev(args$palette.landsc(n = args$ncols.landsc)),
+                          nlevels = args$nlevels.landsc, drawlabels = args$drawlabels.landsc,
+                          add = TRUE, lwd = args$lwd.landsc, lty = args$lty.landsc)
+        box()
+
+      } else {
+        print("\nlandscapes are omitted from univariate morphospaces")
       }
     }
 
