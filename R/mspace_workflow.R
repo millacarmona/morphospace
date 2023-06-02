@@ -28,7 +28,7 @@
 #' @param nv Numeric; number of shape models along the y axis.
 #' @param mag Numeric; magnifying factor for shape models.
 #' @param invax Optional numeric indicating which of the axes provided in
-#'   \code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
+#'   \code{axes} needs to be inverted (options are \code{1}, \code{2} or
 #'   \code{c(1,2)}).
 #' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
 #'   factors for the width and height of the frame, respectively.
@@ -806,7 +806,9 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 #' @param n =
 #' @param nlevels =
 #' @param drawlabels =
-#' @param expand = Magnification factor to extend (adjust) the reach of the landscape.
+#' @param lty.landsc =
+#' @param lwd.landsc =
+#' @param expand = Numeric; Magnification factor to extend (adjust) the reach of the landscape.
 #' @param pipe = Logical; is the function being included in a pipe?
 #' @param ... = Further arguments passed to \code{FUN}.
 #'
@@ -816,10 +818,151 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 #'
 #' @export
 #'
-#' @examples find one
+#' @examples
+#' # a function to compute lift/drag ratio in Tyrannus' tail shapes (tails dataset)
+#' computeLD <- function(model, MCS = FALSE) {
+#'
+#'   tail <- model
+#'   Ax <- tail[9, 1] ; Ay <- tail[9, 2]
+#'   Bx <- tail[5, 1] ; By <- tail[5, 2]
+#'   X <- tail[7, 1] ; Y <- tail[7, 2]
+#'
+#'   # determine position of the tip of the inner rectrix relative to the tips of
+#'   # the outermost rectrices (positive: anterior to the ORT; negative: posterior
+#'   # to the ORT)
+#'   tip_pos1 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
+#'
+#'   # do the same but for the inner outer rectrices
+#'   Ax <- tail[8, 1] ; Ay <- tail[8, 2]
+#'   Bx <- tail[6, 1] ; By <- tail[6, 2]
+#'   X <- tail[7, 1] ; Y <- tail[7, 2]
+#'
+#'   # determine position of the tip of the inner rectrix relative to the tips of
+#'   # the outermost rectrices (positive: anterior to the ORT; negative: posterior
+#'   # to the ORT)
+#'   tip_pos2 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
+#'
+#'   # compute the area of the polygon representing the whole tail
+#'   tail_area <- coo_area(tail[c(1, 3, 5, 6, 7, 8, 9, 4, 2, 1), ])
+#'
+#'
+#'   # if posterior, compute MCS as the distance between the ORTs, and the lifting
+#'   # area as the polygon enclosed by the ORTs and tail base
+#'   if(tip_pos1 == -1) {
+#'     mcs <- dist(rbind(tail[5, ], tail[9, ]))
+#'     lifting_area <- coo_area(tail[c(1, 3, 5, 9, 4, 2, 1),])
+#'   }
+#'
+#'   # if anterior, find the maximum continuous span as the line perpendicular to
+#'   # the saggital axis that intersects the ORTs and the IRT
+#'   if(tip_pos1 == 1 & tip_pos2 == 1) {
+#'
+#'     # center tail around the IRT and set MCS as a vertical line passing through
+#'     # the origin
+#'     tail_cent <- cbind(tail[, 1] - tail[7, 1],
+#'                        tail[, 2] - tail[7, 2])
+#'     mcs_vec <- c(0,10e10)
+#'
+#'     ort1 <- rbind(tail_cent[4, ], tail_cent[9, ])
+#'     ort1_vec <- lm(ort1[, 2] ~ ort1[, 1])$coef
+#'
+#'     ort2 <- rbind(tail_cent[3, ], tail_cent[5, ])
+#'     ort2_vec <- lm(ort2[, 2] ~ ort2[, 1])$coef
+#'
+#'     # find tips of MCS
+#'     A <- matrix(c(mcs_vec[2], -1, ort1_vec[2], -1), byrow = TRUE, nrow = 2)
+#'     b <- c(-mcs_vec[1], -ort1_vec[1])
+#'     p1 <- solve(A, b)
+#'
+#'     A <- matrix(c(mcs_vec[2], -1, ort2_vec[2], -1), byrow = TRUE, nrow = 2)
+#'     b <- c(-mcs_vec[1], -ort2_vec[1])
+#'     p2 <- solve(A, b)
+#'
+#'     # define "new tail base", enclosing the polygon using the tips of the MCS
+#'     newbase <- rbind(tail_cent[c(2, 4), ],
+#'                      p1,
+#'                      tail_cent[7, ],
+#'                      p2,
+#'                      tail_cent[c(3, 1), ])
+#'
+#'     # compute MCS and lifting area
+#'     lifting_area <- coo_area(newbase[c(1, 2, 3, 4, 5, 6, 7, 1),])
+#'     mcs <- dist(rbind(p1, p2))
+#'
+#'   }
+#'
+#'   # if anterior, find the maximum continuous span as the line perpendicular to
+#'   # the saggital axis that intersects the ORTs and the IRT
+#'   if(tip_pos1 == 1 & tip_pos2 == -1) {
+#'
+#'     # center tail around the IRT and set MCS as a vertical line passing through
+#'     # the origin
+#'     tail_cent <- cbind(tail[, 1] - mean(tail[6, 1], tail[8, 1]),
+#'                        tail[, 2] - mean(tail[6, 2], tail[8, 2]))
+#'     mcs_vec <- c(0,10e10)
+#'
+#'     ort1 <- rbind(tail_cent[4, ], tail_cent[9, ])
+#'     ort1_vec <- lm(ort1[, 2] ~ ort1[, 1])$coef
+#'
+#'     ort2 <- rbind(tail_cent[3, ], tail_cent[5, ])
+#'     ort2_vec <- lm(ort2[, 2] ~ ort2[, 1])$coef
+#'
+#'     # find tips of MCS
+#'     A <- matrix(c(mcs_vec[2], -1, ort1_vec[2], -1), byrow = TRUE, nrow = 2)
+#'     b <- c(-mcs_vec[1], -ort1_vec[1])
+#'     p1 <- solve(A, b)
+#'
+#'     A <- matrix(c(mcs_vec[2], -1, ort2_vec[2], -1), byrow = TRUE, nrow = 2)
+#'     b <- c(-mcs_vec[1], -ort2_vec[1])
+#'     p2 <- solve(A, b)
+#'
+#'     # define "new tail base", enclosing the polygon using the tips of the MCS
+#'     newbase <- rbind(tail_cent[c(2, 4), ],
+#'                      p1,
+#'                      tail_cent[7, ],
+#'                      p2,
+#'                      tail_cent[c(3, 1), ])
+#'
+#'     # compute MCS and lifting area
+#'     lifting_area <- coo_area(newbase[c(1, 2, 3, 4, 5, 6, 7, 1),])
+#'     mcs <- dist(rbind(p1, p2))
+#'
+#'   }
+#'
+#'
+#'
+#'
+#'   #compute and return lift/drag ratio
+#'   if(!MCS) LD_ratio <- lifting_area / tail_area
+#'   if(MCS)  LD_ratio <- (mcs ^ 2) / tail_area
+#'
+#'   return(as.numeric(LD_ratio))
+#'
+#' }
+#'
+#'
+#'
+#' library(morphospace)
+#' library(Morpho)
+#' library(Momocs)
+#'
+#' data("tails")
+#' shapes <- tails$shapes
+#' links <- tails$links
+#' tree <- tails$tree
+#' spp <- tails$data$species
+#' shapes_sp <- expected_shapes(shapes, spp)
+#'
+#'
+#'
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0) %>%
+#'   proj_shapes(shapes, pch = 16) %>%
+#'   proj_landscape(nlevels = 60, n = 60, FUN = computeLD, expand = 1.2)
+#'
+
 proj_landscape <- function(mspace, FUN, method = "interp", palette = heat.colors,
                            n = 50, nlevels = 50, drawlabels = FALSE, expand = 1,
-                           pipe = TRUE, ...) {
+                           pipe = TRUE, lwd.landsc = 1, lty.landsc = 1, ...) {
 
   args <- c(as.list(environment()), list(...))
 
@@ -838,17 +981,20 @@ proj_landscape <- function(mspace, FUN, method = "interp", palette = heat.colors
     }
 
     graphics::contour(x = landscape$x, y = landscape$y, z = landscape$z,
-                      col=rev(palette(n = n)), nlevels = nlevels,
-                      drawlabels = drawlabels, add = TRUE, lwd = 2)
+                      col = rev(palette(n = n)), nlevels = nlevels,
+                      drawlabels = drawlabels, add = TRUE,
+                      lwd = lwd.landsc, lty = lty.landsc)
     box()
 
   }
 
-  mspace$landscape <- landscape
-  mspace$plotinfo$palette.landscape <- palette
-  mspace$plotinfo$n.landscape <- n
-  mspace$plotinfo$nlevels.landscape <- nlevels
-  mspace$plotinfo$drawlabels.landscape <- drawlabels
+  mspace$landsc <- landscape
+  mspace$plotinfo$palette.landsc <- palette
+  mspace$plotinfo$n.landsc <- n
+  mspace$plotinfo$nlevels.landsc <- nlevels
+  mspace$plotinfo$drawlabels.landsc <- drawlabels
+  mspace$plotinfo$lty.landsc <- lty.landsc
+  mspace$plotinfo$lwd.landsc <- lwd.landsc
 
 
   if(pipe == FALSE) {
@@ -1077,7 +1223,7 @@ plot_mspace <- function(mspace,
                         size.models,
                         asp.models,
                         rot.models,
-                        col.models ,
+                        col.models,
                         bg.models,
                         lwd.models,
                         alpha.models,

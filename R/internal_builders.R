@@ -102,7 +102,7 @@ proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors
 #' Singular value decomposition for 2 blocks of variables
 #'
 #' @description Just a wrapper for [svd()] that returns an adequate output
-#'   when used for blocks of variables. Can deal with phylogenetic data too
+#'   when used on blocks of variables. Can deal with phylogenetic data too
 #'   using \code{ape} and \code{phytools} functions. Used internally.
 #'
 #' @param x First block of variables

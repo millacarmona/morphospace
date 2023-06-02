@@ -678,7 +678,6 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
                   center = pls$ycenter,
                   totvar = pls$ytotvar)
 
-  #if(class(pls) == "pls2b") {
   if(inherits(pls, "pls2b")) {
     class(results) <- "pls_shapes"
   } else {
@@ -733,7 +732,6 @@ exp_var <- function(ordination) {
 
   ax_var <- apply(ordination$x, 2, stats::var)
 
-  #if(class(ordination) == "prcomp") {
   if(inherits(ordination, "prcomp")) {
     totvar <- sum(ax_var)
   } else {
@@ -745,11 +743,6 @@ exp_var <- function(ordination) {
                                        cummulative=cumsum(acc_var)),
                              digits = 5))
 
-  # if(class(ordination) == "prcomp") axname <- "PC"
-  # if(class(ordination) == "bg_prcomp") axname <- "bgPC"
-  # if(class(ordination) == "phy_prcomp") axname <- "phyPC"
-  # if(class(ordination) == "pls_shapes") axname <- "PLS-"
-  # if(class(ordination) == "phy_pls_shapes") axname <- "phyPLS-"
   if(inherits(ordination, "prcomp")) axname <- "PC"
   if(inherits(ordination, "bg_prcomp")) axname <- "bgPC"
   if(inherits(ordination, "phy_prcomp")) axname <- "phyPC"
