@@ -301,9 +301,9 @@ mspace <- function(shapes,
 #' @return If a plot device with a morphospace is open, shapes feeded to
 #'   \code{shapes} are projected into morphospace. If \code{pipe = FALSE}
 #'   those scores are returned invisibly. If \code{pipe = TRUE} the supplied
-#'   \code{mspace} object will be modified by replacing the original
-#'   \code{$x} slot as well as adding some graphical parameters, and returned
-#'   invisibly.
+#'   \code{"mspace"} object will be modified by replacing the original
+#'   \code{$x} slot as well as adding some graphical parameters (stored into
+#'   the \code{$plotinfo} slot), and returned invisibly.
 #'
 #' @importFrom magrittr %>%
 #'
@@ -393,15 +393,15 @@ proj_shapes <- function(mspace, shapes, density = TRUE, pipe = TRUE, ...) {
 #' @param ... Further arguments passed to [graphics::points()].
 #'
 #' @details The purpose of this function is to add the scores corresponding
-#'   to groups' mean shapes to \code{mspace} objects during pipeline. Otherwise,
+#'   to groups' mean shapes to \code{"mspace"} objects during pipeline. Otherwise,
 #'   it does the same than \code{proj_shapes}.
 #'
 #' @return If a plot device with a morphospace is open, shapes feeded to
 #'   \code{shapes} are projected into morphospace. If \code{pipe = FALSE} the
 #'   corresponding scores are returned invisibly. If \code{pipe = TRUE} the
-#'   supplied \code{mspace} object will be modified by adding a new
-#'   \code{$gr_centroids} slot as well as a number of graphical parameters,
-#'   and returned invisibly.
+#'   supplied \code{"mspace"} object will be modified by adding a new
+#'   \code{$gr_centroids} slot as well as a number of graphical parameters
+#'   (stored into the \code{$plotinfo} slot), and returned invisibly.
 #'
 #' @seealso \code{\link{expected_shapes}}
 #'
@@ -483,7 +483,7 @@ proj_consensus <- function(mspace, shapes, pipe = TRUE, ...) {
 #'   [ellipses_by_group_2D()].
 #'
 #' @details The purpose of this function is to add a classification
-#'   for shapes populating the morphospace to \code{mspace} objects
+#'   for shapes populating the morphospace to \code{"mspace"} objects
 #'   during pipeline, as well as to facilitate group visualization.
 #'   Otherwise, it is just a wrapper for \code{hulls_by_group_2D} and
 #'   \code{ellipses_by_group_2D}.
@@ -491,8 +491,9 @@ proj_consensus <- function(mspace, shapes, pipe = TRUE, ...) {
 #' @return If a plot device with a morphospace is open, convex hulls or
 #'   confidence ellipses enclosing the scores corresponding to \code{groups}
 #'   are projected into morphospace. If \code{pipe = TRUE} the supplied
-#'   \code{mspace} object will be modified by adding a new \code{$gr_class}
-#'   slot as well as a number of graphical parameters, and returned invisibly.
+#'   \code{"mspace"} object will be modified by adding a new \code{$gr_class}
+#'   slot as well as a number of graphical parameters (stored into the
+#'   \code{$plotinfo} slot), and returned invisibly.
 #'
 #' @seealso \code{\link{hulls_by_group_2D}}, \code{\link{ellipses_by_group_2D}}
 #'
@@ -631,9 +632,9 @@ proj_groups <- function(mspace, shapes = NULL, groups, ellipse = FALSE,
 #' @return If a plot device with a morphospace is open, a straight line marking the
 #'   scores representing shapes at the extremes of the morphometric axis is projected
 #'   into morphospace. If \code{pipe = FALSE} those scores are returned invisibly.
-#'    If \code{pipe = TRUE} the supplied \code{mspace} object will be modified by adding
-#'    a new \code{$shape_axis} slot as well as a number of graphical parameters, and
-#'    returned invisibly.
+#'   If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified by adding
+#'   a new \code{$shape_axis} slot as well as a number of graphical parameters(stored
+#'   into the \code{$plotinfo} slot), and returned invisibly.
 #'
 #' @export
 #'
@@ -718,7 +719,7 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, ...) {
 #'   a morphospace into a phylomorphospace by infusing  phylogenetic structure into
 #'   the former. To this end, a \code{$gr_centroids} slot matching the tip labels
 #'   from \code{tree} needs to be present (either upstream in the pipeline or already
-#'   incorporated into an existing \code{mspace} object). Second, this function can be
+#'   incorporated into an existing \code{"mspace"} object). Second, this function can be
 #'   used to retrieve the scores corresponding to nodes of the phylogenetic tree, which
 #'   can in turn be used to compute the associated shapes using [rev_eigen()]. The
 #'   position of these shapes in morphospace is estimated using the squared-changes
@@ -727,9 +728,10 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, ...) {
 #' @return If a plot device with a morphospace is open, shapes representing the nodes
 #'   of the phylogenetic tree and lines connecting them and tips are projected into
 #'   morphospace. If \code{pipe = FALSE} scores for nodes and tips of the phylogeny
-#'   are returned invisibly. If \code{pipe = TRUE} the supplied \code{mspace}
+#'   are returned invisibly. If \code{pipe = TRUE} the supplied \code{"mspace"}
 #'   object will be modified by adding a new \code{$phylo_scores} and \code{$phylo}
-#'   slots as well as a number of graphical parameters, and returned invisibly.
+#'   slots as well as a number of graphical parameters (stored into the
+#'   \code{$plotinfo} slot), and returned invisibly.
 #'
 #' @export
 #'
@@ -793,33 +795,67 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 
 #' Project landscape into morphospace
 #'
-#' @description Compute and project functional landscape into an existing morphospace.
+#' @description Compute and project a landscape surface over an existing morphospace.
 #'   Experimental.
 #'
 #' @param mspace An \code{"mspace"} object.
 #' @param FUN A function to be applied to an array of shapes (the background models) along
 #'       its third margin, and returning a single numeric value from each. These values will
-#'       be interpolate to generate the landscape surface.
-#' @param method Method used for interpolation. For now, the only option is \code{"interp"},
-#'          which calls the function [akima::interp()].
-#' @param palette Color palette to use in landscape surface representation.
-#' @param n =
-#' @param nlevels =
-#' @param drawlabels =
-#' @param lty.landsc =
-#' @param lwd.landsc =
-#' @param expand = Numeric; Magnification factor to extend (adjust) the reach of the landscape.
-#' @param pipe = Logical; is the function being included in a pipe?
-#' @param ... = Further arguments passed to \code{FUN}.
+#'       be interpolated to generate the landscape surface.
+#' @param X A vector containing the values assigned to each background shape model (vector
+#'       length must match the number of the shape models in the background and have the order).
+#' @param method Method used for interpolation. For now, the only option available is
+#'       \code{"interp"}, which calls the function [akima::interp()].
+#' @param palette Color palette to use for landscape representation.
+#' @param ncols Number of colors to use for landscape representation.
+#' @param nlevels Number of levels (i.e. contours) to use in landscape representation.
+#' @param drawlabels Logical; should the labels indicating the value of each surface contour be plotted?
+#' @param lty.landsc Numeric; type of the lines depicting surface contour.
+#' @param lwd.landsc Numeric; width of the lines depicting surface contour.
+#' @param expand Numeric; Magnification factor to extend (adjust) the reach of the landscape.
+#' @param pipe Logical; is the function being included in a pipe?
+#' @param ... Further arguments passed to \code{FUN}.
 #'
-#' @details description
+#' @details The purpose of this function is to generate and depict a 3-dimensonal surface
+#'   (i.e. a landscape), interpolated from values assigned to the set of background shape models
+#'   of an existing morphospace created using \code{mspace}. Generally, these values will
+#'   represent a variable measuring functional performance (although it can be any kind of
+#'   continuous variable), and can either be provided directly through the \code{X} argument
+#'   or be computed automatically using an ad hoc R function through the \code{FUN} argument.
 #'
-#' @return values
+#'   If the \code{FUN} argument is used, the function provided must include a \code{model} argument
+#'   feeding the ad hoc function with a single shape, and return a single numeric value computed
+#'   for that shape. If the \code{X} argument is used instead, values should be provided in the same
+#'   order than the background shape models are plotted (i.e. from left to right and from bottom to
+#'   top; see \code{\link{morphogrid}}, \code{\link{plot_morphogrid2d}} and \code{\link{plot_morphogrid3d}}).
+#'   See examples below.
+#'
+#' @return If a plot device with a morphospace is open, the landscape surface is projected
+#'   into it as a contour map using [akima::interp()]. If \code{pipe = FALSE}, a list of
+#'   length 3 containing the x, y and z values used to plot the landscape is returned invisibly.
+#'   If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified by adding a new
+#'   \code{$landsc} slot together with a number of graphical parameters (stored into the
+#'   \code{$plotinfo} slot), and returned invisibly.
 #'
 #' @export
 #'
 #' @examples
-#' # a function to compute lift/drag ratio in Tyrannus' tail shapes (tails dataset)
+#' #load data and packages
+#' library(geomorph)
+#' library(Morpho)
+#' library(Momocs)
+#' library(morphospace)
+#'
+#' data("tails")
+#' shapes <- tails$shapes
+#' links <- tails$links
+#'
+#'
+#' #Compute and plot adaptive landscape for wing tail shape:
+#'
+#' ##Using the FUN argument
+#'
+#' #a function to compute lift/drag ratio on tail shape:
 #' computeLD <- function(model, MCS = FALSE) {
 #'
 #'   tail <- model
@@ -929,9 +965,6 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 #'
 #'   }
 #'
-#'
-#'
-#'
 #'   #compute and return lift/drag ratio
 #'   if(!MCS) LD_ratio <- lifting_area / tail_area
 #'   if(MCS)  LD_ratio <- (mcs ^ 2) / tail_area
@@ -940,29 +973,31 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 #'
 #' }
 #'
-#'
-#'
-#' library(morphospace)
-#' library(Morpho)
-#' library(Momocs)
-#'
-#' data("tails")
-#' shapes <- tails$shapes
-#' links <- tails$links
-#' tree <- tails$tree
-#' spp <- tails$data$species
-#' shapes_sp <- expected_shapes(shapes, spp)
-#'
-#'
-#'
+#' #plot morphospace with its associated adaptive landscape
 #' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0) %>%
 #'   proj_shapes(shapes, pch = 16) %>%
-#'   proj_landscape(nlevels = 60, n = 60, FUN = computeLD, expand = 1.2)
+#'   proj_landscape(nlevels = 60, ncols = 60, FUN = computeLD, expand = 1.2)
 #'
-
-proj_landscape <- function(mspace, FUN, method = "interp", palette = heat.colors,
-                           n = 50, nlevels = 50, drawlabels = FALSE, expand = 1,
-                           pipe = TRUE, lwd.landsc = 1, lty.landsc = 1, ...) {
+#'
+#' ##Using the X argument
+#'
+#' #first, create morphospace and extract background shapes
+#' msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0)
+#' shapemodels <- msp$plotinfo$shapemodels$models_arr
+#'
+#' #run computeLD (defined above) through the array of shapes models (this is the
+#' #same thing the proj_landscape function is doing internally when FUN is used, but
+#' #this vector could be replaced with some other variable obtained in a different way)
+#' LDs <- apply(X = shapemodels, FUN = computeLD, MARGIN = 3)
+#'
+#' #plot morphospace with its associated adaptive landscape
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0) %>%
+#'   proj_shapes(shapes, pch = 16) %>%
+#'   proj_landscape(nlevels = 60, ncols = 60, X = LDs, expand = 1.2)
+proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "interp",
+                           palette = heat.colors, ncols = 50, nlevels = 50,
+                           drawlabels = FALSE, expand = 1, pipe = TRUE,
+                           lwd.landsc = 1, lty.landsc = 1, ...) {
 
   args <- c(as.list(environment()), list(...))
 
@@ -971,7 +1006,13 @@ proj_landscape <- function(mspace, FUN, method = "interp", palette = heat.colors
     grid <- mspace$plotinfo$shapemodels$grid * expand
     axes <- mspace$plotinfo$axes
 
-    models_values <- apply(X = models, MARGIN = 3, FUN = FUN, ...)
+    if(!is.null(FUN) & !is.null(X)) {
+      print("Please provide either a function (FUN) or a vector (X) to interpolate")
+    } else {
+      if(!is.null(FUN)) models_values <- apply(X = models, MARGIN = 3, FUN = FUN, ...)
+      if(!is.null(X)) models_values <- X
+    }
+
     if(method == "interp") {
 
       landscape <- suppressWarnings({akima::interp(x = grid[, axes[1]],
@@ -981,7 +1022,7 @@ proj_landscape <- function(mspace, FUN, method = "interp", palette = heat.colors
     }
 
     graphics::contour(x = landscape$x, y = landscape$y, z = landscape$z,
-                      col = rev(palette(n = n)), nlevels = nlevels,
+                      col = rev(palette(n = ncols)), nlevels = nlevels,
                       drawlabels = drawlabels, add = TRUE,
                       lwd = lwd.landsc, lty = lty.landsc)
     box()
@@ -990,7 +1031,7 @@ proj_landscape <- function(mspace, FUN, method = "interp", palette = heat.colors
 
   mspace$landsc <- landscape
   mspace$plotinfo$palette.landsc <- palette
-  mspace$plotinfo$n.landsc <- n
+  mspace$plotinfo$ncols.landsc <- ncols
   mspace$plotinfo$nlevels.landsc <- nlevels
   mspace$plotinfo$drawlabels.landsc <- drawlabels
   mspace$plotinfo$lty.landsc <- lty.landsc
@@ -1031,7 +1072,7 @@ proj_landscape <- function(mspace, FUN, method = "interp", palette = heat.colors
 #' @param nv Numeric; the number of shape models along the y axis.
 #' @param mag Numeric; magnifying factor for shape models.
 #' @param invax Optional numeric indicating which of the axes provided in
-#'   \code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
+#'   \code{axes} needs to be inverted (options are \code{1}, \code{2} or
 #'   \code{c(1,2)}).
 #' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
 #'   factors for the width and height of the frame, respectively.
@@ -1095,7 +1136,7 @@ proj_landscape <- function(mspace, FUN, method = "interp", palette = heat.colors
 #' @param xlim,ylim,xlab,ylab,asp Standard arguments passed to the generic [graphics::plot()]
 #'   function.
 #'
-#' @details This function allows to regenerate morphospaces contained in \code{mspace}
+#' @details This function allows to regenerate morphospaces contained in \code{"mspace"}
 #'   objects already in existence, either preserving the graphical attributes used
 #'   during the pipeline or modifying one or more of them (so there is no need to
 #'   execute the pipeline every time morphospaces need to be visualized and/or changed).
