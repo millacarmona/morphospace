@@ -1147,11 +1147,11 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "interp",
 #'   \code{x} or \code{y}, a 'hybrid' morphospace is produced (i.e. the bivariate
 #'   plot will be constructed from the combination of \code{x} or \code{y} and a
 #'   morphometric axis; shape models in the background will represent variation
-#'   only for the latter). If instead a \code{"phylo"} object (assumed to describe
-#'   the phylogenetic relationships among tips scores stored in
-#'   \code{mspace$phylo_scores}) is feeded to one of \code{x} or \code{y}, a vertical
-#'   or horizontal phenogram will be deployed (the x/y axis range will correspond to
-#'   branch lengths, so caution should be exercised when interpreting the output).
+#'   only for the latter). If instead a \code{"phylo"} object (describing phylogenetic
+#'   relationships among tips scores stored in \code{mspace$phylo_scores}) is fed to
+#'   one of \code{x} or \code{y}, a vertical or horizontal phenogram will be deployed
+#'   (the x/y axis range will correspond to branch lengths, so caution should be
+#'   exercised when interpreting the output).
 #'
 #' @export
 #'
