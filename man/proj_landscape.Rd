@@ -8,15 +8,15 @@ proj_landscape(
   mspace,
   FUN = NULL,
   X = NULL,
-  method = "interp",
+  method = "spline",
   palette = heat.colors,
   ncols = 50,
   nlevels = 50,
   drawlabels = FALSE,
   expand = 1,
-  pipe = TRUE,
   lwd = 1,
   lty = 1,
+  pipe = TRUE,
   ...
 )
 }
@@ -30,8 +30,8 @@ be interpolated to generate the landscape surface.}
 \item{X}{A vector containing the values assigned to each background shape model (vector
 length must match the number of the shape models in the background and have the order).}
 
-\item{method}{Method used for interpolation. For now, the only option available is
-\code{"interp"}, which calls the function \code{\link[akima:interp]{akima::interp()}}.}
+\item{method}{Method used for interpolation; either \code{"linear"} or \code{"spline"}.
+See \code{\link[akima:interp]{akima::interp()}}.}
 
 \item{palette}{Color palette to use for landscape representation.}
 
@@ -41,42 +41,55 @@ length must match the number of the shape models in the background and have the 
 
 \item{drawlabels}{Logical; should the labels indicating the value of each surface contour be plotted?}
 
-\item{expand}{Numeric; Magnification factor to extend (adjust) the reach of the landscape.}
-
-\item{pipe}{Logical; is the function being included in a pipe?}
+\item{expand}{Numeric; Magnification factor to extend (adjust) the reach of the landscape,
+attained by extrapolating the x, y, and z values. Only available for \code{method = "spline"}.}
 
 \item{lwd}{Numeric; width of the lines depicting surface contour.}
 
 \item{lty}{Numeric; type of the lines depicting surface contour.}
 
+\item{pipe}{Logical; is the function being included in a pipe?}
+
 \item{...}{Further arguments passed to \code{FUN}.}
 }
 \value{
 If a plot device with a morphospace is open, the landscape surface is projected
-into it as a contour map using \code{\link[akima:interp]{akima::interp()}}. If \code{pipe = FALSE}, a list of
-length 3 containing the x, y and z values used to plot the landscape is returned invisibly.
-If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified by adding a new
-\code{$landsc} slot together with a number of graphical parameters (stored into the
-\code{$plotinfo} slot), and returned invisibly.
+into it as a contour map using \code{\link[akima:interp]{akima::interp()}}. If \code{pipe = FALSE}, a list containing
+the x, y and z values used to plot the landscape (x and z for univariate morphospaces) is
+returned invisibly. If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified
+by adding a new \code{$landsc} slot together with a number of graphical parameters (stored into
+the \code{$plotinfo} slot), and returned invisibly.
 }
 \description{
-Compute and project a landscape surface over an existing morphospace.
+Compute and/or project a landscape surface over an existing morphospace.
 Experimental.
 }
 \details{
-The purpose of this function is to generate and depict a 3-dimensonal surface
-(i.e. a landscape), interpolated from values assigned to the set of background shape models
-of an existing morphospace created using \code{mspace}. Generally, these values will
-represent a variable measuring functional performance (although it can be any kind of
-continuous variable), and can either be provided directly through the \code{X} argument
-or be computed automatically using an ad hoc R function through the \code{FUN} argument.
+The purpose of this function is to generate and depict a 2- (for univariate morphospaces)
+or 3-dimensonal (for bivariate morphospaces) surface (i.e. a landscape), interpolated from values
+assigned to the set of background shape models of an existing morphospace created using
+\code{\link{mspace}}. Generally, these values will represent a variable measuring functional
+performance (although it can be any kind of continuous variable), and can be either provided
+directly through the \code{X} argument in a two-steps procedure or computed automatically using
+an \emph{ad hoc} function through the \code{FUN} argument.
 
-If the \code{FUN} argument is used, the function provided must include a \code{model} argument
-feeding the ad hoc function with a single shape, and return a single numeric value computed
-for (or from) that shape. If the \code{X} argument is used instead, values should be provided
-in the same order than the background shape models are plotted (i.e. from left to right and from
-bottom to top; see \code{\link{morphogrid}}, \code{\link{plot_morphogrid2d}} and
-\code{\link{plot_morphogrid3d}}). See examples below.
+If the \code{FUN} argument is used, the function provided must include a \code{model}
+argument feeding the \emph{ad hoc} function with a single shape, and return a single numeric
+value computed for or from that shape. If the \code{X} argument is used instead, values
+should be provided in the same order than the background shape models are plotted (i.e. from
+left to right and from bottom to top; see \code{\link{morphogrid}}, \code{\link{plot_morphogrid2d}}
+and \code{\link{plot_morphogrid3d}}). The latter alternative can be useful when importing
+variables from other software or pipelines, but the background shape models used to compute the
+vector feeding \code{X} in the first step must the same used to depict the morphospace in the
+second step (otherwise, the shapes in the background won't match the landscape surface projected
+over them). See examples below.
+
+Because the landscape surface is generated for a specific set of background shape models,
+regenerating the former using \code{\link{plot_mspace}} is only possible if the new axes being
+depicted are the same than those used for computing the surface landscape originally through
+\code{\link{mspace}} + \code{\link{proj_landscape}}. The only exception is when one of the original
+axes is dropped, which will result in a the collapse of the 3D landscape projected into a bivariate
+morphospace into a 2D landscape projected into a univariate one.
 }
 \examples{
 #load data and packages
@@ -228,8 +241,20 @@ shapemodels <- msp$plotinfo$shapemodels$models_arr
 #this vector could be replaced with some other variable obtained in a different way)
 LDs <- apply(X = shapemodels, FUN = computeLD, MARGIN = 3)
 
-#plot morphospace with its associated adaptive landscape
+#second, plot morphospace with its associated adaptive landscape
 mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0) \%>\%
   proj_shapes(shapes, pch = 16) \%>\%
   proj_landscape(nlevels = 60, ncols = 60, X = LDs, expand = 1.2)
+
+#be careful to use the same morphospaces in the second and first steps.
+#For example, retaining the LD values computed above but changing the axes
+#represented by mspace will result in the same surface wrongly being projected
+#over a different morphospace!
+mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0, axes = c(2,3)) \%>\%
+  proj_shapes(shapes, pch = 16) \%>\%
+  proj_landscape(nlevels = 60, ncols = 60, X = LDs, expand = 1.2)
+}
+\seealso{
+\code{\link{morphogrid}}, \code{\link{mspace}}, \code{\link{plot_morphogrid2d}},
+\code{\link{plot_morphogrid3d}}
 }

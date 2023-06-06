@@ -2,7 +2,7 @@
 % Please edit documentation in R/internal_builders.R
 \name{inv_efourier}
 \alias{inv_efourier}
-\title{Iverse Fourier transform}
+\title{Inverse Fourier transform}
 \usage{
 inv_efourier(coe, nb.pts = 120)
 }

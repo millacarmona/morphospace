@@ -114,7 +114,11 @@ An object of class \code{"mspace"}, which is a list containing:
 \item{$x:} { scores of the sample of shapes in the synthetic axes.}
 \item{$rotation:} { eigenvector's coefficients.}
 \item{$center:} { the mean values of the original shape variables.}
-\item{$plotinfo:} { a list with the information used to create the plot.}
+\item{$plotinfo:} { a list with the information used to create the plot. These
+include a list called \code{$shapemodels}, containing the result of \code{morphogrid},
+i.e., an array with the shapes plotted in the background (slot \code{$models_arr}),
+a 2-column matrix containing all the shapes from the background (slot \code{$models_mat}),
+and a grid marking the (x,y) coordinates of their centroids (slot \code{$grid}).}
 }
 }
 \description{
@@ -226,6 +230,5 @@ mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 1,
 }
 \seealso{
 \code{\link{proj_shapes}}, \code{\link{proj_consensus}},
-\code{\link{proj_groups}}, \code{\link{proj_phylogeny}},
-\code{\link{proj_axis}}
+\code{\link{proj_groups}}, \code{\link{proj_phylogeny}}, \code{\link{proj_axis}}
 }

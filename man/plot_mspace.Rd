@@ -215,8 +215,6 @@ branches.}
 \item{lty.landsc}{Numeric; type of the lines depicting surface contour.}
 
 \item{lwd.landsc}{Numeric; width of the lines depicting surface contour.}
-
-\item{expand.landsc}{Numeric; Magnification factor to extend (adjust) the reach of the landscape.}
 }
 \description{
 Flexible representation of morphospaces, including their combination

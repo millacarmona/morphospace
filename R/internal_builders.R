@@ -174,7 +174,7 @@ svd_block <- function(x, y, tree = NULL) {
 }
 ##########################################################################
 
-#' Iverse Fourier transform
+#' Inverse Fourier transform
 #'
 #' @description A wrapper for [Momocs::efourier_i()] to transform a
 #'   set of Fourier coefficients into (x,y) coordinates. Used internally.
