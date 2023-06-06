@@ -67,9 +67,11 @@
 #'   \item{$center:} { the mean values of the original shape variables.}
 #'   \item{$plotinfo:} { a list with the information used to create the plot. These
 #'      include a list called \code{$shapemodels}, containing the result of \code{morphogrid},
-#'      i.e., an array with the shapes plotted in the background (slot \code{$models_arr}),
-#'      a 2-column matrix containing all the shapes from the background (slot \code{$models_mat}),
-#'      and a grid marking the (x,y) coordinates of their centroids (slot \code{$grid}).}
+#'      i.e., an array with the shapes plotted in the background (slot \code{$models_arr}; for
+#'      univariate morphospaces, only non-redundant shapes are saved, i.e., those corresponding
+#'      to a single row of background shape models), a 2-column matrix containing all the shapes
+#'      from the background (slot \code{$models_mat}), and a grid marking the (x,y) coordinates
+#'      of their centroids (slot \code{$grid}).}
 #'   }
 #'
 #' @seealso \code{\link{proj_shapes}}, \code{\link{proj_consensus}},
@@ -267,6 +269,8 @@ mspace <- function(shapes,
   }
 
   if(points == TRUE) graphics::points(ordination$x[,axes])
+
+  if(length(axes) == 1) shapemodels$models_arr <- shapemodels$models_arr[,,1:nh]
 
   plotinfo <- list(p = p, k = k, links = links, template = template, axes = axes, nh = nh, nv = nv, mag = mag,
                    asp = asp, adj_frame = adj_frame, asp.models = asp.models, rot.models = rot.models,
@@ -1038,7 +1042,30 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "spline",
       warning("Please provide either a function (FUN) or a vector (X) to interpolate")
     } else {
 
-      models <- mspace$plotinfo$shapemodels$models_arr
+      if(!is.null(X)) { # if X is specified
+        if(length(X) != dim(mspace$plotinfo$shapemodels$models_arr)[3]) {
+          stop("the length of X does not match the number of effective background shape models")
+        } else {
+          if(length(mspace$plotinfo$axes) == 1) {
+            models_values <- rep(X, times = mspace$plotinfo$nv)
+          } else {
+            models_values <- X
+          }
+        }
+      } else { # if FUN is specified
+        if(length(mspace$plotinfo$axes) == 1) {
+          models <- NULL
+          for(i in 1:mspace$plotinfo$nv) {
+            models <- abind::abind(models,
+                                   mspace$plotinfo$shapemodels$models_arr,
+                                   along = 3)
+          }
+        } else {
+          models <- mspace$plotinfo$shapemodels$models_arr
+        }
+        models_values <- apply(X = models, MARGIN = 3, FUN = FUN, ...)
+      }
+
       grid <- mspace$plotinfo$shapemodels$grid
       xlim <- range(mspace$plotinfo$shapemodels$models_mat[,1]) * expand
       ylim <- range(mspace$plotinfo$shapemodels$models_mat[,2]) * expand
@@ -1046,7 +1073,7 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "spline",
       xo <- seq(from = xlim[1], to = xlim[2], length.out = 40)
       which.x0 <- which.min(abs(xo))
       xo[which.x0] <- 0
-      if(length(mspace$plotinfo$axes) > 1){
+      if(length(mspace$plotinfo$axes) > 1) {
         yo <- seq(from = ylim[1], to = ylim[2], length.out = 40)
         which.y0 <- which.min(abs(yo))
         yo[which.y0] <- 0
@@ -1054,15 +1081,11 @@ proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "spline",
         yo <- 0
       }
 
-      if(!is.null(FUN)) models_values <- apply(X = models, MARGIN = 3, FUN = FUN, ...)
-      if(!is.null(X)) models_values <- X
-
       landscape <- suppressWarnings({akima::interp(x = grid[, 1], y = grid[, 2],
                                                    z = models_values, extrap = TRUE,
                                                    linear = linear, xo = xo, yo = yo)})
-
       landscape$which.x0 <- which.x0
-      landscape$which.y0 <- which.y0
+      if(length(mspace$plotinfo$axes) > 1) landscape$which.y0 <- which.y0
 
 
       if(length(mspace$plotinfo$axes) > 1) {
