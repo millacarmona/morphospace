@@ -648,8 +648,14 @@ morphogrid <- function(ordination,
     sh_arr <- abind::abind(coords_l, along = 3)
   } else {
     sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k)
-    for(i in seq_len(dim(sh_arr)[3])) sh_arr[,,i] <- sh_arr[,,i] / Morpho::cSize(sh_arr[,,i])
+    #this muting is new, see if it sticks###########
+    #for(i in seq_len(dim(sh_arr)[3])) sh_arr[,,i] <- sh_arr[,,i] / Morpho::cSize(sh_arr[,,i])
+    ###############################################
   }
+
+  #new, see if it sticks######################
+  sh_arr_unmodified <- sh_arr
+  ############################################
 
 
   if(rot.models != 0) for(i in seq_len(dim(sh_arr)[3])) {
@@ -693,8 +699,11 @@ morphogrid <- function(ordination,
   }
 
 
-  return(list(models_mat = models_mat, models_arr = models_arr, grid = gridcoords))
-
+  return(list(models_mat = models_mat, models_arr = models_arr,
+              #this is new, see if it sticks###########
+              #grid = gridcoords, # but the muting is new!
+              shapemodels = sh_arr_unmodified))
+              #########################################
 }
 
 
