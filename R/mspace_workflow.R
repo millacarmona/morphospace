@@ -106,7 +106,7 @@
 #'        axes = c(1,2), invax = 1, points = TRUE)
 #'
 #' #generate morphospace using species' consensus shapes and phylogenetic tree,
-#' #phylogenetic PCA as ordination method, and links between landmarks for backround
+#' #phylogenetic PCA as ordination method, and links between landmarks for background
 #' #models
 #' sp_shapes <- expected_shapes(shapes, species)
 #' mspace(sp_shapes, links = links, FUN = phy_prcomp, tree = tree, mag = 0.7,
@@ -235,9 +235,7 @@ mspace <- function(shapes,
     y <- NULL
   }
 
-  #this is new, see if it sticks################
   if(ncol(ordination$x) == 1) axes <- 1
-  ##############################################
 
   if(k == 3 & datype == "landm") {
 
@@ -250,12 +248,12 @@ mspace <- function(shapes,
     xlim <- range(ordination$x[,axes[1]])
     if(ncol(ordination$x) > 1 | length(axes) > 1) ylim <- range(ordination$x[,axes[2]])
 
-    plot_morphogrid3d(x = NULL, y = y, morphogrid = shapemodels, refshape = refshape,
-                      template = template, links = links, ordtype = ordtype, adj_frame = adj_frame,
-                      axes = axes, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab,
-                      cex.ldm = cex.ldm, col.ldm = col.ldm, col.models = col.models,
-                      lwd.models = lwd.models, bg.models = bg.models, size.models = size.models,
-                      asp.models = asp.models, alpha.models = alpha.models, plot = plot, models = models)
+    fr <- plot_morphogrid3d(x = NULL, y = y, morphogrid = shapemodels, refshape = refshape,
+                            template = template, links = links, ordtype = ordtype, adj_frame = adj_frame,
+                            axes = axes, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab,
+                            cex.ldm = cex.ldm, col.ldm = col.ldm, col.models = col.models,
+                            lwd.models = lwd.models, bg.models = bg.models, size.models = size.models,
+                            asp.models = asp.models, alpha.models = alpha.models, plot = plot, models = models)
   } else {
 
 
@@ -264,35 +262,27 @@ mspace <- function(shapes,
                               asp = asp, xlim = xlim, ylim = ylim, rot.models = rot.models,
                               size.models = size.models, asp.models = asp.models)
 
-    plot_morphogrid2d(x = NULL, y = y, morphogrid = shapemodels, template = template,
-                      links = links, datype = datype, ordtype = ordtype, axes = axes,
-                      adj_frame = adj_frame, p = p, xlab = xlab, ylab = ylab, cex.ldm = cex.ldm,
-                      col.ldm = col.ldm, col.models = col.models, lwd.models = lwd.models,
-                      bg.models = bg.models, plot = plot, models = models)
+    fr <- plot_morphogrid2d(x = NULL, y = y, morphogrid = shapemodels, template = template,
+                            links = links, datype = datype, ordtype = ordtype, axes = axes,
+                            adj_frame = adj_frame, p = p, xlab = xlab, ylab = ylab, cex.ldm = cex.ldm,
+                            col.ldm = col.ldm, col.models = col.models, lwd.models = lwd.models,
+                            bg.models = bg.models, plot = plot, models = models)
 
   }
 
   if(points == TRUE) graphics::points(ordination$x[,axes])
-
-  #this is new, see if it sticks###########
-  xlim <- range(shapemodels$models_mat[,1])
-  ylim <- range(shapemodels$models_mat[,2])
 
   if(length(axes) == 1) {
     shapemodels <- shapemodels$shapemodels[,,1:nh]
   } else {
     shapemodels <- shapemodels$shapemodels
   }
-  ##########################################
 
   plotinfo <- list(p = p, k = k, links = links, template = template, axes = axes, nh = nh, nv = nv, mag = mag,
-                   #this is new, see if it sticks#################
-                   xlim = xlim, ylim = ylim,
-                   ###############################################
-                   asp = asp, adj_frame = adj_frame, asp.models = asp.models,
-                   rot.models = rot.models, size.models = size.models, lwd.models = lwd.models, bg.models = bg.models,
-                   col.models = col.models, alpha.models = alpha.models, cex.ldm = cex.ldm, col.ldm = col.ldm,
-                   models = models, shapemodels = shapemodels)
+                   frame = fr, asp = asp, adj_frame = adj_frame, asp.models = asp.models, rot.models = rot.models,
+                   size.models = size.models, lwd.models = lwd.models, bg.models = bg.models, col.models = col.models,
+                   alpha.models = alpha.models, cex.ldm = cex.ldm, col.ldm = col.ldm, models = models,
+                   shapemodels = shapemodels)
 
   results <- list(x = ordination$x, rotation = ordination$rotation, center = ordination$center,
                   datype = datype, ordtype = ordtype, plotinfo = plotinfo)
@@ -391,6 +381,7 @@ proj_shapes <- function(mspace, shapes, density = TRUE, pipe = TRUE, ...) {
   }
 
   if(is.null(args$col)) args$col <- 1
+  if(is.null(args$pch)) args$pch <- 1
 
   mspace$x <- scores
   mspace$plotinfo$pch.points <- args$pch
@@ -1042,19 +1033,20 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 #' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0, axes = c(2,3)) %>%
 #'   proj_shapes(shapes, pch = 16) %>%
 #'   proj_landscape(nlevels = 60, ncols = 60, X = LDs, expand = 1.2)
-proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL,
-                           linear = FALSE, display = "contour", nlevels = 50,
-                           palette = grDevices::heat.colors, ncols = 60,
-                           alpha = 0.5, drawlabels = FALSE, expand = 1, lwd = 1,
-                           lty = 1, pipe = TRUE, ...) {
+proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear = FALSE,
+                           resolution = 50, expand = 1, display = "contour", nlevels = 50,
+                           palette = grDevices::heat.colors, alpha = 0.5, lwd = 1, lty = 1,
+                           drawlabels = FALSE, spar = 0.5, pipe = TRUE, ...) {
 
   args <- c(as.list(environment()), list(...))
 
   if(is.null(shapes)) {
-    extrap <- TRUE
     shapes <- mspace$plotinfo$shapemodels
+    extrap <- TRUE
+    type <- "theoretical"
   } else {
     extrap <- FALSE
+    type <- "empirical"
   }
 
   gridcoords <- proj_eigen(x = shapes_mat(shapes)$data2d,
@@ -1063,9 +1055,15 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL,
 
   if(is.null(X)) X <- apply(X = shapes, FUN = FUN, MARGIN = 3, ...)
 
-  xlim <- mspace$plotinfo$xlim * expand
-  xo <- seq(from = xlim[1], to = xlim[2], length.out = 40)
-  xo[which.x0 <- which.min(abs(xo))] <- 0
+  if(type == "theoretical") {
+    frame <- mspace$plotinfo$frame
+  } else {
+    frame <- list(xlim = range(gridcoords[,1]))
+    if(length(mspace$plotinfo$axes) > 1) frame$ylim <- range(gridcoords[,2])
+  }
+
+  xlim <- frame$xlim * expand
+  xo <- seq(from = xlim[1], to = xlim[2], length.out = resolution)
 
   if(length(mspace$plotinfo$axes) == 1) {
     gridcoords <- expand.grid(gridcoords, 0:(mspace$plotinfo$nh - 1))
@@ -1073,8 +1071,10 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL,
 
     yo <- 0
   } else {
-    ylim <- mspace$plotinfo$ylim * expand
-    yo <- seq(from = ylim[1], to = ylim[2], length.out = 40)
+    ylim <- frame$ylim * expand
+    yo <- seq(from = ylim[1], to = ylim[2], length.out = resolution)
+
+    xo[which.x0 <- which.min(abs(xo))] <- 0
     yo[which.y0 <- which.min(abs(yo))] <- 0
   }
 
@@ -1083,70 +1083,88 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL,
                                                z = X, extrap = extrap, linear = linear,
                                                xo = xo, yo = yo)})
 
-  landscape$which.x0 <- which.x0
-  if(length(mspace$plotinfo$axes) > 1) landscape$which.y0 <- which.y0
+
+  if(type == "empirical" & length(mspace$plotinfo$axes) == 1) {
+    spline <- stats::smooth.spline(x = landscape$x[!is.na(landscape$z)],
+                                   y = landscape$z[!is.na(landscape$z)], spar = spar)
+    smoothed_landsc <- Morpho::equidistantCurve(x = cbind(spline$x, spline$y), n = resolution)
+
+    landscape$x <- smoothed_landsc[,1]
+    landscape$z <- smoothed_landsc[,2]
+  }
+
+  if(length(mspace$plotinfo$axes) > 1) {
+    landscape$which.y0 <- which.y0
+    landscape$which.x0 <- which.x0
+  }
 
 
   if(.Device != "null device") {
 
     if(length(mspace$plotinfo$axes) > 1) {
+
+      cols <- palette(n = nlevels)
+      levs <- seq(from = min(landscape$z, na.rm = TRUE),
+                  to = max(landscape$z, na.rm = TRUE),
+                  length.out = nlevels)
+
       if(display == "contour") {
-        graphics::contour(x = landscape$x, y = landscape$y, z = landscape$z,
-                          col = palette(n = ncols), nlevels = nlevels,
-                          drawlabels = drawlabels, add = TRUE,
-                          lwd = lwd, lty = lty)
+        graphics::contour(landscape$x, landscape$y, landscape$z, levels = levs,
+                          lwd = lwd, lty = lty, col = cols,
+                          labels = round(levs, digits = 3), drawlabels = drawlabels,
+                          add = TRUE)
         box()
       }
 
       if(display == "filled.contour") {
-        cols <- grDevices::adjustcolor(palette(n = ncols), alpha = alpha)
-        levs <- seq(from = min(landscape$z, na.rm = TRUE),
-                    to = max(landscape$z, na.rm = TRUE),
-                    length.out = nlevels)
-
-        graphics::.filled.contour(landscape$x, landscape$y, landscape$z,
-                                  levels = levs, col = cols)
+        if(type == "theoretical") {
+          graphics::.filled.contour(landscape$x, landscape$y, landscape$z, levels = levs,
+                                    col = grDevices::adjustcolor(cols, alpha = alpha))
+        }
+        if(type == "empirical") {
+          graphics::image(landscape$x, landscape$y, landscape$z, add = TRUE,
+                          col = grDevices::adjustcolor(cols, alpha = alpha))
+        }
       }
 
     } else {
 
-      if(length(mspace$plotinfo$axes) == 1) {
+      cols <- palette(n = resolution)[order(order(landscape$z))]
 
-        cols <- palette(ncols)
-        if(ncols < length(landscape$z)) cols <- rep(cols, 10)[1:length(landscape$z)]
-        cols_ord <- cols[order(order(landscape$z))]
+      if(drawlabels == TRUE) {
+        w.transp <-round(quantile(x = 1:length(landscape$z), probs = c(0.25, 0.5, 0.75)))
+        w.transp <- sort(c(w.transp - 1, w.transp, w.transp + 1))
 
-        if(drawlabels == TRUE) {
-          w.transp <- c(3:5, 17:19, 30:32)
-          label_cols <- cols_ord[w.transp[c(2,5,8)]]
-          cols_ord[w.transp] <- NA
-        }
+        label_cols <- cols[w.transp[c(2,5,8)]]
+        cols[w.transp] <- NA
+      }
 
-        for(i in 1:(length(landscape$x) - 1)) {
-          lines(rbind(c(landscape$x[i], landscape$z[i]),
-                      c(landscape$x[i + 1], landscape$z[i + 1])),
-                col = cols_ord[i], lwd = lwd)
-        }
+      for(i in 1:(length(landscape$x) - 1)) {
+        lines(rbind(c(landscape$x[i], landscape$z[i]),
+                    c(landscape$x[i + 1], landscape$z[i + 1])),
+              col = cols[i], lwd = lwd)
+      }
+      box()
 
-        if(drawlabels == TRUE) {
-          x_text <- colMeans(matrix(landscape$x[w.transp], nrow = 3))
-          y_text <- colMeans(matrix(landscape$z[w.transp], nrow = 3))
-          labels <- round(colMeans(matrix(landscape$z[w.transp], nrow = 3)), 2)
-          text(cbind(x_text, y_text), labels = labels, cex = 0.5, col = label_cols)
-        }
+      if(drawlabels == TRUE) {
+        x_text <- colMeans(matrix(landscape$x[w.transp + 1], nrow = 3))
+        y_text <- colMeans(matrix(landscape$z[w.transp + 1], nrow = 3))
+        labels <- round(colMeans(matrix(landscape$z[w.transp], nrow = 3)), 2)
+        text(cbind(x_text, y_text), labels = labels, cex = 0.7, col = label_cols)
       }
     }
-
   }
 
   mspace$landsc <- landscape
+  mspace$landsc$type <- type
   mspace$plotinfo$palette.landsc <- args$palette
-  mspace$plotinfo$ncols.landsc <- args$ncols
-  mspace$plotinfo$alpha.landsc <- args$alpha
+  mspace$plotinfo$display.landsc <- args$display
   mspace$plotinfo$nlevels.landsc <- args$nlevels
-  mspace$plotinfo$drawlabels.landsc <- args$drawlabels
+  mspace$plotinfo$resolution.landsc <- args$resolution
   mspace$plotinfo$lty.landsc <- args$lty
   mspace$plotinfo$lwd.landsc <- args$lwd
+  mspace$plotinfo$alpha.landsc <- args$alpha
+  mspace$plotinfo$drawlabels.landsc <- args$drawlabels
 
 
   if(pipe == FALSE) {
@@ -1155,124 +1173,6 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL,
     return(invisible(mspace))
   }
 }
-
-# proj_landscape <- function(mspace, FUN = NULL, X = NULL, method = "spline",
-#                            palette = heat.colors, ncols = 50, nlevels = 50,
-#                            drawlabels = FALSE, expand = 1, lwd = 1, lty = 1,
-#                            pipe = TRUE, ...) {
-#
-#   args <- c(as.list(environment()), list(...))
-#
-#   if(method == "linear") linear <- TRUE
-#   if(method == "spline") linear <- FALSE
-#   if(method != "linear" & method != "spline") stop("invalid interpolation method")
-#
-#   if(.Device != "null device") {
-#     if(!is.null(FUN) & !is.null(X)) {
-#       warning("Please provide either a function (FUN) or a vector (X) to interpolate")
-#     } else {
-#
-#       if(!is.null(X)) { # if X is specified
-#         if(length(X) != dim(mspace$plotinfo$shapemodels$models_arr)[3]) {
-#           stop("the length of X does not match the number of effective background shape models")
-#         } else {
-#           if(length(mspace$plotinfo$axes) == 1) {
-#             models_values <- rep(X, times = mspace$plotinfo$nv)
-#           } else {
-#             models_values <- X
-#           }
-#         }
-#       } else { # if FUN is specified
-#         if(length(mspace$plotinfo$axes) == 1) {
-#           models <- NULL
-#           for(i in 1:mspace$plotinfo$nv) {
-#             models <- abind::abind(models,
-#                                    mspace$plotinfo$shapemodels$models_arr,
-#                                    along = 3)
-#           }
-#         } else {
-#           models <- mspace$plotinfo$shapemodels$models_arr
-#         }
-#         models_values <- apply(X = models, MARGIN = 3, FUN = FUN, ...)
-#       }
-#
-#       grid <- mspace$plotinfo$shapemodels$grid
-#       xlim <- range(mspace$plotinfo$shapemodels$models_mat[,1]) * expand
-#       ylim <- range(mspace$plotinfo$shapemodels$models_mat[,2]) * expand
-#
-#       xo <- seq(from = xlim[1], to = xlim[2], length.out = 40)
-#       which.x0 <- which.min(abs(xo))
-#       xo[which.x0] <- 0
-#       if(length(mspace$plotinfo$axes) > 1) {
-#         yo <- seq(from = ylim[1], to = ylim[2], length.out = 40)
-#         which.y0 <- which.min(abs(yo))
-#         yo[which.y0] <- 0
-#       } else {
-#         yo <- 0
-#       }
-#
-#       landscape <- suppressWarnings({akima::interp(x = grid[, 1], y = grid[, 2],
-#                                                    z = models_values, extrap = TRUE,
-#                                                    linear = linear, xo = xo, yo = yo)})
-#       landscape$which.x0 <- which.x0
-#       if(length(mspace$plotinfo$axes) > 1) landscape$which.y0 <- which.y0
-#
-#
-#       if(length(mspace$plotinfo$axes) > 1) {
-#
-#         graphics::contour(x = landscape$x, y = landscape$y, z = landscape$z,
-#                           col = palette(n = ncols), nlevels = nlevels,
-#                           drawlabels = drawlabels, add = TRUE,
-#                           lwd = lwd, lty = lty)
-#         box()
-#
-#       }
-#
-#       if(length(mspace$plotinfo$axes) == 1) {
-#
-#         cols <- palette(ncols)
-#         if(ncols < length(landscape$z)) cols <- rep(cols, 10)[1:length(landscape$z)]
-#         cols_ord <- cols[order(order(landscape$z))]
-#
-#         if(drawlabels == TRUE) {
-#           w.transp <- c(3:5, 17:19, 30:32)
-#           label_cols <- cols_ord[w.transp[c(2,5,8)]]
-#           cols_ord[w.transp] <- NA
-#         }
-#
-#         for(i in 1:(length(landscape$x) - 1)) {
-#           lines(rbind(c(landscape$x[i], landscape$z[i]),
-#                       c(landscape$x[i + 1], landscape$z[i + 1])),
-#                 col = cols_ord[i], lwd = lwd)
-#         }
-#
-#         if(drawlabels == TRUE) {
-#           x_text <- colMeans(matrix(landscape$x[w.transp], nrow = 3))
-#           y_text <- colMeans(matrix(landscape$z[w.transp], nrow = 3))
-#           labels <- round(colMeans(matrix(landscape$z[w.transp], nrow = 3)), 2)
-#           text(cbind(x_text, y_text), labels = labels, cex = 0.5, col = label_cols)
-#         }
-#
-#       }
-#     }
-#   }
-#
-#   mspace$landsc <- landscape
-#   mspace$plotinfo$palette.landsc <- args$palette
-#   mspace$plotinfo$ncols.landsc <- args$ncols
-#   mspace$plotinfo$nlevels.landsc <- args$nlevels
-#   mspace$plotinfo$drawlabels.landsc <- args$drawlabels
-#   mspace$plotinfo$lty.landsc <- args$lty
-#   mspace$plotinfo$lwd.landsc <- args$lwd
-#   mspace$plotinfo$expand.landsc <- args$expand
-#
-#
-#   if(pipe == FALSE) {
-#     return(invisible(landscape))
-#   } else {
-#     return(invisible(mspace))
-#   }
-# }
 
 
 #########################################################################################
@@ -1493,6 +1393,7 @@ plot_mspace <- function(mspace,
                         shapeax = TRUE,
                         landsc = TRUE,
                         legend = FALSE,
+                        scalebar = FALSE, #########
                         cex.legend = 1,
                         asp = NA,
                         xlab,
@@ -1560,35 +1461,22 @@ plot_mspace <- function(mspace,
 
   if(!is.null(x) & !is.null(y)) stop("Only one of x or y can be specified")
 
-  if(legend == TRUE) {
+  ##########
 
-    if(is.null(mspace$gr_class)) {
-      stop("Groups ($gr_class) are needed to plot legend")
+  if(any(legend, scalebar)) {
 
-    } else {
+    layout_mat <- matrix(c(rep(1, 4), 2), nrow = 1)
+    if(all(legend, scalebar)) layout_mat <- rbind(layout_mat, c(rep(1, 4), 3))
 
-      orig_par <- graphics::par(names(graphics::par())[-c(13, 19, 21:23, 54)])
-      on.exit(graphics::par(orig_par))
+    orig_par <- graphics::par(names(graphics::par())[-c(13, 19, 21:23, 54)])
+    on.exit(graphics::par(orig_par))
 
-      graphics::layout(matrix(c(2, 2, 2, 2, 1), nrow = 1))
-      graphics::par(mar = c(1, 0, 1, 1))
-      plot(0, type = "n", axes = FALSE, xlab = "", ylab = "")
+    graphics::layout(layout_mat)
+    graphics::par(mar = c(5.1, 4.1, 4.1, 2.1))
 
-      if(any(args$pch.groups %in% c(21:25))) {
-        graphics::legend("left", legend = levels(mspace$gr_class),
-                         cex = cex.legend, pch = args$pch.groups,
-                         pt.bg = args$bg.groups)
-      } else {
-        graphics::legend("left", legend = levels(mspace$gr_class),
-                         cex = cex.legend, pch = args$pch.groups,
-                         col = args$col.groups)
-      }
-
-      graphics::par(mar = c(5.1, 4.1, 4.1, 2.1))
-
-    }
   }
 
+  ###########
 
   if(is.null(x) & is.null(y)) { #if neither x nor y have been provided, plot pure morphospace
 
@@ -1796,16 +1684,38 @@ plot_mspace <- function(mspace,
     }
 
     if(landsc == TRUE & !is.null(mspace$landsc)) {
-
       if(all(args$axes %in% mspace$plotinfo$axes)) { #all specified vectors must be in the original mspace object
-        if(length(args$axes) > 1) { # if number of specified axes is 2...
 
+        if(length(args$axes) > 1) { # if number of specified axes is 2...
           if(all(args$axes == mspace$plotinfo$axes)) { # ...and axes are in the same order
-            graphics::contour(x = mspace$landsc$x, y = mspace$landsc$y, z = mspace$landsc$z,
-                              col = args$palette.landsc(n = args$ncols.landsc),
-                              nlevels = args$nlevels.landsc, drawlabels = args$drawlabels.landsc,
-                              add = TRUE, lwd = args$lwd.landsc, lty = args$lty.landsc)
-            box()
+            cols.landsc <- args$palette.landsc(n = args$nlevels.landsc)
+            levs.landsc <- seq(from = min(mspace$landsc$z, na.rm = TRUE),
+                               to = max(mspace$landsc$z, na.rm = TRUE),
+                               length.out = args$nlevels.landsc)
+
+            if(args$display.landsc == "contour") {
+              graphics::contour(mspace$landsc$x, mspace$landsc$y, mspace$landsc$z,
+                                col = cols.landsc, levels = levs.landsc, lwd = args$lwd.landsc,
+                                lty = args$lty.landsc, drawlabels = args$drawlabels.landsc,
+                                labels = round(levs.landsc, digits = 3), add = TRUE)
+              box()
+            }
+
+            if(args$display.landsc == "filled.contour") {
+              if(mspace$landsc$type == "empirical") {
+                graphics::image(mspace$landsc$x, mspace$landsc$y, mspace$landsc$z, add = TRUE,
+                                col = grDevices::adjustcolor(cols.landsc, alpha = args$alpha.landsc))
+              }
+              if(mspace$landsc$type == "theoretical") {
+                graphics::.filled.contour(mspace$landsc$x, mspace$landsc$y, mspace$landsc$z,
+                                          levels = levs.landsc,
+                                          col = grDevices::adjustcolor(cols.landsc,
+                                                                       alpha = args$alpha.landsc))
+              }
+
+            }
+
+
           } else { # ...but axes are NOT in the same order
             cat("\naxes used to generate landscape are in the wrong order; won't be regenerated")
           }
@@ -1825,30 +1735,28 @@ plot_mspace <- function(mspace,
             landsc.x <- mspace$landsc$x
           }
 
-
-          cols <- args$palette.landsc(n = args$ncols.landsc)
-          if(args$ncols.landsc < length(landsc.z)) {
-            cols <- rep(cols, 10)[1:length(landsc.z)]
-          }
-          cols_ord <- cols[order(order(landsc.z))]
+          cols.landsc <- args$palette.landsc(n = args$resolution.landsc)[order(order(landsc.z))]
 
           if(args$drawlabels.landsc == TRUE) {
-            w.transp <- c(3:5, 17:19, 30:32)
-            label_cols <- cols_ord[w.transp[c(2,5,8)]]
-            cols_ord[w.transp] <- NA
+            w.transp <-round(quantile(x = 1:length(landsc.z), probs = c(0.25, 0.5, 0.75)))
+            w.transp <- sort(c(w.transp - 1, w.transp, w.transp + 1))
+
+            label_cols <- cols.landsc[w.transp[c(2,5,8)]]
+            cols.landsc[w.transp] <- NA
           }
 
           for(i in 1:(length(landsc.x) - 1)) {
             lines(rbind(c(landsc.x[i], landsc.z[i]),
                         c(landsc.x[i + 1], landsc.z[i + 1])),
-                  col = cols_ord[i], lwd = args$lwd.landsc)
+                  col = cols.landsc[i], lwd = args$lwd.landsc)
           }
+          box()
 
           if(args$drawlabels.landsc == TRUE) {
-            x_text <- colMeans(matrix(landsc.x[w.transp], nrow = 3))
-            y_text <- colMeans(matrix(landsc.z[w.transp], nrow = 3))
+            x_text <- colMeans(matrix(landsc.x[w.transp + 1], nrow = 3))
+            y_text <- colMeans(matrix(landsc.z[w.transp + 1], nrow = 3))
             labels <- round(colMeans(matrix(landsc.z[w.transp], nrow = 3)), 2)
-            text(cbind(x_text, y_text), labels = labels, cex = 0.5, col = label_cols)
+            text(cbind(x_text, y_text), labels = labels, cex = 0.7, col = label_cols)
           }
 
         }
@@ -2024,8 +1932,58 @@ plot_mspace <- function(mspace,
     }
   }
 
-  if(legend == TRUE) {
-    graphics::layout(matrix(1, nrow=1))
-  }
-}
+  if(any(legend, scalebar)) {
 
+    if(legend) {
+      if(is.null(mspace$gr_class)) {
+        stop("Groups ($gr_class) are necessary to create labels for the legend")
+      } else {
+
+        if(is.null(args$pch.groups)) args$pch.groups <- args$pch.points
+
+        graphics::par(mar = c(5.1, 1, 4.1, 1))
+        plot(0, type = "n", axes = FALSE, xlab = "", ylab = "",
+             ylim = c(0,1), xlim = c(0,1), xaxs = "i", yaxs = "i")
+
+        if(any(args$pch.groups %in% c(21:25))) {
+          graphics::legend("topleft", legend = levels(mspace$gr_class),
+                           cex = cex.legend, pch = args$pch.groups,
+                           pt.bg = args$bg.groups)
+        } else {
+          graphics::legend("topleft", legend = levels(mspace$gr_class),
+                           cex = cex.legend, pch = args$pch.groups,
+                           col = args$col.groups)
+        }
+      }
+    }
+
+    if(scalebar) {
+      if(is.null(mspace$landsc)) {
+        stop("A landscape ($landsc) is necessary to a scale for the scalebar")
+      } else {
+
+        graphics::par(mar = c(5.1, 1, 4.1, 10))
+        plot(0, type = "n", axes = FALSE, xlab = "", ylab = "",
+             ylim = range(levs.landsc), xlim = c(0,1), xaxs = "i", yaxs = "i")
+
+        if(args$display.landsc == "filled.contour") {
+          alpha.landsc <- args$alpha.landsc
+        } else {
+          alpha.landsc <- 1
+        }
+
+        rect(0, levs.landsc[-length(levs.landsc)], 1, levs.landsc[-1L],
+             col = adjustcolor(cols.landsc, alpha = alpha.landsc), border = "#00000000")
+        ticks <- quantile(levs.landsc, probs = seq(0, 0.95, length.out = 4))
+        axis(side = 4, at = round(ticks, 1))
+        box()
+        mtext("Landscape", side = 4, line = 3)
+
+      }
+    }
+
+    graphics::layout(matrix(1, nrow=1))
+
+  }
+
+}

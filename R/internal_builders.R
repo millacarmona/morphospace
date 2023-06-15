@@ -648,15 +648,10 @@ morphogrid <- function(ordination,
     sh_arr <- abind::abind(coords_l, along = 3)
   } else {
     sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k)
-    #this muting is new, see if it sticks###########
     #for(i in seq_len(dim(sh_arr)[3])) sh_arr[,,i] <- sh_arr[,,i] / Morpho::cSize(sh_arr[,,i])
-    ###############################################
   }
 
-  #new, see if it sticks######################
   sh_arr_unmodified <- sh_arr
-  ############################################
-
 
   if(rot.models != 0) for(i in seq_len(dim(sh_arr)[3])) {
     sh_arr[,,i] <- spdep::Rotation(sh_arr[,,i], rot.models * 0.0174532925199)
@@ -699,11 +694,8 @@ morphogrid <- function(ordination,
   }
 
 
-  return(list(models_mat = models_mat, models_arr = models_arr,
-              #this is new, see if it sticks###########
-              #grid = gridcoords, # but the muting is new!
-              shapemodels = sh_arr_unmodified))
-              #########################################
+  return(list(models_mat = models_mat, models_arr = models_arr, shapemodels = sh_arr_unmodified))
+
 }
 
 
@@ -873,6 +865,9 @@ plot_morphogrid2d <- function(x = NULL,
         }
       }
     }
+
+    return(invisible(list(xlim = xlim, ylim = ylim)))
+
   }
 }
 
@@ -1141,9 +1136,12 @@ plot_morphogrid3d <- function(x = NULL,
       for(i in seq_len((length(models) - 1))) {
       graphics::rasterImage(models[[i]], model_frames[[i]][1,1], model_frames[[i]][1,2],
                   model_frames[[i]][2,1], model_frames[[i]][2,2])
-    }
+      }
     }
   }
+
+  return(invisible(list(xlim = new_xlim, ylim = new_ylim)))
+
 }
 
 
