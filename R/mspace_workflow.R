@@ -220,7 +220,8 @@ mspace <- function(shapes,
 
   FUN <- match.fun(FUN)
   ordination <- FUN(data2d, ...)
-  ordtype <- class(ordination)
+  ordination$ordtype <- class(ordination)
+  ordination$datype <- datype
 
   if(!is.null(invax)) {
     ordination$x[,axes[invax]] <- ordination$x[,axes[invax]] * -1
@@ -249,9 +250,9 @@ mspace <- function(shapes,
     if(ncol(ordination$x) > 1 | length(axes) > 1) ylim <- range(ordination$x[,axes[2]])
 
     fr <- plot_morphogrid3d(x = NULL, y = y, morphogrid = shapemodels, refshape = refshape,
-                            template = template, links = links, ordtype = ordtype, adj_frame = adj_frame,
-                            axes = axes, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab,
-                            cex.ldm = cex.ldm, col.ldm = col.ldm, col.models = col.models,
+                            template = template, links = links, ordtype = ordination$ordtype,
+                            adj_frame = adj_frame, axes = axes, xlim = xlim, ylim = ylim, xlab = xlab,
+                            ylab = ylab, cex.ldm = cex.ldm, col.ldm = col.ldm, col.models = col.models,
                             lwd.models = lwd.models, bg.models = bg.models, size.models = size.models,
                             asp.models = asp.models, alpha.models = alpha.models, plot = plot, models = models)
   } else {
@@ -263,7 +264,7 @@ mspace <- function(shapes,
                               size.models = size.models, asp.models = asp.models)
 
     fr <- plot_morphogrid2d(x = NULL, y = y, morphogrid = shapemodels, template = template,
-                            links = links, datype = datype, ordtype = ordtype, axes = axes,
+                            links = links, datype = datype, ordtype = ordination$ordtype, axes = axes,
                             adj_frame = adj_frame, p = p, xlab = xlab, ylab = ylab, cex.ldm = cex.ldm,
                             col.ldm = col.ldm, col.models = col.models, lwd.models = lwd.models,
                             bg.models = bg.models, plot = plot, models = models)
@@ -281,11 +282,11 @@ mspace <- function(shapes,
   plotinfo <- list(p = p, k = k, links = links, template = template, axes = axes, nh = nh, nv = nv, mag = mag,
                    frame = fr, asp = asp, adj_frame = adj_frame, asp.models = asp.models, rot.models = rot.models,
                    size.models = size.models, lwd.models = lwd.models, bg.models = bg.models, col.models = col.models,
-                   alpha.models = alpha.models, cex.ldm = cex.ldm, col.ldm = col.ldm, models = models,
-                   shapemodels = shapemodels)
+                   alpha.models = alpha.models, cex.ldm = cex.ldm, col.ldm = col.ldm, models = models)
 
-  results <- list(x = ordination$x, rotation = ordination$rotation, center = ordination$center,
-                  datype = datype, ordtype = ordtype, plotinfo = plotinfo)
+  results <- list(ordination = ordination,
+                  projected = shapemodels,
+                  plotinfo = plotinfo)
   class(results) <- "mspace"
 
   return(invisible(results))
@@ -349,14 +350,14 @@ proj_shapes <- function(mspace, shapes, density = TRUE, pipe = TRUE, ...) {
   data2d <- dat$data2d
   datype <- dat$datype
 
-  if(mspace$datype != datype) stop("shapes and mspace types are not compatible")
+  if(mspace$ordination$datype != datype) stop("shapes and mspace types are not compatible")
 
-  scores <- proj_eigen(x = data2d, vectors = mspace$rotation,
-                       center = mspace$center)
+  scores <- proj_eigen(x = data2d, vectors = mspace$ordination$rotation,
+                       center = mspace$ordination$center)
 
   if(.Device != "null device") {
 
-    if(ncol(mspace$x) > 1) {
+    if(ncol(mspace$ordination$x) > 1) {
       if(length(mspace$plotinfo$axes) > 1) {
         graphics::points(scores[, mspace$plotinfo$axes], ...)
       } else {
@@ -383,7 +384,7 @@ proj_shapes <- function(mspace, shapes, density = TRUE, pipe = TRUE, ...) {
   if(is.null(args$col)) args$col <- 1
   if(is.null(args$pch)) args$pch <- 1
 
-  mspace$x <- scores
+  mspace$projected$scores <- scores
   mspace$plotinfo$pch.points <- args$pch
   mspace$plotinfo$col.points <- args$col
   mspace$plotinfo$bg.points <- args$bg
@@ -443,14 +444,14 @@ proj_consensus <- function(mspace, shapes, pipe = TRUE, ...) {
   data2d <- dat$data2d
   datype <- dat$datype
 
-  if(mspace$datype != datype) stop("shapes and mspace types are not compatible")
+  if(mspace$ordination$datype != datype) stop("shapes and mspace types are not compatible")
 
-  gr_centroids <- proj_eigen(x = data2d, vectors = mspace$rotation,
-                             center = mspace$center)
+  gr_centroids <- proj_eigen(x = data2d, vectors = mspace$ordination$rotation,
+                             center = mspace$ordination$center)
 
   if(.Device != "null device") {
 
-    if(ncol(mspace$x) > 1) {
+    if(ncol(mspace$ordination$x) > 1) {
       if(length(mspace$plotinfo$axes) > 1) {
         graphics::points(gr_centroids[, mspace$plotinfo$axes], ...)
       } else {
@@ -467,7 +468,7 @@ proj_consensus <- function(mspace, shapes, pipe = TRUE, ...) {
   if(is.null(args$pch)) args$pch <- 1
 
 
-  mspace$gr_centroids <- gr_centroids
+  mspace$projected$gr_centroids <- gr_centroids
   mspace$plotinfo$col.groups <- args$col
   mspace$plotinfo$pch.groups <- args$pch
   mspace$plotinfo$cex.groups <- args$cex
@@ -538,19 +539,25 @@ proj_groups <- function(mspace, shapes = NULL, groups, ellipse = FALSE,
   args <- c(as.list(environment()), list(...))
 
   if(is.null(shapes)) {
-    data2d <- mspace$x
+    if(is.null(mspace$projected$scores)) {
+      data2d <- mspace$projected$scores
+    } else {
+      data2d <- mspace$ordination$x
+    }
   } else {
     dat <- shapes_mat(shapes)
     datype <- dat$datype
-    data2d <- proj_eigen(x = dat$data2d, vectors = mspace$rotation, center = mspace$center)
+    data2d <- proj_eigen(x = dat$data2d,
+                         vectors = mspace$ordination$rotation,
+                         center = mspace$ordination$center)
 
-    if(mspace$datype != datype) stop("shapes and mspace types are not compatible")
+    if(mspace$ordination$datype != datype) stop("shapes and mspace types are not compatible")
 
   }
 
   if(.Device != "null device") {
 
-    if(ncol(mspace$x) > 1) {
+    if(ncol(mspace$ordination$x) > 1) {
       if(length(mspace$plotinfo$axes) > 1) {
         if(ellipse == FALSE) {
           hulls_by_group_2D(data2d[, mspace$plotinfo$axes], fac = groups, ...)
@@ -560,7 +567,7 @@ proj_groups <- function(mspace, shapes = NULL, groups, ellipse = FALSE,
       } else {
         if(density == TRUE) {
           dens <- lapply(seq_len(nlevels(groups)), function(i) {
-            subdens <- stats::density(mspace$x[groups == levels(groups)[i], mspace$plotinfo$axes[1]])
+            subdens <- stats::density(data2d[groups == levels(groups)[i], mspace$plotinfo$axes[1]])
             list(x = subdens$x, y = subdens$y)
           })
           ymax <- max(unlist(lapply(dens, function(x) {x$y})))
@@ -576,7 +583,7 @@ proj_groups <- function(mspace, shapes = NULL, groups, ellipse = FALSE,
     } else {
       if(density == TRUE) {
         dens <- lapply(seq_len(nlevels(groups)), function(i) {
-          subdens <- stats::density(mspace$x[groups == levels(groups)[i], 1])
+          subdens <- stats::density(data2d[groups == levels(groups)[i], 1])
           list(x = subdens$x, y = subdens$y)
         })
         ymax <- max(unlist(lapply(dens, function(x) {x$y})))
@@ -593,7 +600,7 @@ proj_groups <- function(mspace, shapes = NULL, groups, ellipse = FALSE,
   if(is.null(args$col)) args$col <- seq_len(nlevels(groups))
   if(is.null(args$alpha)) args$alpha <- 0
 
-  mspace$gr_class <- groups
+  mspace$projected$gr_class <- groups
   mspace$plotinfo$ellipse.groups <- args$ellipse
   mspace$plotinfo$conflev.groups <- args$conflev
   mspace$plotinfo$col.groups <- args$col
@@ -695,8 +702,8 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, ...) {
   args <- c(as.list(environment()), list(...))
 
   ext_shapes2d <- ax_transformation(obj = obj, axis = axis, mag = mag)
-  ext_scores <- proj_eigen(x = ext_shapes2d, vectors = mspace$rotation,
-                           center = mspace$center)
+  ext_scores <- proj_eigen(x = ext_shapes2d, vectors = mspace$ordination$rotation,
+                           center = mspace$ordination$center)
 
   if(.Device != "null device") {
     if(length(mspace$plotinfo$axes) > 1) {
@@ -706,7 +713,7 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, ...) {
     }
   }
 
-  mspace$shape_axis <- c(mspace$shape_axis, list(ext_scores))
+  mspace$projected$shape_axis <- c(mspace$projected$shape_axis, list(ext_scores))
   mspace$plotinfo$lwd.axis <- c(mspace$plotinfo$lwd.axis, args$lwd)
   mspace$plotinfo$lty.axis <- c(mspace$plotinfo$lty.axis, args$lty)
   mspace$plotinfo$col.axis <- c(mspace$plotinfo$col.axis, args$col)
@@ -771,10 +778,10 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 
   args <- c(as.list(environment()), list(...))
 
-  if(is.null(mspace$gr_centroids)) stop("Group centroids have not been provided; add proj_consensus() before")
+  if(is.null(mspace$projected$gr_centroids)) stop("Group centroids have not been provided; add proj_consensus() before")
 
-  nodes_scores <- apply(mspace$gr_centroids[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
-  phylo_scores <- rbind(mspace$gr_centroids[tree$tip.label,], nodes_scores)
+  nodes_scores <- apply(mspace$projected$gr_centroids[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
+  phylo_scores <- rbind(mspace$projected$gr_centroids[tree$tip.label,], nodes_scores)
 
 
   if(.Device != "null device") {
@@ -791,8 +798,8 @@ proj_phylogeny <- function(mspace, tree, pipe = TRUE, ...) {
 
   if(is.null(args$col)) args$col <- 1
 
-  mspace$phylo_scores <- phylo_scores
-  mspace$phylo <- tree
+  mspace$projected$phylo_scores <- phylo_scores
+  mspace$projected$phylo <- tree
   mspace$plotinfo$lwd.phylo <- args$lwd
   mspace$plotinfo$lty.phylo <- args$lty
   mspace$plotinfo$col.phylo <- args$col
@@ -1041,19 +1048,26 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
   args <- c(as.list(environment()), list(...))
 
   if(is.null(shapes)) {
-    shapes <- mspace$plotinfo$shapemodels
     extrap <- TRUE
     type <- "theoretical"
+
+    data2d <- shapes_mat(mspace$ordination$shapemodels)$data2d
+
   } else {
     extrap <- FALSE
     type <- "empirical"
+
+    dat <- shapes_mat(shapes)
+    data2d <- dat$data2d
+    datype <- dat$datype
+
+    if(mspace$ordination$datype != datype) stop("shapes and mspace types are not compatible")
   }
 
-  gridcoords <- proj_eigen(x = shapes_mat(shapes)$data2d,
-                           vectors = mspace$rotation[, mspace$plotinfo$axes],
-                           center = mspace$center)
+  gridcoords <- proj_eigen(x = data2d, vectors = mspace$ordination$rotation[, mspace$plotinfo$axes],
+                           center = mspace$ordination$center)
 
-  if(is.null(X)) X <- apply(X = shapes, FUN = FUN, MARGIN = 3, ...)
+  if(is.null(X)) X <- apply(X = data2d, FUN = FUN, MARGIN = 2, ...)
 
   if(type == "theoretical") {
     frame <- mspace$plotinfo$frame
@@ -1155,8 +1169,8 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
     }
   }
 
-  mspace$landsc <- landscape
-  mspace$landsc$type <- type
+  mspace$ordination$landsc <- landscape
+  mspace$ordination$landsc$type <- type
   mspace$plotinfo$palette.landsc <- args$palette
   mspace$plotinfo$display.landsc <- args$display
   mspace$plotinfo$nlevels.landsc <- args$nlevels
@@ -1447,8 +1461,8 @@ plot_mspace <- function(mspace,
 
 
   if(!is.null(invax)) {
-    mspace$x[,axes[invax]] <- mspace$x[,axes[invax]]  * -1
-    mspace$rotation[,axes[invax]] <- mspace$rotation[,axes[invax]] * -1
+    mspace$ordination$x[,axes[invax]] <- mspace$ordination$x[,axes[invax]]  * -1
+    mspace$ordination$rotation[,axes[invax]] <- mspace$ordination$rotation[,axes[invax]] * -1
     if(!is.null(mspace$gr_centroids)) {
       mspace$gr_centroids[,axes[invax]] <- mspace$gr_centroids[,axes[invax]] * -1
     }
@@ -1457,11 +1471,10 @@ plot_mspace <- function(mspace,
     }
   }
 
-  ordination <- list(x = mspace$x, rotation = mspace$rotation, center = mspace$center)
+  ordination <- list(x = mspace$ordination$x, rotation = mspace$ordination$rotation,
+                     center = mspace$ordination$center)
 
   if(!is.null(x) & !is.null(y)) stop("Only one of x or y can be specified")
-
-  ##########
 
   if(any(legend, scalebar)) {
 
@@ -1476,8 +1489,6 @@ plot_mspace <- function(mspace,
 
   }
 
-  ###########
-
   if(is.null(x) & is.null(y)) { #if neither x nor y have been provided, plot pure morphospace
 
     if(ncol(ordination$x) == 1 | length(args$axes) == 1) {
@@ -1488,9 +1499,9 @@ plot_mspace <- function(mspace,
       y <- NULL
     }
 
-    if(mspace$plotinfo$k == 3 & mspace$datype == "landm") {
+    if(mspace$plotinfo$k == 3 & mspace$ordination$datype == "landm") {
 
-      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
+      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$ordination$datype,
                                 template = NULL, x = NULL, y = y, p = mspace$plotinfo$p,
                                 k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
                                 asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
@@ -1505,7 +1516,7 @@ plot_mspace <- function(mspace,
       if(ncol(ordination$x) > 1 | length(args$axes) > 1) args$ylim <- range(ordination$x[, args$axes[2]])
 
       plot_morphogrid3d(x = NULL, y = y, morphogrid = shapemodels, refshape = refshape,
-                        template = args$template, links = args$links, ordtype = mspace$ordtype,
+                        template = args$template, links = args$links, ordtype = mspace$ordination$ordtype,
                         axes = args$axes, xlim = args$xlim, ylim = args$ylim, adj_frame = args$adj_frame,
                         xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
                         col.ldm = args$col.ldm, col.models = args$col.models, lwd.models = args$lwd.models,
@@ -1513,14 +1524,14 @@ plot_mspace <- function(mspace,
                         asp.models = args$asp.models, alpha.models = args$alpha.models, models = args$models)
     } else {
 
-      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
+      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$ordination$datype,
                                 template = args$template, x = NULL, y = y, p = mspace$plotinfo$p,
                                 k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
                                 asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
                                 size.models = args$size.models, asp.models = args$asp.models)
 
       plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
-                        links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
+                        links = args$links, datype = mspace$ordination$datype, ordtype = mspace$ordination$ordtype,
                         axes = args$axes, adj_frame = args$adj_frame, p = mspace$plotinfo$p,
                         xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm, col.ldm = args$col.ldm,
                         col.models = args$col.models, lwd.models = args$lwd.models,
@@ -1528,72 +1539,72 @@ plot_mspace <- function(mspace,
     }
 
     #add points, hulls, phylogeny, and/or consensus
-    if(points == TRUE) {
-      if(ncol(mspace$x) > 1) {
+    if(points) {
+      if(ncol(mspace$projected$scores) > 1) {
         if(length(args$axes) > 1) {
           if(any(args$pch.points %in% c(21:25))) {
-            graphics::points(mspace$x[, args$axes], pch = args$pch.points,
+            graphics::points(mspace$projected$scores[, args$axes], pch = args$pch.points,
                              bg = args$bg.points, cex = args$cex.points)
           } else {
-            graphics::points(mspace$x[, args$axes], pch = args$pch.points,
+            graphics::points(mspace$projected$scores[, args$axes], pch = args$pch.points,
                              col = args$col.points, cex = args$cex.points)
           }
         } else {
-          if(args$density.points == TRUE) {
-            dens <- stats::density(mspace$x[,args$axes[1]])
+          if(args$density.points) {
+            dens <- stats::density(mspace$projected$scores[,args$axes[1]])
             graphics::polygon(dens$x, dens$y / max(dens$y), lwd = 2,
                               col = grDevices::adjustcolor(1, alpha.f = 0.5))
           }
           graphics::abline(h = 0)
           if(any(args$pch.points %in% c(21:25))) {
-            graphics::points(cbind(mspace$x[, args$axes[1]], 0), pch = args$pch.points,
+            graphics::points(cbind(mspace$projected$scores[, args$axes[1]], 0), pch = args$pch.points,
                              bg = args$bg.points, cex = args$cex.points)
           } else {
-            graphics::points(cbind(mspace$x[, args$axes[1]], 0), pch = args$pch.points,
+            graphics::points(cbind(mspace$projected$scores[, args$axes[1]], 0), pch = args$pch.points,
                              col = args$col.points, cex = args$cex.points)
           }
         }
       } else {
-        if(args$density.points == TRUE) {
-          dens <- stats::density(mspace$x[, 1])
+        if(args$density.points) {
+          dens <- stats::density(mspace$projected$scores[, 1])
           graphics::polygon(dens$x, dens$y/max(dens$y), lwd = 2,
                             col = grDevices::adjustcolor(1, alpha.f = 0.5))
         }
         graphics::abline(h = 0)
         if(any(args$pch.points %in% c(21:25))) {
-          graphics::points(cbind(mspace$x[, 1], 0), pch = args$pch.points,
+          graphics::points(cbind(mspace$projected$scores[, 1], 0), pch = args$pch.points,
                            bg = args$bg.points, cex = args$cex.points)
         } else {
-          graphics::points(cbind(mspace$x[, 1], 0), pch = args$pch.points,
+          graphics::points(cbind(mspace$projected$scores[, 1], 0), pch = args$pch.points,
                            col = args$col.points, cex = args$cex.points)
         }
       }
     }
 
-    if(groups == TRUE & !is.null(mspace$gr_class)) {
-      if(ncol(mspace$x) > 1) {
+    if(groups & !is.null(mspace$projected$gr_class)) {
+      if(ncol(mspace$projected$scores) > 1) {
         if(length(args$axes) > 1) {
-          if(args$ellipse.groups == FALSE) {
-            hulls_by_group_2D(mspace$x[, args$axes], fac = mspace$gr_class,
-                              col = args$col.groups, lty = args$lty.groups,
-                              lwd = args$lwd.groups, alpha = args$alpha.groups)
+          if(!args$ellipse.groups) {
+            hulls_by_group_2D(mspace$projected$scores[, args$axes], fac = mspace$projected$gr_class,
+                              col = args$col.groups, lty = args$lty.groups, lwd = args$lwd.groups,
+                              alpha = args$alpha.groups)
           } else {
-            ellipses_by_group_2D(mspace$x[, args$axes], fac = mspace$gr_class,
+            ellipses_by_group_2D(mspace$projected$scores[, args$axes], fac = mspace$projected$gr_class,
                                  conflev = args$conflev.groups, col = args$col.groups,
                                  lty = args$lty.groups, lwd = args$lwd.groups,
                                  alpha = args$alpha.groups)
           }
         } else {
-          if(args$density.groups == TRUE) {
-            dens <- lapply(seq_len(nlevels(mspace$gr_class)), function(i) {
-              subdens <- stats::density(mspace$x[mspace$gr_class == levels(mspace$gr_class)[i],
+          if(args$density.groups) {
+            dens <- lapply(seq_len(nlevels(mspace$projected$gr_class)), function(i) {
+              subdens <- stats::density(mspace$projected$scores[mspace$projected$gr_class == levels(mspace$projected$gr_class)[i],
                                                  args$axes[1]])
               list(x = subdens$x, y = subdens$y)
             })
             ymax <- max(unlist(lapply(dens, function(x) {x$y})))
 
             graphics::abline(h = 0)
-            for(i in seq_len(nlevels(mspace$gr_class))) {
+            for(i in seq_len(nlevels(mspace$projected$gr_class))) {
               graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = 2,
                                 col = grDevices::adjustcolor(i, alpha.f = alpha.groups))
             }
@@ -1601,15 +1612,15 @@ plot_mspace <- function(mspace,
         }
 
       } else {
-        if(args$density.groups == TRUE) {
-          dens <- lapply(seq_len(nlevels(mspace$gr_class)), function(i) {
-            subdens <- stats::density(mspace$x[mspace$gr_class == levels(mspace$gr_class)[i], 1])
+        if(args$density.groups) {
+          dens <- lapply(seq_len(nlevels(mspace$projected$gr_class)), function(i) {
+            subdens <- stats::density(mspace$projected$scores[mspace$projected$gr_class == levels(mspace$projected$gr_class)[i], 1])
             list(x = subdens$x, y = subdens$y)
           })
           ymax <- max(unlist(lapply(dens, function(x) {x$y})))
 
           graphics::abline(h=0)
-          for(i in seq_len(nlevels(mspace$gr_class))) {
+          for(i in seq_len(nlevels(mspace$projected$gr_class))) {
             graphics::polygon(dens[[i]]$x, dens[[i]]$y/ymax, lwd = 2,
                               col = grDevices::adjustcolor(i, alpha.f = alpha.groups))
           }
@@ -1617,11 +1628,11 @@ plot_mspace <- function(mspace,
       }
     }
 
-    if(phylo == TRUE & !is.null(mspace$phylo)) {
+    if(phylo & !is.null(mspace$projected$phylo)) {
       if(length(args$axes) > 1) {
-        for(i in seq_len(nrow(mspace$phylo$edge))) {
-          graphics::lines(rbind(mspace$phylo_scores[mspace$phylo$edge[i, 1], args$axes],
-                                mspace$phylo_scores[mspace$phylo$edge[i, 2], args$axes]),
+        for(i in seq_len(nrow(mspace$projected$phylo$edge))) {
+          graphics::lines(rbind(mspace$projected$phylo_scores[mspace$projected$phylo$edge[i, 1], args$axes],
+                                mspace$projected$phylo_scores[mspace$projected$phylo$edge[i, 2], args$axes]),
                           lwd = args$lwd.phylo, lty = args$lty.phylo, col = args$col.phylo)
         }
       } else {
@@ -1629,53 +1640,53 @@ plot_mspace <- function(mspace,
       }
     }
 
-    if(mshapes == TRUE & !is.null(mspace$gr_centroids)) {
-      if(ncol(mspace$x) > 1) {
+    if(mshapes & !is.null(mspace$gr_centroids)) {
+      if(ncol(mspace$projected$scores) > 1) {
         if(length(args$axes) > 1) {
           if(any(args$pch.groups %in% c(21:25))) {
-            graphics::points(mspace$gr_centroids[, args$axes], bg = args$bg.groups,
+            graphics::points(mspace$projected$gr_centroids[, args$axes], bg = args$bg.groups,
                              pch = args$pch.groups, cex = args$cex.groups)
           } else {
-            graphics::points(mspace$gr_centroids[, args$axes], col = args$col.groups,
+            graphics::points(mspace$projected$gr_centroids[, args$axes], col = args$col.groups,
                              pch = args$pch.groups, cex = args$cex.groups)
           }
         } else {
           graphics::abline(h = 0)
           if(any(args$pch.groups %in% c(21:25))) {
-            graphics::points(cbind(mspace$gr_centroids[, args$axes[1]], 0), bg = args$bg.groups,
+            graphics::points(cbind(mspace$projected$gr_centroids[, args$axes[1]], 0), bg = args$bg.groups,
                              pch = args$pch.groups, cex = args$cex.groups)
           } else {
-            graphics::points(cbind(mspace$gr_centroids[, args$axes[1]], 0), col = args$col.groups,
+            graphics::points(cbind(mspace$projected$gr_centroids[, args$axes[1]], 0), col = args$col.groups,
                              pch = args$pch.groups, cex = args$cex.groups)
           }
         }
       } else {
         graphics::abline(h = 0)
         if(any(args$pch.groups %in% c(21:25))) {
-          graphics::points(cbind(mspace$gr_centroids[, 1], 0), bg = args$bg.groups,
+          graphics::points(cbind(mspace$projected$gr_centroids[, 1], 0), bg = args$bg.groups,
                            pch = args$pch.groups, cex = args$cex.groups)
         } else {
-          graphics::points(cbind(mspace$gr_centroids[, 1], 0), col = args$col.groups,
+          graphics::points(cbind(mspace$projected$gr_centroids[, 1], 0), col = args$col.groups,
                            pch = args$pch.groups, cex = args$cex.groups)
         }
       }
     }
 
-    if(shapeax == TRUE & !is.null(mspace$shape_axis)) {
+    if(shapeax & !is.null(mspace$projected$shape_axis)) {
       if(length(args$axes) > 1) {
 
-        if(length(args$lwd.axis) != length(mspace$shape_axis)) {
-          args$lwd.axis <- rep(1, length(mspace$shape_axis))
+        if(length(args$lwd.axis) != length(mspace$projected$shape_axis)) {
+          args$lwd.axis <- rep(1, length(mspace$projected$shape_axis))
         }
-        if(length(args$lty.axis) != length(mspace$shape_axis)) {
-          args$lty.axis <- rep(1, length(mspace$shape_axis))
+        if(length(args$lty.axis) != length(mspace$projected$shape_axis)) {
+          args$lty.axis <- rep(1, length(mspace$projected$shape_axis))
         }
-        if(length(args$col.axis) != length(mspace$shape_axis)) {
-          args$col.axis <- rep(1, length(mspace$shape_axis))
+        if(length(args$col.axis) != length(mspace$projected$shape_axis)) {
+          args$col.axis <- rep(1, length(mspace$projected$shape_axis))
         }
 
-        for(i in seq_len(length(mspace$shape_axis))) {
-          graphics::lines(mspace$shape_axis[[i]][, args$axes],
+        for(i in seq_len(length(mspace$projected$shape_axis))) {
+          graphics::lines(mspace$projected$shape_axis[[i]][, args$axes],
                           col = args$col.axis[i], lwd = args$lwd.axis[i], lty = args$lty.axis[i])
         }
       } else {
@@ -1683,31 +1694,34 @@ plot_mspace <- function(mspace,
       }
     }
 
-    if(landsc == TRUE & !is.null(mspace$landsc)) {
+    if(landsc & !is.null(mspace$projected$landsc)) {
       if(all(args$axes %in% mspace$plotinfo$axes)) { #all specified vectors must be in the original mspace object
 
         if(length(args$axes) > 1) { # if number of specified axes is 2...
           if(all(args$axes == mspace$plotinfo$axes)) { # ...and axes are in the same order
             cols.landsc <- args$palette.landsc(n = args$nlevels.landsc)
-            levs.landsc <- seq(from = min(mspace$landsc$z, na.rm = TRUE),
-                               to = max(mspace$landsc$z, na.rm = TRUE),
+            levs.landsc <- seq(from = min(mspace$projected$landsc$z, na.rm = TRUE),
+                               to = max(mspace$projected$landsc$z, na.rm = TRUE),
                                length.out = args$nlevels.landsc)
 
             if(args$display.landsc == "contour") {
-              graphics::contour(mspace$landsc$x, mspace$landsc$y, mspace$landsc$z,
-                                col = cols.landsc, levels = levs.landsc, lwd = args$lwd.landsc,
-                                lty = args$lty.landsc, drawlabels = args$drawlabels.landsc,
-                                labels = round(levs.landsc, digits = 3), add = TRUE)
+              graphics::contour(mspace$projected$landsc$x, mspace$projected$landsc$y,
+                                mspace$projected$landsc$z, col = cols.landsc, levels = levs.landsc,
+                                lwd = args$lwd.landsc, lty = args$lty.landsc,
+                                drawlabels = args$drawlabels.landsc, labels = round(levs.landsc, digits = 3),
+                                add = TRUE)
               box()
             }
 
             if(args$display.landsc == "filled.contour") {
-              if(mspace$landsc$type == "empirical") {
-                graphics::image(mspace$landsc$x, mspace$landsc$y, mspace$landsc$z, add = TRUE,
+              if(mspace$projected$landsc$type == "empirical") {
+                graphics::image(mspace$projected$landsc$x, mspace$projected$landsc$y,
+                                mspace$projected$landsc$z, add = TRUE,
                                 col = grDevices::adjustcolor(cols.landsc, alpha = args$alpha.landsc))
               }
-              if(mspace$landsc$type == "theoretical") {
-                graphics::.filled.contour(mspace$landsc$x, mspace$landsc$y, mspace$landsc$z,
+              if(mspace$projected$landsc$type == "theoretical") {
+                graphics::.filled.contour(mspace$projected$landsc$x, mspace$projected$landsc$y,
+                                          mspace$projected$landsc$z,
                                           levels = levs.landsc,
                                           col = grDevices::adjustcolor(cols.landsc,
                                                                        alpha = args$alpha.landsc))
@@ -1724,15 +1738,15 @@ plot_mspace <- function(mspace,
 
           if(length(mspace$plotinfo$axes) > 1) { # ....and the number of original axes is 2
             if(args$axes == mspace$plotinfo$axes[1]) {
-              landsc.z <- mspace$landsc$z[, mspace$landsc$which.y0]
-              landsc.x <- mspace$landsc$x
+              landsc.z <- mspace$projected$landsc$z[, mspace$projected$landsc$which.y0]
+              landsc.x <- mspace$projected$landsc$x
             } else {
-              landsc.z <- mspace$landsc$z[mspace$landsc$which.x0,]
-              landsc.x <- mspace$landsc$y
+              landsc.z <- mspace$projected$landsc$z[mspace$projected$landsc$which.x0,]
+              landsc.x <- mspace$projected$landsc$y
             }
           } else { # ...and the number of original axes is 1
-            landsc.z <- mspace$landsc$z
-            landsc.x <- mspace$landsc$x
+            landsc.z <- mspace$projected$landsc$z
+            landsc.x <- mspace$projected$landsc$x
           }
 
           cols.landsc <- args$palette.landsc(n = args$resolution.landsc)[order(order(landsc.z))]
@@ -1800,9 +1814,9 @@ plot_mspace <- function(mspace,
 
 
 
-    if(mspace$plotinfo$k == 3 & mspace$datype == "landm") {
+    if(mspace$plotinfo$k == 3 & mspace$ordination$datype == "landm") {
 
-      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
+      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$ordination$datype,
                                 template = NULL, x = x, y = y, p = mspace$plotinfo$p,
                                 k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
                                 asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
@@ -1817,7 +1831,7 @@ plot_mspace <- function(mspace,
       if(is.null(y)) ylim <- range(ordination$x[,args$axes[1]])
 
       plot_morphogrid3d(x = x, y = y, morphogrid = shapemodels, refshape = refshape,
-                        template = args$template, links = args$links, ordtype = mspace$ordtype,
+                        template = args$template, links = args$links, ordtype = mspace$ordination$ordtype,
                         axes = args$axes, xlim = xlim, ylim = ylim, adj_frame = args$adj_frame,
                         xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
                         col.ldm = args$col.ldm, col.models = args$col.models, lwd.models = args$lwd.models,
@@ -1825,14 +1839,14 @@ plot_mspace <- function(mspace,
                         asp.models = args$asp.models, alpha.models = args$alpha.models, models = args$models)
     } else {
 
-      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$datype,
+      shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$ordination$datype,
                                 template = args$template, x = x, y = y, p = mspace$plotinfo$p,
                                 k = mspace$plotinfo$k, nh = args$nh, nv = args$nv, mag = args$mag,
                                 asp = args$asp, xlim = args$xlim, ylim = args$ylim, rot.models = args$rot.models,
                                 size.models = args$size.models, asp.models = args$asp.models)
 
       plot_morphogrid2d(x = x, y = y, morphogrid = shapemodels, template = args$template,
-                        links = args$links, datype = mspace$datype, ordtype = mspace$ordtype,
+                        links = args$links, datype = mspace$ordination$datype, ordtype = mspace$ordination$ordtype,
                         axes = args$axes, adj_frame = args$adj_frame, p = mspace$plotinfo$p,
                         xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm, col.ldm = args$col.ldm,
                         col.models = args$col.models, lwd.models = args$lwd.models,
@@ -1842,23 +1856,23 @@ plot_mspace <- function(mspace,
 
     if(phenogr == TRUE) { #if x/y is a phy object, plot a phenogram
 
-      if(length(args$cex.groups) == 1) args$cex.groups <- rep(args$cex.groups, nlevels(mspace$gr_class))
-      if(length(args$pch.groups) == 1) args$pch.groups <- rep(args$pch.groups, nlevels(mspace$gr_class))
-      if(length(args$col.groups) == 1) args$col.groups <- rep(args$col.groups, nrow(mspace$gr_centroids))
+      if(length(args$cex.groups) == 1) args$cex.groups <- rep(args$cex.groups, nlevels(mspace$projected$gr_class))
+      if(length(args$pch.groups) == 1) args$pch.groups <- rep(args$pch.groups, nlevels(mspace$projected$gr_class))
+      if(length(args$col.groups) == 1) args$col.groups <- rep(args$col.groups, nrow(mspace$projected$gr_centroids))
 
-      maptips <-  order(match(rownames(mspace$gr_centroids), tree$tip.label))
+      maptips <-  order(match(rownames(mspace$projected$gr_centroids), tree$tip.label))
       plot_phenogram(x = x, y = y, tree = tree, axis = args$axes, points = points,
-                     pch.groups = args$pch.groups[maptips], phylo_scores = mspace$phylo_scores,
+                     pch.groups = args$pch.groups[maptips], phylo_scores = mspace$projected$phylo_scores,
                      cex.groups = args$cex.groups[maptips], col.groups = args$col.groups[maptips],
                      bg.groups = args$bg.groups[maptips], lwd.phylo = args$lwd.phylo,
                      lty.phylo = args$lty.phylo, col.phylo = args$col.phylo)
 
     } else { #else, go for a generic hybrid morphospace
 
-      xy <- cbind(x, mspace$x[,args$axes[1]], y)
+      xy <- cbind(x, mspace$projected$scores[,args$axes[1]], y)
 
       #add points, hulls, phylogeny, and/or consensus
-      if(points == TRUE) {
+      if(points) {
         if(any(args$pch.points %in% c(21:25))) {
           graphics::points(xy, pch = args$pch.points, bg = args$bg.points,
                            cex = args$cex.points)
@@ -1868,58 +1882,58 @@ plot_mspace <- function(mspace,
         }
       }
 
-      if(groups == TRUE & !is.null(mspace$gr_class)) {
-        if(ellipse.groups == FALSE) {
-          hulls_by_group_2D(xy, fac = mspace$gr_class, col = args$col.groups,
+      if(groups & !is.null(mspace$projected$gr_class)) {
+        if(!ellipse.groups) {
+          hulls_by_group_2D(xy, fac = mspace$projected$gr_class, col = args$col.groups,
                             lty = args$lty.groups, lwd = args$lwd.groups, alpha = args$alpha.groups)
         } else {
-          ellipses_by_group_2D(xy, fac = mspace$gr_class, conflev = args$conflev.groups,
+          ellipses_by_group_2D(xy, fac = mspace$projected$gr_class, conflev = args$conflev.groups,
                                col = args$col.groups, lty = args$lty.groups,
                                lwd = args$lwd.groups, alpha = args$alpha.groups)
         }
       }
 
-      if(phylo == TRUE & !is.null(mspace$phylo)) {
-        if(is.null(mspace$gr_class)) {
+      if(phylo & !is.null(mspace$projected$phylo)) {
+        if(is.null(mspace$projected$gr_class)) {
           stop("groups classification has not been added to mspace object")
         } else {
           if(!is.null(x)) {
-            meanx <- tapply(x, mspace$gr_class, mean)
+            meanx <- tapply(x, mspace$projected$gr_class, mean)
           } else {
             meanx <- NULL
           }
           if(!is.null(y)) {
-            meany <- tapply(y, mspace$gr_class, mean)
+            meany <- tapply(y, mspace$projected$gr_class, mean)
           } else {
             meany <- NULL
           }
 
-          meanxy <- cbind(meanx, mspace$gr_centroids[,args$axes[1]], meany)[mspace$phylo$tip.label,]
-          nodesxy <- apply(meanxy[mspace$phylo$tip.label,], 2, phytools::fastAnc, tree = mspace$phylo)
+          meanxy <- cbind(meanx, mspace$projected$gr_centroids[,args$axes[1]], meany)[mspace$projected$phylo$tip.label,]
+          nodesxy <- apply(meanxy[mspace$projected$phylo$tip.label,], 2, phytools::fastAnc, tree = mspace$projected$phylo)
           phyloxy <- rbind(meanxy, nodesxy)
 
         }
 
-        for(i in seq_len(nrow(mspace$phylo$edge))) {
-          graphics::lines(rbind(phyloxy[mspace$phylo$edge[i, 1],],
-                                phyloxy[mspace$phylo$edge[i, 2],]),
+        for(i in seq_len(nrow(mspace$projected$phylo$edge))) {
+          graphics::lines(rbind(phyloxy[mspace$projected$phylo$edge[i, 1],],
+                                phyloxy[mspace$projected$phylo$edge[i, 2],]),
                           lwd = args$lwd.phylo, lty = args$lty.phylo, col = args$col.phylo)
         }
       }
 
-      if(mshapes == TRUE & !is.null(mspace$gr_centroids)) {
+      if(mshapes & !is.null(mspace$gr_centroids)) {
         if(!is.null(x)) {
-          meanx <- tapply(x, mspace$gr_class, mean)
+          meanx <- tapply(x, mspace$projected$gr_class, mean)
         } else {
           meanx <- NULL
         }
         if(!is.null(y)) {
-          meany <- tapply(y, mspace$gr_class, mean)
+          meany <- tapply(y, mspace$projected$gr_class, mean)
         } else {
           meany <- NULL
         }
 
-        meanxy <- cbind(meanx, mspace$gr_centroids[,args$axes[1]], meany)
+        meanxy <- cbind(meanx, mspace$projected$gr_centroids[,args$axes[1]], meany)
 
         if(any(args$pch.groups %in% c(21:25))) {
           graphics::points(meanxy, bg = args$bg.groups, pch = args$pch.groups,
@@ -1935,7 +1949,7 @@ plot_mspace <- function(mspace,
   if(any(legend, scalebar)) {
 
     if(legend) {
-      if(is.null(mspace$gr_class)) {
+      if(is.null(mspace$projected$gr_class)) {
         stop("Groups ($gr_class) are necessary to create labels for the legend")
       } else {
 
@@ -1946,11 +1960,11 @@ plot_mspace <- function(mspace,
              ylim = c(0,1), xlim = c(0,1), xaxs = "i", yaxs = "i")
 
         if(any(args$pch.groups %in% c(21:25))) {
-          graphics::legend("topleft", legend = levels(mspace$gr_class),
+          graphics::legend("topleft", legend = levels(mspace$projected$gr_class),
                            cex = cex.legend, pch = args$pch.groups,
                            pt.bg = args$bg.groups)
         } else {
-          graphics::legend("topleft", legend = levels(mspace$gr_class),
+          graphics::legend("topleft", legend = levels(mspace$projected$gr_class),
                            cex = cex.legend, pch = args$pch.groups,
                            col = args$col.groups)
         }
@@ -1958,7 +1972,7 @@ plot_mspace <- function(mspace,
     }
 
     if(scalebar) {
-      if(is.null(mspace$landsc)) {
+      if(is.null(mspace$projected$landsc)) {
         stop("A landscape ($landsc) is necessary to a scale for the scalebar")
       } else {
 
