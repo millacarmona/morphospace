@@ -684,3 +684,85 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 }
 
 
+
+##################################################################################
+
+#' Compute shapes from an existing morphospace
+extract_shapes <- function(mspace,
+                           axis = NULL,
+                           nshapes = NULL,
+                           scores = NULL,
+                           keep.template = TRUE,
+                           mag = 1) {
+
+
+  if(all(is.null(nshapes), is.null(axis), is.null(scores))) {
+    axis <- mspace$plotinfo$axes
+    scores <- proj_eigen(x = shapes_mat(mspace$projected$shapemodels)$data2d,
+                         vectors = mspace$ordination$rotation[,axis],
+                         center = mspace$ordination$center) * mag
+  } else {
+    if(!is.null(axis)) {
+      if(nshapes > 1) {
+        xrange <- range(mspace$ordination$x[,axis]) * mag
+        scores <- seq(xrange[1], xrange[2], length.out = nshapes)
+      } else {
+        stop("At least two shapes are necessary to adequately represent variation along an axis")
+      }
+    } else {
+      axis <- mspace$plotinfo$axes
+      if(!is.null(scores)) {
+        if(is.null(dim(scores))) scores <- rbind(scores)
+      } else {
+        grDevices::X11()
+        plot_mspace(mspace)
+        scores <- matrix(unlist(graphics::locator(n = nshapes)),
+                         nrow = nshapes, ncol = 2, byrow = TRUE)
+        grDevices::dev.off()
+      }
+    }
+  }
+
+
+  data2d <- rev_eigen(scores = scores,
+                      vectors = mspace$ordination$rotation[,axis],
+                      center = mspace$ordination$center)
+
+  if(mspace$ordination$datype == "landm") {
+    shapes <- geomorph::arrayspecs(data2d,
+                                   p = mspace$plotinfo$p,
+                                   k = mspace$plotinfo$k)
+
+    if(keep.template) {
+      centroid <- matrix(rev_eigen(0, mspace$ordination$rotation[,1], mspace$ordination$center),
+                         ncol = mspace$plotinfo$k, byrow = TRUE)
+      if(mspace$plotinfo$k == 2) {
+
+        temp_cent <- rbind(centroid,
+                           Momocs::tps2d(mspace$plotinfo$template[-(seq_len(mspace$plotinfo$p)), ],
+                                         mspace$plotinfo$template[(seq_len(mspace$plotinfo$p)), ],
+                                         centroid))
+
+        temp_warpd_list <- lapply(seq_len(dim(shapes)[3]),
+                                  function(i) {Momocs::tps2d(temp_cent[-(seq_len(mspace$plotinfo$p)),],
+                                                             temp_cent[(seq_len(mspace$plotinfo$p)),],
+                                                             shapes[,,i])})
+        templates <- temp_warpd_arr <- abind::abind(temp_warpd_list, along = 3)
+        #templates <- abind::abind(shapes, temp_warpd_arr, along = 1)
+
+      } else {
+        templates <- vector(length = dim(shapes)[3], mode = "list")
+        for(i in seq_len(dim(shapes)[3])) {
+          templates[[i]] <- Morpho::tps3d(x = template , refmat = centroid, tarmat = shapes[,,i])
+        }
+      }
+    }
+  } else {
+    shapes <- data2d
+  }
+
+  results <- list(scores = scores, shapes = shapes)
+  if(keep.template & !is.null(templates)) results$templates <- templates
+
+  return(invisible((results)))
+}

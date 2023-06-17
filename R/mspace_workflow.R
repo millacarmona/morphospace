@@ -285,7 +285,7 @@ mspace <- function(shapes,
                    alpha.models = alpha.models, cex.ldm = cex.ldm, col.ldm = col.ldm, models = models)
 
   results <- list(ordination = ordination,
-                  projected = shapemodels,
+                  projected = list(shapemodels = shapemodels),
                   plotinfo = plotinfo)
   class(results) <- "mspace"
 
@@ -449,22 +449,24 @@ proj_consensus <- function(mspace, shapes, pipe = TRUE, ...) {
   gr_centroids <- proj_eigen(x = data2d, vectors = mspace$ordination$rotation,
                              center = mspace$ordination$center)
 
+  if(is.null(args$col)) col <- args$col <- seq_len(nrow(gr_centroids))
+
+
   if(.Device != "null device") {
 
     if(ncol(mspace$ordination$x) > 1) {
       if(length(mspace$plotinfo$axes) > 1) {
-        graphics::points(gr_centroids[, mspace$plotinfo$axes], ...)
+        graphics::points(gr_centroids[, mspace$plotinfo$axes], col = col, ...)
       } else {
         graphics::abline(h = 0)
-        graphics::points(cbind(gr_centroids[, mspace$plotinfo$axes[1]], 0), ...)
+        graphics::points(cbind(gr_centroids[, mspace$plotinfo$axes[1]], 0), col = col, ...)
       }
     } else {
       graphics::abline(h = 0)
-      graphics::points(cbind(gr_centroids[, 1], 0), ...)
+      graphics::points(cbind(gr_centroids[, 1], 0), col = col, ...)
     }
   }
 
-  if(is.null(args$col)) args$col <- seq_len(nrow(gr_centroids))
   if(is.null(args$pch)) args$pch <- 1
 
 
@@ -1407,7 +1409,7 @@ plot_mspace <- function(mspace,
                         shapeax = TRUE,
                         landsc = TRUE,
                         legend = FALSE,
-                        scalebar = FALSE, #########
+                        scalebar = FALSE,
                         cex.legend = 1,
                         asp = NA,
                         xlab,
@@ -1463,11 +1465,11 @@ plot_mspace <- function(mspace,
   if(!is.null(invax)) {
     mspace$ordination$x[,axes[invax]] <- mspace$ordination$x[,axes[invax]]  * -1
     mspace$ordination$rotation[,axes[invax]] <- mspace$ordination$rotation[,axes[invax]] * -1
-    if(!is.null(mspace$gr_centroids)) {
-      mspace$gr_centroids[,axes[invax]] <- mspace$gr_centroids[,axes[invax]] * -1
+    if(!is.null(mspace$projected$gr_centroids)) {
+      mspace$projected$gr_centroids[,axes[invax]] <- mspace$projected$gr_centroids[,axes[invax]] * -1
     }
-    if(!is.null(mspace$phylo_scores)) {
-      mspace$phylo_scores[,axes[invax]] <- mspace$phylo_scores[,axes[invax]] * -1
+    if(!is.null(mspace$projected$phylo_scores)) {
+      mspace$projected$phylo_scores[,axes[invax]] <- mspace$projected$phylo_scores[,axes[invax]] * -1
     }
   }
 
@@ -1539,7 +1541,7 @@ plot_mspace <- function(mspace,
     }
 
     #add points, hulls, phylogeny, and/or consensus
-    if(points) {
+    if(points & !is.null(mspace$projected$scores)) {
       if(ncol(mspace$projected$scores) > 1) {
         if(length(args$axes) > 1) {
           if(any(args$pch.points %in% c(21:25))) {
@@ -1640,7 +1642,7 @@ plot_mspace <- function(mspace,
       }
     }
 
-    if(mshapes & !is.null(mspace$gr_centroids)) {
+    if(mshapes & !is.null(mspace$projected$gr_centroids)) {
       if(ncol(mspace$projected$scores) > 1) {
         if(length(args$axes) > 1) {
           if(any(args$pch.groups %in% c(21:25))) {
@@ -1921,7 +1923,7 @@ plot_mspace <- function(mspace,
         }
       }
 
-      if(mshapes & !is.null(mspace$gr_centroids)) {
+      if(mshapes & !is.null(mspace$projected$gr_centroids)) {
         if(!is.null(x)) {
           meanx <- tapply(x, mspace$projected$gr_class, mean)
         } else {
@@ -1950,7 +1952,7 @@ plot_mspace <- function(mspace,
 
     if(legend) {
       if(is.null(mspace$projected$gr_class)) {
-        stop("Groups ($gr_class) are necessary to create labels for the legend")
+        stop("Groups ($gr_class) are necessary to generate legend labels")
       } else {
 
         if(is.null(args$pch.groups)) args$pch.groups <- args$pch.points
@@ -1973,7 +1975,7 @@ plot_mspace <- function(mspace,
 
     if(scalebar) {
       if(is.null(mspace$projected$landsc)) {
-        stop("A landscape ($landsc) is necessary to a scale for the scalebar")
+        stop("A landscape ($landsc) is necessary to generate a scalebar")
       } else {
 
         graphics::par(mar = c(5.1, 1, 4.1, 10))

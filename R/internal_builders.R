@@ -669,10 +669,10 @@ morphogrid <- function(ordination,
 
   if(!is.null(template)) {
     centroid <- matrix(rev_eigen(0, ordination$rotation[,1], ordination$center), ncol = 2, byrow = TRUE)
-    temp_cent<-rbind(centroid,
-                     Momocs::tps2d(template[-(seq_len(p)),],
-                                   template[(seq_len(p)),],
-                                   centroid))
+    temp_cent <- rbind(centroid,
+                       Momocs::tps2d(template[-(seq_len(p)), ],
+                                     template[(seq_len(p)), ],
+                                     centroid))
 
     temp_warpd_list <- lapply(1:dim(sh_arr)[3],
                               function(i) {Momocs::tps2d(temp_cent[-(seq_len(p)),],
