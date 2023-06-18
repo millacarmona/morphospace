@@ -1,4 +1,4 @@
-#############################################################################################
+################################################################################
 
 #' Pile shapes
 #'
@@ -8,7 +8,8 @@
 #' @param links An optional list with the indices of the coordinates defining
 #'   the wireframe (following the format used in \code{Morpho}).
 #' @param mshape Logical; whether to plot the mean configuration.
-#' @param ... Additional arguments passed to [graphics::plot()] or [rgl::points3d()].
+#' @param ... Additional arguments passed to [graphics::plot()] or
+#'   [rgl::points3d()].
 #'
 #' @export
 #'
@@ -113,12 +114,13 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 }
 
 
-#############################################################################################
+################################################################################
 
 #' Plot 2D convex hulls for a series of groups
 #'
 #' @description Plot convex hulls for different groups in 2D scatterplots
-#'   created using the generic [graphics::plot()] function. Used internally (mostly).
+#'   created using the generic [graphics::plot()] function. Used internally
+#'   (mostly).
 #'
 #' @param xy Coordinates of the scatterplot.
 #' @param fac A factor grouping data points.
@@ -162,18 +164,20 @@ hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 
 
 
-#############################################################################################
+################################################################################
 
 #' Plot 2D confidence ellipses for a series of groups
 #'
 #' @description Plot confidence ellipses for different groups in 2D scatterplots
-#'   created using the generic [graphics::plot()] function. Used internally (mostly).
+#'   created using the generic [graphics::plot()] function. Used internally
+#'   (mostly).
 #'
 #' @param xy Coordinates of the scatterplot.
 #' @param fac A factor grouping data points.
 #' @param col A vector (either character or numeric) indicating the colors used
 #'   for each group.
-#' @param lty A numeric vector indicating the type of line used to draw ellipses.
+#' @param lty A numeric vector indicating the type of line used to draw
+#'   ellipses.
 #' @param alpha Numeric; transparency factor for ellipses.
 #' @param conflev Numeric, specifying the confidence level for drawing ellipses.
 #' @param ... Further arguments passed to [graphics::polygon()].
@@ -213,7 +217,7 @@ ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 }
 
 
-#############################################################################################
+################################################################################
 
 #' Plot 3D convex hulls for a series of groups
 #'
@@ -258,34 +262,35 @@ hulls_by_group_3D<-function(xyz, fac, col = seq_len(nlevels(fac)), ...) {
 }
 
 
-######################################################################################
+################################################################################
 
 #' Build template for 2D shape data
 #'
 #' @description Create a template (i.e. a set of curves describing the structure
-#'   the landmarks are placed upon) to aid morphospace visualization, interactively.
+#'   the landmarks are placed upon) to aid morphospace visualization,
+#'   interactively.
 #'
 #' @param image Character; the path to an image of the structure, in png format.
 #' @param nlands Numeric; the number of landmarks to be placed.
 #' @param ncurves Numeric; the number of curves to be drawn.
 #'
-#' @details This functions let the user create a template interactively. The user
-#'   will be first asked to place the landmarks (the same place and order than the
-#'   shape data of interest). Once \code{nland} landmarks have been placed, the
-#'   user will be asked to place the number of curves specified in \code{ncurves};
-#'   the number of coordinates used to drawn each is arbitrary, and is up the user
-#'   to decide when the curve is ready (press the 'Finish' button in the top-right
-#'   corner of the Plots pane).
+#' @details This functions let the user create a template interactively. The
+#'   user will be first asked to place the landmarks (the same place and order
+#'   than the shape data of interest). Once \code{nland} landmarks have been
+#'   placed, the user will be asked to place the number of curves specified in
+#'   \code{ncurves}; the number of coordinates used to drawn each is arbitrary,
+#'   and is up the user to decide when the curve is ready (press the 'Finish'
+#'   button in the top-right corner of the Plots pane).
 #'
-#' @return A 2-column matrix with the landmark configuration (standardized for scale
-#'   and position) followed by the coordinates defining the curves drawn, separated by
-#'   \code{NA}s.
+#' @return A 2-column matrix with the landmark configuration (standardized for
+#'   scale and position) followed by the coordinates defining the curves drawn,
+#'   separated by \code{NA}s.
 #'
 #' @export
 #'
 #' @references
-#' Claude, J. (2008). \emph{Morphometrics with R}. Springer Science & Business Media,
-#' 316.
+#' Claude, J. (2008). \emph{Morphometrics with R}. Springer Science & Business
+#' Media, 316.
 #'
 #' @examples
 #' #generate template interactively
@@ -327,3 +332,126 @@ build_template2d <- function(image, nlands, ncurves) {
 
   return(template_trans_scald)
 }
+
+
+################################################################################
+
+#' Plot scatterpoints into univariate morphospace
+#'
+#' @description Used internally.
+#'
+#' @export
+plot_univ_scatter <- function(scores, density, col, bg, pch, cex, ...) {
+  if(density) {
+    dens <- stats::density(scores)
+
+    graphics::polygon(dens$x, dens$y / max(dens$y), lwd = 2,
+                      col = grDevices::adjustcolor(1, alpha.f = 0.5))
+  }
+
+  graphics::abline(h = 0)
+  if(any(pch %in% c(21:25))) {
+    graphics::points(cbind(scores, 0), pch = pch, bg = bg, cex = cex, ...)
+  } else {
+    graphics::points(cbind(scores, 0), pch = pch, col = col, cex = cex, ...)
+  }
+}
+
+
+################################################################################
+
+#' Plot scatterpoints into bivariate morphospace
+#'
+#' @description Used internally.
+#'
+#' @export
+plot_biv_scatter <- function(scores, col, bg, pch, cex, ...) {
+  if(any(pch %in% c(21:25))) {
+    graphics::points(scores, pch = pch, bg = bg, cex = cex, ...)
+  } else {
+    graphics::points(scores, pch = pch, col = col, cex = cex, ...)
+  }
+}
+
+
+################################################################################
+
+#' Plot univariate density distributions for a series of groups
+#'
+#' @description Used internally.
+#'
+#' @export
+density_by_group_2D <- function(groups, scores, ax, alpha) {
+  dens <- lapply(seq_len(nlevels(groups)), function(i) {
+    subdens <- stats::density(scores[groups == levels(groups)[i], ax])
+    list(x = subdens$x, y = subdens$y)
+  })
+  ymax <- max(unlist(lapply(dens, function(x) {x$y})))
+
+  graphics::abline(h = 0)
+  for(i in seq_len(nlevels(groups))) {
+    graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = 2,
+                      col = grDevices::adjustcolor(i, alpha.f = alpha))
+  }
+}
+
+
+################################################################################
+
+#' Plot bivariate landscape into morphospace
+#'
+#' @description Used internally.
+#'
+#' @export
+plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, drawlabels, alpha) {
+  if(display == "contour") {
+    graphics::contour(landscape$x, landscape$y, landscape$z, levels = levels,
+                      lwd = lwd, lty = lty, col = cols, labels = round(levels, digits = 3),
+                      drawlabels = drawlabels, add = TRUE)
+    box()
+  }
+
+  if(display == "filled.contour") {
+    if(type == "theoretical") {
+      graphics::.filled.contour(landscape$x, landscape$y, landscape$z, levels = levels,
+                                col = grDevices::adjustcolor(cols, alpha = alpha))
+    }
+    if(type == "empirical") {
+      graphics::image(landscape$x, landscape$y, landscape$z, add = TRUE,
+                      col = grDevices::adjustcolor(cols, alpha = alpha))
+    }
+  }
+}
+
+
+################################################################################
+
+#' Plot bivariate landscape into morphospace
+#'
+#' @description Used internally.
+#'
+#' @export
+plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
+  if(drawlabels) {
+    w.transp <-round(quantile(x = 1:length(landscape$z), probs = c(0.25, 0.5, 0.75)))
+    w.transp <- sort(c(w.transp - 1, w.transp, w.transp + 1))
+
+    label_col <- col[w.transp[c(2,5,8)]]
+    col[w.transp] <- NA
+  }
+
+  for(i in 1:(length(landscape$x) - 1)) {
+    lines(rbind(c(landscape$x[i], landscape$z[i]),
+                c(landscape$x[i + 1], landscape$z[i + 1])),
+          col = col[i], lwd = lwd)
+  }
+  box()
+
+  if(drawlabels == TRUE) {
+    x_text <- colMeans(matrix(landscape$x[w.transp + 1], nrow = 3))
+    y_text <- colMeans(matrix(landscape$z[w.transp + 1], nrow = 3))
+    labels <- round(colMeans(matrix(landscape$z[w.transp], nrow = 3)), 2)
+    text(cbind(x_text, y_text), labels = labels, cex = 0.7, col = label_col)
+  }
+}
+
