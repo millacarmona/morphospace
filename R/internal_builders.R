@@ -502,6 +502,8 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #'   first value of this argument is considered.
 #' @param datype Character; the type of shape data (either \code{"fcoef"} or
 #'   \code{"landm"}).
+#' @param rescale Logical; whether to re-scale background shape models so shape
+#'    variation is shown more clearly.
 #' @param template A 2-column matrix containing landmarks/semilandmarks followed
 #'   by coordinates defining a curve or set of curves describing additional aspects
 #'   of morphology, which will be warped using TPS interpolation to produce the set
@@ -562,6 +564,7 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 morphogrid <- function(ordination,
                        axes,
                        datype,
+                       rescale,
                        template = NULL,
                        x = NULL,
                        y = NULL,
@@ -641,17 +644,19 @@ morphogrid <- function(ordination,
 
   sh_mat <- rev_eigen(gridcoords_mag, vectors, center)
   if(datype == "fcoef") {
+    sh_originals <- sh_mat
     coords_l <- lapply(seq_len(nrow(sh_mat)), function(i) {
       sh <- inv_efourier(coe = sh_mat[i,], nb.pts = p)
-      sh / Morpho::cSize(sh)
     })
     sh_arr <- abind::abind(coords_l, along = 3)
   } else {
-    sh_arr <- geomorph::arrayspecs(sh_mat, p = p, k = k)
-    #for(i in seq_len(dim(sh_arr)[3])) sh_arr[,,i] <- sh_arr[,,i] / Morpho::cSize(sh_arr[,,i])
+    sh_arr <- sh_originals <- geomorph::arrayspecs(sh_mat, p = p, k = k)
+
   }
 
-  sh_arr_unmodified <- sh_arr
+  if(rescale) {
+    for(i in seq_len(dim(sh_arr)[3])) sh_arr[,,i] <- sh_arr[,,i] / Morpho::cSize(sh_arr[,,i])
+  }
 
   if(rot.models != 0) for(i in seq_len(dim(sh_arr)[3])) {
     sh_arr[,,i] <- spdep::Rotation(sh_arr[,,i], rot.models * 0.0174532925199)
@@ -694,7 +699,7 @@ morphogrid <- function(ordination,
   }
 
 
-  return(list(models_mat = models_mat, models_arr = models_arr, shapemodels = sh_arr_unmodified))
+  return(list(models_mat = models_mat, models_arr = models_arr, shapemodels = sh_originals))
 
 }
 
@@ -1263,10 +1268,14 @@ plot_phenogram <- function(x = NULL,
                            lwd.phylo,
                            lty.phylo,
                            col.phylo,
-                           cex.groups,
-                           pch.groups,
-                           col.groups,
-                           bg.groups,
+                           cex.nodes,
+                           pch.nodes,
+                           col.nodes,
+                           bg.nodes,
+                           cex.tips,
+                           pch.tips,
+                           col.tips,
+                           bg.tips,
                            points) {
 
   for(i in seq_len(nrow(tree$edge))) {
@@ -1277,15 +1286,10 @@ plot_phenogram <- function(x = NULL,
   }
   if(points == TRUE) {
     ntips <- length(tree$tip.label)
-    graphics::points(phyloxy[-c(seq_len(ntips)),], pch = 16)
-
-    if(any(pch.groups %in% c(21:25))) {
-      graphics::points(phyloxy[seq_len(ntips),][rownames(phylo_scores)[seq_len(ntips)],],
-                       bg = bg.groups, pch = pch.groups, cex = cex.groups)
-    } else {
-      graphics::points(phyloxy[seq_len(ntips),][rownames(phylo_scores)[seq_len(ntips)],],
-                       col = col.groups, pch = pch.groups, cex = cex.groups)
-    }
+    plot_biv_scatter(phyloxy[-c(seq_len(ntips)),], bg = bg.nodes, pch = pch.nodes,
+                     cex = cex.nodes, col = col.nodes)
+    plot_biv_scatter(phyloxy[seq_len(ntips),][rownames(phylo_scores)[seq_len(ntips)],],
+                     bg = bg.tips, pch = pch.tips, cex = cex.tips, col = col.tips)
 
   }
 }

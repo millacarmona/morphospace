@@ -341,7 +341,7 @@ build_template2d <- function(image, nlands, ncurves) {
 #' @description Used internally.
 #'
 #' @export
-plot_univ_scatter <- function(scores, density, col, bg, pch, cex, ...) {
+plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1, ...) {
   if(density) {
     dens <- stats::density(scores)
 
@@ -365,7 +365,7 @@ plot_univ_scatter <- function(scores, density, col, bg, pch, cex, ...) {
 #' @description Used internally.
 #'
 #' @export
-plot_biv_scatter <- function(scores, col, bg, pch, cex, ...) {
+plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
   if(any(pch %in% c(21:25))) {
     graphics::points(scores, pch = pch, bg = bg, cex = cex, ...)
   } else {
@@ -381,17 +381,22 @@ plot_biv_scatter <- function(scores, col, bg, pch, cex, ...) {
 #' @description Used internally.
 #'
 #' @export
-density_by_group_2D <- function(groups, scores, ax, alpha) {
-  dens <- lapply(seq_len(nlevels(groups)), function(i) {
-    subdens <- stats::density(scores[groups == levels(groups)[i], ax])
+density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1,
+                                col = seq_len(nlevels(fac))) {
+
+  if(length(col) == 1) col <- rep(col, nlevels(fac))
+  if(length(lty) == 1) lty <- rep(lty, nlevels(fac))
+
+  dens <- lapply(seq_len(nlevels(fac)), function(i) {
+    subdens <- stats::density(xy[fac == levels(fac)[i], ax])
     list(x = subdens$x, y = subdens$y)
   })
   ymax <- max(unlist(lapply(dens, function(x) {x$y})))
 
-  graphics::abline(h = 0)
-  for(i in seq_len(nlevels(groups))) {
-    graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = 2,
-                      col = grDevices::adjustcolor(i, alpha.f = alpha))
+  #graphics::abline(h = 0)
+  for(i in seq_len(nlevels(fac))) {
+    graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
+                      lty = lty[i], col = grDevices::adjustcolor(col[i], alpha.f = alpha))
   }
 }
 
@@ -406,7 +411,7 @@ density_by_group_2D <- function(groups, scores, ax, alpha) {
 plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, drawlabels, alpha) {
   if(display == "contour") {
     graphics::contour(landscape$x, landscape$y, landscape$z, levels = levels,
-                      lwd = lwd, lty = lty, col = cols, labels = round(levels, digits = 3),
+                      lwd = lwd, lty = lty, col = col, labels = round(levels, digits = 3),
                       drawlabels = drawlabels, add = TRUE)
     box()
   }
@@ -414,11 +419,11 @@ plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, 
   if(display == "filled.contour") {
     if(type == "theoretical") {
       graphics::.filled.contour(landscape$x, landscape$y, landscape$z, levels = levels,
-                                col = grDevices::adjustcolor(cols, alpha = alpha))
+                                col = grDevices::adjustcolor(col = col, alpha = alpha))
     }
     if(type == "empirical") {
       graphics::image(landscape$x, landscape$y, landscape$z, add = TRUE,
-                      col = grDevices::adjustcolor(cols, alpha = alpha))
+                      col = grDevices::adjustcolor(col = col, alpha = alpha))
     }
   }
 }
