@@ -684,7 +684,6 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 }
 
 
-
 ##################################################################################
 
 #' Compute shapes from an existing morphospace
@@ -707,14 +706,14 @@ extract_shapes <- function(mspace,
         xrange <- range(mspace$ordination$x[,axis]) * mag
         scores <- seq(xrange[1], xrange[2], length.out = nshapes)
       } else {
-        stop("At least two shapes are necessary to adequately represent variation along an axis")
+        stop("At least two shapes are necessary to represent variation along a PC axis")
       }
     } else {
       axis <- mspace$plotinfo$axes
       if(!is.null(scores)) {
         if(is.null(dim(scores))) scores <- rbind(scores)
       } else {
-        grDevices::X11()
+        if(Sys.info()["sysname"] == "Darwin") grDevices::quartz() else grDevices::x11()
         plot_mspace(mspace)
         scores <- matrix(unlist(graphics::locator(n = nshapes)),
                          nrow = nshapes, ncol = 2, byrow = TRUE)
@@ -722,7 +721,6 @@ extract_shapes <- function(mspace,
       }
     }
   }
-
 
   data2d <- rev_eigen(scores = scores,
                       vectors = mspace$ordination$rotation[,axis],
@@ -733,7 +731,7 @@ extract_shapes <- function(mspace,
                                    p = mspace$plotinfo$p,
                                    k = mspace$plotinfo$k)
 
-    if(keep.template) {
+    if(keep.template & !is.null(mspace$plotinfo$template)) {
       centroid <- matrix(rev_eigen(0, mspace$ordination$rotation[,1], mspace$ordination$center),
                          ncol = mspace$plotinfo$k, byrow = TRUE)
       if(mspace$plotinfo$k == 2) {
@@ -753,7 +751,8 @@ extract_shapes <- function(mspace,
       } else {
         templates <- vector(length = dim(shapes)[3], mode = "list")
         for(i in seq_len(dim(shapes)[3])) {
-          templates[[i]] <- Morpho::tps3d(x = template , refmat = centroid, tarmat = shapes[,,i])
+          templates[[i]] <- Morpho::tps3d(x = mspace$plotinfo$template ,
+                                          refmat = centroid, tarmat = shapes[,,i])
         }
       }
     }
@@ -762,7 +761,7 @@ extract_shapes <- function(mspace,
   }
 
   results <- list(scores = scores, shapes = shapes)
-  if(keep.template & !is.null(templates)) results$templates <- templates
+  if(keep.template & !is.null(mspace$plotinfo$template)) results$templates <- templates
 
   return(invisible((results)))
 }
