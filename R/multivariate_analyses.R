@@ -1,4 +1,4 @@
-########################################################################################
+################################################################################
 
 #' Phylogenetic Principal Component Analysis
 #'
@@ -7,8 +7,8 @@
 #' @param x A matrix with one or more variables as columns and observations as
 #'   rows. Row must be named and match tip labels from the phylogenetic
 #'   \code{tree}.
-#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-#'   should match the row names from \code{x}.
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
+#'   labels should match the row names from \code{x}.
 #' @param corr Logical; whether to use correlation instead of covariance matrix
 #'   as input.
 #' @param ... Further arguments passed to [phytools::phyl.pca()].
@@ -27,16 +27,16 @@
 #'   is independent of phylogenetic structure. However, only the orientation of
 #'   the scores on those axes, and not their variances, reflect this adjustment.
 #'   In other words, orientation of the phylogenetic PC axes are devoid of
-#'   phylogenetic structure, but magnitudes measured in the resulting morphospace
-#'   (e.g. distances, variances) still retain phylogenetic information. Stemming
-#'   from this same fact, the variances computed using phylogenetic scores differ
-#'   from the ones calculated from the phylogenetic eigenvalues (which represent
-#'   the total amount of variance among the taxa after removing covariance
-#'   accounted by phylogeny, although their magnitude depends on the units used
-#'   to measure branch length), and do not necessarily decrease for subordinate
-#'   axes. Also, the set of phylogenetic scores are not uncorrelated, meaning
-#'   they can contain redundant information. For more details, see Polly et al.
-#'   2013.
+#'   phylogenetic structure, but magnitudes measured in the resulting
+#'   morphospace (e.g. distances, variances) still retain phylogenetic
+#'   information. Stemming from this same fact, the variances computed using
+#'   phylogenetic scores differ from the ones calculated from the phylogenetic
+#'   eigenvalues (which represent the total amount of variance among the taxa
+#'   after removing covariance accounted by phylogeny, although their magnitude
+#'   depends on the units used to measure branch length), and do not necessarily
+#'   decrease for subordinate axes. Also, the set of phylogenetic scores are not
+#'   uncorrelated, meaning they can contain redundant information. For more
+#'   details, see Polly et al. 2013.
 #'
 #'
 #' @return A \code{"phy_prcomp"} object formatted following the \code{"prcomp"}
@@ -97,7 +97,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
   center <- colMeans(x)
   totvar <- sum(apply(x, 2, stats::var))
 
-  phypca <- phytools::phyl.pca(Y = x, tree = tree, mode = mode, ...)
+  phypca <- suppressWarnings(phytools::phyl.pca(Y = x, tree = tree, mode = mode, ...))
 
   if(is.null(phypca$lambda)) {
     lambda <- 1
@@ -108,7 +108,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
   C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
   anc <- c(phytools::phyl.vcv(x, C, lambda)$alpha)
 
-  results <- list(sdev = sqrt(phypca$Eval), rotation = phypca$Evec,  x = phypca$S,
+  results <- list(sdev = suppressWarnings(sqrt(phypca$Eval)), rotation = phypca$Evec,  x = phypca$S,
                   center = anc, totvar = totvar)
   if(!is.null(phypca$lambda)) results$lambda <- phypca$lambda
   if(!is.null(phypca$logL)) results$logL <- phypca$logL
@@ -118,8 +118,39 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 
 }
 
+################################################################################
 
-########################################################################################
+#' Phylogenetically Aligned Component Analysis
+#'
+#' @description Performs Phylogenetically Aligned Component Analysis (PACA).
+#'   Experimental.
+#'
+#' @param x A matrix with one or more variables as columns and observations as
+#'   rows. Row must be named and match tip labels from the phylogenetic
+#'   \code{tree}.
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
+#'   labels should match the row names from \code{x}.
+phyalign_comp <- function(x, tree, corr = FALSE) {
+
+  C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
+  anc <- c(phytools::phyl.vcv(x, C, 1)$alpha)
+  z <- t(t(rbind(x)) - anc) # this is Z
+
+  decomp <- svd(C %*% z)
+  vectors <- decomp$v
+  scores <- z %*% vectors
+  values <- decomp$d
+
+  totalRV <- sum(values^2) / (sqrt(sum(diag(t(C) %*% C)) * sum(diag(t(z) %*% z))))
+  partialRVs <- values^2 / (sqrt(sum(diag(t(C) %*% C)) * sum(diag(t(z) %*% z))))
+
+  results <- list(sdev = decomp$v, rotation = vectors,
+                  x = scores, center = anc, RVs = round(partialRVs / totalRV, 3))
+  class(results) <- "phyalign_prcomp"
+  return(results)
+
+}
+################################################################################
 
 #' Between-groups Principal Component Analysis
 #'
@@ -143,7 +174,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #'   context of \code{morphospace} will generally be a series of shapes
 #'   arranged as 2-margin matrix) maximizing variation between groups'
 #'   centroids, and then project the actual observation into the resulting
-#'   synthetic axes. This method is preferred here to LDA/CVA as a way to
+#'   ordination axes. This method is preferred here to LDA/CVA as a way to
 #'   produce ordinations maximizing separation between groups because it avoids
 #'   spherization of shape variation carried out for the former methods.
 #'
@@ -186,15 +217,16 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #' Evolutionary Biology, 46(4), 303-316.
 #'
 #' Cardini, A., & Polly, P. D. (2020). \emph{Cross-validated between group PCA
-#' scatterplots: A solution to spurious group separation?}. Evolutionary Biology,
-#' 47(1), 85-95.
+#' scatterplots: A solution to spurious group separation?}. Evolutionary
+#' Biology, 47(1), 85-95.
 #'
 #' Rohlf, F. J. (2021). \emph{Why clusters and other patterns can seem to be
-#' found in analyses of high-dimensional data}. Evolutionary Biology, 48(1), 1-16.
+#' found in analyses of high-dimensional data}. Evolutionary Biology, 48(1),
+#' 1-16.
 #'
-#' Thioulouse, J., Renaud, S., Dufour, A. B., & Dray, S. (2021). \emph{Overcoming
-#' the spurious groups problem in between-group PCA}. Evolutionary Biology, 48(4),
-#' 458-471.
+#' Thioulouse, J., Renaud, S., Dufour, A. B., & Dray, S. (2021).
+#' \emph{Overcoming the spurious groups problem in between-group PCA}.
+#' Evolutionary Biology, 48(4), 458-471.
 #'
 #' @export
 #'
@@ -291,19 +323,19 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 }
 
 
-########################################################################################
+################################################################################
 
 #' Two-blocks Partial Least Squares
 #'
-#' @description Performs 2B Partial Least Squares allowing for leave-one-out cross-validation
-#'   and removal of phylogenetic covariation (experimental).
+#' @description Performs 2B Partial Least Squares allowing for leave-one-out
+#'   cross-validation and removal of phylogenetic covariation (experimental).
 #'
 #' @param x A matrix with one or more variables as columns and observations as
 #'   rows, representing the first block.
 #' @param y A matrix with one or more variables as columns and observations as
 #'   rows, representing the second block.
-#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-#'   should match the row number and names from \code{x} and \code{y}.
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
+#'   labels should match the row number and names from \code{x} and \code{y}.
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
 #'   scores resulting from LOOCV.
@@ -332,10 +364,10 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'
 #'   The phylogenetic version of [pls2b()] displays the same variational
 #'   properties than phylogenetic PCA (i.e. centering on the phylogenetic mean;
-#'   orientation of scores reflect non-phylogenetic covariation but their variance
-#'   is not scaled and thus contain phylogenetic information; for the latter
-#'   reason, variance of scores and eigenvalues differ; scores are correlated; etc;
-#'   see Polly et al. 2013).
+#'   orientation of scores reflect non-phylogenetic covariation but their
+#'   variance is not scaled and thus contain phylogenetic information; for the
+#'   latter reason, variance of scores and eigenvalues differ; scores are
+#'   correlated; etc; see Polly et al. 2013).
 #'
 #' @return A \code{"pls2b"} or \code{"phy_pls2b"} object, containing:
 #' \itemize{
@@ -388,7 +420,8 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' library(geomorph)
 #' data("tails")
 #'
-#' #extract mean log sizes and shapes for all species, as well as the phylogenetic tree
+#' #extract mean log sizes and shapes for all species, as well as the
+#' #phylogenetic tree
 #' shapes <- tails$shapes
 #' sizes <- log(tails$sizes)
 #' sp_shapes <- expected_shapes(shapes = shapes, x = tails$data$species)
@@ -403,8 +436,8 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' plot(pls$xscores, pls$yscores) #ordination
 #'
 #' #pls_shapes achieves identical results, but it is formatted to be used more
-#' #easily when analyzing shape variables and its output is compatible with other
-#' #functions from morphospace
+#' #easily when analyzing shape variables and its output is compatible with
+#' #other functions from morphospace
 #' pls2 <- pls_shapes(shapes = shapes, X = sizes)
 #'
 #' names(pls2) #the contents of the resulting object
@@ -422,8 +455,8 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'
 #'
 #' #pls_shapes achieves identical results, but it is formatted to be used more
-#' #easily when analyzing shape variables and its output is compatible with other
-#' #functions from morphospace
+#' #easily when analyzing shape variables and its output is compatible with
+#' #other functions from morphospace
 #' ppls2 <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree)
 #'
 #' names(ppls2) #the contents of the resulting object
@@ -558,11 +591,11 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 }
 
 
-########################################################################################
+################################################################################
 
 #' 2B Partial Least Squares for shape data
 #'
-#' @description A wrapper for [pls2b()] aimed specifically at synthesizing
+#' @description A wrapper for [pls2b()] aimed specifically at summarising
 #'   covariation between shape data and other external, non-shape variable(s).
 #'
 #' @param X A matrix with variables as columns and observations as rows,
@@ -570,8 +603,8 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 #'   (corresponding to the first block).
 #' @param shapes Shape data (corresponding to the second block of
 #' \code{pls2b}.
-#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-#'   should match the row number and names from \code{x} and \code{y}.
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
+#'   labels should match the row number and names from \code{x} and \code{y}.
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
 #'   scores resulting from LOOCV.
@@ -626,7 +659,8 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 #' #load data
 #' data("tails")
 #'
-#' #extract shapes and sizes, compute mean shapes and sizes for all species, extract tree
+#' #extract shapes and sizes, compute mean shapes and sizes for all species,
+#' #extract tree
 #' shapes <- tails$shapes
 #' sizes <- log(tails$sizes)
 #' sp_shapes <- expected_shapes(shapes, tails$data$species)
@@ -658,7 +692,8 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 #' plot(ppls$x2, ppls$x) #ordination
 #'
 #' #perform phylogenetic PLS between shape and size with leave-one-out CV
-#' ppls <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree, LOOCV = TRUE)
+#' ppls <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree,
+#'                    LOOCV = TRUE)
 #'
 #' #inspect results
 #' names(ppls) #the contents of the resulting object
@@ -688,20 +723,113 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 }
 
 
-########################################################################################
+################################################################################
 
-#' Calculate percentages of variation accounted by synthetic axes
+# burnaby <- function(x, vars, axmat = NULL, center = NULL) {
+#
+#   if(!is.null(axmat)) {
+#     axmat <- cbind(axmat)
+#   } else {
+#     vars <- cbind(vars)
+#     axmat <- matrix(NA, nrow = ncol(x), ncol = ncol(vars))
+#     for(i in seq_len(ncol(vars))) axmat[, i] <- lm(x ~ vars[,i])[[1]][2,]
+#   }
+#
+#   I <- diag(1, ncol(x))
+#   orthobasis <- I - axmat %*% MASS::ginv(t(axmat) %*% axmat) %*% t(axmat)
+#
+#   if(is.null(center)) center <- colMeans(x)
+#   z <- t(t(rbind(x)) - center)
+#   covmat <- cov(z %*% orthobasis)
+#   values <- eigen(covmat)$values#[1:(ncol(x) - ncol(axmat))]
+#   vectors <- eigen(covmat)$vectors#[, 1:(ncol(x) - ncol(axmat))]
+#   scores <- z %*% vectors
+#
+#   results <- list(x = scores, rotation = vectors,
+#                   center = colMeans(x), sdev = sqrt(values), values = values)
+#   class(results) <- "burnaby"
+#   return(results)
+#
+# }
+burnaby <- function(y, x = NULL, tree = NULL, axmat = NULL) {
+
+  if(is.null(x) & is.null(axmat)) stop("one of x or axmat must be provided")
+
+  if(!is.null(axmat)) {
+    axmat <- cbind(axmat)
+    center <- if(is.null(tree)) colMeans(y) else apply(y, 2, phytools::fastAnc, tree = tree)[1,]
+    if(!is.null(tree)) cat("\naxmat has been provided directly, phylogenetic tree will be ignored")
+  } else {
+    x <- as.data.frame(x)
+
+    if(is.null(rownames(x))) rownames(x) <- seq_len(nrow(x))
+    if(is.null(rownames(y))) rownames(y) <- seq_len(nrow(y))
+    namesx <- rownames(x)
+    namesy <- rownames(y)
+
+    formula <- as.formula(paste("~", paste(colnames(x), collapse = " + ")))
+    designmat <- stats::model.matrix(formula, data = x)
+
+
+    if(!is.null(tree)) {
+
+      if(!all(length(tree$tip.label) == nrow(x), length(tree$tip.label) == nrow(y))) {
+        stop("Number of tips in the tree does not match the number of observations in x and/or y data sets")
+      }
+      if(!all(tree$tip.label %in% namesy, tree$tip.label %in% namesx)) {
+        stop("Names in phylogenetic tree does not match names in x and/or y data sets")
+      } else {
+        x <- cbind(x[tree$tip.label,])
+        y <- cbind(y[tree$tip.label,])
+        designmat <- cbind(designmat[tree$tip.label,])
+      }
+
+      center <- apply(y, 2, phytools::fastAnc, tree = tree)[1,]
+      C <- ape::vcv.phylo(tree)
+      coefs <- solve(t(designmat) %*% solve(C) %*% designmat) %*%
+        t(designmat) %*% solve(C) %*% y
+
+    } else {
+      center <- colMeans(y)
+      coefs <- solve(t(designmat) %*% designmat) %*% t(designmat) %*% y
+    }
+
+    axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))
+
+  }
+
+  I <- diag(1, ncol(y))
+  orthobasis <- I - axmat %*% MASS::ginv(t(axmat) %*% axmat) %*% t(axmat)
+
+  z <- t(t(rbind(y)) - center)
+  covmat <- cov(z %*% orthobasis)
+  values <- eigen(covmat)$values
+  vectors <- eigen(covmat)$vectors
+  scores <- z %*% vectors
+
+  sdev <- suppressWarnings(sqrt(values))
+  sdev[is.nan(sdev)] <- 0
+
+  results <- list(x = scores, rotation = vectors,
+                  center = center, sdev = sdev)
+  class(results) <- "burnaby"
+  return(results)
+
+}
+
+################################################################################
+
+#' Calculate percentages of variation accounted by ordination axes
 #'
 #' @description Calculate the percentage of total original variation accounted
-#'   by syntethtic axes generated by different multivariate ordination methods.
+#'   by axes generated by different multivariate ordination methods.
 #'
 #' @param ordination An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
 #'   \code{"phy_prcomp"}, \code{"pls_shapes"} or \code{"phy_pls_shapes"}
 #'   object).
 #'
 #' @return A table informing the percentages and cumulative percentages of
-#'   original variation accounted by each synthetic axis of the multivariate
-#'   ordination.
+#'   original variation accounted by each ordination axis.
 #'
 #' @export
 #'
@@ -753,3 +881,5 @@ exp_var <- function(ordination) {
   return(tab)
 
 }
+
+
