@@ -870,9 +870,6 @@ plot_morphogrid2d <- function(x = NULL,
         }
       }
     }
-
-    return(invisible(list(xlim = xlim, ylim = ylim)))
-
   }
 }
 
@@ -900,6 +897,8 @@ plot_morphogrid2d <- function(x = NULL,
 #'   (\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"}, \code{"pls_shapes"}
 #'   or \code{"phy_pls_shapes"}).
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
+#' @param rotmat Optional rotation matrix for background shape models. If
+#'   \code{NULL}, the user will be asked to define a preferred orientation.
 #' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
 #'   factors for the width and height of the frame, respectively.
 #' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
@@ -973,6 +972,7 @@ plot_morphogrid3d <- function(x = NULL,
                               links = NULL,
                               ordtype,
                               axes,
+                              rotmat = NULL, ####
                               xlim = NULL,
                               ylim = NULL,
                               xlab = NULL,
@@ -1039,76 +1039,52 @@ plot_morphogrid3d <- function(x = NULL,
     }
   }
 
-
   wd <- tempdir()
   enter <- NULL
-  if(!is.null(template)) {
+  while(is.null(enter)) {
 
-    while(is.null(enter)) {
+    if(!is.null(template)) {
       refmesh <- template
-
+      add <- TRUE
       rgl::plot3d(refmesh, col = bg.models, specular = "black", axes = FALSE, aspect = FALSE,
                   xlab = "", ylab = "", zlab = "", alpha = alpha.models)
+    } else add <- FALSE
 
-      rgl::plot3d(refshape, col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
-                  xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm, add = TRUE)
+    rgl::plot3d(refshape, col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
+                xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm, add = add)
 
-      for(l in seq_len(length(links))) rgl::lines3d(refshape[links[[l]],],
-                                             col = col.models, lwd = lwd.models)
+    for(l in seq_len(length(links))) rgl::lines3d(refshape[links[[l]],],
+                                                  col = col.models, lwd = lwd.models)
 
+    if(is.null(rotmat)) {
       cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close or minimize the rgl device).")
-
       enter <- readline("Press <Enter> in the console to continue:")
-
-      rgl::rgl.snapshot(paste0(wd, "model", dim(morphogrid$models_arr)[3] + 1, ".png"))
-
-      cat("This will take a minute...")
+    } else {
+      enter <- 1
     }
 
-    for(i in seq_len(dim(morphogrid$models_arr)[3])) {
-      modelmesh <- Morpho::tps3d(x = refmesh , refmat = refshape, tarmat = morphogrid$models_arr[,,i])
+    rgl::rgl.snapshot(paste0(wd, "model", dim(morphogrid$models_arr)[3] + 1, ".png"))
 
-      rgl::plot3d(modelmesh, col = bg.models, specular = "black", axes = FALSE, aspect = FALSE,
-                  xlab = "", ylab = "", zlab = "", alpha = alpha.models)
-
-      rgl::plot3d(morphogrid$models_arr[,,i], col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
-                  xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm, add = TRUE)
-
-      for(l in seq_len(length(links))) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
-                                             col = col.models, lwd = lwd.models)
-
-      rgl::rgl.snapshot(paste0(wd, "model", i, ".png"))
-    }
-    cat("\nDONE.")
-
-  } else {
-    while(is.null(enter)) {
-      rgl::plot3d(refshape, col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
-                  xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm)
-
-      for(l in seq_len(length(links))) rgl::lines3d(refshape[links[[l]],],
-                                             col = col.models, lwd = lwd.models)
-
-      cat("Preparing for snapshot: rotate mean shape to the desired orientation\n (don't close or minimize the rgl device).")
-
-      enter <- readline("Press <Enter> in the console to continue:")
-
-      rgl::rgl.snapshot(paste0(wd, "model", dim(morphogrid$models_arr)[3] + 1, ".png"))
-
-    }
-
-    for(i in seq_len(dim(morphogrid$models_arr)[3])) {
-      rgl::plot3d(morphogrid$models_arr[,,i], col = col.ldm, specular = "black",
-                  axes = FALSE, aspect = FALSE, xlab = "", ylab = "", zlab = "",
-                  type = "s", size = cex.ldm)
-
-      for(l in seq_len(length(links))) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
-                                             col = col.models, lwd = lwd.models)
-
-      rgl::rgl.snapshot(paste0(wd, "model", i, ".png"))
-    }
+    cat("This can take a few seconds...")
   }
 
+  for(i in seq_len(dim(morphogrid$models_arr)[3])) {
+
+    if(!is.null(template)) {
+      modelmesh <- Morpho::tps3d(x = refmesh , refmat = refshape, tarmat = morphogrid$models_arr[,,i])
+      rgl::plot3d(modelmesh, col = bg.models, specular = "black", axes = FALSE, aspect = FALSE,
+                  xlab = "", ylab = "", zlab = "", alpha = alpha.models)
+    }
+
+    rgl::plot3d(morphogrid$models_arr[,,i], col = col.ldm, specular = "black", axes = FALSE, aspect = FALSE,
+                xlab = "", ylab = "", zlab = "", type = "s", size = cex.ldm, add = add)
+
+    for(l in seq_len(length(links))) rgl::lines3d(morphogrid$models_arr[,,i][links[[l]],],
+                                                  col = col.models, lwd = lwd.models)
+
+    rgl::rgl.snapshot(paste0(wd, "model", i, ".png"))
+  }
+  cat("\nDONE.")
 
   for(i in seq_len((dim(morphogrid$models_arr)[3] + 1))) {
     model_i <- magick::image_read(paste0(wd, "model", i, ".png"))
@@ -1144,9 +1120,6 @@ plot_morphogrid3d <- function(x = NULL,
       }
     }
   }
-
-  return(invisible(list(xlim = new_xlim, ylim = new_ylim)))
-
 }
 
 
