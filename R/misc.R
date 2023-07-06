@@ -8,8 +8,8 @@
 #' @param links An optional list with the indices of the coordinates defining
 #'   the wireframe (following the format used in \code{Morpho}).
 #' @param mshape Logical; whether to plot the mean configuration.
-#' @param ... Additional arguments passed to [graphics::plot()] or
-#'   [rgl::points3d()].
+#' @param ... Additional arguments passed to [graphics::lines()] or
+#'   [rgl::lines3d()].
 #'
 #' @export
 #'
@@ -50,7 +50,6 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
   dat <- shapes_mat(shapes)
 
   if(dat$datype == "fcoef") {
-    # coords_l <- lapply(1:nrow(dat$data2d), function(i) {
     coords_l <- lapply(seq_len(nrow(dat$data2d)), function(i) {
       inv_efourier(coe = dat$data2d[i,], nb.pts = 300)
     })
@@ -65,18 +64,19 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
   if(dat$datype == "landm") {
 
     if(ncol(shapes_coord) == 2) {
-      plot(longlist, type = "n", axes = FALSE, xlab = "", ylab = "", ...)
+      plot(longlist, type = "n", axes = FALSE, xlab = "", ylab = "")
 
       if(!is.null(links)) {
         for(i in seq_len(dim(shapes_coord)[3])) {
-          for(l in seq_len(length(links))) graphics::lines(shapes_coord[links[[l]],,i], col = "gray")
+          for(l in seq_len(length(links))) graphics::lines(shapes_coord[links[[l]],,i],
+                                                           col = "gray", ...)
         }
       }
 
       graphics::points(longlist, col = "#708095")
 
       if(mshape == TRUE) {
-        graphics::points(expected_shapes(shapes_coord), pch = 16, ...)
+        graphics::points(expected_shapes(shapes_coord), pch = 16)
         if(!is.null(links)) {
           for(l in seq_len(length(links))) graphics::lines(expected_shapes(shapes_coord)[links[[l]],])
         }
@@ -84,7 +84,7 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 
     } else {
       rgl::plot3d(longlist, aspect = FALSE, axes = FALSE, col = "#708095",
-                  xlab = "", ylab = "", zlab = "", size = 5, ...)
+                  xlab = "", ylab = "", zlab = "", size = 5)
 
       if(!is.null(links)) {
         for(i in seq_len(dim(shapes_coord)[3])) {
@@ -104,13 +104,85 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
   } else {
     plot(longlist, axes = FALSE, xlab = "", ylab = "", type = "n")
 
-    for(i in seq_len(dim(shapes_coord)[3])) graphics::lines(shapes_coord[,,i], col = "#708095")
+    for(i in seq_len(dim(shapes_coord)[3])) graphics::lines(shapes_coord[,,i], col = "#708095", ...)
 
     if(mshape == TRUE) {
       graphics::lines(expected_shapes(shapes_coord), lwd = 4)
     }
   }
 
+}
+
+
+################################################################################
+
+#' Build template for 2D shape data
+#'
+#' @description Create a template (i.e. a set of curves describing the structure
+#'   the landmarks are placed upon) to aid morphospace visualization,
+#'   interactively.
+#'
+#' @param image Character; the path to an image of the structure, in png format.
+#' @param nlands Numeric; the number of landmarks to be placed.
+#' @param ncurves Numeric; the number of curves to be drawn.
+#'
+#' @details This functions let the user create a template interactively. The
+#'   user will be first asked to place the landmarks (the same place and order
+#'   than the shape data of interest). Once \code{nland} landmarks have been
+#'   placed, the user will be asked to place the number of curves specified in
+#'   \code{ncurves}; the number of coordinates used to drawn each is arbitrary,
+#'   and is up the user to decide when the curve is ready (press the 'Finish'
+#'   button in the top-right corner of the Plots pane).
+#'
+#' @return A 2-column matrix with the landmark configuration (standardized for
+#'   scale and position) followed by the coordinates defining the curves drawn,
+#'   separated by \code{NA}s.
+#'
+#' @export
+#'
+#' @references
+#' Claude, J. (2008). \emph{Morphometrics with R}. Springer Science & Business
+#' Media, 316.
+#'
+#' @examples
+#' #generate template interactively
+#' \dontrun{
+#' temp <- build_template2d(image = "extdata/sample_wing.jpg", nlands = 9, ncurves = 9)
+#'
+#' plot(temp, type = "n", asp = 1)
+#' points(temp[c(1:9),], col = "red", pch = 16)
+#' points(temp[-c(1:9),], type = "l")
+#' }
+build_template2d <- function(image, nlands, ncurves) {
+
+  if(any(grepl(x = image, pattern = ".jpg"),
+         grepl(x = image, pattern = ".jpeg"),
+         grepl(x = image, pattern = ".JPG"),
+         grepl(x = image, pattern = ".JPEG"))) {ras <- jpeg::readJPEG(image)}
+
+  if(any(grepl(x = image, pattern = ".png"),
+         grepl(x = image, pattern = ".PNG"))) {ras <- png::readPNG(image)}
+
+
+  plot(c(1, dim(ras)[2]), c(1, dim(ras)[1]), type = "n", xlab = "", ylab = "",
+       asp = 1, axes = FALSE)
+  graphics::rasterImage(ras, 1, 1, dim(ras)[2], dim(ras)[1])
+
+  lands <- graphics::locator(nlands, type = "p", pch = 8, col = "white")
+  cat(paste0("Place the ", nlands, " landmarks"))
+
+  curves <- lapply(seq_len(ncurves), function(i) {
+    cat(paste0("\nWhen the ", i,
+               " curve is ready click Finish (top-right corner of Plots pane) or enter <Esc> in the console"))
+    graphics::locator(type = "l", pch = 8, col = i)
+  })
+
+  template <- cbind(c(lands$x, unlist(lapply(curves, function(x) {c(NA, x$x)}))),
+                    c(lands$y, unlist(lapply(curves, function(x) {c(NA, x$y)}))))
+  template_trans <- t(t(rbind(template)) - colMeans(template, na.rm = TRUE))
+  template_trans_scald <- template_trans / Morpho::cSize(template_trans[seq_len(nlands),])
+
+  return(template_trans_scald)
 }
 
 
@@ -161,7 +233,6 @@ hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
                       col = grDevices::adjustcolor(col[i], alpha.f = alpha), lty = lty[i], ...)
   }
 }
-
 
 
 ################################################################################
@@ -258,79 +329,61 @@ hulls_by_group_3D<-function(xyz, fac, col = seq_len(nlevels(fac)), ...) {
     matsp <- xyz[fac == levels(fac)[i], 1:3]
     surf <- t(geometry::convhulln(matsp))
     convex <- rgl::triangles3d(matsp[surf, 1], matsp[surf, 2], matsp[surf, 3], col = col[i], ...)
-    }
+  }
 }
 
 
 ################################################################################
 
-#' Build template for 2D shape data
+#' Plot univariate density distributions for a series of groups
 #'
-#' @description Create a template (i.e. a set of curves describing the structure
-#'   the landmarks are placed upon) to aid morphospace visualization,
-#'   interactively.
+#' @description Plot density distribution for different groups in "univariate"
+#'   scatterplots. Used internally.
 #'
-#' @param image Character; the path to an image of the structure, in png format.
-#' @param nlands Numeric; the number of landmarks to be placed.
-#' @param ncurves Numeric; the number of curves to be drawn.
-#'
-#' @details This functions let the user create a template interactively. The
-#'   user will be first asked to place the landmarks (the same place and order
-#'   than the shape data of interest). Once \code{nland} landmarks have been
-#'   placed, the user will be asked to place the number of curves specified in
-#'   \code{ncurves}; the number of coordinates used to drawn each is arbitrary,
-#'   and is up the user to decide when the curve is ready (press the 'Finish'
-#'   button in the top-right corner of the Plots pane).
-#'
-#' @return A 2-column matrix with the landmark configuration (standardized for
-#'   scale and position) followed by the coordinates defining the curves drawn,
-#'   separated by \code{NA}s.
+#' @param xy Coordinates of the scatterplot.
+#' @param fac A factor grouping data points.
+#' @param ax the axis of \code{xy} corresponding to the active variable.
+#' @param lty A numeric vector indicating the type of line used to draw density
+#'   distributions.
+#' @param alpha Numeric; transparency factor for density distributions.
+#' @param lwd A numeric vector indicating the width of line used to draw density
+#'   distributions.
+#' @param col A vector (either character or numeric) indicating the colors used
+#'   for each group.
 #'
 #' @export
 #'
-#' @references
-#' Claude, J. (2008). \emph{Morphometrics with R}. Springer Science & Business
-#' Media, 316.
-#'
 #' @examples
-#' #generate template interactively
-#' \dontrun{
-#' temp <- build_template2d(image = "extdata/sample_wing.jpg", nlands = 9, ncurves = 9)
+#' #load Fourier data and necessary packages
+#' library(geomorph)
+#' data("shells")
+#' shapes <- shells$shapes$coe
+#' species <- shells$data$species
 #'
-#' plot(temp, type = "n", asp = 1)
-#' points(temp[c(1:9),], col = "red", pch = 16)
-#' points(temp[-c(1:9),], type = "l")
-#' }
-build_template2d <- function(image, nlands, ncurves) {
+#' #perform PCA
+#' pca <- prcomp(shapes)
+#'
+#' #bind 1st axis with a column of 0s, plot and add density distributions
+#' xy <- cbind(pca$x[,1], 0)
+#' plot(xy, ylim = c(0,1))
+#' density_by_group_2D(xy, fac = species, ax = 1)
+density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1,
+                                col = seq_len(nlevels(fac))) {
 
-  if(any(grepl(x = image, pattern = ".jpg"),
-         grepl(x = image, pattern = ".jpeg"),
-         grepl(x = image, pattern = ".JPG"),
-         grepl(x = image, pattern = ".JPEG"))) {ras <- jpeg::readJPEG(image)}
+  if(length(col) == 1) col <- rep(col, nlevels(fac))
+  if(length(lty) == 1) lty <- rep(lty, nlevels(fac))
 
-  if(any(grepl(x = image, pattern = ".png"),
-         grepl(x = image, pattern = ".PNG"))) {ras <- png::readPNG(image)}
-
-
-  plot(c(1, dim(ras)[2]), c(1, dim(ras)[1]), type = "n", xlab = "", ylab = "",
-       asp = 1, axes = FALSE)
-  graphics::rasterImage(ras, 1, 1, dim(ras)[2], dim(ras)[1])
-
-  lands <- graphics::locator(nlands, type = "p", pch = 8, col = "white")
-  cat(paste0("Place the ", nlands, " landmarks"))
-
-  curves <- lapply(seq_len(ncurves), function(i) {
-    cat(paste0("\nWhen the ", i,
-               " curve is ready click Finish (top-right corner of Plots pane) or enter <Esc> in the console"))
-    graphics::locator(type = "l", pch = 8, col = i)
+  dens <- lapply(seq_len(nlevels(fac)), function(i) {
+    subdens <- stats::density(xy[fac == levels(fac)[i], ax])
+    list(x = subdens$x, y = subdens$y)
   })
+  ymax <- max(unlist(lapply(dens, function(x) {x$y})))
 
-  template <- cbind(c(lands$x, unlist(lapply(curves, function(x) {c(NA, x$x)}))),
-                    c(lands$y, unlist(lapply(curves, function(x) {c(NA, x$y)}))))
-  template_trans <- t(t(rbind(template)) - colMeans(template, na.rm = TRUE))
-  template_trans_scald <- template_trans / Morpho::cSize(template_trans[seq_len(nlands),])
 
-  return(template_trans_scald)
+  for(i in seq_len(nlevels(fac))) {
+    graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
+                      lty = lty[i], col = grDevices::adjustcolor(col[i], alpha.f = alpha))
+  }
 }
 
 
@@ -338,7 +391,17 @@ build_template2d <- function(image, nlands, ncurves) {
 
 #' Plot scatterpoints into univariate morphospace
 #'
-#' @description Used internally.
+#' @description An \code{ad hoc} wrapper for [stats::density()] +
+#'   [graphics::polygon()] / [graphics::points()]. Used internally for
+#'   projecting scatterpoints into univariate morphospaces.
+#'
+#' @param scores a matrix of (x,y) coordinates to plot.
+#' @param density Logical; whether to plot density curve.
+#' @param col Numeric; color of the scatterpoints.
+#' @param pch Numeric; symbol of the scatterpoints.
+#' @param bg Numeric; background color for the scatterpoints.
+#' @param cex Numeric; size of the scatterpoints.
+#' @param ... Further arguments passed to [graphics::points()].
 #'
 #' @export
 plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1, ...) {
@@ -362,7 +425,15 @@ plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1
 
 #' Plot scatterpoints into bivariate morphospace
 #'
-#' @description Used internally.
+#' @description An \code{ad hoc} wrapper for [graphics::points()]. Used internally
+#'   for projecting scatterpoints into bivariate morphospaces.
+#'
+#' @param scores a matrix of (x,y) coordinates to plot.
+#' @param col Numeric; color of the scatterpoints.
+#' @param pch Numeric; symbol of the scatterpoints.
+#' @param bg Numeric; background color for the scatterpoints.
+#' @param cex Numeric; size of the scatterpoints.
+#' @param ... Further arguments passed to [graphics::points()].
 #'
 #' @export
 plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
@@ -376,36 +447,23 @@ plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
 ################################################################################
 
-#' Plot univariate density distributions for a series of groups
-#'
-#' @description Used internally.
-#'
-#' @export
-density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1,
-                                col = seq_len(nlevels(fac))) {
-
-  if(length(col) == 1) col <- rep(col, nlevels(fac))
-  if(length(lty) == 1) lty <- rep(lty, nlevels(fac))
-
-  dens <- lapply(seq_len(nlevels(fac)), function(i) {
-    subdens <- stats::density(xy[fac == levels(fac)[i], ax])
-    list(x = subdens$x, y = subdens$y)
-  })
-  ymax <- max(unlist(lapply(dens, function(x) {x$y})))
-
-  #graphics::abline(h = 0)
-  for(i in seq_len(nlevels(fac))) {
-    graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
-                      lty = lty[i], col = grDevices::adjustcolor(col[i], alpha.f = alpha))
-  }
-}
-
-
-################################################################################
-
 #' Plot bivariate landscape into morphospace
 #'
-#' @description Used internally.
+#' @description An \code{ad hoc} wrapper for [graphics::contour()] /
+#'   [graphics::.filled.contour()] /  [graphics::image()]. Used internally for
+#'   projecting landscapes into bivariate morphospaces.
+#'
+#' @param landscape A list containing the results of [akima::interp()].
+#' @param display Either \code{"contour"} or \code{"filled.contour"}.
+#' @param type Type of landscape to be plotted. Options are \code{"theoretical"}
+#'   or \code{"empirical"}.
+#' @param levels Levels to be used to create the contours.
+#' @param lty Numeric; type of the lines depicting contours.
+#' @param lwd Numeric; width of the lines depicting contours.
+#' @param col Colors used to represent the landscape contours.
+#' @param drawlabels Logical; should the labels indicating the value of each
+#'   surface contour be plotted?
+#' @param alpha Transparency factor for filled contours.
 #'
 #' @export
 plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, drawlabels, alpha) {
@@ -431,9 +489,16 @@ plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, 
 
 ################################################################################
 
-#' Plot bivariate landscape into morphospace
+#' Plot univariate landscape into morphospace
 #'
-#' @description Used internally.
+#' @description Plot a curve representing a "univariate" landscape. Used
+#'   internally for projecting landscapes into univariate morphospaces.
+#'
+#' @param landscape A list containing the results of [akima::interp()].
+#' @param drawlabels Logical; should the labels indicating the value of each
+#'   surface contour be plotted?
+#' @param col Colors used to represent the landscape curve.
+#' @param lwd Numeric; width of the lines depicting the landscape curve.
 #'
 #' @export
 plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
