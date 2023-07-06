@@ -14,8 +14,8 @@ representing the external variables that supervise ordination
 \item{shapes}{Shape data (corresponding to the second block of
 \code{pls2b}.}
 
-\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-should match the row number and names from \code{x} and \code{y}.}
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip
+labels should match the row number and names from \code{x} and \code{y}.}
 
 \item{LOOCV}{Logical; whether to apply leave-one-out cross-validation.}
 
@@ -39,7 +39,7 @@ variables in the shape block.}
 }
 }
 \description{
-A wrapper for \code{\link[=pls2b]{pls2b()}} aimed specifically at synthesizing
+A wrapper for \code{\link[=pls2b]{pls2b()}} aimed specifically at summarising
 covariation between shape data and other external, non-shape variable(s).
 }
 \details{
@@ -62,7 +62,8 @@ projection in the resulting ordination as a way to calculate its score).
 #load data
 data("tails")
 
-#extract shapes and sizes, compute mean shapes and sizes for all species, extract tree
+#extract shapes and sizes, compute mean shapes and sizes for all species,
+#extract tree
 shapes <- tails$shapes
 sizes <- log(tails$sizes)
 sp_shapes <- expected_shapes(shapes, tails$data$species)
@@ -94,7 +95,8 @@ exp_var(ppls) #variance explained by each axis
 plot(ppls$x2, ppls$x) #ordination
 
 #perform phylogenetic PLS between shape and size with leave-one-out CV
-ppls <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree, LOOCV = TRUE)
+ppls <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree,
+                   LOOCV = TRUE)
 
 #inspect results
 names(ppls) #the contents of the resulting object

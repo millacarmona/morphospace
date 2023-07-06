@@ -4,41 +4,84 @@
 \alias{proj_phylogeny}
 \title{Project phylogenetic structure into morphospace}
 \usage{
-proj_phylogeny(mspace, tree, pipe = TRUE, ...)
+proj_phylogeny(
+  mspace,
+  shapes = NULL,
+  tree,
+  pipe = TRUE,
+  pch.nodes = 16,
+  col.nodes = "gray",
+  bg.nodes = 1,
+  cex.nodes = 0.8,
+  pch.tips = 16,
+  bg.tips = 1,
+  col.tips = 1,
+  cex.tips = 1,
+  ...
+)
 }
 \arguments{
 \item{mspace}{An \code{"mspace"} object.}
+
+\item{shapes}{Shape data, with 3rd margin names matching tip labels
+from \code{tree}.}
 
 \item{tree}{A \code{"phylo"} object containing a phylogenetic tree.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
-\item{...}{Further arguments passed to \code{\link[graphics:lines]{graphics::lines()}}.}
+\item{pch.nodes}{Numeric; symbol of the scatter points corresponding to the
+nodes of the phylogeny.}
+
+\item{col.nodes}{Color of the hulls/ellipses and/or scatter points
+corresponding to the nodes of the phylogeny.}
+
+\item{bg.nodes}{Background color of the scatter points corresponding to the
+nodes of the phylogeny.}
+
+\item{cex.nodes}{Numeric; size of the scatter points corresponding to the
+nodes of the phylogeny.}
+
+\item{pch.tips}{Numeric; symbol of the scatter points corresponding to the
+tips of the phylogeny.}
+
+\item{bg.tips}{Background color of the scatter points corresponding to the
+tips of the phylogeny.}
+
+\item{col.tips}{Color of the hulls/ellipses and/or scatter points
+corresponding to the tips of the phylogeny.}
+
+\item{cex.tips}{Numeric; size of the scatter points corresponding to the
+tips of the phylogeny.}
+
+\item{...}{Further arguments passed to \code{\link[graphics:lines]{graphics::lines()}} (commonly, \link{pch},
+\link{col}/\link{bg} and \link{cex}.}
 }
 \value{
-If a plot device with a morphospace is open, shapes representing the nodes
-of the phylogenetic tree and lines connecting them and tips are projected into
-morphospace. If \code{pipe = FALSE} scores for nodes and tips of the phylogeny
-are returned invisibly. If \code{pipe = TRUE} the supplied \code{"mspace"}
-object will be modified by adding a new \code{$phylo_scores} and \code{$phylo}
-slots as well as a number of graphical parameters (stored into the
-\code{$plotinfo} slot), and returned invisibly.
+If a plot device with a morphospace is open, shapes representing the
+tips and nodes of the phylogenetic tree, as well as the lines connecting
+them, are projected into morphospace. If \code{pipe = FALSE} scores for
+nodes and tips of the phylogeny are returned invisibly.
+If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified
+by appending a \code{$phylo_Scores} and a \code{$phylo} slots to
+\code{$projected}, as well as by adding some graphical parameters (stored
+into the \code{$plotinfo} slot), and returned invisibly.
 }
 \description{
 Project phylogenetic relationships among a set of shapes
-(representing the consensuses of phylogenetic terminals) into an existing
-bivariate morphospace.
+(representing the tips of a phylogenetic tree) into an existing bivariate
+morphospace.
 }
 \details{
-The purpose of this function is twofold. First, it is meant to transform
-a morphospace into a phylomorphospace by infusing  phylogenetic structure into
-the former. To this end, a \code{$gr_centroids} slot matching the tip labels
-from \code{tree} needs to be present (either upstream in the pipeline or already
-incorporated into an existing \code{"mspace"} object). Second, this function can be
-used to retrieve the scores corresponding to nodes of the phylogenetic tree, which
-can in turn be used to compute the associated shapes using \code{\link[=rev_eigen]{rev_eigen()}}. The
-position of these shapes in morphospace is estimated using the squared-changes
-parsimony algorithm as performed by \code{\link[phytools:fastAnc]{phytools::fastAnc()}}.
+The purpose of this function is twofold. First, it is meant to
+transform a morphospace into a phylomorphospace by projecting node shapes
+and phylogenetic relationships. To this end, a set of named shapes must be
+provided; \code{dim(shapes)[3]} must match \code{tree$tip.labels}. Second,
+this function can be used to retrieve the scores corresponding to nodes of
+the phylogenetic tree (\code{$projected$phylo_scores}, which can then be
+used to compute the node shapes using \code{\link{extract_shapes}}. The
+position of these shapes in morphospace is estimated using the
+squared-changes parsimony algorithm as performed by \code{\link[phytools:fastAnc]{phytools::fastAnc()}}.
 }
 \examples{
 #load and extract relevant data, packages and information
@@ -53,7 +96,7 @@ links <- tails$links
 #generate basic morphospace, add sampled shapes, species mean shapes, and
 #phylogenetic structure
 mspace(shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0) \%>\%
-  proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1, cex = 0.7) \%>\%
-  proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 2) \%>\%
-  proj_phylogeny(tree = tree)
+  proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1,
+              cex = 0.7) \%>\%
+  proj_phylogeny(shapes = sp_shapes, tree = tree)
 }

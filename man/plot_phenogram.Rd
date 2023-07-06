@@ -13,10 +13,14 @@ plot_phenogram(
   lwd.phylo,
   lty.phylo,
   col.phylo,
-  cex.groups,
-  pch.groups,
-  col.groups,
-  bg.groups,
+  cex.nodes,
+  pch.nodes,
+  col.nodes,
+  bg.nodes,
+  cex.tips,
+  pch.tips,
+  col.tips,
+  bg.tips,
   points
 )
 }
@@ -44,8 +48,7 @@ branches.}
 \item{col.phylo}{Numeric; the color of the lines depicting phylogenetic
 branches.}
 
-\item{cex.groups}{Numeric; the size of the scatter points corresponding to
-groups mean shapes.}
+\item{points}{Logical; whether to plot the scatter points.}
 
 \item{pch.groups}{Numeric; the symbol of the scatter points corresponding to
 groups mean shapes.}
@@ -56,7 +59,8 @@ mean shapes.}
 \item{bg.groups}{The background color of the scatter points corresponding
 to groups mean shapes.}
 
-\item{points}{Logical; whether to plot the scatter points.}
+\item{cex.groups}{Numeric; the size of the scatter points corresponding to
+groups mean shapes.}
 }
 \description{
 Plot phenogram using phylogenetic and morphometric information.

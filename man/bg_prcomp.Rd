@@ -58,7 +58,7 @@ bgPCA finds the liner combination of variables (which in the
 context of \code{morphospace} will generally be a series of shapes
 arranged as 2-margin matrix) maximizing variation between groups'
 centroids, and then project the actual observation into the resulting
-synthetic axes. This method is preferred here to LDA/CVA as a way to
+ordination axes. This method is preferred here to LDA/CVA as a way to
 produce ordinations maximizing separation between groups because it avoids
 spherization of shape variation carried out for the former methods.
 
@@ -101,15 +101,16 @@ groups where there are none: spurious patterns from between-group PCA}.
 Evolutionary Biology, 46(4), 303-316.
 
 Cardini, A., & Polly, P. D. (2020). \emph{Cross-validated between group PCA
-scatterplots: A solution to spurious group separation?}. Evolutionary Biology,
-47(1), 85-95.
+scatterplots: A solution to spurious group separation?}. Evolutionary
+Biology, 47(1), 85-95.
 
 Rohlf, F. J. (2021). \emph{Why clusters and other patterns can seem to be
-found in analyses of high-dimensional data}. Evolutionary Biology, 48(1), 1-16.
+found in analyses of high-dimensional data}. Evolutionary Biology, 48(1),
+1-16.
 
-Thioulouse, J., Renaud, S., Dufour, A. B., & Dray, S. (2021). \emph{Overcoming
-the spurious groups problem in between-group PCA}. Evolutionary Biology, 48(4),
-458-471.
+Thioulouse, J., Renaud, S., Dufour, A. B., & Dray, S. (2021).
+\emph{Overcoming the spurious groups problem in between-group PCA}.
+Evolutionary Biology, 48(4), 458-471.
 }
 \seealso{
 \code{\link[stats]{prcomp}}, \code{\link{exp_var}}

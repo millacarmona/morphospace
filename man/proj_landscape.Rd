@@ -6,16 +6,20 @@
 \usage{
 proj_landscape(
   mspace,
+  shapes = NULL,
   FUN = NULL,
   X = NULL,
-  method = "spline",
-  palette = heat.colors,
-  ncols = 50,
-  nlevels = 50,
-  drawlabels = FALSE,
+  linear = FALSE,
+  resolution = 50,
   expand = 1,
+  display = "contour",
+  nlevels = 50,
+  palette = grDevices::heat.colors,
+  alpha = 0.5,
   lwd = 1,
   lty = 1,
+  drawlabels = FALSE,
+  spar = 0.5,
   pipe = TRUE,
   ...
 )
@@ -23,73 +27,99 @@ proj_landscape(
 \arguments{
 \item{mspace}{An \code{"mspace"} object.}
 
-\item{FUN}{A function to be applied to an array of shapes (the background models) along
-its third margin, and returning a single numeric value from each. These values will
-be interpolated to generate the landscape surface.}
+\item{shapes}{Optional shape data. If provided, a landscape will be computed
+for the region of the morphospace encompassing that sample of shapes
+("empirical landscape"). If \code{NULL}, the landscape will be computed for
+the set of background shape models ("theoretical landscape").}
 
-\item{X}{A vector containing the values assigned to each background shape model (vector
-length must match the number of the shape models in the background and have the order).}
+\item{FUN}{An optional \emph{ad hoc} function to be applied to a set of
+shapes, stored in "two-dimensional" format, along its first margin (i.e.
+rows), and returning a single numeric value from each.}
 
-\item{method}{Method used for interpolation; either \code{"linear"} or \code{"spline"}.
-See \code{\link[akima:interp]{akima::interp()}}.}
+\item{X}{An optional vector containing the values assigned to each shape
+(vector length and order must match those from the shapes provided in
+\code{shapes} or from the background shape models, depending on whether or
+not \code{shapes} have been provided).}
 
-\item{palette}{Color palette to use for landscape representation.}
+\item{linear}{Logical; whether to use linear interpolation (if \code{FALSE},
+a cubic spline interpolation is used instead. See \code{\link[akima:interp]{akima::interp()}}.}
 
-\item{ncols}{Number of colors to use for landscape representation.}
+\item{resolution}{Numeric; the resolution used for interpolation.}
 
-\item{nlevels}{Number of levels (i.e. contours) to use in landscape representation.}
+\item{expand}{Numeric; Magnification factor to extend (adjust) the reach of
+the landscape, attained by extrapolating the x, y, and z values. Only
+available for \code{linear = FALSE}.}
 
-\item{drawlabels}{Logical; should the labels indicating the value of each surface contour be plotted?}
+\item{display}{Either \code{"contour"} or \code{"filled.contour"}. For
+bivariate landscapes only.}
 
-\item{expand}{Numeric; Magnification factor to extend (adjust) the reach of the landscape,
-attained by extrapolating the x, y, and z values. Only available for \code{method = "spline"}.}
+\item{nlevels}{Number of levels (i.e. contours) to use for landscape
+representation.}
 
-\item{lwd}{Numeric; width of the lines depicting surface contour.}
+\item{palette}{A function defining a color palette to use for landscape
+representation.}
 
-\item{lty}{Numeric; type of the lines depicting surface contour.}
+\item{alpha}{Numeric; transparency factor for filled contours.}
+
+\item{lwd}{Numeric; width of the lines depicting contours.}
+
+\item{lty}{Numeric; type of the lines depicting contours.}
+
+\item{drawlabels}{Logical; should the labels indicating the value of each
+surface contour be plotted?}
+
+\item{spar}{Numeric; smoothing parameter used to smooth landscape outline in
+univariate representations.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
 \item{...}{Further arguments passed to \code{FUN}.}
 }
 \value{
-If a plot device with a morphospace is open, the landscape surface is projected
-into it as a contour map using \code{\link[akima:interp]{akima::interp()}}. If \code{pipe = FALSE}, a list containing
-the x, y and z values used to plot the landscape (x and z for univariate morphospaces) is
-returned invisibly. If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified
-by adding a new \code{$landsc} slot together with a number of graphical parameters (stored into
-the \code{$plotinfo} slot), and returned invisibly.
+If a plot device with a morphospace is open, the landscape surface is
+projected into it as a contour map using \code{\link[akima:interp]{akima::interp()}}. If
+\code{pipe = FALSE}, a list containing the x, y and z values used to plot
+the landscape (x and z for univariate morphospaces) is returned invisibly.
+If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified
+by appending a \code{$landsc} slot to \code{$projected}, as well as by
+adding some graphical parameters (stored into the \code{$plotinfo} slot),
+and returned invisibly.
 }
 \description{
-Compute and/or project a landscape surface over an existing morphospace.
-Experimental.
+Compute and project a landscape surface as a contour map over an
+existing morphospace.
 }
 \details{
-The purpose of this function is to generate and depict a 2- (for univariate morphospaces)
-or 3-dimensonal (for bivariate morphospaces) surface (i.e. a landscape), interpolated from values
-assigned to the set of background shape models of an existing morphospace created using
-\code{\link{mspace}}. Generally, these values will represent a variable measuring functional
-performance (although it can be any kind of continuous variable), and can be either provided
-directly through the \code{X} argument in a two-steps procedure or computed automatically using
-an \emph{ad hoc} function through the \code{FUN} argument.
+The purpose of this function is to generate and depict a 2- (for
+univariate morphospaces) or 3-dimensonal (for bivariate morphospaces)
+surface (i.e. a landscape), interpolated from values assigned to the set of
+shapes projected into an existing morphospace. These can be a sample of
+shapes specified by the user, producing a surface for a specific region of
+the morphospace ("empirical landscapes"). Alternatively, the set of
+background shape models can be used to generate a surface for the entire
+observed morphospace ("theoretical morphospace"). Generally, the values
+that are interpolated will represent a variable measuring functional
+performance (although it can be any kind of continuous variable), and can
+be either provided directly through the \code{X} argument or computed
+automatically using an \emph{ad hoc} function through the \code{FUN}
+argument.
 
-If the \code{FUN} argument is used, the function provided must include a \code{model}
-argument feeding the \emph{ad hoc} function with a single shape, and return a single numeric
-value computed for or from that shape. If the \code{X} argument is used instead, values
-should be provided in the same order than the background shape models are plotted (i.e. from
-left to right and from bottom to top; see \code{\link{morphogrid}}, \code{\link{plot_morphogrid2d}}
-and \code{\link{plot_morphogrid3d}}). The latter alternative can be useful when importing
-variables from other software or pipelines, but the background shape models used to compute the
-vector feeding \code{X} in the first step must the same used to depict the morphospace in the
-second step (otherwise, the shapes in the background won't match the landscape surface projected
-over them). See examples below.
+If the \code{FUN} argument is used, the function supplied must include a
+\code{model} argument feeding the \emph{ad hoc} function with a single
+shape (stored as a vector of shape descriptors), and return a single
+numeric value computed for or from that shape. If the \code{X} argument is
+used instead, values should be in the same order than the shapes provided
+in \code{shapes}, or than the background shape models (i.e. from left to
+right and from bottom to top; see \code{\link{morphogrid}},
+\code{\link{plot_morphogrid2d}} and \code{\link{plot_morphogrid3d}}) if
+\code{shapes = NULL}. Otherwise, landscape topography will be dissociated
+from the shapes represented in the morphospace. See examples below.
 
-Because the landscape surface is generated for a specific set of background shape models,
-regenerating the former using \code{\link{plot_mspace}} is only possible if the new axes being
-depicted are the same than those used for computing the surface landscape originally through
-\code{\link{mspace}} + \code{\link{proj_landscape}}. The only exception is when one of the original
-axes is dropped, which will result in a the collapse of the 3D landscape projected into a bivariate
-morphospace into a 2D landscape projected into a univariate one.
+Directly providing the values to be interpolated using \code{X} can be
+useful when importing variables obtained using other software or pipelines.
+If the user desires to compute those variables for the background shape
+models, they can be extracted using \code{\link{extract_shapes}}) prior to
+exporting or feeding them to their preferred analytical protocol.
 }
 \examples{
 #load data and packages
@@ -100,6 +130,7 @@ library(Momocs)
 data("tails")
 shapes <- tails$shapes
 links <- tails$links
+type <- tails$data$type
 
 
 #Compute and plot adaptive landscape for wing tail shape:
@@ -109,14 +140,14 @@ links <- tails$links
 #a function to compute lift/drag ratio on tail shape:
 computeLD <- function(model, MCS = FALSE) {
 
-  tail <- model
+  tail <- matrix(model, ncol = 2, byrow = TRUE)
   Ax <- tail[9, 1] ; Ay <- tail[9, 2]
   Bx <- tail[5, 1] ; By <- tail[5, 2]
   X <- tail[7, 1] ; Y <- tail[7, 2]
 
-  # determine position of the tip of the inner rectrix relative to the tips of
-  # the outermost rectrices (positive: anterior to the ORT; negative: posterior
-  # to the ORT)
+  # determine position of the tip of the inner rectrix relative to the tips
+  # of the outermost rectrices (positive: anterior to the ORT; negative:
+  # posterior to the ORT)
   tip_pos1 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
 
   # do the same but for the inner outer rectrices
@@ -124,28 +155,28 @@ computeLD <- function(model, MCS = FALSE) {
   Bx <- tail[6, 1] ; By <- tail[6, 2]
   X <- tail[7, 1] ; Y <- tail[7, 2]
 
-  # determine position of the tip of the inner rectrix relative to the tips of
-  # the outermost rectrices (positive: anterior to the ORT; negative: posterior
-  # to the ORT)
+  # determine position of the tip of the inner rectrix relative to the tips
+  # of the outermost rectrices (positive: anterior to the ORT; negative:
+  # posterior to the ORT)
   tip_pos2 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
 
   # compute the area of the polygon representing the whole tail
   tail_area <- coo_area(tail[c(1, 3, 5, 6, 7, 8, 9, 4, 2, 1), ])
 
 
-  # if posterior, compute MCS as the distance between the ORTs, and the lifting
-  # area as the polygon enclosed by the ORTs and tail base
+  # if posterior, compute MCS as the distance between the ORTs, and the
+  # lifting area as the polygon enclosed by the ORTs and tail base
   if(tip_pos1 == -1) {
     mcs <- dist(rbind(tail[5, ], tail[9, ]))
     lifting_area <- coo_area(tail[c(1, 3, 5, 9, 4, 2, 1),])
   }
 
-  # if anterior, find the maximum continuous span as the line perpendicular to
-  # the saggital axis that intersects the ORTs and the IRT
+  # if anterior, find the maximum continuous span as the line perpendicular
+  # to the saggital axis that intersects the ORTs and the IRT
   if(tip_pos1 == 1 & tip_pos2 == 1) {
 
-    # center tail around the IRT and set MCS as a vertical line passing through
-    # the origin
+    # center tail around the IRT and set MCS as a vertical line passing
+    # through the origin
     tail_cent <- cbind(tail[, 1] - tail[7, 1],
                        tail[, 2] - tail[7, 2])
     mcs_vec <- c(0,10e10)
@@ -178,12 +209,12 @@ computeLD <- function(model, MCS = FALSE) {
 
   }
 
-  # if anterior, find the maximum continuous span as the line perpendicular to
-  # the saggital axis that intersects the ORTs and the IRT
+  # if anterior, find the maximum continuous span as the line perpendicular
+  # to the saggital axis that intersects the ORTs and the IRT
   if(tip_pos1 == 1 & tip_pos2 == -1) {
 
-    # center tail around the IRT and set MCS as a vertical line passing through
-    # the origin
+    # center tail around the IRT and set MCS as a vertical line passing
+    # through the origin
     tail_cent <- cbind(tail[, 1] - mean(tail[6, 1], tail[8, 1]),
                        tail[, 2] - mean(tail[6, 2], tail[8, 2]))
     mcs_vec <- c(0,10e10)
@@ -224,37 +255,70 @@ computeLD <- function(model, MCS = FALSE) {
 
 }
 
-#plot morphospace with its associated adaptive landscape
-mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0) \%>\%
-  proj_shapes(shapes, pch = 16) \%>\%
-  proj_landscape(nlevels = 60, ncols = 60, FUN = computeLD, expand = 1.2)
+###"Theoretical" landscapes
 
+#plot morphospace with its associated adaptive landscape
+mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+       cex.ldm = 0) \%>\%
+  proj_shapes(shapes, pch = 16) \%>\%
+  proj_landscape(nlevels = 60, FUN = computeLD, expand = 1.2, lwd = 2)
 
 ##Using the X argument
 
-#first, create morphospace and extract background shapes
-msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0)
-shapemodels <- msp$plotinfo$shapemodels$models_arr
+#first, create morphospace and extract background shapes without plotting
+msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+              cex.ldm = 0, plot = FALSE)
+shapemodels2d <- two.d.array(extract_shapes(msp)$shapes)
 
-#run computeLD (defined above) through the array of shapes models (this is the
-#same thing the proj_landscape function is doing internally when FUN is used, but
-#this vector could be replaced with some other variable obtained in a different way)
-LDs <- apply(X = shapemodels, FUN = computeLD, MARGIN = 3)
+#run computeLD (defined above) through the "two-dimensional" matrix of shapes
+#models (this is the same thing the proj_landscape function is doing
+#internally when FUN is used, but this vector could be replaced with some
+#other variable obtained in a different way)
+LDs <- apply(X = shapemodels2d, FUN = computeLD, MARGIN = 1)
 
 #second, plot morphospace with its associated adaptive landscape
-mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0) \%>\%
+msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+              cex.ldm = 0) \%>\%
   proj_shapes(shapes, pch = 16) \%>\%
-  proj_landscape(nlevels = 60, ncols = 60, X = LDs, expand = 1.2)
+  proj_landscape(nlevels = 20, X = LDs, expand = 1.2,
+                 palette = terrain.colors, display = "filled.contour")
+
+#add scalebar using plot_mspace()
+plot_mspace(msp, scalebar = TRUE)
 
 #be careful to use the same morphospaces in the second and first steps.
 #For example, retaining the LD values computed above but changing the axes
-#represented by mspace will result in the same surface wrongly being projected
-#over a different morphospace!
-mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5, cex.ldm = 0, axes = c(2,3)) \%>\%
+#represented by mspace will result in the same surface wrongly being
+#projected over a different morphospace!
+mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+       cex.ldm = 0, axes = c(2,3)) \%>\%
   proj_shapes(shapes, pch = 16) \%>\%
-  proj_landscape(nlevels = 60, ncols = 60, X = LDs, expand = 1.2)
+  proj_landscape(nlevels = 20, X = LDs, expand = 1.2,
+                 palette = terrain.colors, display = "filled.contour")
+
+###"Empirical" landscapes
+
+#it is essentially the same, but providing a set of shapes with the shapes
+#argument of proj_landscape. Let's compute it it only for Tyrannus species with
+#non-deep forked tail shapes:
+mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+       cex.ldm = 0) \%>\%
+  proj_shapes(shapes, pch = 16) \%>\%
+  proj_landscape(shapes = shapes[,,type == "NDF"], nlevels = 20, linear = TRUE,
+                 FUN = computeLD, expand = 1.2, display = "filled.contour")
+
+#in this case, the resolution of the projected surface can be improved using
+#the argument resolution (however, be aware this can be computationally intense!
+#especially if a theoretical landscape is being computed)
+mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+       cex.ldm = 0) \%>\%
+  proj_shapes(shapes, pch = 16) \%>\%
+  proj_landscape(shapes = shapes[,,type == "NDF"], nlevels = 20, linear = TRUE,
+                 resolution = 200, FUN = computeLD, expand = 1.2,
+                 display = "filled.contour")
 }
 \seealso{
-\code{\link{morphogrid}}, \code{\link{mspace}}, \code{\link{plot_morphogrid2d}},
-\code{\link{plot_morphogrid3d}}
+\code{\link{morphogrid}}, \code{\link{mspace}},
+\code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}},
+\code{\link{extract_shapes}}
 }

@@ -11,8 +11,8 @@ phy_prcomp(x, tree, corr = FALSE, ...)
 rows. Row must be named and match tip labels from the phylogenetic
 \code{tree}.}
 
-\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-should match the row names from \code{x}.}
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip
+labels should match the row names from \code{x}.}
 
 \item{corr}{Logical; whether to use correlation instead of covariance matrix
 as input.}
@@ -53,16 +53,16 @@ eigenvectors and eigenvalues have been constructed using covariation that
 is independent of phylogenetic structure. However, only the orientation of
 the scores on those axes, and not their variances, reflect this adjustment.
 In other words, orientation of the phylogenetic PC axes are devoid of
-phylogenetic structure, but magnitudes measured in the resulting morphospace
-(e.g. distances, variances) still retain phylogenetic information. Stemming
-from this same fact, the variances computed using phylogenetic scores differ
-from the ones calculated from the phylogenetic eigenvalues (which represent
-the total amount of variance among the taxa after removing covariance
-accounted by phylogeny, although their magnitude depends on the units used
-to measure branch length), and do not necessarily decrease for subordinate
-axes. Also, the set of phylogenetic scores are not uncorrelated, meaning
-they can contain redundant information. For more details, see Polly et al.
-2013.
+phylogenetic structure, but magnitudes measured in the resulting
+morphospace (e.g. distances, variances) still retain phylogenetic
+information. Stemming from this same fact, the variances computed using
+phylogenetic scores differ from the ones calculated from the phylogenetic
+eigenvalues (which represent the total amount of variance among the taxa
+after removing covariance accounted by phylogeny, although their magnitude
+depends on the units used to measure branch length), and do not necessarily
+decrease for subordinate axes. Also, the set of phylogenetic scores are not
+uncorrelated, meaning they can contain redundant information. For more
+details, see Polly et al. 2013.
 }
 \examples{
 #load data and packages

@@ -22,7 +22,8 @@ ellipses_by_group_2D(
 \item{col}{A vector (either character or numeric) indicating the colors used
 for each group.}
 
-\item{lty}{A numeric vector indicating the type of line used to draw ellipses.}
+\item{lty}{A numeric vector indicating the type of line used to draw
+ellipses.}
 
 \item{conflev}{Numeric, specifying the confidence level for drawing ellipses.}
 
@@ -32,7 +33,8 @@ for each group.}
 }
 \description{
 Plot confidence ellipses for different groups in 2D scatterplots
-created using the generic \code{\link[graphics:plot.default]{graphics::plot()}} function. Used internally (mostly).
+created using the generic \code{\link[graphics:plot.default]{graphics::plot()}} function. Used internally
+(mostly).
 }
 \examples{
 #load landmark data and necessary packages

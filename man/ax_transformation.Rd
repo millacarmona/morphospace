@@ -9,7 +9,8 @@ ax_transformation(obj, axis = 1, mag = 1)
 \arguments{
 \item{obj}{An object containing either a multivariate ordination of class
 \code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes"} or
-\code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using \code{\link[stats:lm]{stats::lm()}}.}
+\code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using
+\code{\link[stats:lm]{stats::lm()}}.}
 
 \item{axis}{An optional numeric value specifying the axis of the multivariate
 ordination which is to be represented.}
@@ -27,9 +28,9 @@ the extremes of a morphometric axis, which can be supplied as an object
 containing a linear model or a multivariate ordination analysis.
 }
 \details{
-If an object of class \code{"mlm"} fitting shape to a factor (only two
-levels allowed) is supplied in \code{obj}, magnification of the axis range
-is attained through bgPCA.
+If an object of class \code{"mlm"} fitting shape to a factor (only
+two levels allowed) is supplied in \code{obj}, magnification of the axis
+range is attained through bgPCA.
 }
 \examples{
 #load tail data and packages
@@ -54,13 +55,15 @@ extshapes2d <- ax_transformation(obj = pca, axis = 2, mag = 2)
 extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 pile_shapes(extshapes, links = links, mshape = FALSE)
 
-#perform lm of shape on size, compute and plot extreme shapes at its natural range
+#perform lm of shape on size, compute and plot extreme shapes at its natural
+#range
 model <- lm(two.d.array(tails$shapes) ~ log(tails$sizes))
 extshapes2d <- ax_transformation(obj = model, mag = 1)
 extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 pile_shapes(extshapes, links = links, mshape = FALSE)
 
-#perform lm of shape on size, compute and plot extreme shapes at its natural range
+#perform lm of shape on size, compute and plot extreme shapes at its natural
+#range
 model <- lm(two.d.array(tails$shapes) ~ tails$data$sex)
 extshapes2d <- ax_transformation(obj = model, mag = 1)
 extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))

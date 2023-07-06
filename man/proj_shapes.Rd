@@ -19,20 +19,21 @@ proj_shapes(mspace, shapes, density = TRUE, pipe = TRUE, ...)
 \item{...}{Further arguments passed to \code{\link[graphics:points]{graphics::points()}}.}
 }
 \value{
-If a plot device with a morphospace is open, shapes feeded to
+If a plot device with a morphospace is open, shapes fed to
 \code{shapes} are projected into morphospace. If \code{pipe = FALSE}
 those scores are returned invisibly. If \code{pipe = TRUE} the supplied
-\code{"mspace"} object will be modified by replacing the original
-\code{$x} slot as well as adding some graphical parameters (stored into
-the \code{$plotinfo} slot), and returned invisibly.
+\code{"mspace"} object will be modified by appending a \code{$scores} slot
+to \code{$projected} and adding some graphical parameters (stored into the
+\code{$plotinfo} slot), and returned invisibly.
 }
 \description{
-Project a set of shapes into an existing morphospace.
+Project a set of shapes as scatterpoints into an existing
+morphospace.
 }
 \details{
-The purpose of this function is to maintain morphospace
-generation and sample representation as independent affairs, and
-to add flexibility to graphical representation of scatter points.
+The purpose of this function is to maintain morphospace building
+and sample representation as separated steps, as well as to add flexibility
+to graphical representation of scatterpoints.
 }
 \examples{
 #load and extract relevant data, packages and information

@@ -4,7 +4,13 @@
 \alias{expected_shapes}
 \title{Compute mean/expected shape(s)}
 \usage{
-expected_shapes(shapes, x = NULL, xvalue = NULL, tree = NULL)
+expected_shapes(
+  shapes,
+  x = NULL,
+  xvalue = NULL,
+  tree = NULL,
+  returnarray = TRUE
+)
 }
 \arguments{
 \item{shapes}{Shape data.}
@@ -17,25 +23,31 @@ the entire sample is computed.}
 which calculate expected shape(s). If \code{NULL}, all the value(s) or
 level(s) are used.}
 
-\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-should match names in \code{x} and \code{shapes}.}
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip
+labels should match names in \code{x} and \code{shapes}.}
+
+\item{returnarray}{Logical, indicating whether shapes should be returned
+in "3D" array format (landmark shapes only). Mostly intended for internal
+use.}
 }
 \value{
 For landmark data, either a \code{p x k} matrix defining a single
-mean shape or a \code{p x k x n} array containing \code{n} mean shapes.
-For Fourier data, a \code{n x (4 x nb.h)} matrix of Fourier coefficients
-(with \code{nb.h} being the number of harmonics used during elliptic Fourier
-analysis).
+mean shape or a \code{p x k x n} array containing \code{n} mean shapes,
+unless \code{returnarray = TRUE} (in which case a \code{n x (p x k)} matrix
+will be returned. For Fourier data, a \code{n x (4 x nb.h)} matrix of
+Fourier coefficients (with \code{nb.h} being the number of harmonics used
+during elliptic Fourier analysis).
 }
 \description{
 Compute the mean shape from the entire sample, or the shape(s)
-expected for one or more levels (factors) or values (numerics) of an external
-explanatory variable as fitted by a linear model.
+expected for one or more levels (factors) or values (numerics) of an
+external explanatory variable as fitted by a linear model.
 }
 \details{
 If a phylogenetic tree is supplied for interspecific shape data, the
-procedure is performed using the phylogenetically-corrected regression coefficients
-(see Revell, 2009) assuming a Brownian motion model of evolution.
+procedure is performed using the phylogenetically-corrected regression
+coefficients (see Revell, 2009) assuming a Brownian Motion model of
+evolution.
 }
 \examples{
 #load tails data and packages
@@ -53,39 +65,41 @@ mshape <- expected_shapes(shapes)
 plot(mshape)
 lineplot(mshape, tails$links)
 
-#getting mean shapes for the levels of a factor: compute and plot the mean shape
-#of each of the 13 species
+#getting mean shapes for the levels of a factor: compute and plot the mean
+#shape of each of the 13 species
 sp_shapes <- expected_shapes(shapes, x = species)
 pile_shapes(sp_shapes, links = tails$links, mshape = FALSE)
 
-#getting the mean shape for a specific level of a factor: compute and plot the
-#mean shape of deep-forked specimens
+#getting the mean shape for a specific level of a factor: compute and plot
+#the mean shape of deep-forked specimens
 df_shape <- expected_shapes(shapes, x = type, xvalue = "DF")
 plot(df_shape)
 lineplot(df_shape, tails$links)
 
-#getting the mean shape for a specific level of a factor, correcting for phylogeny:
-#compute and plot mean the shape of deep-forked species
+#getting the mean shape for a specific level of a factor, correcting for
+#phylogeny: compute and plot mean the shape of deep-forked species
 sp_type <- factor(c(tapply(as.character(type), species, unique)))
-df_sp_shape <- expected_shapes(sp_shapes, x = sp_type, xvalue = "DF", tree = tree)
+df_sp_shape <- expected_shapes(sp_shapes, x = sp_type, xvalue = "DF",
+                               tree = tree)
 plot(df_sp_shape)
 lineplot(df_sp_shape, tails$links)
 
-#getting the shapes expected for a covariate: compute and plot the shapes expected
-#under the linear regression size on of shape
+#getting the shapes expected for a covariate: compute and plot the shapes
+#expected under the linear regression size on of shape
 exp_shapes <- expected_shapes(shapes, x = sizes)
 pile_shapes(exp_shapes, links = tails$links, mshape = FALSE)
 
-#getting the shape expected for specific values of a covariate: compute and plot the
-#shapes expected at the maximum size
+#getting the shape expected for specific values of a covariate: compute and
+#plot the shapes expected at the maximum size
 large_shape <- expected_shapes(shapes, x = sizes, xvalue = max(sizes))
 plot(large_shape)
 lineplot(large_shape, tails$links)
 
-#getting the shape expected for specific values of a covariate, correcting for phylogeny:
-#compute and plot the shapes expected at the maximum size
+#getting the shape expected for specific values of a covariate, correcting
+#for phylogeny: compute and plot the shapes expected at the maximum size
 sp_sizes <- c(tapply(sizes, species, mean))
-large_sp_shape <- expected_shapes(sp_shapes, x = sp_sizes, xvalue = max(sp_sizes), tree = tree)
+large_sp_shape <- expected_shapes(sp_shapes, x = sp_sizes,
+                                  xvalue = max(sp_sizes), tree = tree)
 plot(large_sp_shape)
 lineplot(large_sp_shape, tails$links)
 
@@ -103,7 +117,8 @@ sp_shapes <- expected_shapes(shapes, x = shells$data$species)
 pile_shapes(sp_shapes, mshape = FALSE)
 
 #mean shape of P. esbelta
-esbelta_shape <- expected_shapes(shapes, x = shells$data$species, xvalue = "esbelta")
+esbelta_shape <- expected_shapes(shapes, x = shells$data$species,
+                                 xvalue = "esbelta")
 plot(inv_efourier(esbelta_shape, nb.pts = 200), type = "l")
 
 #shapes expected by the linear regression of size on shape
@@ -111,10 +126,12 @@ exp_shapes <- expected_shapes(shapes, x = shells$sizes)
 pile_shapes(exp_shapes, mshape = FALSE)
 
 #shapes expected at the minimum size
-large_shape <- expected_shapes(shapes, x = shells$sizes, xvalue = min(shells$sizes))
+large_shape <- expected_shapes(shapes, x = shells$sizes,
+                               xvalue = min(shells$sizes))
 plot(inv_efourier(large_shape, nb.pts = 200), type = "l")
 }
 \references{
-Revell, L. J. (2009). \emph{Size-correction and principal components
-for interspecific comparative studies}. Evolution, 63, 3258-3268.
+Revell, L. J. (2009). \emph{Size-correction and principal
+components for interspecific comparative studies}. Evolution, 63,
+3258-3268.
 }

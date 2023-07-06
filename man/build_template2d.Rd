@@ -14,22 +14,23 @@ build_template2d(image, nlands, ncurves)
 \item{ncurves}{Numeric; the number of curves to be drawn.}
 }
 \value{
-A 2-column matrix with the landmark configuration (standardized for scale
-and position) followed by the coordinates defining the curves drawn, separated by
-\code{NA}s.
+A 2-column matrix with the landmark configuration (standardized for
+scale and position) followed by the coordinates defining the curves drawn,
+separated by \code{NA}s.
 }
 \description{
 Create a template (i.e. a set of curves describing the structure
-the landmarks are placed upon) to aid morphospace visualization, interactively.
+the landmarks are placed upon) to aid morphospace visualization,
+interactively.
 }
 \details{
-This functions let the user create a template interactively. The user
-will be first asked to place the landmarks (the same place and order than the
-shape data of interest). Once \code{nland} landmarks have been placed, the
-user will be asked to place the number of curves specified in \code{ncurves};
-the number of coordinates used to drawn each is arbitrary, and is up the user
-to decide when the curve is ready (press the 'Finish' button in the top-right
-corner of the Plots pane).
+This functions let the user create a template interactively. The
+user will be first asked to place the landmarks (the same place and order
+than the shape data of interest). Once \code{nland} landmarks have been
+placed, the user will be asked to place the number of curves specified in
+\code{ncurves}; the number of coordinates used to drawn each is arbitrary,
+and is up the user to decide when the curve is ready (press the 'Finish'
+button in the top-right corner of the Plots pane).
 }
 \examples{
 #generate template interactively
@@ -42,6 +43,6 @@ points(temp[-c(1:9),], type = "l")
 }
 }
 \references{
-Claude, J. (2008). \emph{Morphometrics with R}. Springer Science & Business Media,
-316.
+Claude, J. (2008). \emph{Morphometrics with R}. Springer Science & Business
+Media, 316.
 }

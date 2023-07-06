@@ -13,8 +13,8 @@ rows, representing the first block.}
 \item{y}{A matrix with one or more variables as columns and observations as
 rows, representing the second block.}
 
-\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-should match the row number and names from \code{x} and \code{y}.}
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip
+labels should match the row number and names from \code{x} and \code{y}.}
 
 \item{LOOCV}{Logical; whether to apply leave-one-out cross-validation.}
 
@@ -43,8 +43,8 @@ variables from the second block.}
 }
 }
 \description{
-Performs 2B Partial Least Squares allowing for leave-one-out cross-validation
-and removal of phylogenetic covariation (experimental).
+Performs 2B Partial Least Squares allowing for leave-one-out
+cross-validation and removal of phylogenetic covariation (experimental).
 }
 \details{
 Starting with two blocks of variables measured for the same
@@ -70,17 +70,18 @@ equivalent to setting \code{method = "BM"} in \code{\link[phytools:phyl.pca]{phy
 
 The phylogenetic version of \code{\link[=pls2b]{pls2b()}} displays the same variational
 properties than phylogenetic PCA (i.e. centering on the phylogenetic mean;
-orientation of scores reflect non-phylogenetic covariation but their variance
-is not scaled and thus contain phylogenetic information; for the latter
-reason, variance of scores and eigenvalues differ; scores are correlated; etc;
-see Polly et al. 2013).
+orientation of scores reflect non-phylogenetic covariation but their
+variance is not scaled and thus contain phylogenetic information; for the
+latter reason, variance of scores and eigenvalues differ; scores are
+correlated; etc; see Polly et al. 2013).
 }
 \examples{
 #load data and packages
 library(geomorph)
 data("tails")
 
-#extract mean log sizes and shapes for all species, as well as the phylogenetic tree
+#extract mean log sizes and shapes for all species, as well as the
+#phylogenetic tree
 shapes <- tails$shapes
 sizes <- log(tails$sizes)
 sp_shapes <- expected_shapes(shapes = shapes, x = tails$data$species)
@@ -95,8 +96,8 @@ names(pls) #the contents of the resulting object
 plot(pls$xscores, pls$yscores) #ordination
 
 #pls_shapes achieves identical results, but it is formatted to be used more
-#easily when analyzing shape variables and its output is compatible with other
-#functions from morphospace
+#easily when analyzing shape variables and its output is compatible with
+#other functions from morphospace
 pls2 <- pls_shapes(shapes = shapes, X = sizes)
 
 names(pls2) #the contents of the resulting object
@@ -114,8 +115,8 @@ plot(ppls$xscores, ppls$yscores) #ordination
 
 
 #pls_shapes achieves identical results, but it is formatted to be used more
-#easily when analyzing shape variables and its output is compatible with other
-#functions from morphospace
+#easily when analyzing shape variables and its output is compatible with
+#other functions from morphospace
 ppls2 <- pls_shapes(shapes = sp_shapes, X = sp_sizes, tree = tree)
 
 names(ppls2) #the contents of the resulting object

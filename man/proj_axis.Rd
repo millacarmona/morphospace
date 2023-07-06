@@ -4,54 +4,59 @@
 \alias{proj_axis}
 \title{Project a morphometric axis into morphospace}
 \usage{
-proj_axis(mspace, obj, axis = 1, mag = 1, pipe = TRUE, ...)
+proj_axis(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...)
 }
 \arguments{
 \item{mspace}{An \code{"mspace"} object.}
 
 \item{obj}{An object containing either a multivariate ordination of class
-\code{"prcomp", "bg_prcomp", "phy_prcomp"} or \code{"pls_shape"} or a
+\code{"prcomp", "bg_prcomp", "phy_prcomp"} or \code{"pls_shape"}, or a
 \code{"mlm"} object fitted using \code{\link[stats:lm]{stats::lm()}}.}
 
-\item{axis}{An optional vector indicating the axis from \code{obj} to be
-projected.}
+\item{axis}{Optional; which axis from \code{obj} should to be projected?}
 
 \item{mag}{Numeric; magnifying factor for representing shape transformation.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
-\item{...}{Further arguments passed to \code{\link[graphics:lines]{graphics::lines()}}.}
+\item{type}{Integer; type of arrows (\link{0} = no arrow; \link{1} = pointing towards
+the maximum; \link{2} = pointing towards the maximum, \link{3} = pointing in both
+directions).}
+
+\item{...}{Further arguments passed to \code{\link[graphics:arrows]{graphics::arrows()}}.}
 }
 \value{
-If a plot device with a morphospace is open, a straight line marking the
-scores representing shapes at the extremes of the morphometric axis is projected
-into morphospace. If \code{pipe = FALSE} those scores are returned invisibly.
-If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified by adding
-a new \code{$shape_axis} slot as well as a number of graphical parameters(stored
+If a plot device with a morphospace is open, a straight line marking
+the scores representing shapes at the extremes of the morphometric axis is
+projected into morphospace. If \code{pipe = FALSE} those scores are
+returned invisibly. If \code{pipe = TRUE} the supplied \code{"mspace"}
+object will be modified by appending a \code{$shape_axis} slot to
+\code{$projected}, as well as by adding some graphical parameters (stored
 into the \code{$plotinfo} slot), and returned invisibly.
 }
 \description{
 Project one or more morphometric axes (i.e., linear combinations
-of shape variables) into an existing bivariate morphospace.
+of shape variables) as vectors into an existing bivariate morphospace.
 }
 \details{
-This function is primarily aimed at the graphical representation
-of morphometric axes (estimated using either linear models or multivariate
+This function is primarily aimed at graphically representing
+morphometric axes (estimated using either linear models or multivariate
 ordination methods) into an existing morphospace for heuristic exploration
 of patterns in the data. It can also be used to extract theoretical shapes
 at the extremes of those axes, although \code{\link[=ax_transformation]{ax_transformation()}} does the
 same thing in a more flexible and straightforward way.
 
-Axes computed from linear models and from supervised multivariate ordinations
-using the same supervising variable will usually differ in length (i.e. shape
-transformations will be magnified or attenuated) due to the assumption of the
-former that the explanatory variable has been measured without error. Also,
-the former will not be necessarily centered.
+Axes computed by fitting linear models to shape data can differ in
+extension from axes obtained through supervised ordination using the same
+supervising variable (i.e. shape transformations will be either stretched
+or truncated) due to the former assuming that the explanatory variable has
+been measured without error. Also, the former will not be necessarily
+centered.
 
 For statistical analysis of axes (e.g., trajectory analysis) their vector
 coefficients can be extracted directly from slope coefficients stored in
-\code{"mlm"} objects or eigenvector coefficients stored in the \code{$rotation}
-slot returned by multivariate ordination methods.
+\code{"mlm"} objects or eigenvector coefficients stored in the
+\code{$rotation} slot returned by multivariate ordination methods.
 }
 \examples{
 #load and extract relevant data, packages and information
@@ -61,32 +66,53 @@ data("tails")
 shapes <- tails$shapes
 logsizes <- log(tails$sizes)
 species <- tails$data$species
+sp_shapes <- expected_shapes(shapes, species)
+tree <- tails$tree
 links <- tails$links
 
-#compute intraspecific allometric axis detrend_shapes, using lm and pls_shapes
+##Compare (orientations) axes resulting from different version of PCA
+
+#first perform the different variants of PCA on tail shape data
+pca <- prcomp(two.d.array(shapes))
+bgpca <- bg_prcomp(two.d.array(shapes), groups = species)
+phypca <- phy_prcomp(two.d.array(sp_shapes), tree = tree)
+
+#then project the first 2 axes from each into morphospace
+mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
+  proj_axis(obj = pca, axis = 1, col = "red", lwd = 2) \%>\%
+  proj_axis(obj = pca, axis = 2, col = "red", lwd = 2) \%>\%
+  proj_axis(obj = bgpca, axis = 1, col = "blue", lwd = 2) \%>\%
+  proj_axis(obj = bgpca, axis = 2, col = "blue", lwd = 2) \%>\%
+  proj_axis(obj = phypca, axis = 1, col = "black", lwd = 2) \%>\%
+  proj_axis(obj = phypca, axis = 2, col = "black", lwd = 2)
+
+
+##Linear models vs ordination methods
+
+#compute intraspecific allometric axis detrend_shapes, using lm and
+#pls_shapes
 detr_shapes <- arrayspecs(
   detrend_shapes(lm(two.d.array(shapes) ~ species)),
                           p = 9, k = 2)
 intrasp_allo_mod <- lm(two.d.array(detr_shapes) ~ logsizes)
-intrasp_allo_pls <- pls_shapes(shapes = two.d.array(detr_shapes), X = logsizes)
+intrasp_allo_pls <- pls_shapes(shapes = two.d.array(detr_shapes),
+                               X = logsizes)
 
-#compute intraspecific allometric axis using expected_shapes, tapply, lm and
-#pls_shapes
-sp_shapes <- expected_shapes(shapes, species)
+#compute intraspecific allometric axis using tapply, lm and pls_shapes
 sp_logsizes <- tapply(logsizes, species, max)
 intersp_allo_mod <- lm(two.d.array(sp_shapes) ~ sp_logsizes)
-intersp_allo_pls <- pls_shapes(shapes = two.d.array(sp_shapes), X = sp_logsizes)
+intersp_allo_pls <- pls_shapes(shapes = two.d.array(sp_shapes),
+                               X = sp_logsizes)
 
-
-#generate basic morphospace, add intraspecific (red) and interspecific (blue) axes
-#for lm models
+#generate basic morphospace, add intraspecific (red) and interspecific (blue)
+#axes for lm models
 mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
-  proj_axis(obj = intrasp_allo_mod, col = "red", lwd = 2) \%>\%
-  proj_axis(obj = intersp_allo_mod, col = "blue", lwd = 2)
+  proj_axis(obj = intrasp_allo_mod, col = "red", lwd = 2, type = 2) \%>\%
+  proj_axis(obj = intersp_allo_mod, col = "blue", lwd = 2, type = 2)
 #for pls ordination
 mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
-  proj_axis(obj = intrasp_allo_pls, col = "red", lwd = 2) \%>\%
-  proj_axis(obj = intersp_allo_pls, col = "blue", lwd = 2)
+  proj_axis(obj = intrasp_allo_pls, col = "red", lwd = 2, type = 2) \%>\%
+  proj_axis(obj = intersp_allo_pls, col = "blue", lwd = 2, type = 2)
 }
 \seealso{
 \code{\link{ax_transformation}}

@@ -18,9 +18,12 @@ proj_groups(
 \arguments{
 \item{mspace}{An \code{"mspace"} object.}
 
-\item{shapes}{Optional shapes data.}
+\item{shapes}{Optional shape data (if \code{NULL}, the function will look for
+them first in \code{mspace$projected$scores} and then in
+\code{mspace$ordination$x}).}
 
-\item{groups}{Factor; classification of observations into groups.}
+\item{groups}{Factor; classification of observations into groups. Its length
+must be the same as the number of shapes provided in \code{shapes}.}
 
 \item{ellipse}{Logical; whether to plot confidence ellipses (if \code{FALSE},
 convex hulls will be used instead).}
@@ -39,20 +42,19 @@ convex hulls will be used instead).}
 If a plot device with a morphospace is open, convex hulls or
 confidence ellipses enclosing the scores corresponding to \code{groups}
 are projected into morphospace. If \code{pipe = TRUE} the supplied
-\code{"mspace"} object will be modified by adding a new \code{$gr_class}
-slot as well as a number of graphical parameters (stored into the
-\code{$plotinfo} slot), and returned invisibly.
+\code{"mspace"} object will be modified by appending a \code{$gr_class}
+slot to \code{$projected}, as well as by adding some graphical parameters
+(stored into the \code{$plotinfo} slot), and returned invisibly.
 }
 \description{
-Project convex hulls or confidence ellipses enclosing \emph{a priori}
-groups into an existing morphospace.
+Project convex hulls or confidence ellipses enclosing
+\emph{a priori} groups into an existing morphospace.
 }
 \details{
-The purpose of this function is to add a classification
-for shapes populating the morphospace to \code{"mspace"} objects
-during pipeline, as well as to facilitate group visualization.
-Otherwise, it is just a wrapper for \code{hulls_by_group_2D} and
-\code{ellipses_by_group_2D}.
+The goal of this function is to add a classification for shapes
+populating the morphospace to \code{"mspace"} objects, as well as to
+facilitate group visualization. Other than that, it is just a wrapper for
+\code{hulls_by_group_2D} and \code{ellipses_by_group_2D}.
 }
 \examples{
 #load and extract relevant data, packages and information
@@ -63,14 +65,21 @@ species <- shells$data$species
 sp_shapes <- expected_shapes(shapes, species)
 
 #generate basic morphospace, add sampled shapes and convex hulls for species
-mspace(shapes, links = links, mag = 0.7, axes = c(1,2), bg.model = "light gray") \%>\%
+mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
+       bg.model = "light gray") \%>\%
   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) \%>\%
-  proj_groups(groups = species, col = 1:4, lwd = 2)
+  proj_groups(groups = species, col = 1:4, lwd = 2, alpha = 0.5)
 
-#generate basic morphospace, add sampled shapes and 95\% confidence for species
-mspace(shapes, links = links, mag = 0.7, axes = c(1,2), bg.model = "light gray") \%>\%
+#generate basic morphospace, add sampled shapes and 95\% confidence for
+#species
+msp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
+              bg.model = "light gray") \%>\%
   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) \%>\%
-  proj_groups(groups = species, col = 1:4, lwd = 2, ellipse = TRUE, conflev = 0.95)
+  proj_groups(groups = species, col = 1:4, lwd = 2, ellipse = TRUE,
+              conflev = 0.95, alpha = 0.1)
+
+#add legend using plot_mspace()
+plot_mspace(msp, legend = TRUE, cex.legend = 2, pch.groups = 16)
 }
 \seealso{
 \code{\link{hulls_by_group_2D}}, \code{\link{ellipses_by_group_2D}}

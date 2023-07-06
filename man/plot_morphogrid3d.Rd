@@ -13,6 +13,7 @@ plot_morphogrid3d(
   links = NULL,
   ordtype,
   axes,
+  rotmat = NULL,
   xlim = NULL,
   ylim = NULL,
   xlab = NULL,
@@ -55,6 +56,9 @@ wireframe (following the format used in \code{Morpho}).}
 or \code{"phy_pls_shapes"}).}
 
 \item{axes}{Numeric of length 2, indicating the axes to be plotted.}
+
+\item{rotmat}{Optional rotation matrix for background shape models. If
+\code{NULL}, the user will be asked to define a preferred orientation.}
 
 \item{xlim, ylim, xlab, ylab}{Standard arguments passed to the generic plot
 function.}

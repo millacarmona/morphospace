@@ -14,16 +14,17 @@ plot_mspace(
   nh,
   nv,
   mag,
+  rescale,
   invax = NULL,
   adj_frame = c(1, 1),
   points = TRUE,
   models = TRUE,
-  mshapes = TRUE,
   groups = TRUE,
   phylo = TRUE,
   shapeax = TRUE,
   landsc = TRUE,
   legend = FALSE,
+  scalebar = FALSE,
   cex.legend = 1,
   asp = NA,
   xlab,
@@ -54,14 +55,24 @@ plot_mspace(
   lty.groups = 1,
   alpha.groups = 0,
   density.groups = TRUE,
+  col.phylo = 1,
   lwd.phylo = 1,
   lty.phylo = 1,
-  col.phylo = 1,
+  col.nodes,
+  pch.nodes,
+  bg.nodes,
+  cex.nodes,
+  col.tips,
+  pch.tips,
+  bg.tips,
+  cex.tips,
+  type.axis,
   lwd.axis = 1,
   lty.axis = 1,
   col.axis = 1,
   palette.landsc = heat.colors,
-  ncols.landsc = 50,
+  display.landsc,
+  alpha.landsc,
   nlevels.landsc = 50,
   drawlabels.landsc = FALSE,
   lty.landsc = 1,
@@ -69,20 +80,17 @@ plot_mspace(
 )
 }
 \arguments{
-\item{mspace}{An \code{"mspace"} object created using \code{\link[=mspace]{mspace()}}.}
+\item{mspace}{An \code{"mspace"} object created using the
+\code{\link{mspace()}} \%>\% \code{proj_*} pipeline.}
 
 \item{axes}{Numeric of length 1 or 2, indicating the axes to be plotted.}
 
 \item{links}{A list with the indices of the coordinates defining the
 wireframe (following the format used in \code{Morpho}).}
 
-\item{template}{Either a 2-column matrix containing landmarks/semilandmarks
-followed by coordinates defining a curve or set of curves describing additional
-aspects of morphology (for 2D shape data) or a \code{"mesh3d"} object containing
-geometry of the structure the landmarks were placed on (for 3D shape data),
-corresponding to the mean shape of the sample. These will be warped using TPS
-interpolation to produce the set of background shell models (see
-\code{\link{build_template2d}}).}
+\item{template}{Either a 2-column matrix with landmarks/semilandmarks and
+template curves coordinates (for 2D shape data) or a \code{"mesh3d"}
+object representing the mean shape of the sample (for 3D shape data).}
 
 \item{x}{Optional vector with a non-morphometric variable to be plotted in
 the x axis. Alternatively, a \code{"phylo"} object can be provided.}
@@ -96,39 +104,41 @@ the y axis. Alternatively, a \code{"phylo"} object can be provided.}
 
 \item{mag}{Numeric; magnifying factor for shape models.}
 
+\item{rescale}{Logical; whether to re-scale background shape models so shape
+variation is shown more clearly.}
+
 \item{invax}{Optional numeric indicating which of the axes provided in
-\code{axes} needs to be inverted (optionsare \code{1}, \code{2} or
+\code{axes} needs to be inverted (options are \code{1}, \code{2} or
 \code{c(1,2)}).}
 
 \item{adj_frame}{Numeric of length 2, providing \emph{a posteriori} scaling
 factors for the width and height of the frame, respectively.}
 
 \item{points}{Logical; whether to plot the scatter points corresponding to
-the sampled shapes stored in \code{mspace$x}.}
+the sampled shapes stored in \code{mspace$projected$scores}.}
 
 \item{models}{Logical; whether to plot background shape models.}
 
-\item{mshapes}{Logical; whether to plot the scatter points corresponding to
-groups' mean shapes stored in \code{mspace$gr_centroids}.}
-
 \item{groups}{Logical; whether to plot the convex hulls/confidence ellipses
-enclosing the groups stored in \code{mspace$gr_class}.}
+enclosing the groups stored in \code{mspace$projected$gr_class}.}
 
 \item{phylo}{Logical; whether to plot phylogenetic relationships stored
-in \code{mspace$phylo}.}
+in \code{mspace$projected$phylo}.}
 
 \item{shapeax}{Logical; whether to plot morphometric axes stored in
-\code{mspace$shape_axis}.}
+\code{mspace$projected$shape_axis}.}
 
 \item{landsc}{Logical; whether to plot landscape surface stored in
-\code{mspace$landsc}.}
+\code{mspace$projected$landsc}.}
 
-\item{legend}{Logical; whether to show legend for groups (\code{mspace$gr_class}).}
+\item{legend}{Logical; whether to show legend for groups.}
+
+\item{scalebar}{Logical; whether to show scalebar for landscapes.}
 
 \item{cex.legend}{Numeric; size of legend labels/symbols.}
 
-\item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic \code{\link[graphics:plot.default]{graphics::plot()}}
-function.}
+\item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic
+\code{\link[graphics:plot.default]{graphics::plot()}} function.}
 
 \item{size.models}{Numeric; size factor for shape models.}
 
@@ -142,7 +152,8 @@ function.}
 
 \item{lwd.models}{Numeric; width of the lines in wireframes/outlines.}
 
-\item{alpha.models}{Numeric; transparency factor for background models (3D only).}
+\item{alpha.models}{Numeric; transparency factor for background models (3D
+only).}
 
 \item{cex.ldm}{Numeric; size of landmarks/semilandmarks in the background
 models.}
@@ -162,10 +173,10 @@ to sampled shapes.}
 sampled shapes.}
 
 \item{density.points}{Logical; whether to add density distribution for points
-(univariate ordinations only).}
+(univariate ordinations only). Overriden by \code{density.groups = TRUE}}
 
-\item{col.groups}{Color of the hulls/ellipses and/or scatter points corresponding
-to groups mean shapes.}
+\item{col.groups}{Color of the hulls/ellipses and/or scatter points
+corresponding to groups mean shapes.}
 
 \item{bg.groups}{Background color of the scatter points corresponding
 to groups mean shapes.}
@@ -176,67 +187,296 @@ groups mean shapes.}
 \item{cex.groups}{Numeric; size of the scatter points corresponding to
 groups mean shapes.}
 
-\item{ellipse.groups}{Logical; whether to plot confidence ellipses (if \code{FALSE},
-convex hulls will be used instead).}
+\item{ellipse.groups}{Logical; whether to plot confidence ellipses
+(if \code{FALSE} convex hulls will be used instead).}
 
-\item{conflev.groups}{Numeric; confidence level used for confidence ellipse(s).}
+\item{conflev.groups}{Numeric; confidence level used for confidence
+ellipse(s).}
 
 \item{lwd.groups}{Numeric; width of the lines in groups' ellipses/hulls.}
 
 \item{lty.groups}{Numeric; type of the lines in groups' ellipses/hulls.}
 
-\item{alpha.groups}{Numeric; transparency factor for groups' ellipses/hulls/density
-distributions.}
+\item{alpha.groups}{Numeric; transparency factor for groups'
+ellipses/hulls/density distributions.}
 
 \item{density.groups}{Logical; whether to add density distribution for groups
 (univariate ordinations only).}
+
+\item{col.phylo}{Numeric; color of the lines depicting phylogenetic branches.}
 
 \item{lwd.phylo}{Numeric; width of the lines depicting phylogenetic
 branches.}
 
 \item{lty.phylo}{Numeric; type of the lines depicting phylogenetic branches.}
 
-\item{col.phylo}{Numeric; color of the lines depicting phylogenetic branches.}
+\item{col.nodes}{Color of the hulls/ellipses and/or scatter points
+corresponding to the nodes of the phylogeny.}
 
-\item{lwd.axis}{Numeric; width of the lines depicting morphometric axis.}
+\item{pch.nodes}{Numeric; symbol of the scatter points corresponding to the
+nodes of the phylogeny.}
 
-\item{lty.axis}{Numeric; type of the lines depicting  morphometric axis.}
+\item{bg.nodes}{Background color of the scatter points corresponding to the
+nodes of the phylogeny.}
 
-\item{col.axis}{Numeric; color of the lines depicting morphometric axis.}
+\item{cex.nodes}{Numeric; size of the scatter points corresponding to the
+nodes of the phylogeny.}
 
-\item{palette.landsc}{Color palette to use for landscape representation.}
+\item{col.tips}{Color of the hulls/ellipses and/or scatter points
+corresponding to the tips of the phylogeny.}
 
-\item{ncols.landsc}{Number of colors to use for landscape representation.}
+\item{pch.tips}{Numeric; symbol of the scatter points corresponding to the
+tips of the phylogeny.}
 
-\item{nlevels.landsc}{Number of levels (i.e. contours) to use in landscape representation.}
+\item{bg.tips}{Background color of the scatter points corresponding to the
+tips of the phylogeny.}
 
-\item{drawlabels.landsc}{Logical; should the labels indicating the value of each surface contour be plotted?}
+\item{cex.tips}{Numeric; size of the scatter points corresponding to the
+tips of the phylogeny.}
 
-\item{lty.landsc}{Numeric; type of the lines depicting surface contour.}
+\item{type.axis}{Integer; type of arrows (\link{0} = no arrow; \link{1} = pointing
+towards the maximum; \link{2} = pointing towards the maximum, \link{3} = pointing in
+both directions).}
 
-\item{lwd.landsc}{Numeric; width of the lines depicting surface contour.}
+\item{lwd.axis}{Numeric; width of the lines depicting a morphometric axis.}
+
+\item{lty.axis}{Numeric; type of the lines depicting  a morphometric axis.}
+
+\item{col.axis}{Numeric; color of the lines depicting a morphometric axis.}
+
+\item{palette.landsc}{A function defining a color palette to use for
+landscape representation.}
+
+\item{display.landsc}{How to display landscape representation; options are
+\code{"contour"} and \code{"filled.contour"}. For bivariate landscapes
+only.}
+
+\item{alpha.landsc}{Numeric; transparency factor for filled contours
+depicting landscapes.}
+
+\item{nlevels.landsc}{Number of levels (i.e. contours) to use in landscape
+representation.}
+
+\item{drawlabels.landsc}{Logical; should the labels indicating the value of
+each surface contour be plotted?}
+
+\item{lty.landsc}{Numeric; type of the contour lines depicting landscapes.}
+
+\item{lwd.landsc}{Numeric; width of the contour lines depicting landscapes.}
+
+\item{mshapes}{Logical; whether to plot the scatter points corresponding to
+groups' mean shapes stored in \code{mspace$projected$gr_centroids}.}
+
+\item{x, y}{Optional vector with a non-morphometric variable to be plotted in
+the x or y axis. Alternatively, a \code{"phylo"} object can be provided.}
+
+\item{nh, nv}{Numeric; the number of shape models along the x (\code{nh}) and
+the y (\code{nv}) axes.}
+
+\item{_.models, _.ldm}{Control how background shape models are displayed.
+\itemize{
+\item{models} { Logical; whether to plot background shape models (stored
+in \code{mspace$projected$shapemodels}).}
+\item{size.models} { Numeric; size factor for shape models.}
+\item{col.models} { Color for wireframes/outlines of shape models.}
+\item{bg.models} { Background color for outlines/meshes of shape models.}
+\item{asp.models} { Numeric; y/x aspect ratio of shape models.}
+\item{rot.models} { Numeric; angle (in degrees) to rotate shape models.}
+\item{lwd.models} { Numeric; width of border lines in wireframes/outlines
+of shape models.}
+\item{alpha.models} { Numeric; transparency factor for background models
+(3D only).}
+\item{cex.ldm} { Numeric; size of landmarks/semilandmarks in the background
+models.}
+\item{col.ldm} { Color of landmarks/semilandmarks in the background
+models.}
+}}
+
+\item{_.points}{Control how scatterpoints representing projected shapes are
+represented.
+\itemize{
+\item{points} { Logical; whether to plot the scatter points corresponding
+to the sampled shapes stored in \code{mspace$projected$scores}.}
+\item{pch.points} { Numeric; symbol of the scatterpoints.}
+\item{col.points} { Color of the scatterpoints.}
+\item{bg.points} { Background color of the scatterpoints.}
+\item{cex.points} { Numeric; size of the scatterpoints}
+\item{density.points} { Logical; whether to add density distribution for
+points (univariate ordinations only). Overriden by
+\code{density.groups = TRUE}}
+}}
+
+\item{_.groups, legend}{Control how groups of shapes are represented.
+\itemize{
+\item{groups} { Logical; whether to plot the convex hulls/confidence
+ellipses enclosing the groups stored in
+\code{mspace$projected$gr_class}.}
+\item{mshapes} { Logical; whether to plot the scatter points corresponding
+to groups' mean shapes stored in \code{mspace$projected$gr_centroids}.}
+\item{col.groups} { Color of the hulls/ellipses and/or scatterpoints
+corresponding to groups' mean shapes.}
+\item{bg.groups} { Background color of the scatterpoints corresponding to
+groups' mean shapes.}
+\item{pch.groups} { Numeric; symbol of the scatterpoints corresponding to
+groups' mean shapes.}
+\item{cex.groups} { Numeric; size of the scatterpoints corresponding to
+groups' mean shapes.}
+\item{ellipse.groups} { Logical; whether to use confidence ellipses to
+delimit groups (if \code{FALSE} convex hulls are used instead).}
+\item{conflev.groups} { Numeric; confidence level used for confidence
+ellipse(s).}
+\item{lwd.groups} { Numeric; width of the lines in groups' ellipses/hulls.}
+\item{lty.groups} { Numeric; type of the lines in groups' ellipses/hulls.}
+\item{alpha.groups} { Numeric; transparency factor for groups'
+ellipses/hulls/density distributions.}
+\item{density.groups} { Logical; whether to add density distribution for
+groups (univariate ordinations only).}
+\item{legend} { Logical; whether to show legend for groups.}
+\item{cex.legend} { Numeric; size of legend labels/symbols.}
+}}
+
+\item{_.phylo, _.nodes, _.tips}{Control how phylogenetic relationships are
+represented.
+\itemize{
+\item{phylo} { Logical; whether to plot phylogenetic relationships stored
+in \code{mspace$projected$phylo}.}
+\item{col.phylo} { Color of the lines depicting phylogenetic
+branches.}
+\item{lwd.phylo} { Numeric; width of the lines depicting phylogenetic
+branches.}
+\item{lty.phylo} { Numeric; type of the lines depicting phylogenetic
+branches.}
+\item{col.nodes} { Color of the scatterpoints representing phylogenetic
+nodes.}
+\item{bg.nodes} { Background color of the scatterpoints representing
+phylogenetic nodes.}
+\item{pch.nodes} { Numeric; symbol of the scatterpoints representing
+phylogenetic nodes.}
+\item{cex.nodes} { Numeric; size of the scatterpoints representing
+phylogenetic nodes.}
+\item{col.tips} { Color of the scatterpoints representing phylogenetic
+tips.}
+\item{bg.tips} { Background color of the scatterpoints representing
+phylogenetic tips.}
+\item{pch.tips} { Numeric; symbol of the scatterpoints representing
+phylogenetic tips.}
+\item{cex.tips} { Numeric; size of the scatterpoints representing
+phylogenetic tips.}
+}}
+
+\item{_.axis}{Control how groups of shapes are represented.
+\itemize{
+\item{shapeax} { Logical; whether to plot morphometric axes stored in
+\code{mspace$projected$shape_axis}.}
+\item{type.axis} { Integer; type of arrows (\link{0} = no arrow; \link{1} = pointing
+towards the maximum; \link{2} = pointing towards the maximum, \link{3} = pointing in
+both directions).}
+\item{col.axis} { Color of the lines depicting a morphometric axis.}
+\item{lwd.axis} { Numeric; width of the lines depicting a morphometric
+axis.}
+\item{lty.axis} { Numeric; type of the lines depicting  a morphometric
+axis.}
+}}
+
+\item{_.landsc, scalebar}{Control how landscape surfaces are represented.
+\itemize{
+\item{landsc} { Logical; whether to plot landscape surface stored in
+\code{mspace$projected$landsc}.}
+\item{display.landsc} { How to display landscape representation; options
+are \code{"contour"} and \code{"filled.contour"}. For bivariate
+landscapes only.}
+\item{nlevels.landsc} { Number of levels (i.e. contours) to use in
+landscape representation.}
+\item{palette.landsc} { A function defining a color palette to use for
+landscape representation.}
+\item{alpha.landsc} { Numeric; transparency factor for filled contours
+depicting landscapes.}
+\item{lwd.landsc} { Numeric; width of the contour lines depicting
+landscapes.}
+\item{lty.landsc} { Numeric; type of the contour lines depicting
+landscapes.}
+\item{drawlabels.landsc} { Logical; should the labels indicating the value
+of each surface contour be plotted?}
+\item{scalebar} { Logical; whether to show scalebar for landscapes.}
+}}
 }
 \description{
-Flexible representation of morphospaces, including their combination
-with other variables or a phylogeny.
+Flexible representation of morphospaces, including their
+combination with either other variables or a phylogeny.
+
+Flexible representation of morphospaces, including their
+combination with either other variables or a phylogeny.
 }
 \details{
-This function allows to regenerate morphospaces contained in \code{mspace}
-objects already in existence, either preserving the graphical attributes used
-during the pipeline or modifying one or more of them (so there is no need to
-execute the pipeline every time morphospaces need to be visualized and/or changed).
+This function allows to regenerate/tweak morphospaces contained in
+\code{"mspace"} objects already in existence. By default, \link{plot_mspace}
+regenerates the morphospace with all its projected elements preserving the
+graphical parameters used originally during the \code{\link{mspace}} +
+\code{proj_*} pipeline (and stored in \code{mspace$plotinfo}). However,
+all the graphical parameters can be modified to customize morphospaces
+graphical representations. Also, \link{plot_mspace} can be used to add a legend
+and/or a scalebar to aid identification of groups and interpretation of
+landscapes, respectively.
 
-Also, \code{plot_mspace} expands the range of graphical options available
-beyond 'pure' morphospaces. If a numeric non-shape variable (assumed to have
-been measured for the same specimens in \code{mspace$x}) is feeded to one of
-\code{x} or \code{y}, a 'hybrid' morphospace is produced (i.e. the bivariate
-plot will be constructed from the combination of \code{x} or \code{y} and a
-morphometric axis; shape models in the background will represent variation
-only for the latter). If instead a \code{"phylo"} object (assumed to describe
-the phylogenetic relationships among tips scores stored in
-\code{mspace$phylo_scores}) is feeded to one of \code{x} or \code{y}, a vertical
-or horizontal phenogram will be deployed (the x/y axis range will correspond to
-branch lengths, so caution should be exercised when interpreting the output).
+In addition, this function expands the range of graphical options available
+beyond 'pure' morphospaces. If a numeric non-shape variable (assumed to be
+measured for the same specimens in \code{mspace$projected$scores}) is fed
+to one of \code{x} or \code{y}, a 'hybrid' morphospace is produced (i.e.
+the bivariate plot will be constructed from the combination of \code{x} or
+\code{y} and a morphometric axis; background shape models will represent
+variation only for the latter). If instead a \code{"phylo"} object (assumed
+to describe the phylogenetic relationships among tips scores stored in
+\code{mspace$projected$phylo_scores}) is provided for either \code{x} or
+\code{y}, a vertical or horizontal phenogram will be deployed (the x/y axis
+range will correspond to branch lengths, so caution should be exercised
+when interpreting the output).
+
+\emph{Note}: when regenerating landscapes, it's important to keep in mind
+that this surface has been calculated for a specific set of shapes and
+ordination axes. Hence, its regeneration using \link{plot_mspace} is only
+warranted if the axes being depicted are the same than those used when the
+surface landscape was originally computed using \code{\link{mspace}} +
+\code{\link{proj_landscape}}. The only exception is when one of the
+original axes (i.e. those specified with the \code{axes} argument in
+\code{\link{mspace}}) is dropped (i.e. not specified with the \code{axes}
+argument of \code{\link{plot_mspace}}). This will result in the collapse of
+the 3D landscape projected into a bivariate morphospace into a 2D landscape
+projected into a univariate one.
+
+This function allows to regenerate/tweak morphospaces contained in
+\code{"mspace"} objects already in existence. By default, \link{plot_mspace}
+regenerates the morphospace with all its projected elements, preserving
+graphical parameters used originally during the \code{\link{mspace}} +
+\code{proj_*} pipeline (and stored in \code{mspace$plotinfo}). However,
+all the graphical parameters can be modified to customize graphical
+representations. Also, \link{plot_mspace} can be used to add a legend and/or a
+scalebar to aid identification of groups and interpretation of landscapes,
+respectively.
+
+In addition, this function expands the range of graphical options available
+beyond 'pure' morphospaces. If a numeric non-shape variable (assumed to be
+measured for the same specimens in \code{mspace$projected$scores}) is fed
+to one of \code{x} or \code{y}, a 'hybrid' morphospace is produced (i.e.
+the bivariate plot will be constructed from the combination of \code{x} or
+\code{y} and a morphometric axis; background shape models will represent
+variation only for the latter). If instead a \code{"phylo"} object (assumed
+to describe the phylogenetic relationships among tips scores stored in
+\code{mspace$projected$phylo_scores}) is provided for either \code{x} or
+\code{y}, a vertical or horizontal phenogram will be deployed (the x/y axis
+range will correspond to branch lengths, so caution should be exercised
+when interpreting the output).
+
+\emph{Note}: when regenerating landscapes, it's important to keep in mind
+that this surface has been calculated for a specific set of shapes and
+ordination axes. Hence, its regeneration using \link{plot_mspace} is only
+warranted if the axes being depicted are the same than those used when the
+surface landscape was originally computed using \code{\link{mspace}} +
+\code{\link{proj_landscape}}. The only exception is when one of the
+original axes (i.e. those specified with the \code{axes} argument in
+\code{\link{mspace}}) is dropped (i.e. not specified with the \code{axes}
+argument of \code{\link{plot_mspace}}). This will result in the collapse of
+the 3D landscape projected into a bivariate morphospace into a 2D landscape
+projected into a univariate one.
 }
 \examples{
 #load and extract relevant data, packages and information
@@ -320,4 +560,102 @@ plot_mspace(msp, x = tree,  axes = 1, links = links, col.points = species,
 plot_mspace(msp, y = tree,  axes = 2, links = links, col.points = species,
             col.groups = 1:nlevels(species), pch.points = 16,
             points = TRUE, groups = FALSE, mshapes = FALSE, phylo = FALSE, ylab = "Branch lengths")
+Plot morphospaces and combine them with other variables
+
+#load and extract relevant data, packages and information
+library(magrittr)
+data("tails")
+shapes <- tails$shapes
+species <- tails$data$species
+sizes <- tails$sizes
+sp_shapes <- expected_shapes(shapes, species)
+sp_sizes <- cbind(tapply(sizes, species, mean))
+tree <- tails$tree
+links <- tails$links
+
+#generate basic morphospace, add sampled shapes, species classification, and
+#phylogenetic structure
+msp <- mspace(shapes, axes = c(1,2), plot = FALSE) \%>\%
+ proj_shapes(shapes = shapes) \%>\%
+ proj_groups(groups = species) \%>\%
+ proj_phylogeny(shapes = sp_shapes, tree = tree)
+
+##Plotting 'pure' morphospaces:
+
+#plot mspace object as it is
+plot_mspace(msp)
+
+#add colors for points, by species
+plot_mspace(msp, col.points = species,
+            col.groups = 1:nlevels(species))
+
+#add links for landmark configurations
+plot_mspace(msp, links = links,
+            col.points = species, col.groups = 1:nlevels(species))
+
+#change number and sizes of shape models in the background
+plot_mspace(msp, nh = 2, nv = 2, links = links,
+            size.models = 0.5,
+            col.points = species, col.groups = 1:nlevels(species))
+
+#magnify deformation and highlight landmarks
+plot_mspace(msp, mag = 1.5, nh = 2, nv = 2, links = links,
+            size.models = 0.5, col.points = species,
+            col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red")
+
+#change axes 1,2 for 1,3
+plot_mspace(msp, axes = c(1,3), mag = 1.5, nh = 2, nv = 2, links = links,
+            size.models = 0.5, col.points = species,
+            col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red")
+
+#change colors for as tips and nodes of the phylogeny
+plot_mspace(msp, axes = c(1,3), mag = 1.5, nh = 2, nv = 2, links = links,
+            size.models = 0.5, cex.ldm = 5, col.ldm = "red", col.tips = "red",
+            col.nodes = "blue")
+
+#plot only first PC axis, with general distribution of specimens
+plot_mspace(msp, axes = 1, mag = 1.5, nh = 2, nv = 2, links = links,
+            size.models = 0.5, cex.ldm = 5, density.groups = FALSE,
+            col.ldm = "red", col.tips = "red", col.nodes = "blue")
+
+#plot only first PC axis, with distribution of specimens by group
+plot_mspace(msp, axes = 1, mag = 1.5, nh = 2, nv = 2, links = links,
+            alpha.groups = 0.5, size.models = 0.5, cex.ldm = 5,
+            density.groups = TRUE, col.ldm = "red", col.tips = "red",
+            col.nodes = "blue")
+
+#add legend
+plot_mspace(msp, axes = 1, mag = 1.5, nh = 2, nv = 2, links = links,
+            alpha.groups = 0.5, size.models = 0.5, cex.ldm = 5,
+            density.groups = TRUE, col.ldm = "red", col.tips = "red",
+            col.nodes = "blue", legend = TRUE, cex.legend = 1.3,
+            pch.groups = 16)
+
+
+#remove all the other elements to see only shape variation captured by the
+#first two PCs
+plot_mspace(msp, axes = c(1,2), links = links,
+            col.points = species, col.groups = 1:nlevels(species),
+            points = FALSE, groups = FALSE, phylo = FALSE)
+
+
+##Plotting 'hybrid' morphospaces:
+
+#plot size against first PC
+plot_mspace(msp, x = sizes,  axes = 1, links = links, col.points = species,
+            col.groups = 1:nlevels(species), pch.points = 16,
+            xlab = "Centroid size")
+
+
+##Plotting phenograms:
+
+#plot vertical phenogram against PC1
+plot_mspace(msp, y = tree,  axes = 1, links = links, col.points = species,
+            col.groups = 1:nlevels(species), pch.points = 16, xlab = "Branch lengths",
+            pch.tips = 21, bg.tips = "red", pch.nodes = 21, bg.nodes = "blue")
+
+#plot horizontal phenogram against PC2
+plot_mspace(msp, x = tree,  axes = 2, links = links, col.points = species,
+            col.groups = 1:nlevels(species), pch.points = 16, ylab = "Branch lengths",
+            pch.tips = 21, bg.tips = "red", pch.nodes = 21, bg.nodes = "blue")
 }

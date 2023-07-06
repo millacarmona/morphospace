@@ -9,14 +9,13 @@ mspace(
   axes = c(1, 2),
   links = NULL,
   template = NULL,
-  p = NULL,
-  k = NULL,
   FUN = stats::prcomp,
   nh = 5,
   nv = 4,
   mag = 1,
   invax = NULL,
   asp = NA,
+  rescale = TRUE,
   xlim = NULL,
   ylim = NULL,
   xlab = NULL,
@@ -38,30 +37,23 @@ mspace(
 )
 }
 \arguments{
-\item{shapes}{Shapes data.}
+\item{shapes}{Shape data.}
 
-\item{axes}{Numeric of length 2, indicating the axes to be plotted.}
+\item{axes}{Numeric of length 1 (univariate morphospace) or 2 (bivariate
+morphospace), indicating the axes to be plotted.}
 
 \item{links}{A list with the indices of the coordinates defining the
 wireframe (following the format used in \code{Morpho}).}
 
-\item{template}{Either a 2-column matrix containing landmarks/semilandmarks
-followed by coordinates defining a curve or set of curves describing additional
-aspects of morphology (for 2D shape data) or a \code{"mesh3d"} object containing
-geometry of the structure the landmarks were placed on (for 3D shape data),
-corresponding to the mean shape of the sample. These will be warped using TPS
-interpolation to produce the set of background shell models (see
-\code{\link{build_template2d}}).}
+\item{template}{Either a 2-column matrix with landmarks/semilandmarks and
+template curves coordinates (for 2D shape data) or a \code{"mesh3d"}
+object \strong{representing the mean shape of the sample} (for 3D shape
+data). See details below.}
 
-\item{p}{Numeric, indicating the number of landmarks/semilandmarks used (for
-landmark data only).}
-
-\item{k}{Numeric, indicating the number of cartesian dimensions of
-landmarks/semilandmarks (for landmark data only).}
-
-\item{FUN}{The function to be used for synthesizing geometric morphometric
-variation. Usual alternatives include \code{\link[stats]{prcomp}},
-\code{\link{bg_prcomp}} and \code{\link{phy_prcomp}}.}
+\item{FUN}{The function (method) to be used for ordination of shape
+variation. Supported alternatives include \code{\link[stats]{prcomp}},
+\code{\link{phy_prcomp}}, \code{\link{bg_prcomp}} and
+\code{\link{pls_shapes}}.}
 
 \item{nh}{Numeric; number of shape models along the x axis.}
 
@@ -72,6 +64,9 @@ variation. Usual alternatives include \code{\link[stats]{prcomp}},
 \item{invax}{Optional numeric indicating which of the axes provided in
 \code{axes} needs to be inverted (options are \code{1}, \code{2} or
 \code{c(1,2)}).}
+
+\item{rescale}{Logical; whether to re-scale background shape models so shape
+variation is shown more clearly.}
 
 \item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic plot
 function.}
@@ -91,7 +86,8 @@ factors for the width and height of the frame, respectively.}
 
 \item{lwd.models}{Numeric; width of the lines in wireframes/outlines.}
 
-\item{alpha.models}{Numeric; transparency factor for background models (3D only).}
+\item{alpha.models}{Numeric; transparency factor for background models
+(3D only).}
 
 \item{points}{Logical; whether to plot the scatter points.}
 
@@ -109,35 +105,50 @@ models.}
 \value{
 An object of class \code{"mspace"}, which is a list containing:
 \itemize{
-\item{$ordtype:} { method used for multivariate ordination.}
-\item{$datype:} { type of shape data used.}
-\item{$x:} { scores of the sample of shapes in the synthetic axes.}
-\item{$rotation:} { eigenvector's coefficients.}
-\item{$center:} { the mean values of the original shape variables.}
-\item{$plotinfo:} { a list with the information used to create the plot. These
-include a list called \code{$shapemodels}, containing the result of \code{morphogrid},
-i.e., an array with the shapes plotted in the background (slot \code{$models_arr}),
-a 2-column matrix containing all the shapes from the background (slot \code{$models_mat}),
-and a grid marking the (x,y) coordinates of their centroids (slot \code{$grid}).}
+\item{$ordination:} { a list with the output from the ordination method
+used, styled in the \code{\link{prcomp}} format (typically containing at
+least an \code{$x}, \code{$rotation}, and \code{$center} slots. Also
+contains the type of data (\code{$datype}) and ordination method
+(\code{$ordtype}) used.}
+\item{$projected:} { a list containing the elements that have been
+projected into the morphospace stored in the \code{"mspace"} object.
+Initially includes only the background shape models
+(\code{$shapemodels}), but more elements can be added using the
+\code{proj_*} family of functions.
+\item{$plotinfo:} { a list containing the graphical parameters used to
+create the plot. Passed to \code{\link{plot_mspace()}} to regenerate
+morphospaces.}
 }
 }
 \description{
-Create an empirical morphospace as an ordination comprising a set
-of axes synthesizing shape variation. Allows a variety of multivariate methods
-for building the ordination.
+Build morphospaces using a variety of multivariate methods,
+and depict shape variation represented by the resulting ordination axes.
 }
 \details{
-This function is the central piece of the \code{morphospace} workflow.
-It produces a synthetic space from a sample of normalized shapes using
-eigenanalysis-based ordination methods (PCA, between groups PCA, two-block
-PLS, and their phylogenetic versions) and generates shape models depicting
-the range of realized variation, retaining the information necessary to
-project and retrieve new compatible shapes. The output of \code{mspace} is
-meant to be expanded using the \code{proj_*} family of functions and the
-\code{\%>\%} operator from \code{magrittr}.
+This function is the heart of the \code{morphospace} workflow. It
+computes a new ordination space from a sample of normalized shapes using
+eigenanalysis-based multivariate methods (supported alternatives include
+PCA, between groups PCA, phylogenetic PCA, two-block PLS); it will also
+generate a series of shape models depicting the range of variation. The
+resulting \code{"mspace"} object stores all the information necessary to
+project and/or retrieve new shapes into the ordination space. The output
+of \code{mspace} can be expanded using the \code{proj_*} family of
+functions and the \code{\%>\%} operator from \code{magrittr}.
+
+For landmark data, representation of shape variation can be further
+aided by providing a template, which contains additional geometric
+features from the structure the landmark/semilandmarks were placed upon.
+Templates will be warped using TPS interpolation to produce the set of
+background shape models. For 2D landmark data, templates must be provided
+as a 2-column matrix containing the actual landmarks/semilandmarks,
+followed by the coordinates defining a curve or set of curves, separated
+from the former and from each other by a row of\code{NA}s
+(see \code{\link{build_template2d}}). For 3D landmark data, the template
+must be a \code{"mesh3d"} object corresponding to the \strong{actual mean
+shape of the sample} (which can be obtained using
+\code{\link{expected_shapes}} + \code{\link[Morpho:tps3d]{Morpho::tps3d()}}; see examples below).
 }
 \examples{
-
 ##2D Landmark data
 
 #load and extract relevant data and information
@@ -147,8 +158,8 @@ species <- tails$data$species
 links <- tails$links
 tree <- tails$tree
 
-#generate morphospace using the basic sample of shapes, PCA as ordination method
-#and the links between landmarks provided for backround models
+#generate morphospace using the basic sample of shapes, PCA as ordination
+#method and the links between landmarks provided for backround models
 mspace(shapes, links = links, mag = 0.7, axes = c(1,2), points = TRUE)
 
 #increase magnification factor x2:
@@ -157,21 +168,22 @@ mspace(shapes, links = links, mag = 1.5, axes = c(1,2), points = TRUE)
 #plot PCs 1 and 3
 mspace(shapes, links = links, mag = 1.5, axes = c(1,3), points = TRUE)
 
-#generate morphospace using the basic sample of shapes, bgPCA as ordination method
-#and links between landmarks for backround models
+#generate morphospace using the basic sample of shapes, bgPCA as ordination
+#method and links between landmarks for backround models
 mspace(shapes, links = links, FUN = bg_prcomp, groups = species, mag = 0.7,
        axes = c(1,2), invax = 1, points = TRUE)
 
-#generate morphospace using species' consensus shapes and phylogenetic tree,
-#phylogenetic PCA as ordination method, and links between landmarks for backround
-#models
+#generate morphospace using species' consensus shapes, phylogenetic PCA as
+#ordination method, and links between landmarks for background models
 sp_shapes <- expected_shapes(shapes, species)
 mspace(sp_shapes, links = links, FUN = phy_prcomp, tree = tree, mag = 0.7,
        axes = c(1,2), points = TRUE)
 
 #just create a morphospace without plotting, save into an object, and inspect
-morphosp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2), plot = FALSE)
-names(morphosp)
+morphosp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
+                   plot = FALSE)
+morphosp #general info about the object
+names(morphosp) #slots
 
 
 #load wing data for a quick demo with templates
@@ -193,28 +205,37 @@ mspace(shapes, template = template, mag = 3, axes = c(1,2), points = TRUE)
 \dontrun{
 #load data and packages and extract relevant data and information
 library(Morpho)
+library(geomorph)
 data("shells3D")
 shapes <- shells3D$shapes
 mesh_meanspec <- shells3D$mesh_meanspec
 
-#generate morphospace. This is interactive, you need to rotate the shape by yourself and
-#then press enter into the console.
-mspace(shapes, mag = 1, axes = c(1,2), col.ldm = "black", cex.ldm = 2, points = TRUE)
+#generate morphospace. This is interactive, you need to rotate the shape by
+#yourself and then press enter into the console.
+mspace(shapes, mag = 1, axes = c(1,2), col.ldm = "black", cex.ldm = 2,
+       points = TRUE)
 
 #generate morphospace using a mesh template that improves visualization:
-#first, get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec
+#first, get shape corresponding to shells3D$mesh_meanspec using
+#geomorph::findMeanSpec
 meanspec_id <- findMeanSpec(shapes)
 meanspec_shape <- shapes[,,meanspec_id]
 
-#then get the consensus shape and warp the sample mesh to get the mesh corresponding to the
-#consensus using Morpho::tps3d
+#then get the consensus shape and warp the sample mesh to get the mesh
+#corresponding to the consensus using Morpho::tps3d
 meanshape <- expected_shapes(shapes)
-meanmesh <- tps3d(x = mesh_meanspec , refmat = meanspec_shape, tarmat = meanshape)
+meanmesh <- tps3d(x = mesh_meanspec , refmat = meanspec_shape,
+                  tarmat = meanshape)
 
-#finally, generate morphospace providing template (this function used the mesh warped to
-#the mean shape of the entire sample, hence the previous lines)
-mspace(shapes, mag = 1, axes = c(1,2), template = meanmesh, bg.models = "gray",
-       nh = 4, nv = 4, cex.ldm = 0, points = TRUE)
+#finally, generate morphospace providing template (this function used the
+#mesh warped to the mean shape of the entire sample, hence the previous
+#lines)
+morphosp_3d <- mspace(shapes, mag = 1, axes = c(1,2), template = meanmesh,
+                      bg.models = "gray", nh = 4, nv = 4, cex.ldm = 0,
+                      points = TRUE)
+
+#inspect the contents of the object
+morphosp_3d
 }
 
 
@@ -226,9 +247,22 @@ shapes <- shells$shapes$coe
 
 #generate morphospace using all the raw variation
 mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 1,
-       asp.models = 1, bg.model = "light gray")
+       rescale = F, asp.models = 1, bg.model = "light gray")
+
+#shapes in the background can be rescaled to avhieve a (slightly) better
+#visualization. Also, save the ordination into an object.
+morphosp_F <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4,
+                     size.models = 1, asp.models = 1,
+                     bg.model = "light gray")
+
+#inspect the contents of the object
+morphosp_F
 }
 \seealso{
-\code{\link{proj_shapes}}, \code{\link{proj_consensus}},
-\code{\link{proj_groups}}, \code{\link{proj_phylogeny}}, \code{\link{proj_axis}}
+\code{\link{{print.mspace}}, \code{\link{proj_shapes}},
+\code{\link{proj_consensus}}, \code{\link{proj_groups}},
+\code{\link{proj_phylogeny}}, \code{\link{proj_axis},
+\code{\link{proj_landscape}}, \code{\link{extract_shapes},
+\code{\link{prcomp}}, \code{\link{bg_prcomp}}, \code{\link{phy_prcomp}},
+\code{\link{pls_shapes}},
 }

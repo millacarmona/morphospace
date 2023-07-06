@@ -8,6 +8,7 @@ morphogrid(
   ordination,
   axes,
   datype,
+  rescale,
   template = NULL,
   x = NULL,
   y = NULL,
@@ -34,6 +35,9 @@ first value of this argument is considered.}
 
 \item{datype}{Character; the type of shape data (either \code{"fcoef"} or
 \code{"landm"}).}
+
+\item{rescale}{Logical; whether to re-scale background shape models so shape
+variation is shown more clearly.}
 
 \item{template}{A 2-column matrix containing landmarks/semilandmarks followed
 by coordinates defining a curve or set of curves describing additional aspects

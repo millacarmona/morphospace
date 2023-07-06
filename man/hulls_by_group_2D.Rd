@@ -29,7 +29,8 @@ for each group.}
 }
 \description{
 Plot convex hulls for different groups in 2D scatterplots
-created using the generic \code{\link[graphics:plot.default]{graphics::plot()}} function. Used internally (mostly).
+created using the generic \code{\link[graphics:plot.default]{graphics::plot()}} function. Used internally
+(mostly).
 }
 \examples{
 #load landmark data and necessary packages
