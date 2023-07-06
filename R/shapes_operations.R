@@ -1,10 +1,10 @@
-###########################################################################
+################################################################################
 
 #' Compute mean/expected shape(s)
 #'
 #' @description Compute the mean shape from the entire sample, or the shape(s)
-#'   expected for one or more levels (factors) or values (numerics) of an external
-#'   explanatory variable as fitted by a linear model.
+#'   expected for one or more levels (factors) or values (numerics) of an
+#'   external explanatory variable as fitted by a linear model.
 #'
 #' @param shapes Shape data.
 #' @param x A vector or column vector containing a single explanatory variable
@@ -13,23 +13,29 @@
 #' @param xvalue One or more numeric value(s) or factor level(s) of \code{x} at
 #'   which calculate expected shape(s). If \code{NULL}, all the value(s) or
 #'   level(s) are used.
-#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-#'   should match names in \code{x} and \code{shapes}.
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
+#'   labels should match names in \code{x} and \code{shapes}.
+#' @param returnarray Logical, indicating whether shapes should be returned
+#'   in "3D" array format (landmark shapes only). Mostly intended for internal
+#'   use.
 #'
 #' @details If a phylogenetic tree is supplied for interspecific shape data, the
-#'   procedure is performed using the phylogenetically-corrected regression coefficients
-#'   (see Revell, 2009) assuming a Brownian motion model of evolution.
+#'   procedure is performed using the phylogenetically-corrected regression
+#'   coefficients (see Revell, 2009) assuming a Brownian Motion model of
+#'   evolution.
 #'
 #' @return For landmark data, either a \code{p x k} matrix defining a single
-#'   mean shape or a \code{p x k x n} array containing \code{n} mean shapes.
-#'   For Fourier data, a \code{n x (4 x nb.h)} matrix of Fourier coefficients
-#'   (with \code{nb.h} being the number of harmonics used during elliptic Fourier
-#'   analysis).
+#'   mean shape or a \code{p x k x n} array containing \code{n} mean shapes,
+#'   unless \code{returnarray = TRUE} (in which case a \code{n x (p x k)} matrix
+#'   will be returned. For Fourier data, a \code{n x (4 x nb.h)} matrix of
+#'   Fourier coefficients (with \code{nb.h} being the number of harmonics used
+#'   during elliptic Fourier analysis).
 #'
 #' @export
 #'
-#' @references Revell, L. J. (2009). \emph{Size-correction and principal components
-#'   for interspecific comparative studies}. Evolution, 63, 3258-3268.
+#' @references Revell, L. J. (2009). \emph{Size-correction and principal
+#'   components for interspecific comparative studies}. Evolution, 63,
+#'   3258-3268.
 #'
 #' @examples
 #' #load tails data and packages
@@ -47,39 +53,41 @@
 #' plot(mshape)
 #' lineplot(mshape, tails$links)
 #'
-#' #getting mean shapes for the levels of a factor: compute and plot the mean shape
-#' #of each of the 13 species
+#' #getting mean shapes for the levels of a factor: compute and plot the mean
+#' #shape of each of the 13 species
 #' sp_shapes <- expected_shapes(shapes, x = species)
 #' pile_shapes(sp_shapes, links = tails$links, mshape = FALSE)
 #'
-#' #getting the mean shape for a specific level of a factor: compute and plot the
-#' #mean shape of deep-forked specimens
+#' #getting the mean shape for a specific level of a factor: compute and plot
+#' #the mean shape of deep-forked specimens
 #' df_shape <- expected_shapes(shapes, x = type, xvalue = "DF")
 #' plot(df_shape)
 #' lineplot(df_shape, tails$links)
 #'
-#' #getting the mean shape for a specific level of a factor, correcting for phylogeny:
-#' #compute and plot mean the shape of deep-forked species
+#' #getting the mean shape for a specific level of a factor, correcting for
+#' #phylogeny: compute and plot mean the shape of deep-forked species
 #' sp_type <- factor(c(tapply(as.character(type), species, unique)))
-#' df_sp_shape <- expected_shapes(sp_shapes, x = sp_type, xvalue = "DF", tree = tree)
+#' df_sp_shape <- expected_shapes(sp_shapes, x = sp_type, xvalue = "DF",
+#'                                tree = tree)
 #' plot(df_sp_shape)
 #' lineplot(df_sp_shape, tails$links)
 #'
-#' #getting the shapes expected for a covariate: compute and plot the shapes expected
-#' #under the linear regression size on of shape
+#' #getting the shapes expected for a covariate: compute and plot the shapes
+#' #expected under the linear regression size on of shape
 #' exp_shapes <- expected_shapes(shapes, x = sizes)
 #' pile_shapes(exp_shapes, links = tails$links, mshape = FALSE)
 #'
-#' #getting the shape expected for specific values of a covariate: compute and plot the
-#' #shapes expected at the maximum size
+#' #getting the shape expected for specific values of a covariate: compute and
+#' #plot the shapes expected at the maximum size
 #' large_shape <- expected_shapes(shapes, x = sizes, xvalue = max(sizes))
 #' plot(large_shape)
 #' lineplot(large_shape, tails$links)
 #'
-#' #getting the shape expected for specific values of a covariate, correcting for phylogeny:
-#' #compute and plot the shapes expected at the maximum size
+#' #getting the shape expected for specific values of a covariate, correcting
+#' #for phylogeny: compute and plot the shapes expected at the maximum size
 #' sp_sizes <- c(tapply(sizes, species, mean))
-#' large_sp_shape <- expected_shapes(sp_shapes, x = sp_sizes, xvalue = max(sp_sizes), tree = tree)
+#' large_sp_shape <- expected_shapes(sp_shapes, x = sp_sizes,
+#'                                   xvalue = max(sp_sizes), tree = tree)
 #' plot(large_sp_shape)
 #' lineplot(large_sp_shape, tails$links)
 #'
@@ -97,7 +105,8 @@
 #' pile_shapes(sp_shapes, mshape = FALSE)
 #'
 #' #mean shape of P. esbelta
-#' esbelta_shape <- expected_shapes(shapes, x = shells$data$species, xvalue = "esbelta")
+#' esbelta_shape <- expected_shapes(shapes, x = shells$data$species,
+#'                                  xvalue = "esbelta")
 #' plot(inv_efourier(esbelta_shape, nb.pts = 200), type = "l")
 #'
 #' #shapes expected by the linear regression of size on shape
@@ -105,9 +114,10 @@
 #' pile_shapes(exp_shapes, mshape = FALSE)
 #'
 #' #shapes expected at the minimum size
-#' large_shape <- expected_shapes(shapes, x = shells$sizes, xvalue = min(shells$sizes))
+#' large_shape <- expected_shapes(shapes, x = shells$sizes,
+#'                                xvalue = min(shells$sizes))
 #' plot(inv_efourier(large_shape, nb.pts = 200), type = "l")
-expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
+expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL, returnarray = TRUE) {
 
   dat <- shapes_mat(shapes)
   data2d <- dat$data2d
@@ -165,7 +175,7 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
     }
   }
 
-  if(datype == "landm") {
+  if(datype == "landm" & returnarray) {
     p <- nrow(shapes)
     k <- ncol(shapes)
     predicted_mat <- geomorph::arrayspecs(predicted_mat, p = p, k = k)
@@ -176,58 +186,78 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
 }
 
 
-###########################################################################
+################################################################################
 
 #' Remove shape variation associated to external variables
 #'
-#' @description Detrend shape data using the functional relationship between
-#'   shape data and some external explanatory variable(s) (works for both
-#'   factors and numerics), estimated using a linear model (and potentially
-#'   corrected using phylogenetic relationships).
+#' @description Detrend shape variation using the relationship between shape
+#'   data and some external explanatory variable(s) (works for both factors and
+#'   numerics).
 #'
 #' @param model A \code{"mlm"} object created using [stats::lm()].
 #' @param xvalue A value (numeric) or level (character) at which shape data is
 #'   to be standardized (i.e. centered); If NULL, the mean of the complete
 #'   sample is used.
-#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-#'   should match row names from \code{x}.
-#' @param newdata New data to be standardized instead of the used in \code{model},
-#'   provided as a \code{"mlm"} object created using [stats::lm()]. Explanatory
-#'   variables must be the same as those from \code{model}. Coefficients are taken
-#'   from the linear model from \code{model} and applied to the new data to predict
-#'   shapes at the desired \code{xvalue}.
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
+#'   labels should match row names from \code{x}.
+#' @param method Method used for detrending; options are \code{"residuals"} and
+#'   \code{"orthogonal"} (see details).
+#' @param newdata New data to be standardized. It should be provided as either
+#'   an \code{"mlm"} object fitting the same variables used in \code{model}
+#'   measured in a new sample, created through [stats::lm()], or a 2-margin
+#'   matrix of shape descriptors (only for \code{method = "orthogonal"}). See
+#'   details.
 #'
-#' @details This function detrends (or standardizes, or corrects) shapes
-#'   (landmarks or Fourier coefficients) from variation associated with
-#'   non-shape variables, using a lm model fitting the former to the latter. It
-#'   returns a 2-margins matrix of shapes (which means an extra step has to be
-#'   taken for larndmark data in order to retrieve configurations in 3-margins
-#'   array format) corresponding to the detrended versions of the shapes
-#'   specified in the left size of the formula in \code{model}.
+#' @details This function detrends (or standardizes, or corrects) shapes from
+#'   variation associated with non-shape variables, using either the residuals
+#'   computed from a linear model fitting the former to the latter
+#'   (\code{method = "residuals"}), or the projection of shapes into a subspace
+#'   that is orthogonal to variation associated to non-shape variables, computed
+#'   using the Burnaby approach (\code{method = "orthogonal"}).
 #'
-#'   However, if \code{newdata} is provided, the function will instead return
-#'   the shapes provided in the new model, detrended using the relationship described
-#'   in \code{model}.
+#'   If \code{newdata} is provided as an \code{"mlm"} object, shapes from
+#'   \code{newdata} are detrended by "correcting" their relationship with the
+#'   explanatory variables using the relationship estimated for the data
+#'   provided in \code{model} ("partial detrending"). Specifically, if
+#'   \code{method = "residuals"}, shape residuals will be computed by
+#'   subtracting values fitted to the coefficients from \code{model} to the
+#'   shapes provided in \code{newdata}; whereas if \code{method = "orthogonal"},
+#'   shapes are projected into the subspace resulting from the subtraction of
+#'   the orthogonal subspaces computed for \code{newdata} and \code{model}.
+#'
+#'   If \code{method = "orthogonal"} and \code{newdata} is provided as a
+#'   2-margin matrix of shape descriptors, the function will instead return the
+#'   new set of shapes, detrended using the relationship estimated for the data
+#'   provided in \code{model} (i.e., the shapes provided in \code{newdata} are
+#'   projected directly into the orthogonal subspace computed for the data
+#'   provided in \code{model}).
 #'
 #'   The grand mean of the sample of shapes is used by default to center shape
-#'   variation, although a \code{xvalue} specifying a level or numeric value of
+#'   variation, although an \code{xvalue} specifying a level or numeric value of
 #'   the explanatory variable in \code{model} to center shapes at can be
-#'   provided. This shift can only be applied for one explanatory variable
-#'   at a time.
+#'   provided. This shift can only be applied for one explanatory variable.
 #'
-#'   If a phylogenetic tree is supplied for interspecific shape data, the procedure
-#'   is performed using the phylogenetically-corrected regression coefficients (and
-#'   the phylogenetic mean is used instead of the grand mean for re-centering data;
-#'   see Revell, 2009) assuming a Brownian motion model of evolution.
+#'   If a phylogenetic tree is supplied for interspecific shape data, the
+#'   procedure is performed using the phylogenetically-corrected coefficients
+#'   (and the phylogenetic mean is used instead of the grand mean for
+#'   re-centering data; see Revell, 2009), assuming a Brownian motion model of
+#'   evolution.
 #'
 #' @return A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
-#'   landmark data and \code{n x (4 x nb.h)} for the case of Fourer data (where
+#'   landmark data and \code{n x (4 x nb.h)} for the case of Fourier data (where
 #'   \code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
+#'
+#' @seealso \code{\link[stats]{lm}}, \code{\link{burnaby}},
+#'   \code{\link{expected_shapes}}
 #'
 #' @export
 #'
-#' @references Revell, L. J. (2009). \emph{Size-correction and principal components
-#'   for interspecific comparative studies}. Evolution, 63, 3258-3268.
+#' @references Burnaby, T. P. (1966) \emph{Growth-invariant discriminant
+#'   functions and generalized distances. Biometrics, 22, 96–110.}
+#'
+#' Revell, L. J. (2009). \emph{Size-correction and principal
+#'   components for interspecific comparative studies}. Evolution, 63,
+#'   3258-3268.
 #'
 #' Klingenberg, C. P. (2016). \emph{Size, shape, and form: concepts
 #'   of allometry in geometric morphometrics}. Development Genes and Evolution,
@@ -238,6 +268,8 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
 #'
 #'  #load tails data and packages
 #'  library(geomorph)
+#'  library(Morpho)
+#'
 #'  data(tails)
 #'  shapes <- tails$shapes
 #'  species <- tails$data$species
@@ -249,19 +281,34 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
 #'
 #'  ### For numeric variables
 #'
-#'  #fit linear model between shapes and sizes, then center at the grand mean of the sample
+#'  #fit linear model between shapes and sizes, then center at the grand mean of
+#'  #the sample
 #'  model <- lm(two.d.array(shapes) ~ logsizes)
 #'  detr_shapes_mat <- detrend_shapes(model)
 #'
 #'  detr_shapes_nosize <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
 #'
 #'  msp_nosize <- mspace(detr_shapes_nosize, links = tails$links, points = TRUE)
-#'  hulls_by_group_2D(msp_nosize$x, fac = species)
+#'  hulls_by_group_2D(msp_nosize$ordination$x, fac = species)
 #'
-#'  ## using (phylogenetic) tree
+#'  ## Using xvalue
 #'
-#'  #fit linear model between shapes and sizes, then center at the shape corresponding to the
-#'  #maximum size of the sample
+#'  #fit linear model between shapes and sizes, then center at the shape
+#'  #corresponding to the maximum size of the sample
+#'  model <- lm(two.d.array(shapes) ~ logsizes)
+#'  detr_shapes_mat2 <- detrend_shapes(model,
+#'                                     xvalue = max(logsizes))
+#'
+#'  detr_shapes_nosize2 <- arrayspecs(detr_shapes_mat2, k = 2, p = 9)
+#'
+#'  msp_nosize2 <- mspace(detr_shapes_nosize2, links = tails$links,
+#'                        points = TRUE)
+#'  hulls_by_group_2D(msp_nosize2$ordination$x, fac = species)
+#'
+#'  ## using a phylogenetic tree
+#'
+#'  #fit linear model between shapes and sizes, then center at the shape
+#'  #corresponding to the grand size of the sample
 #'  sp_shapes <- expected_shapes(shapes, species)
 #'  sp_logsizes <- c(tapply(logsizes, species, mean))
 #'  model <- lm(two.d.array(sp_shapes) ~ sp_logsizes)
@@ -269,27 +316,14 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
 #'
 #'  detr_shapes_nosize1 <- arrayspecs(detr_shapes_mat1, k = 2, p = 9)
 #'
-#'  msp_nosize1 <- mspace(detr_shapes_nosize1, links = tails$links, points = TRUE)
-#'  points(msp_nosize1$x, pch = 21, bg = c(1:13)[species])
-#'
-#'  ## Using xvalue
-#'
-#'  #fit linear model between shapes and sizes, then center at the shape corresponding to the
-#'  #maximum size of the sample
-#'  model <- lm(two.d.array(shapes) ~ logsizes)
-#'  detr_shapes_mat2 <- detrend_shapes(model,
-#'                                     xvalue = max(logsizes))
-#'
-#'  detr_shapes_nosize2 <- arrayspecs(detr_shapes_mat2, k = 2, p = 9)
-#'
-#'  msp_nosize2 <- mspace(detr_shapes_nosize2, links = tails$links, points = TRUE)
-#'  hulls_by_group_2D(msp_nosize2$x, fac = species)
+#'  msp_nosize1 <- mspace(detr_shapes_nosize1, links = tails$links,
+#'                        points = TRUE)
+#'  points(msp_nosize1$ordination$x, pch = 21, bg = c(1:13)[species])
 #'
 #'  ## Using newdata
 #'
-#'  #fit linear model between shapes and sizes for NDF species, then use the NDF allometry to
-#'  #detrend DF shapes from alometric variation
-#'  #maximum size of the sample
+#'  #fit linear model between shapes and sizes for NDF species, then use the NDF
+#'  #allometry to detrend DF shapes from alometric variation
 #'  index <- tails$data$type == "NDF"
 #'  shapes_ndf <- shapes[,,index]
 #'  logsizes_ndf <- logsizes[index]
@@ -302,38 +336,38 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
 #'
 #'  detr_shapes_nosize3 <- arrayspecs(detr_shapes_mat3, k = 2, p = 9)
 #'
-#'  msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links, points = TRUE)
-#'  hulls_by_group_2D(msp_nosize3$x, fac = factor(species[!index]))
+#'  msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links,
+#'                        points = TRUE)
+#'  hulls_by_group_2D(msp_nosize3$ordination$x, fac = factor(species[!index]))
 #'
 #'  ### For factors
 #'
-#'  #fit linear model between shapes and species, then center at the grand mean of the sample
+#'  #fit linear model between shapes and species, then center at the grand mean
+#'  #of the sample
 #'  model <- lm(two.d.array(shapes) ~ species)
 #'  detr_shapes_mat <- detrend_shapes(model)
 #'
 #'  detr_shapes_nospp <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
 #'
 #'  msp_nospp <- mspace(detr_shapes_nospp, links = tails$links, points = TRUE)
-#'  hulls_by_group_2D(msp_nospp$x, fac = species)
+#'  hulls_by_group_2D(msp_nospp$ordination$x, fac = species)
 #'
 #'  ## Using xvalue
 #'
-#'  #fit linear model between shapes and species, then center at the shape corresponding to
-#'  #the mean shape of T. savana
+#'  #fit linear model between shapes and species, then center at the shape
+#'  #corresponding to the mean shape of T. savana
 #'  model <- lm(two.d.array(shapes) ~ species)
-#'  detr_shapes_mat2 <- detrend_shapes(model,
-#'                                     xvalue = "T. savana")
+#'  detr_shapes_mat2 <- detrend_shapes(model, xvalue = "T. savana")
 #'
 #'  detr_shapes_nospp2 <- arrayspecs(detr_shapes_mat2, k = 2, p = 9)
 #'
 #'  msp_nospp2 <- mspace(detr_shapes_nospp2, links = tails$links, points = TRUE)
-#'  hulls_by_group_2D(msp_nospp2$x, fac = species)
+#'  hulls_by_group_2D(msp_nospp2$ordination$x, fac = species)
 #'
 #'  ## Using newdata
 #'
-#'  #fit linear model between shapes and sex for NDF species, then use the NDF sexual
-#'  #dimorphism to detrend DF shapes from variation between sexes
-#'  #maximum size of the sample
+#'  #fit linear model between shapes and sex for NDF species, then use the NDF
+#'  #sexual dimorphism to detrend DF shapes from variation between sexes
 #'  index <- tails$data$type == "NDF"
 #'  shapes_ndf <- shapes[,,index]
 #'  sex_ndf <- sex[index]
@@ -345,8 +379,60 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
 #'
 #'  detr_shapes_nosize3 <- arrayspecs(detr_shapes_mat3, k = 2, p = 9)
 #'
-#'  msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links, points = TRUE)
-#'  hulls_by_group_2D(msp_nosize3$x, fac = factor(species[!index]))
+#'  msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links,
+#'                        points = TRUE)
+#'  hulls_by_group_2D(msp_nosize3$ordination$x, fac = factor(species[!index]))
+#'
+#'  ## Comparing residuals vs orthogonal methods
+#'
+#'  \dontrun{
+#'  #load shells3D data, retain only specimens belonging to S. vacaensis
+#'  data("shells3D")
+#'  index <- species == levels(species)[7]
+#'  shapes <- shells3D$shapes
+#'  refmesh <- shells3D$mesh_meanspec
+#'  species <- shells3D$data$species
+#'  sizes <- log(shells3D$sizes)
+#'  template <- Morpho::tps3d(x = refmesh,
+#'                            refmat = shapes[,,findMeanSpec(shapes)],
+#'                            tarmat = expected_shapes(shapes[,,index]))
+#'
+#'  #compute allometric axis (i.e., shape variation associated to changes in size)
+#'  alloax <- lm(two.d.array(shapes[,,index]) ~ sizes[index])
+#'
+#'  #project vacaensis specimens into the overall morphospace together with
+#'  #allometric axis
+#'  mspace(shapes, template = template, bg.models = "gray",
+#'         cex.ldm = 0, alpha.models = 0.7, adj_frame = c(0.93,0.93)) %>%
+#'    proj_shapes(shapes[,,index], pch = 21, bg = 7) %>%
+#'    proj_axis(alloax, type = 2, lwd = 2, lty = 1)
+#'
+#'  #compute non-allometric variation using linear models (center on the shape
+#'  #corresponding to the maximum size)
+#'  detr_shapes_lm <- lm(two.d.array(shapes[,,index]) ~ sizes[index]) %>%
+#'    detrend_shapes(method = "residuals", xvalue = max(sizes[index])) %>%
+#'    arrayspecs(k = 3, p = 90)
+#'
+#'  #visualize
+#'  mspace(shapes, template = template, bg.models = "gray",
+#'         cex.ldm = 0, alpha.models = 0.7, adj_frame = c(0.93,0.93)) %>%
+#'    proj_shapes(shapes[,,index], pch = 1, col = 7) %>%
+#'    proj_axis(alloax, type = 2, lwd = 2, lty = 1) %>%
+#'    proj_shapes(detr_shapes_lm, pch = 21, bg = 7)
+#'
+#'  #compute non-allometric variation using a orthogonal subspace (center on the
+#'  #shape corresponding to the maximum size)
+#'  detr_shapes_os <- lm(two.d.array(shapes[,,index]) ~ sizes[index]) %>%
+#'    detrend_shapes(method = "orthogonal", xvalue = max(sizes[index])) %>%
+#'    arrayspecs(k = 3, p = 90)
+#'
+#'  #visualize
+#'  mspace(shapes, template = template, bg.models = "gray",
+#'         cex.ldm = 0, alpha.models = 0.7, adj_frame = c(0.93,0.93)) %>%
+#'    proj_shapes(shapes[,,index], pch = 1, col = 7) %>%
+#'    proj_axis(alloax, type = 2, lwd = 2, lty = 1) %>%
+#'    proj_shapes(detr_shapes_os, pch = 21, bg = 7)
+#'  }
 #'
 #'  #### Fourier data (quick demo)
 #'
@@ -358,22 +444,22 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
 #'  msp <- mspace(shapes, mag = 0.5, points = TRUE)
 #'  hulls_by_group_2D(msp$x, fac = species)
 #'
-#'  #fit linear model between shapes and sizes, then center at the shape corresponding to
-#'  #the grand mean
+#'  #fit linear model between shapes and sizes, then center at the shape
+#'  #corresponding to the grand mean
 #'  model <- lm(shapes ~ logsizes)
 #'  detr_shapes_nosize <- detrend_shapes(model)
 #'
 #'  msp_nosize <- mspace(detr_shapes_nosize, mag = 0.5, points = TRUE)
-#'  hulls_by_group_2D(msp_nosize$x, fac = species)
+#'  hulls_by_group_2D(msp_nosize$ordination$x, fac = species)
 #'
-#'  #fit linear model between shapes and sizes, then center at the shape corresponding
-#'  #to the maximum size
+#'  #fit linear model between shapes and sizes, then center at the shape
+#'  #corresponding to the maximum size
 #'  model <- lm(shapes ~ logsizes)
 #'  detr_shapes_nosize2 <- detrend_shapes(model,
 #'                                        xvalue = max(logsizes))
 #'
 #'  msp_nosize2 <- mspace(detr_shapes_nosize2, mag = 0.5, points = TRUE)
-#'  hulls_by_group_2D(msp_nosize2$x, fac = species)
+#'  hulls_by_group_2D(msp_nosize2$ordination$x, fac = species)
 #'
 #'  #fit linear model between shapes and sizes, then center at the maximum size
 #'  shapes_koeneni <- shapes[species == "koeneni",]
@@ -389,7 +475,9 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL) {
 #'  title("raw P. esbelta morphospace")
 #'  msp_nosize4 <- mspace(detr_shapes_nosize3, mag = 0.5, points = TRUE)
 #'  title("P. esbelta morphospace, refined using \n allometric variation from P. koeneni")
-detrend_shapes <- function(model, xvalue = NULL, tree = NULL, newdata = NULL) {
+detrend_shapes <- function(model, xvalue = NULL, tree = NULL, method = "residuals", newdata = NULL) {
+
+  if(!any(method == "residuals", method == "orthogonal")) stop("method should be one of 'residuals' or 'orthogonal'")
 
   x <- model$model[-1]
   y <- model$model[[1]]
@@ -425,58 +513,109 @@ detrend_shapes <- function(model, xvalue = NULL, tree = NULL, newdata = NULL) {
     coefs <- model$coefficients
   }
 
-  which_na <- is.na(apply(coefs,1,sum))
-  resids <- y - designmat[,!which_na] %*% coefs[!which_na,]
+  if(method == "orthogonal") {
+    axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))
+    ycent <- if(!is.null(tree)) t(t(rbind(t(t(rbind(y)) - colMeans(y)))) + grandmean) else y
+    ortho_space <- burnaby(y = ycent, axmat = axmat)
+    ortho_scores <- ortho_space$x
+    ortho_rotation <- ortho_space$rotation
+    ax <- ortho_space$sdev^2 > 1e-15
 
-  if(!is.null(newdata)) {
-    newx <- newdata$model[-1]
-    newy <- newdata$model[[1]]
-    if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
-    namesy <- rownames(newy)
+    if(!is.null(xvalue)) {
+      ortho_center <- c(expected_shapes(shapes = y, x = as.matrix(x), xvalue = xvalue,
+                                        tree = tree, returnarray = FALSE))
+    } else {
+      ortho_center <- ortho_space$center
+    }
 
-    newdesignmat <- stats::model.matrix(stats::as.formula(paste0("~ ",
-                                                   strsplit(as.character(newdata$call[2]),
-                                                            split = "~")[[1]][2])),
-                                 data = newx)
+    if(!is.null(newdata)) {
 
+      if(inherits(newdata, "mlm")) {
+        newx <- newdata$model[-1]
+        newy <- newdata$model[[1]]
+        if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
+        namesy <- rownames(newy)
+
+        newortho_space <- burnaby(y = newy, x = newx)
+        ax <- 1:min(sum(newortho_space$sdev^2 > 1e-15),
+                    sum(ortho_space$sdev^2 > 1e-15))
+        ortho_scores <- newortho_space$x
+        ortho_rotation <- newortho_space$rotation[,ax] - ortho_space$rotation[,ax]
+
+
+        if(!is.null(xvalue)) {
+          ortho_center <- c(expected_shapes(shapes = newy, x = as.matrix(newx),
+                                            xvalue = xvalue, returnarray = FALSE))
+        } else {
+          ortho_center <- newortho_space$center
+        }
+
+      } else {
+        ortho_scores <- proj_eigen(x = newdata, vectors = ortho_space$rotation,
+                                   center = ortho_space$center)
+      }
+    }
+
+    ortho_shapes2d <- rev_eigen(scores = ortho_scores[, ax],
+                                vectors = ortho_rotation[, ax],
+                                center = ortho_center)
+
+    return(ortho_shapes2d)
+  }
+
+  if(method == "residuals") {
     which_na <- is.na(apply(coefs,1,sum))
-    resids <- newy - newdesignmat[,!which_na] %*% coefs[!which_na,]
+    resids <- y - designmat[,!which_na] %*% coefs[!which_na,]
 
-  }
+    if(!is.null(newdata)) {
+      newx <- newdata$model[-1]
+      newy <- newdata$model[[1]]
+      if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
+      namesy <- rownames(newy)
 
-  n <- nrow(resids)
+      formula <- stats::as.formula(paste0("~ ", strsplit(as.character(newdata$call[2]),
+                                                         split = "~")[[1]][2]))
+      newdesignmat <- stats::model.matrix(formula, data = newx)
 
-  if(is.null(xvalue)) {
+      which_na <- is.na(apply(coefs,1,sum))
+      resids <- newy - newdesignmat[,!which_na] %*% coefs[!which_na,]
 
-    grandmean_vec <- rep(1, n) %*% t(grandmean)
-    predicted_mat <- resids + grandmean_vec
-
-  } else {
-
-    if(is.numeric(x[[1]]) == TRUE) {
-      designmat <- cbind(1, xvalue)
     }
 
-    if(is.factor(x[[1]]) == TRUE) {
-      designmat <- rep(0, nlevels(x[[1]]))
-      designmat[which(levels(x[[1]]) == xvalue)] <- 1
+    n <- nrow(resids)
 
-      if(isFALSE(designmat[1] == 1)) designmat[1] <- 1
+    if(is.null(xvalue)) {
+
+      grandmean_vec <- rep(1, n) %*% t(grandmean)
+      predicted_mat <- resids + grandmean_vec
+
+    } else {
+
+      if(is.numeric(x[[1]]) == TRUE) {
+        designmat <- cbind(1, xvalue)
+      }
+
+      if(is.factor(x[[1]]) == TRUE) {
+        designmat <- rep(0, nlevels(x[[1]]))
+        designmat[which(levels(x[[1]]) == xvalue)] <- 1
+
+        if(isFALSE(designmat[1] == 1)) designmat[1] <- 1
+      }
+
+      fitted <- as.numeric(designmat %*% coefs)
+
+      fitted_vec <- rep(1, n) %*% t(fitted)
+      predicted_mat <- resids + fitted_vec
     }
 
-    fitted <- as.numeric(designmat %*% coefs)
+    predicted_mat <- predicted_mat[namesy,]
+    return(rbind(predicted_mat))
 
-    fitted_vec <- rep(1, n) %*% t(fitted)
-    predicted_mat <- resids + fitted_vec
   }
-
-  predicted_mat <- predicted_mat[namesy,]
-  return(rbind(predicted_mat))
-
 }
 
 
-##################################################################################
+################################################################################
 
 #' Correct artificially rotated set of Fourier shapes interactively
 #'
@@ -565,7 +704,7 @@ correct_efourier<-function(ef, index = NULL) {
 }
 
 
-##################################################################################
+################################################################################
 
 #' Compute shapes at the extremes of a morphometric axis
 #'
@@ -575,7 +714,8 @@ correct_efourier<-function(ef, index = NULL) {
 #'
 #' @param obj An object containing either a multivariate ordination of class
 #'   \code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes"} or
-#'   \code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using [stats::lm()].
+#'   \code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using
+#'   [stats::lm()].
 #' @param axis An optional numeric value specifying the axis of the multivariate
 #'   ordination which is to be represented.
 #' @param mag Numeric; magnifying factor for representing shape transformation.
@@ -584,9 +724,9 @@ correct_efourier<-function(ef, index = NULL) {
 #'   landmark data and \code{2 x (4 x nb.h)} for the case of Fourer data (where
 #'   \code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
 #'
-#' @details If an object of class \code{"mlm"} fitting shape to a factor (only two
-#'   levels allowed) is supplied in \code{obj}, magnification of the axis range
-#'   is attained through bgPCA.
+#' @details If an object of class \code{"mlm"} fitting shape to a factor (only
+#'   two levels allowed) is supplied in \code{obj}, magnification of the axis
+#'   range is attained through bgPCA.
 #'
 #' @export
 #'
@@ -618,13 +758,15 @@ correct_efourier<-function(ef, index = NULL) {
 #' extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 #' pile_shapes(extshapes, links = links, mshape = FALSE)
 #'
-#' #perform lm of shape on size, compute and plot extreme shapes at its natural range
+#' #perform lm of shape on size, compute and plot extreme shapes at its natural
+#' #range
 #' model <- lm(two.d.array(tails$shapes) ~ log(tails$sizes))
 #' extshapes2d <- ax_transformation(obj = model, mag = 1)
 #' extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 #' pile_shapes(extshapes, links = links, mshape = FALSE)
 #'
-#' #perform lm of shape on size, compute and plot extreme shapes at its natural range
+#' #perform lm of shape on size, compute and plot extreme shapes at its natural
+#' #range
 #' model <- lm(two.d.array(tails$shapes) ~ tails$data$sex)
 #' extshapes2d <- ax_transformation(obj = model, mag = 1)
 #' extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
@@ -684,13 +826,141 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 }
 
 
-##################################################################################
+################################################################################
 
-#' Compute shapes from an existing morphospace
+#' Retrieve / compute shapes from an existing morphospace
+#'
+#' @description Extracts shapes from \code{"mspace"} objects in various ways
+#'   (background shape models, specific axes, or particular coordinates - either
+#'   provided or chosen interactively by the user).
+#'
+#' @param mspace An \code{"mspace"} object.
+#' @param axis Optional integer indicating an axis along which shapes should
+#'   be sampled.
+#' @param range Optional numeric vector of length 2, indicating the range of values
+#'   the axis should be sampled over.
+#' @param nshapes Optional integer indicating the number of shapes the user
+#'   wishes to extract.
+#' @param scores An optional vector of length 2 or 2-column matrix indicating
+#'   the (x,y) coordinates in the morphospace that the user wishes to extract
+#'   as shapes. If \code{NULL}, a new device will open and the user will be
+#'   asked choose the coordinates interactively. Ignored when \code{axis} is
+#'   provided.
+#' @param keep.template Logical; should warped templates be returned as well?
+#' @param mag Optional numeric indicating a magnifying factor for representing
+#'   shape transformation.
+#'
+#' @details This function provides the user with an easy way to extract
+#'   theoretical shapes from an existing morphospace. If only an \code{"mspace"}
+#'   object is provided, the set of background shape models (optionally
+#'   amplified by a factor of \code{mag}) will be returned.
+#'
+#'   If \code{axis} is provided, a sample of \code{nshapes} shapes computed at
+#'   regular intervals along the specified ordination axis (either over its
+#'   empirical range -optionally amplified by a factor of \code{mag}- or, if
+#'   provided, between the extremes of \code{range}) will be returned.
+#'
+#'   If \code{axis = NULL}, this function will let the user to select arbitrary
+#'   coordinates in the morphospace to be back-transformed into shapes. There
+#'   are two alternatives: 1) if \code{scores = NULL} (the default option) the
+#'   user will be asked to interactively select the location(s) of
+#'   \code{nshapes} points in a new graphical device. 2) Otherwise, the set of
+#'   shapes represented by the (x,y) coordinates provided in \code{scores} will
+#'   be returned.
+#'
+#' @return A list containing sampled shapes (\code{$shapes}), as well as their
+#'   associated templates (\code{$templates}), when warranted.
+#'
+#' @export
+#'
+#' @examples
+#' #load all the relevant data and packages
+#' library(Morpho)
+#' library(geomorph)
+#'
+#' data("tails")
+#' shapes <- tails$shapes
+#' sizes <- tails$sizes
+#' species <- tails$data$species
+#' type <- tails$data$type
+#' links <- tails$links
+#' sp_shapes <- expected_shapes(shapes, species)
+#' tree <- tails$tree
+#'
+#' #build phylomorphospace
+#' phylomsp <- mspace(shapes, links = links) %>%
+#'   proj_phylogeny(sp_shapes, tree = tree)
+#'
+#'
+#' ##Extracting background shape models
+#'
+#' #extract background shape models
+#' background_shapes <- extract_shapes(phylomsp)
+#'
+#' #pile shapes and visualise the corresponding coordinates sampled in the
+#' #morphospace
+#' pile_shapes(background_shapes$shapes, links = links)
+#'
+#' plot_mspace(phylomsp, phylo = FALSE)
+#' background_scores <- proj_eigen(two.d.array(background_shapes$shapes),
+#'                                 phylomsp$ord$rotation, phylomsp$ord$center)
+#' points(background_scores, pch = 21, bg = "red")
+#'
+#'
+#' ##Sampling a particular ordination axis
+#'
+#' #extract shapes along PC2
+#' PC2_shapes <- extract_shapes(phylomsp, axis = 2, nshapes = 8)
+#'
+#' #pile shapes and visualise the corresponding coordinates sampled in the
+#' #morphospace
+#' pile_shapes(PC2_shapes$shapes, links = links, mshape = FALSE)
+#'
+#' plot_mspace(phylomsp, phylo = FALSE)
+#' PC2_scores <- proj_eigen(two.d.array(PC2_shapes$shapes),
+#'                          phylomsp$ord$rotation, phylomsp$ord$center)
+#' points(PC2_scores, pch = 21, bg = "blue")
+#'
+#'
+#' ##Sampling particular (x,y) locations
+#'
+#' #1. Interactively
+#'
+#' \dontrun{
+#'
+#' #select 1 shape in the new window
+#' arbitrary_shape <- extract_shapes(phylomsp, nshapes = 1)
+#'
+#' #plot shape and visualise the corresponding coordinates sampled in the
+#' #morphospace
+#' plot(arbitrary_shape$shapes[,,1], axes = FALSE, xlab = "", ylab = "")
+#' lineplot(arbitrary_shape$shapes[,,1], links)
+#'
+#' plot_mspace(phylomsp, phylo = FALSE)
+#' arbitrary_scores <- proj_eigen(two.d.array(arbitrary_shape$shapes),
+#'                                 phylomsp$ord$rotation, phylomsp$ord$center)
+#' points(arbitrary_scores, pch = 21, bg = "magenta")
+#'
+#' }
+#'
+#'
+#' #2. Specifying coordinates
+#'
+#' #get scores of the nodes of the phylogeny for the first two PCs
+#' nodes_scores0 <- phylomsp$projected$phylo_scores[14:25,1:2]
+#'
+#' #extract shapes from morphospace
+#' nodes_shapes <- extract_shapes(phylomsp, scores = nodes_scores0)
+#'
+#' plot_mspace(phylomsp, phylo = TRUE)
+#' nodes_scores <- proj_eigen(two.d.array(nodes_shapes$shapes),
+#'                          phylomsp$ord$rotation, phylomsp$ord$center)
+#' points(nodes_scores, pch = 21, bg = "green")
 extract_shapes <- function(mspace,
                            axis = NULL,
                            nshapes = NULL,
                            scores = NULL,
+                           range = NULL,
                            keep.template = TRUE,
                            mag = 1) {
 
@@ -702,8 +972,13 @@ extract_shapes <- function(mspace,
                          center = mspace$ordination$center) * mag
   } else {
     if(!is.null(axis)) {
+      if(!is.null(scores)) warning("an axis has been provided; scores will be ignored")
       if(nshapes > 1) {
-        xrange <- range(mspace$ordination$x[,axis]) * mag
+        if(!is.null(range)) {
+          xrange <- range
+        }  else {
+          xrange <- range(mspace$ordination$x[,axis]) * mag
+        }
         scores <- seq(xrange[1], xrange[2], length.out = nshapes)
       } else {
         stop("At least two shapes are necessary to represent variation along a PC axis")
@@ -711,9 +986,15 @@ extract_shapes <- function(mspace,
     } else {
       axis <- mspace$plotinfo$axes
       if(!is.null(scores)) {
+        if(!is.null(nshapes)) {
+          if((is.null(dim(scores)) & nshapes != 1) | (nshapes != nrow(scores))) {
+            warning("number of scores provided and nshapes differ, the latter will be ignored")
+          }
+        }
         if(is.null(dim(scores))) scores <- rbind(scores)
       } else {
-        if(Sys.info()["sysname"] == "Darwin") grDevices::quartz() else grDevices::x11()
+        if(Sys.info()["sysname"] == "Darwin") grDevices::quartz() else grDevices::X11()
+        cat(paste0("Select ", nshapes, " points in the morphospace"))
         plot_mspace(mspace)
         scores <- matrix(unlist(graphics::locator(n = nshapes)),
                          nrow = nshapes, ncol = 2, byrow = TRUE)
@@ -731,28 +1012,31 @@ extract_shapes <- function(mspace,
                                    p = mspace$plotinfo$p,
                                    k = mspace$plotinfo$k)
 
-    if(keep.template & !is.null(mspace$plotinfo$template)) {
-      centroid <- matrix(rev_eigen(0, mspace$ordination$rotation[,1], mspace$ordination$center),
-                         ncol = mspace$plotinfo$k, byrow = TRUE)
-      if(mspace$plotinfo$k == 2) {
-
-        temp_cent <- rbind(centroid,
-                           Momocs::tps2d(mspace$plotinfo$template[-(seq_len(mspace$plotinfo$p)), ],
-                                         mspace$plotinfo$template[(seq_len(mspace$plotinfo$p)), ],
-                                         centroid))
-
-        temp_warpd_list <- lapply(seq_len(dim(shapes)[3]),
-                                  function(i) {Momocs::tps2d(temp_cent[-(seq_len(mspace$plotinfo$p)),],
-                                                             temp_cent[(seq_len(mspace$plotinfo$p)),],
-                                                             shapes[,,i])})
-        templates <- temp_warpd_arr <- abind::abind(temp_warpd_list, along = 3)
-        #templates <- abind::abind(shapes, temp_warpd_arr, along = 1)
-
+    if(keep.template) {
+      if(is.null(mspace$plotinfo$template)) {
+        warning("there are no templates to warp; won't be returned")
       } else {
-        templates <- vector(length = dim(shapes)[3], mode = "list")
-        for(i in seq_len(dim(shapes)[3])) {
-          templates[[i]] <- Morpho::tps3d(x = mspace$plotinfo$template ,
-                                          refmat = centroid, tarmat = shapes[,,i])
+        centroid <- matrix(rev_eigen(0, mspace$ordination$rotation[,1], mspace$ordination$center),
+                           ncol = mspace$plotinfo$k, byrow = TRUE)
+        if(mspace$plotinfo$k == 2) {
+
+          temp_cent <- rbind(centroid,
+                             Momocs::tps2d(mspace$plotinfo$template[-(seq_len(mspace$plotinfo$p)), ],
+                                           mspace$plotinfo$template[(seq_len(mspace$plotinfo$p)), ],
+                                           centroid))
+
+          temp_warpd_list <- lapply(seq_len(dim(shapes)[3]),
+                                    function(i) {Momocs::tps2d(temp_cent[-(seq_len(mspace$plotinfo$p)),],
+                                                               temp_cent[(seq_len(mspace$plotinfo$p)),],
+                                                               shapes[,,i])})
+          templates <- temp_warpd_arr <- abind::abind(temp_warpd_list, along = 3)
+
+        } else {
+          templates <- vector(length = dim(shapes)[3], mode = "list")
+          for(i in seq_len(dim(shapes)[3])) {
+            templates[[i]] <- Morpho::tps3d(x = mspace$plotinfo$template ,
+                                            refmat = centroid, tarmat = shapes[,,i])
+          }
         }
       }
     }
@@ -760,7 +1044,7 @@ extract_shapes <- function(mspace,
     shapes <- data2d
   }
 
-  results <- list(scores = scores, shapes = shapes)
+  results <- list(shapes = shapes)
   if(keep.template & !is.null(mspace$plotinfo$template)) results$templates <- templates
 
   return(invisible((results)))
