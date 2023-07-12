@@ -582,7 +582,7 @@ proj_groups <- function(mspace, shapes = NULL, groups, ellipse = FALSE,
 #'
 #'   Axes computed by fitting linear models to shape data can differ in
 #'   extension from axes obtained through supervised ordination using the same
-#'   supervising variable (i.e. shape transformations will be either stretched
+#'   supervising variable (i.e., shape transformations will be either stretched
 #'   or truncated) due to the former assuming that the explanatory variable has
 #'   been measured without error. Also, the former will not be necessarily
 #'   centered.
@@ -871,7 +871,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
 #' @param alpha Numeric; transparency factor for filled contours.
 #' @param palette A function defining a color palette to use for landscape
 #'   representation.
-#' @param nlevels Number of levels (i.e. contours) to use for landscape
+#' @param nlevels Number of levels (i.e., contours) to use for landscape
 #'   representation.
 #' @param drawlabels Logical; should the labels indicating the value of each
 #'   surface contour be plotted?
@@ -884,8 +884,8 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
 #'
 #' @details The purpose of this function is to generate and depict a 2- (for
 #'   univariate morphospaces) or 3-dimensonal (for bivariate morphospaces)
-#'   surface (i.e. a landscape), interpolated from values assigned to the set of
-#'   shapes projected into an existing morphospace. These can be a sample of
+#'   surface (i.e., a landscape), interpolated from values assigned to the set
+#'   of shapes projected into an existing morphospace. These can be a sample of
 #'   shapes specified by the user, producing a surface for a specific region of
 #'   the morphospace ("empirical landscapes"). Alternatively, the set of
 #'   background shape models can be used to generate a surface for the entire
@@ -901,7 +901,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
 #'   shape (stored as a vector of shape descriptors), and return a single
 #'   numeric value computed for or from that shape. If the \code{X} argument is
 #'   used instead, values should be in the same order than the shapes provided
-#'   in \code{shapes}, or than the background shape models (i.e. from left to
+#'   in \code{shapes}, or than the background shape models (i.e., from left to
 #'   right and from bottom to top; see \code{\link{morphogrid}},
 #'   \code{\link{plot_morphogrid2d}} and \code{\link{plot_morphogrid3d}}) if
 #'   \code{shapes = NULL}. Otherwise, landscape topography will be dissociated
@@ -1419,7 +1419,7 @@ print.mspace <- function(mspace){
 #'   depicting landscapes.
 #' @param palette.landsc A function defining a color palette to use for
 #'   landscape representation.
-#' @param nlevels.landsc Number of levels (i.e. contours) to use in landscape
+#' @param nlevels.landsc Number of levels (i.e., contours) to use in landscape
 #'   representation.
 #' @param drawlabels.landsc Logical; should the labels indicating the value of
 #'   each surface contour be plotted?
@@ -1457,8 +1457,8 @@ print.mspace <- function(mspace){
 #'   warranted if the axes being depicted are the same than those used when the
 #'   surface landscape was originally computed using \code{\link{mspace}} +
 #'   \code{\link{proj_landscape}}. The only exception is when one of the
-#'   original axes (i.e. those specified with the \code{axes} argument in
-#'   \code{\link{mspace}}) is dropped (i.e. not specified with the \code{axes}
+#'   original axes (i.e., those specified with the \code{axes} argument in
+#'   \code{\link{mspace}}) is dropped (i.e., not specified with the \code{axes}
 #'   argument of \code{\link{plot_mspace}}). This will result in the collapse of
 #'   the 3D landscape projected into a bivariate morphospace into a 2D landscape
 #'   projected into a univariate one.
@@ -2298,7 +2298,7 @@ print.mspace <- function(mspace){
 #'   \item{display.landsc} { How to display landscape representation; options
 #'      are \code{"contour"} and \code{"filled.contour"}. For bivariate
 #'      landscapes only.}
-#'   \item{nlevels.landsc} { Number of levels (i.e. contours) to use in
+#'   \item{nlevels.landsc} { Number of levels (i.e., contours) to use in
 #'      landscape representation.}
 #'   \item{palette.landsc} { A function defining a color palette to use for
 #'      landscape representation.}
@@ -2344,8 +2344,8 @@ print.mspace <- function(mspace){
 #'   warranted if the axes being depicted are the same than those used when the
 #'   surface landscape was originally computed using \code{\link{mspace}} +
 #'   \code{\link{proj_landscape}}. The only exception is when one of the
-#'   original axes (i.e. those specified with the \code{axes} argument in
-#'   \code{\link{mspace}}) is dropped (i.e. not specified with the \code{axes}
+#'   original axes (i.e., those specified with the \code{axes} argument in
+#'   \code{\link{mspace}}) is dropped (i.e., not specified with the \code{axes}
 #'   argument of \code{\link{plot_mspace}}). This will result in the collapse of
 #'   the 3D landscape projected into a bivariate morphospace into a 2D landscape
 #'   projected into a univariate one.
@@ -2401,8 +2401,8 @@ print.mspace <- function(mspace){
 #'
 #' #change colors for as tips and nodes of the phylogeny
 #' plot_mspace(msp, axes = c(1,3), mag = 1.5, nh = 2, nv = 2, links = links,
-#'             size.models = 0.5, cex.ldm = 5, col.ldm = "red", col.tips = "red",
-#'             col.nodes = "blue")
+#'             size.models = 0.5, cex.ldm = 5, col.ldm = "red",
+#'             col.tips = "red", col.nodes = "blue")
 #'
 #' #plot only first PC axis, with general distribution of specimens
 #' plot_mspace(msp, axes = 1, mag = 1.5, nh = 2, nv = 2, links = links,
@@ -2442,13 +2442,15 @@ print.mspace <- function(mspace){
 #'
 #' #plot vertical phenogram against PC1
 #' plot_mspace(msp, y = tree,  axes = 1, links = links, col.points = species,
-#'             col.groups = 1:nlevels(species), pch.points = 16, xlab = "Branch lengths",
-#'             pch.tips = 21, bg.tips = "red", pch.nodes = 21, bg.nodes = "blue")
+#'             col.groups = 1:nlevels(species), pch.points = 16,
+#'             xlab = "Branch lengths", pch.tips = 21, bg.tips = "red",
+#'             pch.nodes = 21, bg.nodes = "blue")
 #'
 #' #plot horizontal phenogram against PC2
 #' plot_mspace(msp, x = tree,  axes = 2, links = links, col.points = species,
-#'             col.groups = 1:nlevels(species), pch.points = 16, ylab = "Branch lengths",
-#'             pch.tips = 21, bg.tips = "red", pch.nodes = 21, bg.nodes = "blue")
+#'             col.groups = 1:nlevels(species), pch.points = 16,
+#'             ylab = "Branch lengths", pch.tips = 21, bg.tips = "red",
+#'             pch.nodes = 21, bg.nodes = "blue")
 plot_mspace <- function(mspace,
                         axes = NULL,
                         links = NULL,
