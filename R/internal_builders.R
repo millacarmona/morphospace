@@ -1,4 +1,4 @@
-##########################################################################
+################################################################################
 
 #' Reverse eigenanalysis-based ordination
 #'
@@ -49,7 +49,7 @@
 rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + center) }
 
 
-###########################################################################
+################################################################################
 
 #' Project cases into existing eigenanalysis-based ordination
 #'
@@ -97,7 +97,7 @@ rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + ce
 proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors }
 
 
-##########################################################################
+################################################################################
 
 #' Singular value decomposition for 2 blocks of variables
 #'
@@ -172,7 +172,9 @@ svd_block <- function(x, y, tree = NULL) {
   return(results)
 
 }
-##########################################################################
+
+
+################################################################################
 
 #' Inverse Fourier transform
 #'
@@ -220,7 +222,7 @@ inv_efourier <- function(coe, nb.pts = 120) {
 }
 
 
-################################################################################################
+################################################################################
 
 #' Identify and arrange shape descriptors
 #'
@@ -256,28 +258,39 @@ inv_efourier <- function(coe, nb.pts = 120) {
 #' head(dat2$data2d)
 #' dat2$datype
 shapes_mat <- function(shapes) {
-
-  if(length(dim(shapes)) == 3) {
-    datype <- "landm"
-    data2d <- geomorph::two.d.array(shapes)
+  #if is just a vector, arrange as a one-row matrix (will be treated as "2D" data)
+  if(is.null(dim(shapes))) {
+    shapes <- rbind(shapes)
+    rownames(shapes) <- NULL
   }
 
-  if(length(dim(shapes)) == 2) {
-    if(any(class(shapes) == "OutCoe")) {
-      datype <- "fcoef"
-      data2d <- shapes$coe
-    } else {
-      if(!is.null(colnames(shapes))) {
-        if(any(colnames(shapes)[1] == "A1", colnames(shapes)[1] == "A2")) {
-          datype <- "fcoef"
-          data2d <- shapes
-        } else {
-          datype <- "landm"
+  if(inherits(shapes, "OutCoe")) { #if it's a Momocs object
+    datype <- "fcoef" #then it's Fourier data
+    data2d <- shapes$coe #extract coefficients
+  } else { #otherwise....
+
+    if(inherits(shapes, "matrix")) { #if it is a matrix,
+      if(any(colnames(shapes)[1] == "A1", colnames(shapes)[1] == "A2")) { #and columns have coefficients names
+        datype <- "fcoef" #then its Fourier data (already in "2D" format)
+        data2d <- shapes
+      } else { #if there are no names,
+        if(ncol(shapes) <= 3) { #and the matrix has 3 columns or less
+          datype <- "landm" #then it is a single landmark shape in "3D" format.
+          data2d <- t(matrix(t(shapes))) #stretch into a single row
+        } else { #if there are more than 3 columns
+          datype <- "landm" #then is landmark data (already in "2D" format)
           data2d <- shapes
         }
-      } else {
-        datype <- "landm"
-        data2d <- shapes
+      }
+    } else { #if it's not a matrix
+      if(inherits(shapes, "array")) { #but it is an array
+        if(dim(shapes)[3] > 1) { #with several slides
+          datype <- "landm" #then is landmark data in "3D" format.
+          data2d <- geomorph::two.d.array(shapes) #transform into "2D" data
+        } else { #but if it only has one slide,
+          datype <- "landm" #then is a single landmark shape in "3D" format.
+          data2d <- t(matrix(t(shapes[,,1]))) #stretch into a single row
+        }
       }
     }
   }
@@ -285,17 +298,19 @@ shapes_mat <- function(shapes) {
 }
 
 
-################################################################################################
+################################################################################
 
 #' Adjust aspect and scale of background shape models for 2D data
 #'
-#' @description Avoid background shape models distortion caused by differences in ranges
-#'   of x and y axes. Used internally.
+#' @description Avoid background shape models distortion caused by differences
+#'   in ranges of x and y axes. Used internally.
 #'
 #' @param models An array containing the background shape models.
 #' @param frame The frame in which shape models are to be plotted.
-#' @param model_width Numeric; the width of a reference shape model (usually the consensus).
-#' @param model_height Numeric; the height of a reference shape model (usually the consensus).
+#' @param model_width Numeric; the width of a reference shape model (usually the
+#'   consensus).
+#' @param model_height Numeric; the height of a reference shape model (usually
+#'   the consensus).
 #'
 #' @return An array containing the adjusted shape models.
 #'
@@ -330,12 +345,15 @@ shapes_mat <- function(shapes) {
 #' }
 #'
 #' #calculate width and height of consensus shape
-#' wh <- abs(apply(apply(expected_shapes(shapes_grid0$models_arr), 2, range), 2, diff))
+#' wh <- abs(apply(apply(expected_shapes(shapes_grid0$models_arr), 2, range), 2,
+#'           diff))
 #'
 #' #ajust grid to new frame and plot
-#' adj_grid <- adjust_models2d(models = shapes_grid0$models_arr, frame = newframe,
-#'                             model_width = wh[1], model_height = wh[2])
-#' for(i in 1:dim(adj_grid)[3]) points(adj_grid[,,i], type = "l", col = "blue", lwd = 2)
+#' adj_grid <- adjust_models2d(models = shapes_grid0$models_arr,
+#'                             frame = newframe, model_width = wh[1],
+#'                             model_height = wh[2])
+#' for(i in 1:dim(adj_grid)[3]) points(adj_grid[,,i], type = "l", col = "blue",
+#'                                     lwd = 2)
 adjust_models2d <- function(models, frame, model_width, model_height) {
 
   frame_xydiffrange <- abs(apply(apply(frame, 2, range), 2, diff))
@@ -381,20 +399,21 @@ adjust_models2d <- function(models, frame, model_width, model_height) {
 }
 
 
-################################################################################################
+################################################################################
 
 #' Adjust aspect and scale of background shape models for 3D data
 #'
-#' @description Avoid background shape models distortion caused by differences in ranges
-#'   of x and y axes. Used internally.
+#' @description Avoid background shape models distortion caused by differences
+#'   in ranges of x and y axes. Used internally.
 #'
 #' @param models A list containing PNG images depicting background shape models.
 #' @param frame The frame in which shape models are to be plotted.
 #' @param size.models Numeric; size factor for shape models.
 #' @param asp.models Numeric; the y/x aspect ratio of shape models.
 #'
-#' @return A list containing the adjusted frame of each element in \code{models}, and
-#'   new, adjusted limits for the x and y axes from \code{frame}.
+#' @return A list containing the adjusted frame of each element in
+#'   \code{models}, and new, adjusted limits for the x and y axes from
+#'   \code{frame}.
 #'
 #' @export
 #'
@@ -435,13 +454,15 @@ adjust_models2d <- function(models, frame, model_width, model_height) {
 #' })
 #'
 #' #adjust snapshots
-#' adj <- adjust_models3d(models = models, frame = model_centers, size.models = 1, asp.models = 1)
+#' adj <- adjust_models3d(models = models, frame = model_centers,
+#'                        size.models = 1, asp.models = 1)
 #'
 #' #plot everything
 #' plot(pca$x, xlim = adj$xlim, ylim = adj$ylim)
 #' for(i in 1:length(models)) {
-#'   rasterImage(models[[i]], adj$model_frames[[i]][1,1], adj$model_frames[[i]][1,2],
-#'               adj$model_frames[[i]][2,1], adj$model_frames[[i]][2,2])
+#'   rasterImage(models[[i]], adj$model_frames[[i]][1,1],
+#'               adj$model_frames[[i]][1,2], adj$model_frames[[i]][2,1],
+#'               adj$model_frames[[i]][2,2])
 #' }
 #'
 #' #kind of. Anyway, use plot_morphogrid3d that do the full process.
@@ -488,14 +509,14 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 
 }
 
-####################################################################################
+################################################################################
 
 #' Generate background shape models
 #'
 #' @description Calculate and arrange background shape models for morphospaces.
 #'   Used internally.
 #'
-#' @param ordination An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
+#' @param ordination An ordination (i.e., a \code{"prcomp"}, \code{"bg_prcomp"},
 #'   \code{"phy_prcomp"} or \code{"pls_shape"} object).
 #' @param axes Numeric of length 1 or 2, indicating the morphometric axes to be
 #'   plotted. If values for either \code{x} or \code{y} are provided, only the
@@ -505,9 +526,10 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #' @param rescale Logical; whether to re-scale background shape models so shape
 #'    variation is shown more clearly.
 #' @param template A 2-column matrix containing landmarks/semilandmarks followed
-#'   by coordinates defining a curve or set of curves describing additional aspects
-#'   of morphology, which will be warped using TPS interpolation to produce the set
-#'   of background shell models(see \code{\link{build_template2d}}).
+#'   by coordinates defining a curve or set of curves describing additional
+#'   aspects of morphology, which will be warped using TPS interpolation to
+#'   produce the set of background shell models (see
+#'   \code{\link{build_template2d}}).
 #' @param x Optional vector with a non-morphometric variable to be plotted in
 #'   the x axis.
 #' @param y Optional vector with a non-morphometric variable to be plotted in
@@ -538,8 +560,9 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #'
 #' @seealso \code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}}
 #'
-#' @references MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological
-#'   Association Newsletter, 72(620), 14-27.
+#' @references
+#' MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological Association
+#'   Newsletter, 72(620), 14-27.
 #'
 #' @examples
 #'  #load data and packages
@@ -704,12 +727,12 @@ morphogrid <- function(ordination,
 }
 
 
-################################################################################################
+################################################################################
 
 #' Plot background 2D shape models
 #'
-#' @description Plot the output from [morphogrid()], for 2-dimensional morphometric
-#'   data. Used internally.
+#' @description Plot the output from [morphogrid()], for 2-dimensional
+#'   morphometric data. Used internally.
 #'
 #' @param morphogrid An object containing the output of \code{morphogrid}.
 #' @param x Optional vector with a non-morphometric variable to be plotted in
@@ -719,14 +742,15 @@ morphogrid <- function(ordination,
 #' @param links A list with the indices of the coordinates defining the
 #'   wireframe (following the format used in \code{Morpho}).
 #' @param template A 2-column matrix containing landmarks/semilandmarks followed
-#'   by coordinates defining a curve or set of curves describing additional aspects
-#'   of morphology, which will be warped using TPS interpolation to produce the set
-#'   of background shell models(see \code{\link{build_template2d}}).
+#'   by coordinates defining a curve or set of curves describing additional
+#'   aspects of morphology, which will be warped using TPS interpolation to
+#'   produce the set of background shell models (see
+#'   \code{\link{build_template2d}}).
 #' @param datype Character; type of shape data used (\code{"landm"} or
 #'   \code{"fcoef"}).
 #' @param ordtype Character; method used for multivariate ordination
-#'   (\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"}, \code{"pls_shapes"}
-#'   or \code{"phy_pls_shapes"}).
+#'   (\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
+#'   \code{"pls_shapes"} or \code{"phy_pls_shapes"}).
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
 #' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
 #'   factors for the width and height of the frame, respectively.
@@ -873,12 +897,12 @@ plot_morphogrid2d <- function(x = NULL,
   }
 }
 
-##################################################################################
+################################################################################
 
 #' Plot background 3D shape models
 #'
-#' @description Plot the output from [morphogrid()], for 3-dimensional morphometric
-#'   (landmark) data. Used internally.
+#' @description Plot the output from [morphogrid()], for 3-dimensional
+#'   morphometric (landmark) data. Used internally.
 #'
 #' @param morphogrid An object containing the output of \code{morphogrid}.
 #' @param x Optional vector with a non-morphometric variable to be plotted in
@@ -894,8 +918,8 @@ plot_morphogrid2d <- function(x = NULL,
 #' @param refshape reference shape (i.e., the mean landmark configuration)
 #'   corresponding to the mesh provided in \code{template}.
 #' @param ordtype Character; method used for multivariate ordination
-#'   (\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"}, \code{"pls_shapes"}
-#'   or \code{"phy_pls_shapes"}).
+#'   (\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
+#'   \code{"pls_shapes"} or \code{"phy_pls_shapes"}).
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
 #' @param rotmat Optional rotation matrix for background shape models. If
 #'   \code{NULL}, the user will be asked to define a preferred orientation.
@@ -918,10 +942,10 @@ plot_morphogrid2d <- function(x = NULL,
 #' @details This function allows the user to choose the orientation of the 3D
 #'   models by interactively rotating a shape model. Do not close the \code{rgl}
 #'   window, or minimize it actively (just bring back Rstudio to the front and
-#'   let the device get minimized pasively). The process of morphospace generation
-#'    is rather slow, specially if a mesh is provided for \code{template}, a large
-#'    number of shape models is asked, and/or \code{alpha.models} value is lower
-#'    than \code{1}.
+#'   let the device get minimized pasively). The process of morphospace
+#'   generation is rather slow, specially if a mesh is provided for
+#'   \code{template}, a large number of shape models is asked, and/or
+#'   \code{alpha.models} value is lower than \code{1}.
 #'
 #' @export
 #'
@@ -948,21 +972,23 @@ plot_morphogrid2d <- function(x = NULL,
 #' \dontrun{
 #' #plot grid (shape coordinates only)
 #' plot_morphogrid3d(morphogrid = shapes_grid, refshape = meanshape,
-#'                   ordtype = "prcomp", axes = c(1,2), col.ldm = 1, cex.ldm = 1,
-#'                   col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
-#'                   asp.models = 1)
+#'                   ordtype = "prcomp", axes = c(1,2), col.ldm = 1,
+#'                   cex.ldm = 1, col.models = 1, lwd.models = 1,
+#'                   bg.models = "gray", size.models = 2, asp.models = 1)
 #'
-#' #get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec,
-#' #then get mesh corresponding to mean shape using Morpho::tps3d
+#' #get shape corresponding to shells3D$mesh_meanspec using
+#' #geomorph::findMeanSpec, then get mesh corresponding to mean shape using
+#' #Morpho::tps3d
 #' meanspec_id<- findMeanSpec(shapes)
 #' meanspec_shape <- shapes[,,meanspec_id]
-#' meanmesh <- tps3d(x = shells3D$mesh_meanspec , refmat = meanspec_shape, tarmat = meanshape)
+#' meanmesh <- tps3d(x = shells3D$mesh_meanspec , refmat = meanspec_shape,
+#'                   tarmat = meanshape)
 #'
 #' #plot grid (includinh mesh template)
-#' plot_morphogrid3d(morphogrid = shapes_grid, template = meanmesh, refshape = meanshape,
-#'                   ordtype = "prcomp", axes = c(1,2), col.ldm = 1, cex.ldm = 1,
-#'                   col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
-#'                   asp.models = 1)
+#' plot_morphogrid3d(morphogrid = shapes_grid, template = meanmesh,
+#'                   refshape = meanshape, ordtype = "prcomp", axes = c(1,2),
+#'                   col.ldm = 1, cex.ldm = 1, col.models = 1, lwd.models = 1,
+#'                   bg.models = "gray", size.models = 2, asp.models = 1)
 #' }
 plot_morphogrid3d <- function(x = NULL,
                               y = NULL,
@@ -1124,7 +1150,7 @@ plot_morphogrid3d <- function(x = NULL,
 
 
 
-################################################################################################
+################################################################################
 
 
 #' Rotate Fourier shape 180 degrees
@@ -1139,9 +1165,10 @@ plot_morphogrid3d <- function(x = NULL,
 #'
 #' @export
 #'
-#' @references Iwata, H., & Ukai, Y. (2002). \emph{SHAPE: a computer program
-#'   package for quantitative evaluation of biological shapes based on elliptic
-#'   Fourier descriptors}. Journal of Heredity, 93(5), 384-385.
+#' @references
+#' Iwata, H., & Ukai, Y. (2002). \emph{SHAPE: a computer program package for
+#'   quantitative evaluation of biological shapes based on elliptic Fourier
+#'   descriptors}. Journal of Heredity, 93(5), 384-385.
 #'
 #' @examples
 #' #load shells data, plot the first shape
@@ -1173,7 +1200,7 @@ rotate_fcoef <- function(fcoef) {
 }
 
 
-##########################################################################################
+################################################################################
 
 #' Plot phenogram
 #'
@@ -1184,8 +1211,8 @@ rotate_fcoef <- function(fcoef) {
 #'   the x axis.
 #' @param y Optional vector with a non-morphometric variable to be plotted in
 #'   the y axis.
-#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-#'   should match the row names from \code{x} or \code{y}.
+#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
+#'   labels should match the row names from \code{x} or \code{y}.
 #' @param phylo_scores A matrix containing the scores from tips and nodes of
 #'   the phylogeny provided in \code{tree}.
 #' @param axis Numeric; the axis to be plotted.
@@ -1219,20 +1246,24 @@ rotate_fcoef <- function(fcoef) {
 #'
 #' #generate basic morphospace, add sampled shapes, species mean shapes, and
 #' #phylogenetic structure
-#' msp <- mspace(shapes, mag = 0.7, axes = c(1,2), cex.ldm = 0, plot = FALSE) %>%
-#'   proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1, cex = 0.7) %>%
+#' msp <- mspace(shapes, mag = 0.7, axes = c(1,2), cex.ldm = 0,
+#'               plot = FALSE) %>%
+#'   proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1,
+#'               cex = 0.7) %>%
 #'   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 2) %>%
 #'   proj_phylogeny(tree = tree)
 #'
 #' #get node heights
 #' heights <- phytools::nodeHeights(tree)
-#' node_heights <- c(rep(max(heights), length(tree$tip.label)), unique(heights[,1]))
+#' node_heights <- c(rep(max(heights), length(tree$tip.label)),
+#'                   unique(heights[,1]))
 #'
 #' #plot simple phengram
 #' plot(node_heights, msp$phylo_scores[,1])
-#' plot_phenogram(tree = tree, x = node_heights, phylo_scores = msp$phylo_scores,
-#'                axis = 1, lwd.phylo = 1, lty.phylo = 1, col.phylo = 1, cex.groups = 1,
-#'                col.groups = 1, pch.groups = 1, points = TRUE)
+#' plot_phenogram(tree = tree, x = node_heights,
+#'                phylo_scores = msp$phylo_scores, axis = 1, lwd.phylo = 1,
+#'                lty.phylo = 1, col.phylo = 1, cex.groups = 1, col.groups = 1,
+#'                pch.groups = 1, points = TRUE)
 plot_phenogram <- function(x = NULL,
                            y = NULL,
                            tree,
