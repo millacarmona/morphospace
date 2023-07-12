@@ -118,8 +118,8 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 
 #' Build template for 2D shape data
 #'
-#' @description Create a template (i.e. a set of curves describing the structure
-#'   the landmarks are placed upon) to aid morphospace visualization,
+#' @description Create a template (i.e., a set of curves describing the
+#'   structure the landmarks are placed upon) to aid morphospace visualization,
 #'   interactively.
 #'
 #' @param image Character; the path to an image of the structure, in png format.
@@ -142,12 +142,13 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 #'
 #' @references
 #' Claude, J. (2008). \emph{Morphometrics with R}. Springer Science & Business
-#' Media, 316.
+#'   Media, 316.
 #'
 #' @examples
 #' #generate template interactively
 #' \dontrun{
-#' temp <- build_template2d(image = "extdata/sample_wing.jpg", nlands = 9, ncurves = 9)
+#' temp <- build_template2d(image = "extdata/sample_wing.jpg", nlands = 9,
+#'                          ncurves = 9)
 #'
 #' plot(temp, type = "n", asp = 1)
 #' points(temp[c(1:9),], col = "red", pch = 16)
@@ -413,6 +414,11 @@ plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1
   }
 
   graphics::abline(h = 0)
+
+  if(is.null(dim(scores))) {
+    scores <- rbind(scores, scores)
+  } else if(nrow(scores) == 1) scores <- rbind(scores, scores)
+
   if(any(pch %in% c(21:25))) {
     graphics::points(cbind(scores, 0), pch = pch, bg = bg, cex = cex, ...)
   } else {
@@ -425,8 +431,8 @@ plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1
 
 #' Plot scatterpoints into bivariate morphospace
 #'
-#' @description An \code{ad hoc} wrapper for [graphics::points()]. Used internally
-#'   for projecting scatterpoints into bivariate morphospaces.
+#' @description An \code{ad hoc} wrapper for [graphics::points()]. Used
+#'   internally for projecting scatterpoints into bivariate morphospaces.
 #'
 #' @param scores a matrix of (x,y) coordinates to plot.
 #' @param col Numeric; color of the scatterpoints.
@@ -437,6 +443,12 @@ plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1
 #'
 #' @export
 plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
+
+  if(is.null(dim(scores))) {
+    scores <- rbind(scores, scores)
+  } else if(nrow(scores) == 1) scores <- rbind(scores, scores)
+
+
   if(any(pch %in% c(21:25))) {
     graphics::points(scores, pch = pch, bg = bg, cex = cex, ...)
   } else {
