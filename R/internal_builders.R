@@ -1297,3 +1297,17 @@ plot_phenogram <- function(x = NULL,
 
   }
 }
+
+
+################################################################################
+
+col2hex <- function(col) {
+
+  rgbcols <- grDevices::col2rgb(col)
+  hexcols <- NULL
+  for(i in seq_len(ncol(rgbcols))) {
+    hexcols[i] <- grDevices::rgb(rgbcols[1,i], rgbcols[2,i], rgbcols[3,i],
+                                 maxColorValue = 255)
+  }
+  return(hexcols)
+}

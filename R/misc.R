@@ -223,8 +223,25 @@ build_template2d <- function(image, nlands, ncurves) {
 hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
                               lty = 1, alpha = 0, ...) {
 
-  if(length(col) == 1) col <- rep(col, nlevels(fac))
-  if(length(lty) == 1) lty <- rep(lty, nlevels(fac))
+  #if(length(col) == 1) col <- rep(col, nlevels(fac))
+
+  col <- if(length(col) == 1) rep(col, nlevels(fac)) else {
+    if(nlevels(fac) > length(col)) {
+      # c(rep(NA, nlevels(fac) - length(unique(col))),
+      #   sort(unique(col)))[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+      #                              which(levels(fac) %in% unique(fac))))]
+      c(rep(NA, nlevels(fac) - length(unique(col))),
+        unique(col))[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+                             which(levels(fac) %in% unique(fac))))]
+    } else col
+  }
+
+  lty <- if(length(lty) == 1) rep(lty, nlevels(fac)) else if(nlevels(fac) > length(lty)) {
+    c(rep(0, nlevels(fac) - length(lty)),
+      lty)[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+                   which(levels(fac) %in% unique(fac))))]
+  } else lty
+
 
   for(i in seq_len(nlevels(fac))) {
     x <- xy[fac == levels(fac)[i], 1]
@@ -274,17 +291,35 @@ hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
                                  lty = 1, conflev = 0.95, alpha = 0, ...) {
 
-  if(length(col) == 1) col <- rep(col, nlevels(fac))
-  if(length(lty) == 1) lty <- rep(lty, nlevels(fac))
+  #if(length(col) == 1) col <- rep(col, nlevels(fac))
+
+  col <- if(length(col) == 1) rep(col, nlevels(fac)) else {
+    if(nlevels(fac) > length(col)) {
+      # c(rep(NA, nlevels(fac) - length(unique(col))),
+      #   sort(unique(col)))[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+      #                              which(levels(fac) %in% unique(fac))))]
+      c(rep(NA, nlevels(fac) - length(unique(col))),
+        unique(col))[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+                             which(levels(fac) %in% unique(fac))))]
+    } else col
+  }
+
+  lty <- if(length(lty) == 1) rep(lty, nlevels(fac)) else if(nlevels(fac) > length(lty)) {
+    c(rep(0, nlevels(fac) - length(lty)),
+      lty)[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+                   which(levels(fac) %in% unique(fac))))]
+  } else lty
 
   for(i in seq_len(nlevels(fac))) {
     cent <- colMeans(xy[fac == levels(fac)[i], 1:2])
     vcv <- stats::var(xy[fac == levels(fac)[i], 1:2])
-    ell <- car::ellipse(center = cent, shape = vcv,
-                        radius = stats::qnorm((1 - conflev) / 2, lower.tail = F),
-                        draw = FALSE)
-    graphics::polygon(ell, border = col[i],
-                      col = grDevices::adjustcolor(col[i], alpha.f = alpha), lty = lty[i], ...)
+    if(any(!is.na(vcv))) {
+      ell <- car::ellipse(center = cent, shape = vcv,
+                          radius = stats::qnorm((1 - conflev) / 2, lower.tail = F),
+                          draw = FALSE)
+      graphics::polygon(ell, border = col[i],
+                        col = grDevices::adjustcolor(col[i], alpha.f = alpha), lty = lty[i], ...)
+    }
   }
 }
 
@@ -322,7 +357,7 @@ ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 #' hulls_by_group_3D(pca$x, fac = species, col = "gray")
 #'
 #' }
-hulls_by_group_3D<-function(xyz, fac, col = seq_len(nlevels(fac)), ...) {
+hulls_by_group_3D <- function(xyz, fac, col = seq_len(nlevels(fac)), ...) {
 
   if(length(col) == 1) col <- rep(col, nlevels(fac))
 
@@ -372,11 +407,17 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1,
                                 col = seq_len(nlevels(fac))) {
 
   if(length(col) == 1) col <- rep(col, nlevels(fac))
-  if(length(lty) == 1) lty <- rep(lty, nlevels(fac))
+  lty <- if(length(lty) == 1) rep(lty, nlevels(fac)) else if(nlevels(fac) > length(lty)) {
+    c(rep(0, nlevels(fac) - length(lty)),
+      lty)[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+                   which(levels(fac) %in% unique(fac))))]
+  } else lty
 
   dens <- lapply(seq_len(nlevels(fac)), function(i) {
-    subdens <- stats::density(xy[fac == levels(fac)[i], ax])
-    list(x = subdens$x, y = subdens$y)
+    if(sum(fac == levels(fac)[i]) > 2) {
+      subdens <- stats::density(xy[fac == levels(fac)[i], ax])
+      list(x = subdens$x, y = subdens$y)
+    }
   })
   ymax <- max(unlist(lapply(dens, function(x) {x$y})))
 
@@ -406,18 +447,20 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1,
 #'
 #' @export
 plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1, ...) {
+
   if(density) {
     dens <- stats::density(scores)
-
     graphics::polygon(dens$x, dens$y / max(dens$y), lwd = 2,
                       col = grDevices::adjustcolor(1, alpha.f = 0.5))
   }
 
   graphics::abline(h = 0)
 
-  if(is.null(dim(scores))) {
-    scores <- rbind(scores, scores)
-  } else if(nrow(scores) == 1) scores <- rbind(scores, scores)
+  scores <- if(is.null(dim(scores))) {
+    rbind(scores, scores)
+  } else {
+    if(length(scores) == 1 | nrow(scores) == 1) rbind(scores, scores) else scores
+  }
 
   if(any(pch %in% c(21:25))) {
     graphics::points(cbind(scores, 0), pch = pch, bg = bg, cex = cex, ...)
