@@ -846,7 +846,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
                        col = col.tips, cex = cex.tips)
 
     } else {
-      print("phylogenetic relationships are omitted from univariate morphospaces")
+      warning("phylogenetic relationships are not projected into univariate morphospaces")
     }
   }
 
@@ -2570,19 +2570,22 @@ plot_mspace <- function(mspace,
 
 
   if(!is.null(invax)) {
-    mspace$ordination$x[,axes[invax]] <- mspace$ordination$x[,axes[invax]]  * -1
-    mspace$ordination$rotation[,axes[invax]] <- mspace$ordination$rotation[,axes[invax]] * -1
+    mspace$ordination$x[,args$axes[invax]] <- mspace$ordination$x[,args$axes[invax]]  * -1
+    mspace$ordination$rotation[,args$axes[invax]] <- mspace$ordination$rotation[,args$axes[invax]] * -1
     if(!is.null(mspace$projected$scores)) {
-      mspace$projected$scores[,axes[invax]] <- mspace$projected$scores[,axes[invax]] * -1
+      mspace$projected$scores[,args$axes[invax]] <- mspace$projected$scores[,args$axes[invax]] * -1
+    }
+    if(!is.null(mspace$projected$gr_scores)) {
+      mspace$projected$gr_scores[,args$axes[invax]] <- mspace$projected$gr_scores[,args$axes[invax]] * -1
     }
     if(!is.null(mspace$projected$phylo_scores)) {
-      mspace$projected$phylo_scores[,axes[invax]] <- mspace$projected$phylo_scores[,axes[invax]] * -1
+      mspace$projected$phylo_scores[,args$axes[invax]] <- mspace$projected$phylo_scores[,args$axes[invax]] * -1
     }
   }
 
   ordination <- mspace$ordination
 
-  if(!is.null(x) & !is.null(y)) stop("Only one of x or y can be specified")
+  if(!is.null(x) & !is.null(y)) stop("Only one of x or y can be included")
 
   if(any(legend, scalebar)) {
 
@@ -2779,7 +2782,7 @@ plot_mspace <- function(mspace,
                          bg = args$bg.tips, col = args$col.tips, cex = args$cex.tips)
 
       } else {
-        cat("\nphylogenetic relationships are omitted from univariate morphospaces")
+        warning("phylogenetic relationships are not projected into univariate morphospaces")
       }
     }
 
@@ -2810,7 +2813,7 @@ plot_mspace <- function(mspace,
                            lwd = args$lwd.axis[i], lty = args$lty.axis[i])
         }
       } else {
-        cat("\nmorphometric axes are excluded from univariate morphospaces")
+        warning("morphometric axes are not projected into univariate morphospaces")
       }
     }
 
@@ -2834,7 +2837,7 @@ plot_mspace <- function(mspace,
 
 
           } else { # ...but axes are NOT in the same order
-            cat("\naxes used to generate landscape are in the wrong order; won't be regenerated")
+            warning("axes used to generate landscape are in the wrong order; won't be regenerated")
           }
 
         } else { # if the number of specified axes is 1....
@@ -2860,7 +2863,7 @@ plot_mspace <- function(mspace,
                               lwd = args$lwd.landsc)
         }
       } else {
-        cat("\nlandscape was originally generated for a different set of axes; won't be regenerated")
+        warning("landscape was originally generated for a different set of axes; won't be regenerated")
       }
     }
 
@@ -2949,7 +2952,7 @@ plot_mspace <- function(mspace,
       if(length(args$pch.nodes) == 1) args$pch.nodes <- rep(args$pch.nodes, length(tips) - 1)
       if(length(args$cex.nodes) == 1) args$cex.nodes <- rep(args$cex.nodes, length(tips) - 1)
 
-      maptips <-  order(match(rownames(mspace$projected$phylo_scores[tips,]), tree$tip.label))
+      maptips <- order(match(rownames(mspace$projected$phylo_scores[tips,]), tree$tip.label))
 
       plot_phenogram(x = x, y = y, tree = tree, phylo_scores = mspace$projected$phylo_scores,
                      axis = args$axes, points = points, pch.tips = args$pch.tips[maptips],
@@ -3040,40 +3043,60 @@ plot_mspace <- function(mspace,
       if(phylo & !is.null(mspace$projected$phylo)) {
 
         tree <- mspace$projected$phylo
+        phylo_scores <- mspace$projected$phylo_scores
 
-        if(!is.null(mspace$projected$scores) & !is.null(mspace$projected$gr_class)) { # if there are scores and groups projected...
-          if(nrow(mspace$projected$scores) == length(mspace$projected$gr_class)) { #and those have the same length
-            if(nlevels(mspace$projected$gr_class) == length(tree$tip.label)){
-              if(!is.null(x)) { # ...and the user provided an x value...
-                if(length(x) > nrow(mspace$projected$phylo_scores)) { # ...there are fewer scores than x values
-                  x <- tapply(x, mspace$projected$gr_class, mean)[tree$tip.label]
-                  y <- NULL
-                }
-              } else { # ...and the user provided an y value...
-                if(length(y) > nrow(mspace$projected$phylo_scores)) { # ...AND there are fewer scores than y values
-                  y <- tapply(y, mspace$projected$gr_class, mean)[tree$tip.label]
-                  x <- NULL
-                }
+        if(nrow(cbind(x, y)) == nrow(phylo_scores[tree$tip.label, ]))  {
+
+          if(!is.null(x)) {
+            x <- cbind(x)
+            if(!is.null(rownames(x))) x <- x[tree$tip.label,] else {
+              warning("names for x have not been provided; it will be assumed that x is in the same order as labels in phylogenetic tree")
+              x <- c(x)
+            }
+          }
+
+          if(!is.null(y)) {
+            y <- cbind(y)
+            if(!is.null(rownames(y))) y <- y[tree$tip.label,] else {
+              warning("names for y have not been provided; it will be assumed that y is in the same order as labels in phylogenetic tree")
+              y <- c(y)
+            }
+          }
+
+        } else {
+
+          gr_class <- factor(gsub(x = as.character(mspace$projected$gr_class),
+                                  pattern = "_bis.", replacement = ""))
+
+          if(!is.null(gr_class)) {
+            if(nrow(cbind(x, y)) == length(gr_class)) {
+              if(nlevels(gr_class) == length(tree$tip.label) &
+                 all(tree$tip.label %in% levels(gr_class))) {
+
+                if(!is.null(x)) x <- tapply(x, gr_class, mean)[tree$tip.label]
+                if(!is.null(y)) y <- tapply(y, gr_class, mean)[tree$tip.label]
+
               }
             }
           }
-        } #otherwise, use the original x/y values
-
-        xy.tips <- cbind(x,
-                         mspace$projected$phylo_scores[tree$tip.label, mspace$plotinfo$axes[1]],
-                         y)[tree$tip.label,]
-        xy.nodes <- apply(xy.tips[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
-        phyloxy <- rbind(xy.tips, xy.nodes)
-
-        for(i in seq_len(nrow(tree$edge))) {
-          graphics::lines(rbind(phyloxy[tree$edge[i, 1],], phyloxy[tree$edge[i, 2],]),
-                          lwd = args$lwd.phylo, lty = args$lty.phylo, col = args$col.phylo)
         }
-        tips <- seq_len(length(tree$tip.label))
-        plot_biv_scatter(scores = phyloxy[-tips,], pch = args$pch.nodes,
-                         bg = args$bg.nodes, col = args$col.nodes, cex = args$cex.nodes)
-        plot_biv_scatter(scores = phyloxy[tips,], pch = args$pch.tips,
-                         bg = args$bg.tips, col = args$col.tips, cex = args$cex.tips)
+
+        if(nrow(cbind(x, y)) == nrow(phylo_scores[tree$tip.label, ]))  {
+          xy.tips <- cbind(x, phylo_scores[tree$tip.label, mspace$plotinfo$axes[1]], y)[tree$tip.label,]
+          xy.nodes <- apply(xy.tips[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
+          phyloxy <- rbind(xy.tips, xy.nodes)
+
+          for(i in seq_len(nrow(tree$edge))) {
+            graphics::lines(rbind(phyloxy[tree$edge[i, 1],], phyloxy[tree$edge[i, 2],]),
+                            lwd = args$lwd.phylo, lty = args$lty.phylo, col = args$col.phylo)
+          }
+          tips <- seq_len(length(tree$tip.label))
+          plot_biv_scatter(scores = phyloxy[-tips,], pch = args$pch.nodes,
+                           bg = args$bg.nodes, col = args$col.nodes, cex = args$cex.nodes)
+          plot_biv_scatter(scores = phyloxy[tips,], pch = args$pch.tips,
+                           bg = args$bg.tips, col = args$col.tips, cex = args$cex.tips)
+
+        }
       }
     }
   }
@@ -3140,8 +3163,15 @@ plot_mspace <- function(mspace,
         if(any(grepl(gr_params$class, pattern = "_bis."))) {
           index_bis. <- which(grepl(gr_params$class, pattern = "_bis."))
 
-          gr_params[-index_bis.,][which(is.na(gr_params[-index_bis.,]$col)),] <-
-            gr_params[index_bis.,][which(!is.na(gr_params[index_bis.,]$col)),]
+          if(all(!is.na(gr_params$col))) {
+            gr_params[-index_bis.,][which(is.na(gr_params[-index_bis.,]$col)),] <-
+              gr_params[index_bis.,][which(!is.na(gr_params[index_bis.,]$col)),]
+          } else {
+            if(all(!is.na(gr_params$col))) {
+              gr_params[-index_bis.,][which(is.na(gr_params[-index_bis.,]$bg)),] <-
+                gr_params[index_bis.,][which(!is.na(gr_params[index_bis.,]$bg)),]
+            }
+          }
 
           gr_params <- gr_params[-index_bis.,]
           gr_params$class <- gsub(x = gr_params$class, pattern = "_bis.", replacement = "")
