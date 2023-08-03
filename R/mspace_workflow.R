@@ -3163,15 +3163,8 @@ plot_mspace <- function(mspace,
         if(any(grepl(gr_params$class, pattern = "_bis."))) {
           index_bis. <- which(grepl(gr_params$class, pattern = "_bis."))
 
-          if(all(!is.na(gr_params$col))) {
-            gr_params[-index_bis.,][which(is.na(gr_params[-index_bis.,]$col)),] <-
-              gr_params[index_bis.,][which(!is.na(gr_params[index_bis.,]$col)),]
-          } else {
-            if(all(!is.na(gr_params$col))) {
-              gr_params[-index_bis.,][which(is.na(gr_params[-index_bis.,]$bg)),] <-
-                gr_params[index_bis.,][which(!is.na(gr_params[index_bis.,]$bg)),]
-            }
-          }
+          gr_params[-index_bis.,][which(is.na(gr_params[-index_bis.,]$col)),] <-
+            gr_params[index_bis.,][which(is.na(gr_params[-index_bis.,]$col)),]
 
           gr_params <- gr_params[-index_bis.,]
           gr_params$class <- gsub(x = gr_params$class, pattern = "_bis.", replacement = "")

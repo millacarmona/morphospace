@@ -17,7 +17,8 @@
 #'   the context of \code{morphospace} will generally be a series of shapes
 #'   arranged as 2-margin matrix) maximizing the residual variation left after
 #'   removing covariation explained by phylogenetic history (i.e., they reflect
-#'   the covariance that would correspond to a star phylogeny).
+#'   the covariance that would correspond to a star phylogeny), assuming a
+#'   Brownian model of evolution.
 #'
 #'   Phylogenetic PCA has some important differences relative to regular PCA.
 #'   First, the resulting ordination is centered around the phylogenetic mean
@@ -140,15 +141,56 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
 #'   labels should match the row names from \code{x}.
 #'
-#' @details
+#' @details Phylogenetically aligned component analysis is an ordination method
+#'   that finds a new set of axes as linear combinations of the original trait
+#'   variables that are maximally aligned with the phylogenetic signal (i.e.,
+#'   covariation between trait variation and phylogenetic structure) present in
+#'   the data.
 #'
-#' @return
+#'   Phylogenetically aligned component analysis shares some important
+#'   properties with phylogenetic PCA that are worth having in mind. Most
+#'   importantly, the transformation achieved by Phylogenetically aligned
+#'   component analysis to maximize alignment to phylogenetic signal only
+#'   concerns the orientation of the new axes (PACs), and not their overall
+#'   dispersion (i.e., Euclidean distances among observations are preserved when
+#'   measured across the entire set of PACs). Like phylogenetic PCA, scores
+#'   projected into the different PACs can be correlated (even though singular
+#'   vectors are orthogonal), and their dispersion does not necessarily decrease
+#'   for lower axes (even though singular values do progressively decay).
+#'   Also, A phylogenetic covariance matrix is computed assuming a Brownian
+#'   model of trait evolution, and the ordination is centered around the
+#'   phylogenetic mean (i.e., the root of the phylogenetic tree).
+#'
+#'   This analysis produces the same number of PACs than the number of original
+#'   variables. These axes account for increasingly small proportions of
+#'   covariation between phylogenetic structure and trait variation -- although
+#'   the total amount of phylogenetic signal present in the data is preserved
+#'   for the entire set of PACs.
+#'
+#' @return A \code{"phyalign_comp"} object formatted following the \code{"prcomp"}
+#' class:
+#' \itemize{
+#'   \item \code{$x:} {a matrix with the scores of observations in the new
+#'     ordination axes.}
+#'   \item \code{$sdev:} {the standard deviations of the principal components
+#'     (i.e., the square roots of the eigenvalues of the covariance/correlation
+#'     matrix).}
+#'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
+#'   \item \code{$center:} {the phylogenetic mean (i.e., the shape estimated
+#'     for the root of the tree).}
+#'   \item \code{$totvar:} {the sum of the variances from all the original
+#'     variables.}
+#'   \item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
+#'     of the model; see \code{\link[phytools]{phyl.pca}}.}
+#'   }
 #'
 #' @export
 #'
-#' @seealso
+#' @seealso \code{\link[geomorph]{gm.prcomp}}, \code{\link{phy_prcomp}}
 #'
 #' @references
+#' Collyer, M. L., & Adams, D. (2021). \emph{Phylogenetically aligned component
+#' analysis}. Methods in Ecology and Evolution, 12(2), 359-372.
 #'
 #' @examples
 #'
@@ -156,7 +198,7 @@ phyalign_comp <- function(x, tree, corr = FALSE) {
 
   C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
   anc <- c(phytools::phyl.vcv(x, C, 1)$alpha)
-  z <- t(t(rbind(x)) - anc)
+  z <- scale(x = x, center = anc, scale = corr)
 
   decomp <- svd(C %*% z)
   vectors <- decomp$v
@@ -166,8 +208,9 @@ phyalign_comp <- function(x, tree, corr = FALSE) {
   totalRV <- sum(values^2) / (sqrt(sum(diag(t(C) %*% C)) * sum(diag(t(z) %*% z))))
   partialRVs <- values^2 / (sqrt(sum(diag(t(C) %*% C)) * sum(diag(t(z) %*% z))))
 
-  results <- list(sdev = decomp$v, rotation = vectors,
+  results <- list(sdev = sqrt((decomp$d^2) / (nrow(decomp$u) - 1)), rotation = vectors,
                   x = scores, center = anc, RVs = round(partialRVs / totalRV, 3))
+
   class(results) <- "phyalign_prcomp"
   return(results)
 
@@ -347,8 +390,9 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 
   }
 
-  results <- list(sdev = sqrt(values), rotation = rotation, x = cbind(scores),
-                  center = grandmean, grcenters = groupmeans, totvar = totvar)
+  results <- list(sdev = sqrt((values^2) / (nrow(cbind(x)) - 1)),
+                  rotation = rotation, x = cbind(scores), center = grandmean,
+                  grcenters = groupmeans, totvar = totvar)
   class(results) <- "bg_prcomp"
   return(results)
 }
@@ -539,7 +583,8 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
   svd <- svd_block(x, y, tree)
 
   ndims <- length(svd$d)
-  values <- (svd$d^2)
+  #values <- (svd$d^2)
+  values <- svd$d
   y_rotation <- svd$v
   x_rotation <- svd$u
 
@@ -619,10 +664,10 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
                   ycenter = y_center, ytotvar = totvar_y,
                   xscores = cbind(xscores), xrotation = cbind(x_rotation),
                   xcenter = x_center, xtotvar = totvar_x,
-                  values = values)
+                  sdev = sqrt((values^2) / (nrow(cbind(xscores)) - 1)))#values = values)
   if(is.null(tree)) {
     class(results) <- "pls2b"
-  } else {
+  } else {#
     class(results) <- "phy_pls2b"
   }
   return(results)
@@ -750,7 +795,8 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 
   pls <- pls2b(y = y, x = x, tree = tree, LOOCV = LOOCV, recompute = recompute)
 
-  results <- list(sdev = apply(pls$yscores, 2, stats::sd),
+  results <- list(sdev = sqrt((values^2) / (nrow(cbind(x)) - 1)),
+                  #sdev = apply(pls$yscores, 2, stats::sd),
                   rotation = pls$yrotation,
                   x = pls$yscores,
                   x2 = pls$xscores,
@@ -791,7 +837,7 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 #'   and then projecting the data onto these new set of axes (However, this
 #'   approach can be used to standardize morphometric data for any type of
 #'   arbitrary vector(s) -- commonly one or more nuisance factors or covariates
-#'   introducing variation the user wishes to remove).
+#'   introducing variation the user wishes to exclude from the analysis).
 #'
 #'   In particular, this function is intended to provide a way for computation
 #'   of ordination (sub)spaces orthogonal to other specific sources of
