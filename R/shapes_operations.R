@@ -648,8 +648,8 @@ detrend_shapes <- function(model, xvalue = NULL, tree = NULL, method = "orthogon
 #'   closed outline shapes.
 #'
 #' @param ef An \code{"OutCoe"} object.
-#' @param index An optional numeric vector providing the indices identifying the
-#'   shapes to be rotated. If declared, overrides interative selection of
+#' @param index An optional integer vector providing the indices identifying the
+#'   shapes to be rotated. If declared, overrides interactive selection of
 #'   shapes.
 #'
 #' @details The usage of this function is inspired in the SHAPE program for
@@ -742,7 +742,7 @@ correct_efourier<-function(ef, index = NULL) {
 #'   \code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes"} or
 #'   \code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using
 #'   [stats::lm()].
-#' @param axis An optional numeric value specifying the axis of the multivariate
+#' @param axis An optional integer value specifying the axis of the multivariate
 #'   ordination which is to be represented.
 #' @param mag Numeric; magnifying factor for representing shape transformation.
 #'
@@ -806,8 +806,8 @@ correct_efourier<-function(ef, index = NULL) {
 #' pile_shapes(extshapes, links = links, mshape = FALSE)
 ax_transformation <- function(obj, axis = 1, mag = 1) {
 
-  if(any(class(obj) %in% c("prcomp", "bg_prcomp", "phy_prcomp",
-                           "pls_shapes", "phy_pls_shapes"))) {
+  if(any(class(obj) %in% c("prcomp", "bg_prcomp", "phy_prcomp", "phyalign_comp",
+                           "pls_shapes", "phy_pls_shapes", "pls_burnaby", "phy_burnaby"))) {
     extshapes_mat <- rev_eigen(range(obj$x[,axis]) * mag,
                                obj$rotation[,axis],
                                obj$center)
@@ -864,8 +864,8 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 #' @param mspace An \code{"mspace"} object.
 #' @param axis Optional integer indicating an axis along which shapes should
 #'   be sampled.
-#' @param range Optional numeric vector of length 2, indicating the range of values
-#'   the axis should be sampled over.
+#' @param range Optional integer vector of length 2, indicating the range of
+#'   values the axis should be sampled over.
 #' @param nshapes Optional integer indicating the number of shapes the user
 #'   wishes to extract.
 #' @param scores An optional vector of length 2 or 2-column matrix indicating
