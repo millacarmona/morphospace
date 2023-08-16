@@ -587,7 +587,7 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 morphogrid <- function(ordination,
                        axes,
                        datype,
-                       rescale,
+                       rescale = TRUE,
                        template = NULL,
                        x = NULL,
                        y = NULL,
@@ -834,11 +834,17 @@ plot_morphogrid2d <- function(x = NULL,
       if(ordtype == "phy_prcomp") {
         xlab <- paste0("phyPC", axes[1])
       }
+      if(ordtype == "phyalign_comp") {
+        xlab <- paste0("PAC", axes[1])
+      }
       if(ordtype == "pls_shapes") {
         xlab <- paste0("PLS-", axes[1])
       }
       if(ordtype == "phy_pls_shapes") {
         xlab <- paste0("phyPLS-", axes[1])
+      }
+      if(any(c("burnaby", "phy_burnaby") %in% ordtype)) {
+        xlab <- paste0("Axis ", axes[1])
       }
     }
   }
@@ -855,11 +861,17 @@ plot_morphogrid2d <- function(x = NULL,
       if(ordtype == "phy_prcomp") {
         ylab <- paste0("phyPC", axes[2])
       }
+      if(ordtype == "phyalign_comp") {
+        ylab <- paste0("PAC", axes[2])
+      }
       if(ordtype == "pls_shapes") {
         ylab <- paste0("PLS-", axes[2])
       }
       if(ordtype == "phy_pls_shapes") {
         ylab <- paste0("phyPLS-", axes[2])
+      }
+      if(any(c("burnaby", "phy_burnaby") %in% ordtype)) {
+        ylab <- paste0("Axis ", axes[2])
       }
     }
   }
@@ -1035,11 +1047,17 @@ plot_morphogrid3d <- function(x = NULL,
       if(ordtype == "phy_prcomp") {
         xlab <- paste0("phyPC", axes[1])
       }
+      if(ordtype == "phyalign_comp") {
+        xlab <- paste0("PAC", axes[1])
+      }
       if(ordtype == "pls_shapes") {
         xlab <- paste0("PLS-", axes[1])
       }
       if(ordtype == "phy_pls_shapes") {
         xlab <- paste0("phyPLS-", axes[1])
+      }
+      if(any(c("burnaby", "phy_burnaby") %in% ordtype)) {
+        xlab <- paste0("Axis ", axes[1])
       }
     }
   }
@@ -1056,11 +1074,17 @@ plot_morphogrid3d <- function(x = NULL,
       if(ordtype == "phy_prcomp") {
         ylab <- paste0("phyPC", axes[2])
       }
+      if(ordtype == "phyalign_comp") {
+        ylab <- paste0("PAC", axes[2])
+      }
       if(ordtype == "pls_shapes") {
         ylab <- paste0("PLS-", axes[2])
       }
       if(ordtype == "phy_pls_shapes") {
         ylab <- paste0("phyPLS-", axes[2])
+      }
+      if(any(c("burnaby", "phy_burnaby") %in% ordtype)) {
+        ylab <- paste0("Axis ", axes[2])
       }
     }
   }
@@ -1216,17 +1240,25 @@ rotate_fcoef <- function(fcoef) {
 #' @param phylo_scores A matrix containing the scores from tips and nodes of
 #'   the phylogeny provided in \code{tree}.
 #' @param axis Numeric; the axis to be plotted.
-#' @param pch.groups Numeric; the symbol of the scatter points corresponding to
-#'   groups mean shapes.
-#' @param col.groups The color of the scatter points corresponding to groups
-#'   mean shapes.
-#' @param bg.groups The background color of the scatter points corresponding
-#'   to groups mean shapes.
-#' @param cex.groups Numeric; the size of the scatter points corresponding to
-#'   groups mean shapes.
-#' @param lwd.phylo Numeric; the width of the lines depicting phylogenetic
+#' @param pch.tips Symbol of the scatterpoints representing the tips of the
+#'   phylogeny.
+#' @param col.tips Color of the scatterpoints representing the tips of the
+#'   phylogeny.
+#' @param bg.tips Background color of the scatterpoints representing the
+#'   tips of the phylogeny.
+#' @param cex.tips Numeric; size of the scatterpoints representing the tips
+#'   of the phylogeny.
+#' @param pch.nodes Symbol of the scatterpoints representing the nodes of the
+#'   phylogeny.
+#' @param col.nodes Color of the scatterpoints representing the nodes of the
+#'   phylogeny.
+#' @param bg.nodes Background color of the scatterpoints representing the
+#'   nodes of the phylogeny.
+#' @param cex.nodes Numeric; size of the scatterpoints representing the nodes
+#'   of the phylogeny.
+#' @param lwd.phylo Integer; the width of the lines depicting phylogenetic
 #'   branches.
-#' @param lty.phylo Numeric; the type of the lines depicting phylogenetic
+#' @param lty.phylo Integer; the type of the lines depicting phylogenetic
 #'   branches.
 #' @param col.phylo Numeric; the color of the lines depicting phylogenetic
 #'   branches.
@@ -1250,8 +1282,8 @@ rotate_fcoef <- function(fcoef) {
 #'               plot = FALSE) %>%
 #'   proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1,
 #'               cex = 0.7) %>%
-#'   proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 2) %>%
-#'   proj_phylogeny(tree = tree)
+#'   proj_shapes(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 2) %>%
+#'   proj_phylogeny(shapes = sp_shapes, tree = tree)
 #'
 #' #get node heights
 #' heights <- phytools::nodeHeights(tree)
@@ -1259,11 +1291,12 @@ rotate_fcoef <- function(fcoef) {
 #'                   unique(heights[,1]))
 #'
 #' #plot simple phengram
-#' plot(node_heights, msp$phylo_scores[,1])
+#' plot(node_heights, msp$projected$phylo_scores[,1])
 #' plot_phenogram(tree = tree, x = node_heights,
-#'                phylo_scores = msp$phylo_scores, axis = 1, lwd.phylo = 1,
-#'                lty.phylo = 1, col.phylo = 1, cex.groups = 1, col.groups = 1,
-#'                pch.groups = 1, points = TRUE)
+#'                phylo_scores = msp$projected$phylo_scores, axis = 1, lwd.phylo = 1,
+#'                lty.phylo = 1, col.phylo = 1, cex.tips = 1, col.tips = 1,
+#'                pch.tips = 1, cex.nodes = 1, col.nodes = 1, pch.nodes = 1,
+#'                points = TRUE)
 plot_phenogram <- function(x = NULL,
                            y = NULL,
                            tree,
