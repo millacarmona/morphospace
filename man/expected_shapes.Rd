@@ -131,7 +131,6 @@ large_shape <- expected_shapes(shapes, x = shells$sizes,
 plot(inv_efourier(large_shape, nb.pts = 200), type = "l")
 }
 \references{
-Revell, L. J. (2009). \emph{Size-correction and principal
-components for interspecific comparative studies}. Evolution, 63,
-3258-3268.
+Revell, L. J. (2009). \emph{Size-correction and principal components for
+interspecific comparative studies}. Evolution, 63, 3258-3268.
 }

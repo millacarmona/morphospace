@@ -4,10 +4,12 @@
 \alias{print.mspace}
 \title{Print \code{"mspace"} objects}
 \usage{
-\method{print}{mspace}(mspace)
+\method{print}{mspace}(mspace, ...)
 }
 \arguments{
 \item{mspace}{An \code{"mspace"} object.}
+
+\item{...}{Further arguments passed to or from other methods.}
 }
 \description{
 Print contents of \code{"mspace"} objects in a friendly way :)

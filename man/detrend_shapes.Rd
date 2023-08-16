@@ -8,7 +8,7 @@ detrend_shapes(
   model,
   xvalue = NULL,
   tree = NULL,
-  method = "residuals",
+  method = "orthogonal",
   newdata = NULL
 )
 }
@@ -16,14 +16,14 @@ detrend_shapes(
 \item{model}{A \code{"mlm"} object created using \code{\link[stats:lm]{stats::lm()}}.}
 
 \item{xvalue}{A value (numeric) or level (character) at which shape data is
-to be standardized (i.e. centered); If NULL, the mean of the complete
-sample is used.}
+to be standardized (i.e., centered); If NULL, the mean of the complete
+sample is used (only available if there is a single explanatory variable).}
 
 \item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip
 labels should match row names from \code{x}.}
 
-\item{method}{Method used for detrending; options are \code{"residuals"} and
-\code{"orthogonal"} (see details).}
+\item{method}{Method used for detrending; options are \code{"orthogonal"}
+(the default) and \code{"residuals"} (see details).}
 
 \item{newdata}{New data to be standardized. It should be provided as either
 an \code{"mlm"} object fitting the same variables used in \code{model}
@@ -90,7 +90,7 @@ evolution.
  sex <- tails$data$sex
  logsizes <- log(tails$sizes)
  msp <- mspace(shapes, links = tails$links, points = TRUE)
- hulls_by_group_2D(msp$x, fac = species)
+ hulls_by_group_2D(msp$ordination$x, fac = species)
 
 
  ### For numeric variables
@@ -119,7 +119,7 @@ evolution.
                        points = TRUE)
  hulls_by_group_2D(msp_nosize2$ordination$x, fac = species)
 
- ## using a phylogenetic tree
+ ## Using a phylogenetic tree
 
  #fit linear model between shapes and sizes, then center at the shape
  #corresponding to the grand size of the sample
@@ -132,12 +132,13 @@ evolution.
 
  msp_nosize1 <- mspace(detr_shapes_nosize1, links = tails$links,
                        points = TRUE)
- points(msp_nosize1$ordination$x, pch = 21, bg = c(1:13)[species])
+ points(msp_nosize1$ordination$x, pch = 21, bg = c(1:13))
 
  ## Using newdata
 
  #fit linear model between shapes and sizes for NDF species, then use the NDF
- #allometry to detrend DF shapes from alometric variation
+ #allometry to detrend DF shapes from allometric variation (just for
+ #illustration, not implying this makes any sense)
  index <- tails$data$type == "NDF"
  shapes_ndf <- shapes[,,index]
  logsizes_ndf <- logsizes[index]
@@ -156,48 +157,66 @@ evolution.
 
  ### For factors
 
- #fit linear model between shapes and species, then center at the grand mean
- #of the sample
- model <- lm(two.d.array(shapes) ~ species)
+ #load wings data
+
+ data(wings)
+ shapes <- wings$shapes
+ cactus <- wings$data$cactus
+ sex <- wings$data$sex
+ species <- wings$data$species
+ msp <- mspace(shapes, template = wings$template, points = TRUE)
+ hulls_by_group_2D(msp$ordination$x, fac = cactus)
+
+
+ #fit linear model between shapes and sex, then center at the grand mean
+ #of the sample.
+ model <- lm(two.d.array(shapes) ~ cactus)
  detr_shapes_mat <- detrend_shapes(model)
 
- detr_shapes_nospp <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
+ detr_shapes_nocac <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
 
- msp_nospp <- mspace(detr_shapes_nospp, links = tails$links, points = TRUE)
- hulls_by_group_2D(msp_nospp$ordination$x, fac = species)
+ msp_nocac <- mspace(detr_shapes_nocac, template = wings$template,
+                     points = TRUE)
+ hulls_by_group_2D(msp_nocac$ordination$x, fac = cactus)
 
  ## Using xvalue
 
  #fit linear model between shapes and species, then center at the shape
  #corresponding to the mean shape of T. savana
- model <- lm(two.d.array(shapes) ~ species)
- detr_shapes_mat2 <- detrend_shapes(model, xvalue = "T. savana")
+ model <- lm(two.d.array(shapes) ~ cactus)
+ detr_shapes_mat <- detrend_shapes(model, xvalue = "Tr")
 
- detr_shapes_nospp2 <- arrayspecs(detr_shapes_mat2, k = 2, p = 9)
+ detr_shapes_nocac2 <- arrayspecs(detr_shapes_mat, k = 2, p = 9)
 
- msp_nospp2 <- mspace(detr_shapes_nospp2, links = tails$links, points = TRUE)
- hulls_by_group_2D(msp_nospp2$ordination$x, fac = species)
+ msp_nocac2 <- mspace(detr_shapes_nocac2, template = wings$template,
+                      points = TRUE)
+ hulls_by_group_2D(msp_nocac2$ordination$x, fac = cactus)
 
  ## Using newdata
 
- #fit linear model between shapes and sex for NDF species, then use the NDF
- #sexual dimorphism to detrend DF shapes from variation between sexes
- index <- tails$data$type == "NDF"
- shapes_ndf <- shapes[,,index]
- sex_ndf <- sex[index]
- shapes_df <- shapes[,,!index]
- sex_df <- sex[!index]
+ #fit linear model between shapes and cactus for Db species, then use this
+ #relationship to detrend Dk shapes from variation between cactus
+ index <- species == "Db"
+ shapes_Db <- shapes[,,index]
+ cactus_Db <- cactus[index]
+ shapes_Dk <- shapes[,,!index]
+ cactus_Dk <- cactus[!index]
 
- model_ndf <- lm(two.d.array(shapes_ndf) ~ sex_ndf)
- detr_shapes_mat3 <- detrend_shapes(model_ndf, newdata = model_df)
+ model_Db <- lm(two.d.array(shapes_Db) ~ cactus_Db)
+ model_Dk <- lm(two.d.array(shapes_Dk) ~ cactus_Dk)
+ detr_shapes_mat3 <- detrend_shapes(model_Db, newdata = model_Dk)
 
- detr_shapes_nosize3 <- arrayspecs(detr_shapes_mat3, k = 2, p = 9)
+ detr_shapes_nocactus <- arrayspecs(detr_shapes_mat3, k = 2, p = 9)
 
- msp_nosize3 <- mspace(detr_shapes_nosize3, links = tails$links,
-                       points = TRUE)
- hulls_by_group_2D(msp_nosize3$ordination$x, fac = factor(species[!index]))
+ msp_cactus <- mspace(shapes_Dk, template = wings$template, points = TRUE)
+ hulls_by_group_2D(msp_cactus$ordination$x, fac = factor(cactus[!index]))
 
- ## Comparing residuals vs orthogonal methods
+ msp_nocactus <- mspace(detr_shapes_nocactus, template = wings$template,
+                     points = TRUE)
+ hulls_by_group_2D(msp_nocactus$ordination$x, fac = factor(cactus[!index]))
+
+
+ ### Comparing residuals vs orthogonal methods
 
  \dontrun{
  #load shells3D data, retain only specimens belonging to S. vacaensis
@@ -211,7 +230,8 @@ evolution.
                            refmat = shapes[,,findMeanSpec(shapes)],
                            tarmat = expected_shapes(shapes[,,index]))
 
- #compute allometric axis (i.e., shape variation associated to changes in size)
+ #compute allometric axis (i.e., shape variation associated to changes in
+ #size)
  alloax <- lm(two.d.array(shapes[,,index]) ~ sizes[index])
 
  #project vacaensis specimens into the overall morphospace together with
@@ -248,6 +268,7 @@ evolution.
    proj_shapes(detr_shapes_os, pch = 21, bg = 7)
  }
 
+
  #### Fourier data (quick demo)
 
  #load shells data
@@ -256,7 +277,7 @@ evolution.
  species <- shells$data$species
  logsizes <- log(shells$sizes)
  msp <- mspace(shapes, mag = 0.5, points = TRUE)
- hulls_by_group_2D(msp$x, fac = species)
+ hulls_by_group_2D(msp$ordination$x, fac = species)
 
  #fit linear model between shapes and sizes, then center at the shape
  #corresponding to the grand mean
@@ -283,7 +304,8 @@ evolution.
 
  model_koeneni <- lm(shapes_koeneni ~ logsizes_koeneni)
  model_esbelta <- lm(shapes_esbelta ~ logsizes_esbelta)
- detr_shapes_nosize3 <- detrend_shapes(model_koeneni, newdata = model_esbelta)
+ detr_shapes_nosize3 <- detrend_shapes(model_koeneni,
+                                       newdata = model_esbelta)
 
  msp_nosize3 <- mspace(shapes_esbelta, mag = 0.5, points = TRUE)
  title("raw P. esbelta morphospace")
@@ -291,16 +313,15 @@ evolution.
  title("P. esbelta morphospace, refined using \n allometric variation from P. koeneni")
 }
 \references{
-Burnaby, T. P. (1966) \emph{Growth-invariant discriminant
-functions and generalized distances. Biometrics, 22, 96–110.}
+Burnaby, T. P. (1966) \emph{Growth-invariant discriminant functions and
+generalized distances. Biometrics, 22, 96–110.}
 
-Revell, L. J. (2009). \emph{Size-correction and principal
-components for interspecific comparative studies}. Evolution, 63,
-3258-3268.
+Revell, L. J. (2009). \emph{Size-correction and principal components for
+interspecific comparative studies}. Evolution, 63, 3258-3268.
 
-Klingenberg, C. P. (2016). \emph{Size, shape, and form: concepts
-of allometry in geometric morphometrics}. Development Genes and Evolution,
-226(3), 113-137.
+Klingenberg, C. P. (2016). \emph{Size, shape, and form: concepts of allometry
+in geometric morphometrics}. Development Genes and Evolution, 226(3),
+113-137.
 }
 \seealso{
 \code{\link[stats]{lm}}, \code{\link{burnaby}},

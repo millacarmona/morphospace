@@ -14,7 +14,7 @@ surface contour be plotted?}
 
 \item{col}{Colors used to represent the landscape curve.}
 
-\item{lwd}{Numeric; width of the lines depicting the landscape curve.}
+\item{lwd}{Integer; width of the lines depicting the landscape curve.}
 }
 \description{
 Plot a curve representing a "univariate" landscape. Used

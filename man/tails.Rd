@@ -24,7 +24,7 @@ wireframe.}
 tails
 }
 \description{
-Sample of intra- and interspecific tail shapes, quntified
+Sample of intra- and interspecific tail shapes, quantified
 using 9 landmarks, from the 13 species of the genus \emph{Tyrannus}
 (Aves: Tyrannidae).
 }
@@ -38,6 +38,9 @@ specimens, their classification to species and sex, and the phylogenetic
 relationships between \emph{Tyrannus} species (see Fasanelli et al. 2022
 and references therein). To further help visualization of shapes, the links
 between landmarks have also been included.
+
+Have in mind that since the asymmetric component has been removed from
+shape variation, this half the rank of a typical shape data matrix.
 }
 \references{
 Fasanelli M. N., Milla Carmona P. S., Soto I. M., & Tuero, D.T . (2022).

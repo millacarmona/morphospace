@@ -31,36 +31,48 @@ the x axis.}
 \item{y}{Optional vector with a non-morphometric variable to be plotted in
 the y axis.}
 
-\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip labels
-should match the row names from \code{x} or \code{y}.}
+\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip
+labels should match the row names from \code{x} or \code{y}.}
 
 \item{phylo_scores}{A matrix containing the scores from tips and nodes of
 the phylogeny provided in \code{tree}.}
 
 \item{axis}{Numeric; the axis to be plotted.}
 
-\item{lwd.phylo}{Numeric; the width of the lines depicting phylogenetic
+\item{lwd.phylo}{Integer; the width of the lines depicting phylogenetic
 branches.}
 
-\item{lty.phylo}{Numeric; the type of the lines depicting phylogenetic
+\item{lty.phylo}{Integer; the type of the lines depicting phylogenetic
 branches.}
 
 \item{col.phylo}{Numeric; the color of the lines depicting phylogenetic
 branches.}
 
+\item{cex.nodes}{Numeric; size of the scatterpoints representing the nodes
+of the phylogeny.}
+
+\item{pch.nodes}{Symbol of the scatterpoints representing the nodes of the
+phylogeny.}
+
+\item{col.nodes}{Color of the scatterpoints representing the nodes of the
+phylogeny.}
+
+\item{bg.nodes}{Background color of the scatterpoints representing the
+nodes of the phylogeny.}
+
+\item{cex.tips}{Numeric; size of the scatterpoints representing the tips
+of the phylogeny.}
+
+\item{pch.tips}{Symbol of the scatterpoints representing the tips of the
+phylogeny.}
+
+\item{col.tips}{Color of the scatterpoints representing the tips of the
+phylogeny.}
+
+\item{bg.tips}{Background color of the scatterpoints representing the
+tips of the phylogeny.}
+
 \item{points}{Logical; whether to plot the scatter points.}
-
-\item{pch.groups}{Numeric; the symbol of the scatter points corresponding to
-groups mean shapes.}
-
-\item{col.groups}{The color of the scatter points corresponding to groups
-mean shapes.}
-
-\item{bg.groups}{The background color of the scatter points corresponding
-to groups mean shapes.}
-
-\item{cex.groups}{Numeric; the size of the scatter points corresponding to
-groups mean shapes.}
 }
 \description{
 Plot phenogram using phylogenetic and morphometric information.
@@ -78,18 +90,23 @@ links <- tails$links
 
 #generate basic morphospace, add sampled shapes, species mean shapes, and
 #phylogenetic structure
-msp <- mspace(shapes, mag = 0.7, axes = c(1,2), cex.ldm = 0, plot = FALSE) \%>\%
-  proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1, cex = 0.7) \%>\%
-  proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 2) \%>\%
-  proj_phylogeny(tree = tree)
+msp <- mspace(shapes, mag = 0.7, axes = c(1,2), cex.ldm = 0,
+              plot = FALSE) \%>\%
+  proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1,
+              cex = 0.7) \%>\%
+  proj_shapes(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 2) \%>\%
+  proj_phylogeny(shapes = sp_shapes, tree = tree)
 
 #get node heights
 heights <- phytools::nodeHeights(tree)
-node_heights <- c(rep(max(heights), length(tree$tip.label)), unique(heights[,1]))
+node_heights <- c(rep(max(heights), length(tree$tip.label)),
+                  unique(heights[,1]))
 
 #plot simple phengram
-plot(node_heights, msp$phylo_scores[,1])
-plot_phenogram(tree = tree, x = node_heights, phylo_scores = msp$phylo_scores,
-               axis = 1, lwd.phylo = 1, lty.phylo = 1, col.phylo = 1, cex.groups = 1,
-               col.groups = 1, pch.groups = 1, points = TRUE)
+plot(node_heights, msp$projected$phylo_scores[,1])
+plot_phenogram(tree = tree, x = node_heights,
+               phylo_scores = msp$projected$phylo_scores, axis = 1, lwd.phylo = 1,
+               lty.phylo = 1, col.phylo = 1, cex.tips = 1, col.tips = 1,
+               pch.tips = 1, cex.nodes = 1, col.nodes = 1, pch.nodes = 1,
+               points = TRUE)
 }

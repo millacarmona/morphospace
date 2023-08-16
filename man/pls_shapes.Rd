@@ -26,37 +26,48 @@ scores resulting from LOOCV.}
 A \code{"pls_shapes"} or \code{"phy_pls_shapes"} object formatted
 following the \code{"prcomp"} class:
 \itemize{
-\item \code{$sdev:} {the standard deviation of the PLS axis/axis of the
-shape block.}
+\item \code{$x:} {the scores from the shapes block.}
+\item \code{$x2:} {the scores from the supervising block (i.e., the
+\code{x} scores.}
+\item \code{$sdev:} {the standard deviations of the PLS axes (i.e., the
+standard deviations calculated from the scores of each axis in the
+shape block).}
 \item \code{$rotation:} {a matrix of vector coefficients for the shape
 block.}
 \item \code{$center:} {the mean values of the original variables from
 the shape block.}
-\item \code{$totvar:} {the sum of the variances from the original
-variables in the shape block.}
-\item \code{$x2:} {the scores from the supervizing block (i.e. the
-\code{x} scores.}
+\item \code{$totvar:} {the sum of the variances of the original variables
+in the shape block.}
 }
 }
 \description{
-A wrapper for \code{\link[=pls2b]{pls2b()}} aimed specifically at summarising
+A wrapper for \code{\link[=pls2b]{pls2b()}} specifically aimed at summarising
 covariation between shape data and other external, non-shape variable(s).
 }
 \details{
 This function finds the linear combination maximizing covariation
 between a block of variables assumed to be shape variables formatted as
 a 2-margins matrix and another block which can be either another set of
-shape variables or one or more non-shape variables for supervizing the
+shape variables or one or more non-shape variables for supervising the
 analysis. If a phylogenetic tree is supplied, observations from \code{x}
-and \code{shapes} blocks are treated as data measured for its tips.
+and \code{shapes} blocks are treated as data measured for its tips. In this
+case, the resulting axes maximize the residual covariation among blocks
+left after removing covariation among blocks accounted by phylogenetic
+history (assuming a Brownian model of evolution and 100\% phylogenetic
+signal).
 
 It has been reported that PLS (as an algebraic equivalent of bgPCA)
 produces spurious covariation between blocks when the number of variables
 exceeds the number of observations (which is a common situation in
 geometric morphometrics analyses). This problem can be alleviated by
-carrying out a leave-one-out cross-validation (LOOCV; i.e. each
+carrying out a leave-one-out cross-validation (LOOCV; i.e., each
 observation is excluded from the calculation of PLS axes before its
 projection in the resulting ordination as a way to calculate its score).
+
+The number of axes in both blocks will be equal to the number of variables
+in the smallest block (i.e., the one with less variables), unless the
+number of observations is lower (in which case this will be equal to the
+number PLS axes).
 }
 \examples{
 #load data
@@ -108,13 +119,12 @@ Rohlf, F. J., & Corti, M. (2000). \emph{Use of two-block partial
 least-squares to study covariation in shape}. Systematic Biology, 49(4),
 740-753.
 
-Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012).
-\emph{Geometric morphometrics for biologists: A primer}. 2nd ed. Academic
-Press.
+Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012). \emph{Geometric
+morphometrics for biologists: A primer}. 2nd ed. Academic Press.
 
 Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
-components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
-271-302.
+components analysis in geometric morphometrics}. Evolutionary Biology,
+46(4), 271-302.
 }
 \seealso{
 \code{\link{pls2b}}

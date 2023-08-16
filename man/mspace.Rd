@@ -10,6 +10,8 @@ mspace(
   links = NULL,
   template = NULL,
   FUN = stats::prcomp,
+  p = NULL,
+  k = NULL,
   nh = 5,
   nv = 4,
   mag = 1,
@@ -55,13 +57,20 @@ variation. Supported alternatives include \code{\link[stats]{prcomp}},
 \code{\link{phy_prcomp}}, \code{\link{bg_prcomp}} and
 \code{\link{pls_shapes}}.}
 
-\item{nh}{Numeric; number of shape models along the x axis.}
+\item{p}{Numeric, indicating the number of landmarks/semilandmarks used (only
+for landmark data in 2-margin matrices format).}
 
-\item{nv}{Numeric; number of shape models along the y axis.}
+\item{k}{Numeric, indicating the number of cartesian dimensions of
+landmarks/semilandmarks (only for landmark data in 2-margin matrices
+format).}
+
+\item{nh}{Positive integer; number of shape models along the x axis.}
+
+\item{nv}{Positive integer; number of shape models along the y axis.}
 
 \item{mag}{Numeric; magnifying factor for shape models.}
 
-\item{invax}{Optional numeric indicating which of the axes provided in
+\item{invax}{Optional integer indicating which of the axes provided in
 \code{axes} needs to be inverted (options are \code{1}, \code{2} or
 \code{c(1,2)}).}
 
@@ -84,7 +93,7 @@ factors for the width and height of the frame, respectively.}
 
 \item{bg.models}{Background color for outlines/meshes.}
 
-\item{lwd.models}{Numeric; width of the lines in wireframes/outlines.}
+\item{lwd.models}{Integer; width of the lines in wireframes/outlines.}
 
 \item{alpha.models}{Numeric; transparency factor for background models
 (3D only).}
@@ -114,9 +123,9 @@ contains the type of data (\code{$datype}) and ordination method
 projected into the morphospace stored in the \code{"mspace"} object.
 Initially includes only the background shape models
 (\code{$shapemodels}), but more elements can be added using the
-\code{proj_*} family of functions.
+\code{proj_*} family of functions.}
 \item{$plotinfo:} { a list containing the graphical parameters used to
-create the plot. Passed to \code{\link{plot_mspace()}} to regenerate
+create the plot. Passed to \code{\link{plot_mspace}} to regenerate
 morphospaces.}
 }
 }
@@ -142,7 +151,7 @@ Templates will be warped using TPS interpolation to produce the set of
 background shape models. For 2D landmark data, templates must be provided
 as a 2-column matrix containing the actual landmarks/semilandmarks,
 followed by the coordinates defining a curve or set of curves, separated
-from the former and from each other by a row of\code{NA}s
+from the former and from each other by a row of \code{NA}s
 (see \code{\link{build_template2d}}). For 3D landmark data, the template
 must be a \code{"mesh3d"} object corresponding to the \strong{actual mean
 shape of the sample} (which can be obtained using
@@ -247,7 +256,7 @@ shapes <- shells$shapes$coe
 
 #generate morphospace using all the raw variation
 mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4, size.models = 1,
-       rescale = F, asp.models = 1, bg.model = "light gray")
+       rescale = FALSE, asp.models = 1, bg.model = "light gray")
 
 #shapes in the background can be rescaled to avhieve a (slightly) better
 #visualization. Also, save the ordination into an object.
@@ -259,10 +268,10 @@ morphosp_F <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4,
 morphosp_F
 }
 \seealso{
-\code{\link{{print.mspace}}, \code{\link{proj_shapes}},
-\code{\link{proj_consensus}}, \code{\link{proj_groups}},
-\code{\link{proj_phylogeny}}, \code{\link{proj_axis},
-\code{\link{proj_landscape}}, \code{\link{extract_shapes},
-\code{\link{prcomp}}, \code{\link{bg_prcomp}}, \code{\link{phy_prcomp}},
+\code{\link{print.mspace}}, \code{\link{proj_shapes}},
+\code{\link{proj_groups}}, \code{\link{proj_phylogeny}},
+\code{\link{proj_axis}}, \code{\link{proj_landscape}},
+\code{\link{extract_shapes}}, \code{\link{prcomp}},
+\code{\link{bg_prcomp}}, \code{\link{phy_prcomp}},
 \code{\link{pls_shapes}},
 }

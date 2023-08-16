@@ -23,14 +23,14 @@ as input.}
 A \code{"phy_prcomp"} object formatted following the \code{"prcomp"}
 class:
 \itemize{
-\item \code{$sdev:} {the standard deviations of the principal components
-(i.e. the square roots of the eigenvalues of the covariance/correlation
-matrix).}
+\item \code{$x:} {a matrix with the scores of observations in the new
+ordination axes.}
+\item \code{$values:} {singular values from the SVD of the phylogenetic
+rate matrix.}
 \item \code{$rotation:} {a matrix of eigenvector coefficients.}
-\item \code{$center:} {the phylogenetic mean (i.e. the shape estimated
+\item \code{$center:} {the phylogenetic mean (i.e., the shape estimated
 for the root of the tree).}
-\item \code{$totvar:} {the sum of the variances from all the original
-variables.}
+\item \code{$totvar:} {the sum of the variances of the original data.}
 \item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
 of the model; see \code{\link[phytools]{phyl.pca}}.}
 }
@@ -42,27 +42,37 @@ A wrapper for \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}}.
 Phylogenetic PCA finds the linear combination of variables (in
 the context of \code{morphospace} will generally be a series of shapes
 arranged as 2-margin matrix) maximizing the residual variation left after
-removing covariation explained by phylogenetic history (i.e. they reflect
-the covariance that would correspond to a star phylogeny).
+removing covariation explained by phylogenetic history (i.e., they reflect
+the covariance that would correspond to a star phylogeny), assuming a
+Brownian model of evolution.
 
-Phylogenetic PCA has some important differences to regular PCA. First, the
-resulting ordination is centered around the phylogenetic mean (i.e. the
-values estimated for the root of the tree) instead of the overall centroid
-of the original variables. More importantly, both phylogenetic PCA's
-eigenvectors and eigenvalues have been constructed using covariation that
-is independent of phylogenetic structure. However, only the orientation of
-the scores on those axes, and not their variances, reflect this adjustment.
-In other words, orientation of the phylogenetic PC axes are devoid of
-phylogenetic structure, but magnitudes measured in the resulting
-morphospace (e.g. distances, variances) still retain phylogenetic
-information. Stemming from this same fact, the variances computed using
-phylogenetic scores differ from the ones calculated from the phylogenetic
-eigenvalues (which represent the total amount of variance among the taxa
-after removing covariance accounted by phylogeny, although their magnitude
-depends on the units used to measure branch length), and do not necessarily
-decrease for subordinate axes. Also, the set of phylogenetic scores are not
-uncorrelated, meaning they can contain redundant information. For more
-details, see Polly et al. 2013.
+Phylogenetic PCA has some important differences relative to regular PCA.
+First, the resulting ordination is centered around the phylogenetic mean
+(i.e., the values estimated for the root of the tree) instead of the
+overall centroid of the original variables. More importantly, both
+phylogenetic PCA's eigenvectors and eigenvalues have been constructed using
+covariation that is independent of phylogenetic structure. However, only
+the orientation of the scores on those axes, and not their variances,
+reflect this adjustment. In other words, orientation of the phylogenetic
+PC axes are devoid of phylogenetic structure, but magnitudes measured in
+the resulting morphospace (e.g. distances, variances) still retain
+phylogenetic information.
+
+Because of these properties, eigenvalues and variances computed from
+phylogenetic PC scores will differ. The former represents the amount of
+variation among the taxa after removing covariance accounted by phylogeny
+-- although their magnitude depends on the units used to measure
+branch length, and thus cannot be simply interpreted as a proportion of the
+original variance. Also, variance computed from pPC scores do not
+necessarily decrease for lower axes, and are not uncorrelated, meaning they
+can contain redundant information. For more details on the difference
+between phylogenetic and regular PCA, see Polly et al. 2013.
+
+Like PCA, phylogenetic PCA does not change the dimensionality of the shape
+data set -- the number of resulting pPC axes will be be equal to the
+number of original variables (unless this is higher than the number of
+observations, in which case the number of resulting pPC will be equal
+to the latter).
 }
 \examples{
 #load data and packages
@@ -76,14 +86,26 @@ tree <- tails$tree
 #perform phylogenetic PCA
 ppca <- phy_prcomp(x = two.d.array(sp_shapes), tree = tree)
 
-#look at the results
+#inspect results
 names(ppca) #the contents of the resulting object
-exp_var(ppca) #variance explained by each axis
+#exp_var(ppca) ##interpretation of eigenvalues is complex! not yet implemented
 plot(ppca$x) #ordination
+
+
+#compare shape variation as summarized by different methods
+
+#build morphospace using phylogenetic PCA
+mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, FUN = phy_prcomp,
+       tree = tree) \%>\%
+  proj_phylogeny(sp_shapes, tree = tree)
+
+#compare against morphospace built with ordinary PCA
+mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, invax = c(1,2)) \%>\%
+  proj_phylogeny(sp_shapes, tree = tree)
 }
 \references{
-Revell, L. J. (2009). \emph{Size-correction and principal components
-for interspecific comparative studies}. Evolution, 63, 3258-3268.
+Revell, L. J. (2009). \emph{Size-correction and principal components for
+interspecific comparative studies}. Evolution, 63, 3258-3268.
 
 Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
 \emph{Phylogenetic principal components analysis and geometric

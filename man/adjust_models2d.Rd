@@ -11,16 +11,18 @@ adjust_models2d(models, frame, model_width, model_height)
 
 \item{frame}{The frame in which shape models are to be plotted.}
 
-\item{model_width}{Numeric; the width of a reference shape model (usually the consensus).}
+\item{model_width}{Numeric; the width of a reference shape model (usually the
+consensus).}
 
-\item{model_height}{Numeric; the height of a reference shape model (usually the consensus).}
+\item{model_height}{Numeric; the height of a reference shape model (usually
+the consensus).}
 }
 \value{
 An array containing the adjusted shape models.
 }
 \description{
-Avoid background shape models distortion caused by differences in ranges
-of x and y axes. Used internally.
+Avoid background shape models distortion caused by differences
+in ranges of x and y axes. Used internally.
 }
 \examples{
 #load package and data
@@ -51,10 +53,13 @@ for(i in 1:dim(shapes_grid0$models_arr)[3]) {
 }
 
 #calculate width and height of consensus shape
-wh <- abs(apply(apply(expected_shapes(shapes_grid0$models_arr), 2, range), 2, diff))
+wh <- abs(apply(apply(expected_shapes(shapes_grid0$models_arr), 2, range), 2,
+          diff))
 
 #ajust grid to new frame and plot
-adj_grid <- adjust_models2d(models = shapes_grid0$models_arr, frame = newframe,
-                            model_width = wh[1], model_height = wh[2])
-for(i in 1:dim(adj_grid)[3]) points(adj_grid[,,i], type = "l", col = "blue", lwd = 2)
+adj_grid <- adjust_models2d(models = shapes_grid0$models_arr,
+                            frame = newframe, model_width = wh[1],
+                            model_height = wh[2])
+for(i in 1:dim(adj_grid)[3]) points(adj_grid[,,i], type = "l", col = "blue",
+                                    lwd = 2)
 }

@@ -26,6 +26,10 @@ A \code{"pls2b"} or \code{"phy_pls2b"} object, containing:
 \itemize{
 \item \code{$values:} {vector of singular values accounting for the
 covariation among blocks explained by each par of axes.}
+\item \code{$xscores:} {a matrix with the scores of observations in the
+ordination axes of the first block.}
+\item \code{$yscores:} {a matrix with the scores of observations in the
+ordination axes of the Second block.}
 \item \code{$xrotation:} {matrix of vector coefficients for the first
 block.}
 \item \code{$yrotation:} {matrix of vector coefficients for the second
@@ -36,10 +40,12 @@ provided).}
 \item \code{$ycenter:} {the mean values of the original variables from
 the second block (or their phylogenetic mean, if \code{tree} is
 provided).}
-\item \code{$xtotvar:} {the sum of the variances from the original
-variables from the second block.}
-\item \code{$ytotvar:} {the sum of the variances from the original
-variables from the second block.}
+\item \code{$xtotvar:} {the sum of the variances of the variables from the
+second block.}
+\item \code{$ytotvar:} {the sum of the variances of the variables from the
+first block.}
+\item \code{$sdev:} {the standard deviations of the PLS-axes (i.e., the
+square roots of the eigenvalues of the covariance/correlation matrix).}
 }
 }
 \description{
@@ -57,7 +63,7 @@ It has been reported that PLS (as an algebraic equivalent of bgPCA)
 produces spurious covariation between blocks when the number of variables
 exceeds the number of observations (which is a common situation in
 geometric morphometrics analyses). This problem can be alleviated by
-carrying out a leave-one-out cross-validation (LOOCV; i.e. each
+carrying out a leave-one-out cross-validation (LOOCV; i.e., each
 observation is excluded from the calculation of PLS axes before its
 projection in the resulting ordination as a way to calculate its score).
 
@@ -69,11 +75,16 @@ Brownian model of evolution and 100\% phylogenetic signal, which is
 equivalent to setting \code{method = "BM"} in \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}}).
 
 The phylogenetic version of \code{\link[=pls2b]{pls2b()}} displays the same variational
-properties than phylogenetic PCA (i.e. centering on the phylogenetic mean;
+properties than phylogenetic PCA (i.e., centering on the phylogenetic mean;
 orientation of scores reflect non-phylogenetic covariation but their
 variance is not scaled and thus contain phylogenetic information; for the
 latter reason, variance of scores and eigenvalues differ; scores are
 correlated; etc; see Polly et al. 2013).
+
+The number of axes in both blocks will be equal to the number of variables
+in the smallest block (i.e., the one with less variables), unless the
+number of observations is lower (in which case this will be equal to the
+number PLS axes).
 }
 \examples{
 #load data and packages
@@ -91,7 +102,7 @@ tree <- tails$tree
 #perform PLS between shape and size
 pls <- pls2b(y = two.d.array(shapes), x = sizes)
 
-#look at the results
+#inspect results
 names(pls) #the contents of the resulting object
 plot(pls$xscores, pls$yscores) #ordination
 
@@ -105,11 +116,10 @@ exp_var(pls2) #variance explained by each axis
 plot(pls2$x2, pls2$x) #ordination
 
 
-
 #perform phylogenetic PLS
 ppls <- pls2b(y = two.d.array(sp_shapes), x = sp_sizes, tree = tree)
 
-#look at the results
+#inspect results
 names(ppls) #the contents of the resulting object
 plot(ppls$xscores, ppls$yscores) #ordination
 
@@ -129,8 +139,7 @@ least-squares to study covariation in shape}. Systematic Biology, 49(4),
 740-753.
 
 Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012). \emph{Geometric
-morphometrics for biologists: A primer}. 2nd ed. Academic
-Press.
+morphometrics for biologists: A primer}. 2nd ed. Academic Press.
 
 Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
 \emph{Phylogenetic principal components analysis and geometric
@@ -141,8 +150,8 @@ studying the evolution of biological shape}. Hystrix, the Italian Journal
 of Mammalogy, 24(1), 25-32.
 
 Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
-components analysis in geometric morphometrics}. Evolutionary Biology, 46(4),
-271-302.
+components analysis in geometric morphometrics}. Evolutionary Biology,
+46(4), 271-302.
 }
 \seealso{
 \code{\link{pls_shapes}}, \code{\link{phy_prcomp}},

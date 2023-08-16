@@ -23,10 +23,10 @@ density_by_group_2D(
 
 \item{alpha}{Numeric; transparency factor for density distributions.}
 
-\item{lwd}{A numeric vector indicating the width of line used to draw density
-distributions.}
+\item{lwd}{A vector indicating the width of line (integer) used to draw
+density distributions.}
 
-\item{lty}{A numeric vector indicating the type of line used to draw density
+\item{lty}{A vector indicating the type of line (integer) used to draw density
 distributions.}
 
 \item{col}{A vector (either character or numeric) indicating the colors used

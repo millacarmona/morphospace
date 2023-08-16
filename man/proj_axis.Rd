@@ -19,9 +19,9 @@ proj_axis(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...)
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
-\item{type}{Integer; type of arrows (\link{0} = no arrow; \link{1} = pointing towards
-the maximum; \link{2} = pointing towards the maximum, \link{3} = pointing in both
-directions).}
+\item{type}{Integer; type of arrows (\code{0} = no arrow; \code{1} = pointing
+towards the maximum; \code{2} = pointing towards the maximum, \code{3} =
+pointing in both directions).}
 
 \item{...}{Further arguments passed to \code{\link[graphics:arrows]{graphics::arrows()}}.}
 }
@@ -48,7 +48,7 @@ same thing in a more flexible and straightforward way.
 
 Axes computed by fitting linear models to shape data can differ in
 extension from axes obtained through supervised ordination using the same
-supervising variable (i.e. shape transformations will be either stretched
+supervising variable (i.e., shape transformations will be either stretched
 or truncated) due to the former assuming that the explanatory variable has
 been measured without error. Also, the former will not be necessarily
 centered.

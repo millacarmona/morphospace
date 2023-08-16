@@ -28,7 +28,7 @@ shape1_rot <- rotate_fcoef(shape1)
 plot(inv_efourier(shape1_rot, 300))
 }
 \references{
-Iwata, H., & Ukai, Y. (2002). \emph{SHAPE: a computer program
-package for quantitative evaluation of biological shapes based on elliptic
-Fourier descriptors}. Journal of Heredity, 93(5), 384-385.
+Iwata, H., & Ukai, Y. (2002). \emph{SHAPE: a computer program package for
+quantitative evaluation of biological shapes based on elliptic Fourier
+descriptors}. Journal of Heredity, 93(5), 384-385.
 }

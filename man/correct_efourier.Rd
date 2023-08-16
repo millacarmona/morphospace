@@ -9,8 +9,8 @@ correct_efourier(ef, index = NULL)
 \arguments{
 \item{ef}{An \code{"OutCoe"} object.}
 
-\item{index}{An optional numeric vector providing the indices identifying the
-shapes to be rotated. If declared, overrides interative selection of
+\item{index}{An optional integer vector providing the indices identifying the
+shapes to be rotated. If declared, overrides interactive selection of
 shapes.}
 }
 \value{
@@ -43,7 +43,7 @@ ef_corr2 <- correct_efourier(ef_corr1)
 }
 }
 \references{
-Iwata, H., & Ukai, Y. (2002). \emph{SHAPE: a computer program
-package for quantitative evaluation of biological shapes based on elliptic
-Fourier descriptors}. Journal of Heredity, 93(5), 384-385.
+Iwata, H., & Ukai, Y. (2002). \emph{SHAPE: a computer program package for
+quantitative evaluation of biological shapes based on elliptic Fourier
+descriptors}. Journal of Heredity, 93(5), 384-385.
 }

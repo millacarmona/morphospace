@@ -26,7 +26,7 @@ The goal of `morphospace` is to enhance representation and heuristic exploration
 ## Installation
 
 
-You can install the development version of morphospace from [GitHub](https://github.com/) with:
+You can install the development version of `morphospace` from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
@@ -105,7 +105,7 @@ plot_mspace(msp, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
             col.groups = 1:nlevels(spp), ylab = "Time", legend = TRUE)
 ```
 
-`morphospace` can also handle closed outlines (in the form of elliptic Fourier coefficients) and 3D landmark data, as shown below briefly using the `shells` and `shells3D `data sets:
+`morphospace` can also handle closed outlines (in the form of elliptic Fourier coefficients) and 3D landmark data, as shown below briefly using the `shells` and `shells3D` data sets:
 
 
 ```{r}
@@ -159,11 +159,12 @@ Aside from working with these types of morphometric data, `morphospace` provides
 ## Update (August 2022)
 
 
-- Different behavior for `proj_shapes` (now replaces `mspace$x` with the actual scores being projected) and `proj_axis` (now adds one or more axes into an `mspace$shapes_axis`).
+- Different behavior for `proj_shapes` (now replaces `mspace$x` with the actual scores being projected) and `proj_axis` (now adds one or more axes into an `mspace$shape_axis`).
 
 - New `ellipses_by_groups_2D` (uses `car::ellipse`) function as an option for `proj_groups` and `plot_mspace`.
 
 - Morphospaces without background shape models are now an option (for both `mspace` and `plot_mspace`).
+
 - `plot_mspace` now regenerates the original mspace plot by default (`proj_*` functions were modified such that all the relevant graphical parameters are inherited downstream to `plot_mspace`), has further flexibility regarding hybrid morphospaces (`plot_phenogram` has been updated) and allows adding a legend (and some various bugs were fixed as well).
 
 - Univariate morphospaces and associated density distributions are now an option (all the `mspace`

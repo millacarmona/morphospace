@@ -53,7 +53,7 @@ available for \code{linear = FALSE}.}
 \item{display}{Either \code{"contour"} or \code{"filled.contour"}. For
 bivariate landscapes only.}
 
-\item{nlevels}{Number of levels (i.e. contours) to use for landscape
+\item{nlevels}{Number of levels (i.e., contours) to use for landscape
 representation.}
 
 \item{palette}{A function defining a color palette to use for landscape
@@ -61,9 +61,9 @@ representation.}
 
 \item{alpha}{Numeric; transparency factor for filled contours.}
 
-\item{lwd}{Numeric; width of the lines depicting contours.}
+\item{lwd}{Integer; width of the lines depicting contours.}
 
-\item{lty}{Numeric; type of the lines depicting contours.}
+\item{lty}{Integer; type of the lines depicting contours.}
 
 \item{drawlabels}{Logical; should the labels indicating the value of each
 surface contour be plotted?}
@@ -92,8 +92,8 @@ existing morphospace.
 \details{
 The purpose of this function is to generate and depict a 2- (for
 univariate morphospaces) or 3-dimensonal (for bivariate morphospaces)
-surface (i.e. a landscape), interpolated from values assigned to the set of
-shapes projected into an existing morphospace. These can be a sample of
+surface (i.e., a landscape), interpolated from values assigned to the set
+of shapes projected into an existing morphospace. These can be a sample of
 shapes specified by the user, producing a surface for a specific region of
 the morphospace ("empirical landscapes"). Alternatively, the set of
 background shape models can be used to generate a surface for the entire
@@ -109,7 +109,7 @@ If the \code{FUN} argument is used, the function supplied must include a
 shape (stored as a vector of shape descriptors), and return a single
 numeric value computed for or from that shape. If the \code{X} argument is
 used instead, values should be in the same order than the shapes provided
-in \code{shapes}, or than the background shape models (i.e. from left to
+in \code{shapes}, or than the background shape models (i.e., from left to
 right and from bottom to top; see \code{\link{morphogrid}},
 \code{\link{plot_morphogrid2d}} and \code{\link{plot_morphogrid3d}}) if
 \code{shapes = NULL}. Otherwise, landscape topography will be dissociated

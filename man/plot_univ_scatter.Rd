@@ -11,11 +11,11 @@ plot_univ_scatter(scores, density, col = 1, bg = 1, pch = 1, cex = 1, ...)
 
 \item{density}{Logical; whether to plot density curve.}
 
-\item{col}{Numeric; color of the scatterpoints.}
+\item{col}{Color of the scatterpoints.}
 
-\item{bg}{Numeric; background color for the scatterpoints.}
+\item{bg}{Background color for the scatterpoints.}
 
-\item{pch}{Numeric; symbol of the scatterpoints.}
+\item{pch}{Symbol of the scatterpoints.}
 
 \item{cex}{Numeric; size of the scatterpoints.}
 
