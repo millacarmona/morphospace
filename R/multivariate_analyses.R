@@ -30,15 +30,17 @@
 #'   reflect this adjustment. In other words, orientation of the phylogenetic
 #'   PC axes are devoid of phylogenetic structure, but magnitudes measured in
 #'   the resulting morphospace (e.g. distances, variances) still retain
-#'   phylogenetic information. Because of this, the variances computed using
-#'   phylogenetic scores differ from the ones calculated from the phylogenetic
-#'   eigenvalues (which represent the total amount of variance among the taxa
-#'   after removing covariance accounted by phylogeny, although their magnitude
-#'   depends on the units used to measure branch length), and do not necessarily
-#'   decrease for subordinate axes. Also, the set of phylogenetic scores are not
-#'   uncorrelated, meaning they can contain redundant information. For more
-#'   details on the difference between phylogenetic and regular PCA, see Polly
-#'   et al. 2013.
+#'   phylogenetic information.
+#'
+#'   Because of these properties, eigenvalues and variances computed from
+#'   phylogenetic PC scores will differ. The former represents the amount of
+#'   variation among the taxa after removing covariance accounted by phylogeny
+#'   -- although their magnitude depends on the units used to measure
+#'   branch length, and thus cannot be simply interpreted as a proportion of the
+#'   original variance. Also, variance computed from pPC scores do not
+#'   necessarily decrease for lower axes, and are not uncorrelated, meaning they
+#'   can contain redundant information. For more details on the difference
+#'   between phylogenetic and regular PCA, see Polly et al. 2013.
 #'
 #'   Like PCA, phylogenetic PCA does not change the dimensionality of the shape
 #'   data set -- the number of resulting pPC axes will be be equal to the
@@ -52,14 +54,12 @@
 #' \itemize{
 #'   \item \code{$x:} {a matrix with the scores of observations in the new
 #'     ordination axes.}
-#'   \item \code{$sdev:} {the standard deviations of the principal components
-#'     (i.e., the square roots of the eigenvalues of the covariance/correlation
-#'     matrix).}
+#'   \item \code{$values:} {singular values from the SVD of the phylogenetic
+#'     rate matrix.}
 #'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
 #'   \item \code{$center:} {the phylogenetic mean (i.e., the shape estimated
 #'     for the root of the tree).}
-#'   \item \code{$totvar:} {the sum of the variances from all the original
-#'     variables.}
+#'   \item \code{$totvar:} {the sum of the variances of the original data.}
 #'   \item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
 #'     of the model; see \code{\link[phytools]{phyl.pca}}.}
 #'   }
@@ -93,35 +93,41 @@
 #' #perform phylogenetic PCA
 #' ppca <- phy_prcomp(x = two.d.array(sp_shapes), tree = tree)
 #'
-#' #look at the results
+#' #inspect results
 #' names(ppca) #the contents of the resulting object
-#' exp_var(ppca) #variance explained by each axis
+#' #exp_var(ppca) ##interpretation of eigenvalues is complex! not yet implemented
 #' plot(ppca$x) #ordination
+#'
+#'
+#' #compare shape variation as summarized by different methods
+#'
+#' #build morphospace using phylogenetic PCA
+#' mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, FUN = phy_prcomp,
+#'        tree = tree) %>%
+#'   proj_phylogeny(sp_shapes, tree = tree)
+#'
+#' #compare against morphospace built with ordinary PCA
+#' mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, invax = c(1,2)) %>%
+#'   proj_phylogeny(sp_shapes, tree = tree)
 phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 
-  if(corr == FALSE) {
-    mode <- "cov"
-  } else {
-    mode <- "corr"
-  }
+  mode <- if(!corr) "cov" else "corr"
   center <- colMeans(x)
-  totvar <- sum(apply(x, 2, stats::var))
+  # totvar <- sum(prcomp(x)$sdev^2)
 
-  phypca <- suppressWarnings(phytools::phyl.pca(Y = x, tree = tree, mode = mode, ...))
+  phypca <- suppressWarnings(phytools::phyl.pca(Y = x, tree = tree, mode = mode))#, ...))
 
-  if(is.null(phypca$lambda)) {
-    lambda <- 1
-  } else {
-    lambda <- phypca$lambda
-  }
-
+  lambda <- if(is.null(phypca$lambda)) 1 else phypca$lambda
   C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
   anc <- c(phytools::phyl.vcv(x, C, lambda)$alpha)
 
-  results <- list(sdev = suppressWarnings(sqrt(diag(phypca$Eval))), rotation = phypca$Evec,
-                  x = phypca$S, center = anc, totvar = totvar)
+  # sdev <- suppressWarnings(sqrt(diag(phypca$Eval)))
+
+  results <- list(values = diag(phypca$Eval), rotation = phypca$Evec, x = phypca$S,
+                  center = anc)
   if(!is.null(phypca$lambda)) results$lambda <- phypca$lambda
   if(!is.null(phypca$logL)) results$logL <- phypca$logL
+
 
   class(results) <- "phy_prcomp"
   return(results)
@@ -140,48 +146,45 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #'   \code{tree}.
 #' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
 #'   labels should match the row names from \code{x}.
+#' @param corr Logical; whether to use correlation instead of covariance matrix
+#'   as input.
 #'
-#' @details Phylogenetically aligned component analysis is an ordination method
-#'   that finds a new set of axes as linear combinations of the original trait
-#'   variables that are maximally aligned with the phylogenetic signal (i.e.,
-#'   covariation between trait variation and phylogenetic structure) present in
-#'   the data.
+#' @details Phylogenetically aligned component analysis (PACA) finds a new set
+#'   of axes as linear combinations of the original trait variables that are
+#'   maximally aligned with the phylogenetic signal (i.e., covariation between
+#'   trait variation and phylogenetic structure) present in the data.
 #'
-#'   Phylogenetically aligned component analysis shares some important
-#'   properties with phylogenetic PCA that are worth having in mind. Most
-#'   importantly, the transformation achieved by Phylogenetically aligned
-#'   component analysis to maximize alignment to phylogenetic signal only
-#'   concerns the orientation of the new axes (PACs), and not their overall
-#'   dispersion (i.e., Euclidean distances among observations are preserved when
-#'   measured across the entire set of PACs). Like phylogenetic PCA, scores
-#'   projected into the different PACs can be correlated (even though singular
-#'   vectors are orthogonal), and their dispersion does not necessarily decrease
-#'   for lower axes (even though singular values do progressively decay).
-#'   Also, A phylogenetic covariance matrix is computed assuming a Brownian
-#'   model of trait evolution, and the ordination is centered around the
-#'   phylogenetic mean (i.e., the root of the phylogenetic tree).
+#'   PACA shares some important properties with phylogenetic PCA that are worth
+#'   having in mind. Most importantly, the transformation achieved by PACA to
+#'   maximize alignment to phylogenetic signal only concerns the orientation of
+#'   the new axes (PACs), and not their overall dispersion (i.e., Euclidean
+#'   distances among observations are preserved when measured across the entire
+#'   set of PACs). Like phylogenetic PCA, scores projected into the different
+#'   PACs can be correlated (even though singular vectors are orthogonal), and
+#'   their dispersion does not necessarily decrease for lower axes (even though
+#'   singular values do progressively decay). Also, A phylogenetic covariance
+#'   matrix is computed assuming a Brownian model of trait evolution, and the
+#'   ordination is centered around the phylogenetic mean (i.e., the root of the
+#'   phylogenetic tree).
 #'
-#'   This analysis produces the same number of PACs than the number of original
-#'   variables. These axes account for increasingly small proportions of
-#'   covariation between phylogenetic structure and trait variation -- although
-#'   the total amount of phylogenetic signal present in the data is preserved
-#'   for the entire set of PACs.
+#'   This analysis produces the same number of axes than the number of original
+#'   variables. Again similar to phylogenetic PCA, interpretation of ordination
+#'   axes' singular values is complex: they represent the amount of covariation
+#'   between phylogenetic structure and trait variation accounted by each axis,
+#'   with a scale that is related to branch lengths' units, and thus cannot be
+#'   directly interpreted as proportion of the original variance.
 #'
-#' @return A \code{"phyalign_comp"} object formatted following the \code{"prcomp"}
-#' class:
+#' @return A \code{"phyalign_comp"} object formatted following the
+#'   \code{"prcomp"} class:
 #' \itemize{
 #'   \item \code{$x:} {a matrix with the scores of observations in the new
 #'     ordination axes.}
-#'   \item \code{$sdev:} {the standard deviations of the principal components
-#'     (i.e., the square roots of the eigenvalues of the covariance/correlation
-#'     matrix).}
+#'   \item \code{$values:} {squared, sample size-corrected singular values from
+#'     the SVD of the cross product of the phylogenetic covariance matrix and
+#'     trait data.}
 #'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
 #'   \item \code{$center:} {the phylogenetic mean (i.e., the shape estimated
 #'     for the root of the tree).}
-#'   \item \code{$totvar:} {the sum of the variances from all the original
-#'     variables.}
-#'   \item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
-#'     of the model; see \code{\link[phytools]{phyl.pca}}.}
 #'   }
 #'
 #' @export
@@ -193,25 +196,52 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #' analysis}. Methods in Ecology and Evolution, 12(2), 359-372.
 #'
 #' @examples
+#' #load packaes and data: shapes, species, links and tree
+#' library(geomorph)
+#' data("tails")
+#' shapes <- tails$shapes
+#' species <- tails$data$species
+#' links <- tails$links
+#' tree <- tails$tree
 #'
+#' #extract species shapes
+#' sp_shapes <- expected_shapes(shapes, species)
+#'
+#' #perform phylogenetically aligned component analysis
+#' paca <- phyalign_comp(x = two.d.array(sp_shapes), tree = tree)
+#'
+#' #inspect results
+#' names(paca) #the contents of the resulting object
+#' #exp_var(paca) #interpretation of eigenvalues is complex! not yet implemented
+#' plot(paca$x) #ordination
+#'
+#'
+#' #compare shape variation as summarized by different methods
+#'
+#' #build morphospace using phylogenetically aligned components analysis
+#' mspace(sp_shapes, links = links, nh = 8, nv = 6, FUN = phyalign_comp,
+#'        tree = tree) %>%
+#'   proj_phylogeny(sp_shapes, tree = tree)
+#'
+#' #compare against morphospace built with ordinary PCA
+#' mspace(sp_shapes, links = links, nh = 8, nv = 6) %>%
+#'   proj_phylogeny(sp_shapes, tree = tree)
 phyalign_comp <- function(x, tree, corr = FALSE) {
+
+  #totvar <- sum(prcomp(x)$sdev^2)
 
   C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
   anc <- c(phytools::phyl.vcv(x, C, 1)$alpha)
   z <- scale(x = x, center = anc, scale = corr)
 
-  decomp <- svd(C %*% z)
+  decomp <- svd(t(C) %*% z)
   vectors <- decomp$v
   scores <- z %*% vectors
-  values <- decomp$d
+  values <-decomp$d^2 / (nrow(x) - 1)
 
-  totalRV <- sum(values^2) / (sqrt(sum(diag(t(C) %*% C)) * sum(diag(t(z) %*% z))))
-  partialRVs <- values^2 / (sqrt(sum(diag(t(C) %*% C)) * sum(diag(t(z) %*% z))))
+  results <- list(values = values, rotation = vectors, x = scores, center = anc)
 
-  results <- list(sdev = sqrt((decomp$d^2) / (nrow(decomp$u) - 1)), rotation = vectors,
-                  x = scores, center = anc, RVs = round(partialRVs / totalRV, 3))
-
-  class(results) <- "phyalign_prcomp"
+  class(results) <- "phyalign_comp"
   return(results)
 
 }
@@ -227,8 +257,8 @@ phyalign_comp <- function(x, tree, corr = FALSE) {
 #'   groups).
 #'
 #' @param x A matrix with variables as columns and observations as rows.
-#' @param groups Factor; classification of observations of \code{x} into a
-#'   priori groups.
+#' @param groups Factor; classification of observations of \code{x} into \emph{a
+#'   priori} groups.
 #' @param gweights Logical; whether to weight each group by its number of
 #'   observations.
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
@@ -263,16 +293,15 @@ phyalign_comp <- function(x, tree, corr = FALSE) {
 #'   \item \code{$x:} {a matrix with the scores of observations in the new
 #'     ordination axes.}
 #'   \item \code{$sdev:} {the standard deviations of the principal components
-#'     (i.e., the square roots of the eigenvalues of the covariance/correlation
-#'     matrix).}
+#'     (i.e., the square roots of the singular values of the covariance or
+#'     correlation matrix).}
 #'   \item \code{$rotation:} {a \code{n x (g - 1)} matrix of eigenvector
 #'     coefficients (with \code{g} being the number of groups.}
 #'   \item \code{$center:} {the mean values of the original variables for the
 #'     entire sample (i.e., the grand mean).}
 #'   \item \code{$grcenters:} {the mean values of the original variables for
 #'     each group.}
-#'   \item \code{$totvar:} {the sum of the variances from all the original
-#'     variables.}
+#'   \item \code{$totvar:} {the sum of the variances of the original data.}
 #'   }
 #'
 #' @seealso \code{\link[stats]{prcomp}}, \code{\link{exp_var}}
@@ -306,6 +335,7 @@ phyalign_comp <- function(x, tree, corr = FALSE) {
 #'
 #' @examples
 #' #load data
+#' library(magrittr)
 #' data("shells")
 #'
 #' #extract species classification and shapes
@@ -315,11 +345,25 @@ phyalign_comp <- function(x, tree, corr = FALSE) {
 #' #perform between-groups PCA
 #' bgpca <- bg_prcomp(x = shapes, groups = species)
 #'
-#' #look at the results
+#' #inspect results
 #' names(bgpca) #the contents of the resulting object
 #' exp_var(bgpca) #variance explained by each axis
 #' plot(bgpca$x) #ordination
 #' hulls_by_group_2D(bgpca$x, species) #add convex hulls for species
+#'
+#'
+#' #compare shape variation as summarized by different methods
+#'
+#' #build morphospace using between-groups PCA
+#' mspace(shapes, links = links, nh = 8, nv = 6, FUN = bg_prcomp,
+#'        groups = species) %>%
+#'   proj_shapes(shapes) %>%
+#'   proj_groups(shapes, groups = species, alpha = 0.5)
+#'
+#' #compare against morphospace built with ordinary PCA
+#' mspace(shapes, links = links, nh = 8, nv = 6, invax = c(1,2)) %>%
+#'   proj_shapes(shapes) %>%
+#'   proj_groups(shapes, groups = species, alpha = 0.5)
 bg_prcomp <- function(x, groups, gweights = TRUE,
                       LOOCV = FALSE, recompute = FALSE,
                       corr = FALSE) {
@@ -390,7 +434,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 
   }
 
-  results <- list(sdev = sqrt((values^2) / (nrow(cbind(x)) - 1)),
+  results <- list(sdev = sqrt(values),
                   rotation = rotation, x = cbind(scores), center = grandmean,
                   grcenters = groupmeans, totvar = totvar)
   class(results) <- "bg_prcomp"
@@ -466,10 +510,12 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'   \item \code{$ycenter:} {the mean values of the original variables from
 #'     the second block (or their phylogenetic mean, if \code{tree} is
 #'     provided).}
-#'   \item \code{$xtotvar:} {the sum of the variances from the original
-#'     variables from the second block.}
-#'   \item \code{$ytotvar:} {the sum of the variances from the original
-#'     variables from the second block.}
+#'   \item \code{$xtotvar:} {the sum of the variances of the variables from the
+#'     second block.}
+#'   \item \code{$ytotvar:} {the sum of the variances of the variables from the
+#'     first block.}
+#'   \item \code{$sdev:} {the standard deviations of the PLS-axes (i.e., the
+#'     square roots of the eigenvalues of the covariance/correlation matrix).}
 #'   }
 #'
 #' @seealso \code{\link{pls_shapes}}, \code{\link{phy_prcomp}},
@@ -513,7 +559,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' #perform PLS between shape and size
 #' pls <- pls2b(y = two.d.array(shapes), x = sizes)
 #'
-#' #look at the results
+#' #inspect results
 #' names(pls) #the contents of the resulting object
 #' plot(pls$xscores, pls$yscores) #ordination
 #'
@@ -527,11 +573,10 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' plot(pls2$x2, pls2$x) #ordination
 #'
 #'
-#'
 #' #perform phylogenetic PLS
 #' ppls <- pls2b(y = two.d.array(sp_shapes), x = sp_sizes, tree = tree)
 #'
-#' #look at the results
+#' #inspect results
 #' names(ppls) #the contents of the resulting object
 #' plot(ppls$xscores, ppls$yscores) #ordination
 #'
@@ -583,7 +628,6 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
   svd <- svd_block(x, y, tree)
 
   ndims <- length(svd$d)
-  #values <- (svd$d^2)
   values <- svd$d
   y_rotation <- svd$v
   x_rotation <- svd$u
@@ -664,12 +708,8 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
                   ycenter = y_center, ytotvar = totvar_y,
                   xscores = cbind(xscores), xrotation = cbind(x_rotation),
                   xcenter = x_center, xtotvar = totvar_x,
-                  sdev = sqrt((values^2) / (nrow(cbind(xscores)) - 1)))#values = values)
-  if(is.null(tree)) {
-    class(results) <- "pls2b"
-  } else {#
-    class(results) <- "phy_pls2b"
-  }
+                  sdev = sqrt(values))
+  class(results) <- if(is.null(tree)) "pls2b" else "phy_pls2b"
   return(results)
 }
 
@@ -697,7 +737,11 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 #'   a 2-margins matrix and another block which can be either another set of
 #'   shape variables or one or more non-shape variables for supervising the
 #'   analysis. If a phylogenetic tree is supplied, observations from \code{x}
-#'   and \code{shapes} blocks are treated as data measured for its tips.
+#'   and \code{shapes} blocks are treated as data measured for its tips. In this
+#'   case, the resulting axes maximize the residual covariation among blocks
+#'   left after removing covariation among blocks accounted by phylogenetic
+#'   history (assuming a Brownian model of evolution and 100% phylogenetic
+#'   signal).
 #'
 #'   It has been reported that PLS (as an algebraic equivalent of bgPCA)
 #'   produces spurious covariation between blocks when the number of variables
@@ -718,14 +762,15 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 #'   \item \code{$x:} {the scores from the shapes block.}
 #'   \item \code{$x2:} {the scores from the supervising block (i.e., the
 #'     \code{x} scores.}
-#'   \item \code{$sdev:} {the standard deviation of the PLS axis (axis of the
-#'      shape block).}
+#'   \item \code{$sdev:} {the standard deviations of the PLS axes (i.e., the
+#'     standard deviations calculated from the scores of each axis in the
+#'     shape block).}
 #'   \item \code{$rotation:} {a matrix of vector coefficients for the shape
 #'     block.}
 #'   \item \code{$center:} {the mean values of the original variables from
 #'     the shape block.}
-#'   \item \code{$totvar:} {the sum of the variances from the original
-#'     variables in the shape block.}
+#'   \item \code{$totvar:} {the sum of the variances of the original variables
+#'     in the shape block.}
 #'   }
 #'
 #' @seealso \code{\link{pls2b}}
@@ -795,8 +840,7 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 
   pls <- pls2b(y = y, x = x, tree = tree, LOOCV = LOOCV, recompute = recompute)
 
-  results <- list(sdev = sqrt((values^2) / (nrow(cbind(x)) - 1)),
-                  #sdev = apply(pls$yscores, 2, stats::sd),
+  results <- list(sdev = apply(pls$yscores, 2, stats::sd),
                   rotation = pls$yrotation,
                   x = pls$yscores,
                   x2 = pls$xscores,
@@ -812,6 +856,8 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 
 }
 
+
+################################################################################
 
 #' Burnaby's orthogonal subspace computation
 #'
@@ -842,10 +888,10 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 #'   In particular, this function is intended to provide a way for computation
 #'   of ordination (sub)spaces orthogonal to other specific sources of
 #'   variation, as well as visualization of shape variation associated to their
-#'   ordination axes, most commonly as part of the \code{\link{mspace()}} %>%
+#'   ordination axes, most commonly as part of the \code{\link{mspace}} %>%
 #'   \code{proj_*} pipeline. If the user wishes to use the Burnaby approach for
 #'   standardization of morphometric (shape) data, this is better achieved
-#'   through \code{\link{detrend_shapes()}} by setting
+#'   through \code{\link{detrend_shapes}} by setting
 #'   \code{method = "orthogonal"}.
 #'
 #'   The subspace produced in this way has one less dimension for each axis or
@@ -867,8 +913,7 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 #'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
 #'   \item \code{$center:} {the mean values of the original variables (or their
 #'     phylogenetic mean, if \code{tree} is provided).}
-#'   \item \code{$totvar:} {the sum of the variances from all the original
-#'     variables.}
+#'   \item \code{$totvar:} {the sum of the variances of the original data.}
 #'   }
 #'
 #' @export
@@ -890,8 +935,67 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 #'   113-137.
 #'
 #' @examples
+#' #load packages
+#' library(geomorph)
+#' library(Morpho)
+#'
+#' #extract input data: shapes and sizes from S. vacaensis.
+#' data("shells3D")
+#' index <- shells3D$data$species == "vacaensis"
+#' allshapes <- shells3D$shapes
+#' shapes <- allshapes[,,index]
+#' sizes <- log(shells3D$sizes[index])
+#'
+#' #construct template for visualization
+#' template <- tps3d(x = shells3D$mesh_meanspec,
+#'                   refmat = allshapes[,,findMeanSpec(allshapes)],
+#'                   tarmat = expected_shapes(shapes))
 #'
 #'
+#' #find shape subspace orthogonal to size using the Burnaby approach for
+#' #S. vacaensis
+#' burn <- burnaby(x = geomorph::two.d.array(shapes), vars = sizes)
+#'
+#' #inspect results
+#' names(burn) #the contents of the resulting object
+#' exp_var(burn) #interpretation of eigenvalues is complex! not yet implemented
+#' plot(burn$x) #ordination
+#'
+#'
+#' #compare shape variation as summarized by different methods
+#'
+#' \dontrun{
+#'
+#' #build morphospace for S. vacaensis using Burnaby's approach (orthogonal
+#' #to size variation)
+#' msp1 <- mspace(shapes, template = template, cex.ldm = 0, bg.models = "gray",
+#'                adj_frame = c(0.9, 0.9), asp.models = 1.1, alpha.models = 0.7,
+#'                FUN = burnaby, vars = sizes) %>%
+#'   proj_shapes(shapes, pch = 16)
+#'
+#' #compare against a morphospace made using regular PCA
+#' mspace(shapes, template = template, cex.ldm = 0, bg.models = "gray",
+#'        adj_frame = c(0.9, 0.9), asp.models = 1.1, alpha.models = 0.7) %>%
+#'   proj_shapes(shapes, pch = 16)
+#'
+#'
+#' #extract sample and background shape models for subspace for S. vacaensis
+#' grid_shapes <- extract_shapes(msp1)$shapes
+#' na_shapes <- extract_shapes(msp1, scores = msp1$projected$scores[,1:2])$shapes
+#'
+#' #perform regression of size on shape for S. vacaensis
+#' reg <- lm(two.d.array(shapes) ~ sizes)
+#'
+#' #build morphospace for the entire dataset using regular PCA, project both the
+#' #empirical shapes, orthogonal subspace range, and size-standardized shapes
+#' mspace(allshapes, template = template, cex.ldm = 0,
+#'        bg.models = "gray", adj_frame = c(0.9, 0.9), asp.models = 1.1,
+#'        alpha.models = 0.7) %>%
+#'   proj_shapes(shapes, pch = 1) %>%
+#'   proj_shapes(na_shapes, pch = 21, bg = "red") %>%
+#'   proj_axis(reg, lwd = 2) %>%
+#'   proj_groups(grid_shapes, alpha = 0.2, col = "red")
+#' }
 burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
 
   totvar <- sum(apply(x, 2, stats::var))
@@ -910,7 +1014,7 @@ burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
     namesvars <- rownames(vars)
     namesx <- rownames(x)
 
-    formula <- as.formula(paste("~", paste(colnames(vars), collapse = " + ")))
+    formula <- stats::as.formula(paste("~", paste(colnames(vars), collapse = " + ")))
     designmat <- stats::model.matrix(formula, data = vars)
 
 
@@ -947,7 +1051,7 @@ burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
   ndims <- ncol(x) - ncol(axmat)
 
   z <- t(t(rbind(x)) - center)
-  covmat <- cov(z %*% orthobasis)
+  covmat <- stats::cov(z %*% orthobasis)
   values <- eigen(covmat)$values[seq_len(ndims)]
   vectors <- eigen(covmat)$vectors[,seq_len(ndims)]
 
@@ -970,9 +1074,13 @@ burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
 #' @description Calculate the percentage of total original variation accounted
 #'   by axes generated by different multivariate ordination methods.
 #'
-#' @param ordination An ordination (i.e., a \code{"prcomp"}, \code{"bg_prcomp"},
-#'   \code{"phy_prcomp"}, \code{"pls_shapes"} or \code{"phy_pls_shapes"}
-#'   object).
+#' @param ordination An object with the results from an ordination method (i.e.,
+#'   a \code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
+#'   \code{"pls_shapes"}, \code{"phy_pls_shapes"}, \code{"burnaby"} or
+#'   \code{"phy_burnaby"} object).
+#' @param nax Integer; information about how many axes the user wishes to be
+#'   returned.
+#' @param digits Integer; amount of decimal numbers to be returned.
 #'
 #' @return A table informing the percentages and cumulative percentages of
 #'   original variation accounted by each ordination axis.
@@ -980,7 +1088,7 @@ burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
 #' @export
 #'
 #' @seealso \code{\link[stats]{prcomp}}, \code{\link{bg_prcomp}},
-#' \code{\link{phy_prcomp}}, \code{\link{pls_shapes}}
+#' \code{\link{phy_prcomp}}, \code{\link{pls_shapes}}, \code{\link{burnaby}}.
 #'
 #' @examples
 #' #load data
@@ -1002,30 +1110,31 @@ burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
 #' head(exp_var(pca))
 #' exp_var(bgpca)
 #' exp_var(pls)
-exp_var <- function(ordination) {
+exp_var <- function(ordination, nax = 10, digits = 5) {
 
-  ax_var <- apply(ordination$x, 2, stats::var)
+  if(inherits(ordination, "mspace")) ordination <- ordination$ordination
 
-  if(inherits(ordination, "prcomp")) {
-    totvar <- sum(ax_var)
-  } else {
-    totvar <- ordination$totvar
-  }
+  if(inherits(ordination, "phy_prcomp")) stop("not yet implemented for class phy_prcomp")
+  if(inherits(ordination, "phyalign_comp")) stop("not yet implemented for class phyalign_comp")
+
+  ax_var <- ordination$sdev^2
+  totvar <- if(inherits(ordination, "prcomp")) sum(ax_var) else totvar <- ordination$totvar
 
   acc_var <- 100 * (ax_var / totvar)
   tab <- as.data.frame(round(x = cbind(variance=acc_var,
                                        cummulative=cumsum(acc_var)),
-                             digits = 5))
+                             digits = digits))[1:nax, ]
 
   if(inherits(ordination, "prcomp")) axname <- "PC"
   if(inherits(ordination, "bg_prcomp")) axname <- "bgPC"
   if(inherits(ordination, "phy_prcomp")) axname <- "phyPC"
-  if(inherits(ordination, "pls_shapes")) axname <- "PLS-"
-  if(inherits(ordination, "phy_pls_shapes")) axname <- "phyPLS-"
+  if(inherits(ordination, "phyalign_comp")) axname <- "PAC"
+  if(inherits(ordination, c("pls2b", "pls_shapes"))) axname <- "PLS-"
+  if(inherits(ordination, c("phy_pls2b", "phy_pls_shapes"))) axname <- "phyPLS-"
+  if(inherits(ordination, c("phy_burnaby", "burnaby"))) axname <- "Axis "
 
   rownames(tab) <- paste0(axname, seq_len(nrow(tab)))
   return(tab)
 
 }
-
 
