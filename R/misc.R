@@ -123,8 +123,8 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 #'   interactively.
 #'
 #' @param image Character; the path to an image of the structure, in png format.
-#' @param nlands Numeric; the number of landmarks to be placed.
-#' @param ncurves Numeric; the number of curves to be drawn.
+#' @param nlands Integer; the number of landmarks to be placed.
+#' @param ncurves Integer; the number of curves to be drawn.
 #'
 #' @details This functions let the user create a template interactively. The
 #'   user will be first asked to place the landmarks (the same place and order
@@ -379,11 +379,11 @@ hulls_by_group_3D <- function(xyz, fac, col = seq_len(nlevels(fac)), ...) {
 #' @param xy Coordinates of the scatterplot.
 #' @param fac A factor grouping data points.
 #' @param ax the axis of \code{xy} corresponding to the active variable.
-#' @param lty A numeric vector indicating the type of line used to draw density
+#' @param lty A vector indicating the type of line (integer) used to draw density
 #'   distributions.
+#' @param lwd A vector indicating the width of line (integer) used to draw
+#'   density distributions.
 #' @param alpha Numeric; transparency factor for density distributions.
-#' @param lwd A numeric vector indicating the width of line used to draw density
-#'   distributions.
 #' @param col A vector (either character or numeric) indicating the colors used
 #'   for each group.
 #'
@@ -439,13 +439,11 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1,
 #'
 #' @param scores a matrix of (x,y) coordinates to plot.
 #' @param density Logical; whether to plot density curve.
-#' @param col Numeric; color of the scatterpoints.
-#' @param pch Numeric; symbol of the scatterpoints.
-#' @param bg Numeric; background color for the scatterpoints.
+#' @param col Color of the scatterpoints.
+#' @param pch Symbol of the scatterpoints.
+#' @param bg Background color for the scatterpoints.
 #' @param cex Numeric; size of the scatterpoints.
 #' @param ... Further arguments passed to [graphics::points()].
-#'
-#' @export
 plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
   if(density) {
@@ -478,13 +476,11 @@ plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1
 #'   internally for projecting scatterpoints into bivariate morphospaces.
 #'
 #' @param scores a matrix of (x,y) coordinates to plot.
-#' @param col Numeric; color of the scatterpoints.
-#' @param pch Numeric; symbol of the scatterpoints.
-#' @param bg Numeric; background color for the scatterpoints.
+#' @param col Color of the scatterpoints.
+#' @param pch Symbol of the scatterpoints.
+#' @param bg Background color for the scatterpoints.
 #' @param cex Numeric; size of the scatterpoints.
 #' @param ... Further arguments passed to [graphics::points()].
-#'
-#' @export
 plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
   if(is.null(dim(scores))) {
@@ -513,20 +509,18 @@ plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 #' @param type Type of landscape to be plotted. Options are \code{"theoretical"}
 #'   or \code{"empirical"}.
 #' @param levels Levels to be used to create the contours.
-#' @param lty Numeric; type of the lines depicting contours.
-#' @param lwd Numeric; width of the lines depicting contours.
+#' @param lty Integer; type of the lines depicting contours.
+#' @param lwd Integer; width of the lines depicting contours.
 #' @param col Colors used to represent the landscape contours.
 #' @param drawlabels Logical; should the labels indicating the value of each
 #'   surface contour be plotted?
 #' @param alpha Transparency factor for filled contours.
-#'
-#' @export
 plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, drawlabels, alpha) {
   if(display == "contour") {
     graphics::contour(landscape$x, landscape$y, landscape$z, levels = levels,
                       lwd = lwd, lty = lty, col = col, labels = round(levels, digits = 3),
                       drawlabels = drawlabels, add = TRUE)
-    box()
+    graphics::box()
   }
 
   if(display == "filled.contour") {
@@ -553,12 +547,10 @@ plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, 
 #' @param drawlabels Logical; should the labels indicating the value of each
 #'   surface contour be plotted?
 #' @param col Colors used to represent the landscape curve.
-#' @param lwd Numeric; width of the lines depicting the landscape curve.
-#'
-#' @export
+#' @param lwd Integer; width of the lines depicting the landscape curve.
 plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
   if(drawlabels) {
-    w.transp <-round(quantile(x = 1:length(landscape$z), probs = c(0.25, 0.5, 0.75)))
+    w.transp <-round(stats::quantile(x = 1:length(landscape$z), probs = c(0.25, 0.5, 0.75)))
     w.transp <- sort(c(w.transp - 1, w.transp, w.transp + 1))
 
     label_col <- col[w.transp[c(2,5,8)]]
@@ -566,17 +558,17 @@ plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
   }
 
   for(i in 1:(length(landscape$x) - 1)) {
-    lines(rbind(c(landscape$x[i], landscape$z[i]),
-                c(landscape$x[i + 1], landscape$z[i + 1])),
-          col = col[i], lwd = lwd)
+    graphics::lines(rbind(c(landscape$x[i], landscape$z[i]),
+                          c(landscape$x[i + 1], landscape$z[i + 1])),
+                    col = col[i], lwd = lwd)
   }
-  box()
+  graphics::box()
 
   if(drawlabels == TRUE) {
     x_text <- colMeans(matrix(landscape$x[w.transp + 1], nrow = 3))
     y_text <- colMeans(matrix(landscape$z[w.transp + 1], nrow = 3))
     labels <- round(colMeans(matrix(landscape$z[w.transp], nrow = 3)), 2)
-    text(cbind(x_text, y_text), labels = labels, cex = 0.7, col = label_col)
+    graphics::text(cbind(x_text, y_text), labels = labels, cex = 0.7, col = label_col)
   }
 }
 
