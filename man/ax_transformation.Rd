@@ -12,7 +12,7 @@ ax_transformation(obj, axis = 1, mag = 1)
 \code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using
 \code{\link[stats:lm]{stats::lm()}}.}
 
-\item{axis}{An optional numeric value specifying the axis of the multivariate
+\item{axis}{An optional integer value specifying the axis of the multivariate
 ordination which is to be represented.}
 
 \item{mag}{Numeric; magnifying factor for representing shape transformation.}
@@ -76,8 +76,8 @@ extshapes <- arrayspecs(extshapes2d, k = ncol(shapes), p = nrow(shapes))
 pile_shapes(extshapes, links = links, mshape = FALSE)
 }
 \references{
-MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological
-Association Newsletter, 72(620), 14-27.
+MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological Association
+Newsletter, 72(620), 14-27.
 }
 \seealso{
 \code{\link{expected_shapes}}, \code{\link{rev_eigen}}

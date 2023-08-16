@@ -9,9 +9,9 @@ build_template2d(image, nlands, ncurves)
 \arguments{
 \item{image}{Character; the path to an image of the structure, in png format.}
 
-\item{nlands}{Numeric; the number of landmarks to be placed.}
+\item{nlands}{Integer; the number of landmarks to be placed.}
 
-\item{ncurves}{Numeric; the number of curves to be drawn.}
+\item{ncurves}{Integer; the number of curves to be drawn.}
 }
 \value{
 A 2-column matrix with the landmark configuration (standardized for
@@ -19,8 +19,8 @@ scale and position) followed by the coordinates defining the curves drawn,
 separated by \code{NA}s.
 }
 \description{
-Create a template (i.e. a set of curves describing the structure
-the landmarks are placed upon) to aid morphospace visualization,
+Create a template (i.e., a set of curves describing the
+structure the landmarks are placed upon) to aid morphospace visualization,
 interactively.
 }
 \details{
@@ -35,7 +35,8 @@ button in the top-right corner of the Plots pane).
 \examples{
 #generate template interactively
 \dontrun{
-temp <- build_template2d(image = "extdata/sample_wing.jpg", nlands = 9, ncurves = 9)
+temp <- build_template2d(image = "extdata/sample_wing.jpg", nlands = 9,
+                         ncurves = 9)
 
 plot(temp, type = "n", asp = 1)
 points(temp[c(1:9),], col = "red", pch = 16)

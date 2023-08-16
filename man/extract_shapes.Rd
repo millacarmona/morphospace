@@ -29,8 +29,8 @@ as shapes. If \code{NULL}, a new device will open and the user will be
 asked choose the coordinates interactively. Ignored when \code{axis} is
 provided.}
 
-\item{range}{Optional numeric vector of length 2, indicating the range of values
-the axis should be sampled over.}
+\item{range}{Optional integer vector of length 2, indicating the range of
+values the axis should be sampled over.}
 
 \item{keep.template}{Logical; should warped templates be returned as well?}
 

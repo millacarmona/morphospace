@@ -30,7 +30,7 @@ from \code{tree}.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
-\item{pch.nodes}{Numeric; symbol of the scatter points corresponding to the
+\item{pch.nodes}{Symbol of the scatter points corresponding to the
 nodes of the phylogeny.}
 
 \item{col.nodes}{Color of the hulls/ellipses and/or scatter points
@@ -42,8 +42,8 @@ nodes of the phylogeny.}
 \item{cex.nodes}{Numeric; size of the scatter points corresponding to the
 nodes of the phylogeny.}
 
-\item{pch.tips}{Numeric; symbol of the scatter points corresponding to the
-tips of the phylogeny.}
+\item{pch.tips}{Symbol of the scatter points corresponding to the tips of the
+phylogeny.}
 
 \item{bg.tips}{Background color of the scatter points corresponding to the
 tips of the phylogeny.}
@@ -54,8 +54,8 @@ corresponding to the tips of the phylogeny.}
 \item{cex.tips}{Numeric; size of the scatter points corresponding to the
 tips of the phylogeny.}
 
-\item{...}{Further arguments passed to \code{\link[graphics:lines]{graphics::lines()}} (commonly, \link{pch},
-\link{col}/\link{bg} and \link{cex}.}
+\item{...}{Further arguments passed to \code{\link[graphics:lines]{graphics::lines()}} (commonly,
+\code{pch}, \code{col}/\code{bg} and \code{cex}.}
 }
 \value{
 If a plot device with a morphospace is open, shapes representing the

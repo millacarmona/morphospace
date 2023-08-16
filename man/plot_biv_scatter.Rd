@@ -9,17 +9,17 @@ plot_biv_scatter(scores, col = 1, bg = 1, pch = 1, cex = 1, ...)
 \arguments{
 \item{scores}{a matrix of (x,y) coordinates to plot.}
 
-\item{col}{Numeric; color of the scatterpoints.}
+\item{col}{Color of the scatterpoints.}
 
-\item{bg}{Numeric; background color for the scatterpoints.}
+\item{bg}{Background color for the scatterpoints.}
 
-\item{pch}{Numeric; symbol of the scatterpoints.}
+\item{pch}{Symbol of the scatterpoints.}
 
 \item{cex}{Numeric; size of the scatterpoints.}
 
 \item{...}{Further arguments passed to \code{\link[graphics:points]{graphics::points()}}.}
 }
 \description{
-An \code{ad hoc} wrapper for \code{\link[graphics:points]{graphics::points()}}. Used internally
-for projecting scatterpoints into bivariate morphospaces.
+An \code{ad hoc} wrapper for \code{\link[graphics:points]{graphics::points()}}. Used
+internally for projecting scatterpoints into bivariate morphospaces.
 }

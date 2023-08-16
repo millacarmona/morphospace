@@ -52,8 +52,8 @@ TPS interpolation to produce the set of background shell models.}
 wireframe (following the format used in \code{Morpho}).}
 
 \item{ordtype}{Character; method used for multivariate ordination
-(\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"}, \code{"pls_shapes"}
-or \code{"phy_pls_shapes"}).}
+(\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
+\code{"pls_shapes"} or \code{"phy_pls_shapes"}).}
 
 \item{axes}{Numeric of length 2, indicating the axes to be plotted.}
 
@@ -88,17 +88,17 @@ models.}
 \item{models}{Logical; whether to plot background shape models.}
 }
 \description{
-Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 3-dimensional morphometric
-(landmark) data. Used internally.
+Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 3-dimensional
+morphometric (landmark) data. Used internally.
 }
 \details{
 This function allows the user to choose the orientation of the 3D
 models by interactively rotating a shape model. Do not close the \code{rgl}
 window, or minimize it actively (just bring back Rstudio to the front and
-let the device get minimized pasively). The process of morphospace generation
-is rather slow, specially if a mesh is provided for \code{template}, a large
-number of shape models is asked, and/or \code{alpha.models} value is lower
-than \code{1}.
+let the device get minimized pasively). The process of morphospace
+generation is rather slow, specially if a mesh is provided for
+\code{template}, a large number of shape models is asked, and/or
+\code{alpha.models} value is lower than \code{1}.
 }
 \examples{
 #load data and packages
@@ -121,21 +121,23 @@ meanshape <- expected_shapes(shapes)
 \dontrun{
 #plot grid (shape coordinates only)
 plot_morphogrid3d(morphogrid = shapes_grid, refshape = meanshape,
-                  ordtype = "prcomp", axes = c(1,2), col.ldm = 1, cex.ldm = 1,
-                  col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
-                  asp.models = 1)
+                  ordtype = "prcomp", axes = c(1,2), col.ldm = 1,
+                  cex.ldm = 1, col.models = 1, lwd.models = 1,
+                  bg.models = "gray", size.models = 2, asp.models = 1)
 
-#get shape corresponding to shells3D$mesh_meanspec using geomorph::findMeanSpec,
-#then get mesh corresponding to mean shape using Morpho::tps3d
+#get shape corresponding to shells3D$mesh_meanspec using
+#geomorph::findMeanSpec, then get mesh corresponding to mean shape using
+#Morpho::tps3d
 meanspec_id<- findMeanSpec(shapes)
 meanspec_shape <- shapes[,,meanspec_id]
-meanmesh <- tps3d(x = shells3D$mesh_meanspec , refmat = meanspec_shape, tarmat = meanshape)
+meanmesh <- tps3d(x = shells3D$mesh_meanspec , refmat = meanspec_shape,
+                  tarmat = meanshape)
 
 #plot grid (includinh mesh template)
-plot_morphogrid3d(morphogrid = shapes_grid, template = meanmesh, refshape = meanshape,
-                  ordtype = "prcomp", axes = c(1,2), col.ldm = 1, cex.ldm = 1,
-                  col.models = 1, lwd.models = 1, bg.models = "gray", size.models = 2,
-                  asp.models = 1)
+plot_morphogrid3d(morphogrid = shapes_grid, template = meanmesh,
+                  refshape = meanshape, ordtype = "prcomp", axes = c(1,2),
+                  col.ldm = 1, cex.ldm = 1, col.models = 1, lwd.models = 1,
+                  bg.models = "gray", size.models = 2, asp.models = 1)
 }
 }
 \seealso{

@@ -16,12 +16,13 @@ adjust_models3d(models, frame, size.models, asp.models)
 \item{asp.models}{Numeric; the y/x aspect ratio of shape models.}
 }
 \value{
-A list containing the adjusted frame of each element in \code{models}, and
-new, adjusted limits for the x and y axes from \code{frame}.
+A list containing the adjusted frame of each element in
+\code{models}, and new, adjusted limits for the x and y axes from
+\code{frame}.
 }
 \description{
-Avoid background shape models distortion caused by differences in ranges
-of x and y axes. Used internally.
+Avoid background shape models distortion caused by differences
+in ranges of x and y axes. Used internally.
 }
 \examples{
 #load package and data
@@ -58,13 +59,15 @@ models <- lapply(1:dim(shapes_grid0$models_arr)[3], function (i) {
 })
 
 #adjust snapshots
-adj <- adjust_models3d(models = models, frame = model_centers, size.models = 1, asp.models = 1)
+adj <- adjust_models3d(models = models, frame = model_centers,
+                       size.models = 1, asp.models = 1)
 
 #plot everything
 plot(pca$x, xlim = adj$xlim, ylim = adj$ylim)
 for(i in 1:length(models)) {
-  rasterImage(models[[i]], adj$model_frames[[i]][1,1], adj$model_frames[[i]][1,2],
-              adj$model_frames[[i]][2,1], adj$model_frames[[i]][2,2])
+  rasterImage(models[[i]], adj$model_frames[[i]][1,1],
+              adj$model_frames[[i]][1,2], adj$model_frames[[i]][2,1],
+              adj$model_frames[[i]][2,2])
 }
 
 #kind of. Anyway, use plot_morphogrid3d that do the full process.

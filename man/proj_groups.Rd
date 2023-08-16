@@ -7,7 +7,7 @@
 proj_groups(
   mspace,
   shapes = NULL,
-  groups,
+  groups = NULL,
   ellipse = FALSE,
   conflev = 0.95,
   density = TRUE,

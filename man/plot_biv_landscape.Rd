@@ -26,9 +26,9 @@ or \code{"empirical"}.}
 
 \item{levels}{Levels to be used to create the contours.}
 
-\item{lwd}{Numeric; width of the lines depicting contours.}
+\item{lwd}{Integer; width of the lines depicting contours.}
 
-\item{lty}{Numeric; type of the lines depicting contours.}
+\item{lty}{Integer; type of the lines depicting contours.}
 
 \item{col}{Colors used to represent the landscape contours.}
 

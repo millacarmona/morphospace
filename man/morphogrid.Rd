@@ -8,7 +8,7 @@ morphogrid(
   ordination,
   axes,
   datype,
-  rescale,
+  rescale = TRUE,
   template = NULL,
   x = NULL,
   y = NULL,
@@ -26,7 +26,7 @@ morphogrid(
 )
 }
 \arguments{
-\item{ordination}{An ordination (i.e. a \code{"prcomp"}, \code{"bg_prcomp"},
+\item{ordination}{An ordination (i.e., a \code{"prcomp"}, \code{"bg_prcomp"},
 \code{"phy_prcomp"} or \code{"pls_shape"} object).}
 
 \item{axes}{Numeric of length 1 or 2, indicating the morphometric axes to be
@@ -40,9 +40,10 @@ first value of this argument is considered.}
 variation is shown more clearly.}
 
 \item{template}{A 2-column matrix containing landmarks/semilandmarks followed
-by coordinates defining a curve or set of curves describing additional aspects
-of morphology, which will be warped using TPS interpolation to produce the set
-of background shell models(see \code{\link{build_template2d}}).}
+by coordinates defining a curve or set of curves describing additional
+aspects of morphology, which will be warped using TPS interpolation to
+produce the set of background shell models (see
+\code{\link{build_template2d}}).}
 
 \item{x}{Optional vector with a non-morphometric variable to be plotted in
 the x axis.}
@@ -107,8 +108,8 @@ Used internally.
  points(shapes_grid$models_arr[,,4], pch=16, col = 4)
 }
 \references{
-MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological
-Association Newsletter, 72(620), 14-27.
+MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological Association
+Newsletter, 72(620), 14-27.
 }
 \seealso{
 \code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}}

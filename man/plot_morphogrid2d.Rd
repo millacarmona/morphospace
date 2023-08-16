@@ -36,9 +36,10 @@ the y axis.}
 \item{morphogrid}{An object containing the output of \code{morphogrid}.}
 
 \item{template}{A 2-column matrix containing landmarks/semilandmarks followed
-by coordinates defining a curve or set of curves describing additional aspects
-of morphology, which will be warped using TPS interpolation to produce the set
-of background shell models(see \code{\link{build_template2d}}).}
+by coordinates defining a curve or set of curves describing additional
+aspects of morphology, which will be warped using TPS interpolation to
+produce the set of background shell models (see
+\code{\link{build_template2d}}).}
 
 \item{links}{A list with the indices of the coordinates defining the
 wireframe (following the format used in \code{Morpho}).}
@@ -47,8 +48,8 @@ wireframe (following the format used in \code{Morpho}).}
 \code{"fcoef"}).}
 
 \item{ordtype}{Character; method used for multivariate ordination
-(\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"}, \code{"pls_shapes"}
-or \code{"phy_pls_shapes"}).}
+(\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
+\code{"pls_shapes"} or \code{"phy_pls_shapes"}).}
 
 \item{axes}{Numeric of length 2, indicating the axes to be plotted.}
 
@@ -76,8 +77,8 @@ models.}
 \item{models}{Logical; whether to plot background shape models.}
 }
 \description{
-Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 2-dimensional morphometric
-data. Used internally.
+Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 2-dimensional
+morphometric data. Used internally.
 }
 \examples{
 #load data and packages
