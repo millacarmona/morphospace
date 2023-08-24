@@ -164,6 +164,7 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL, return
 
   if(is.null(x)) {
     predicted_mat <- unique(predicted_mat)
+    rownames(predicted_mat) <- NULL
   } else {
     if(is.factor(x)) {
       if(is.null(xvalue)) {
@@ -176,10 +177,12 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL, return
   }
 
   if(datype == "landm" & returnarray) {
-    p <- nrow(shapes)
-    k <- ncol(shapes)
-    predicted_mat <- geomorph::arrayspecs(predicted_mat, p = p, k = k)
-    if(dim(predicted_mat)[3] == 1) predicted_mat <- predicted_mat[,,1]
+    if(length(dim(shapes)) == 3) {
+      p <- nrow(shapes)
+      k <- ncol(shapes)
+      predicted_mat <- geomorph::arrayspecs(predicted_mat, p = p, k = k)
+      if(dim(predicted_mat)[3] == 1) predicted_mat <- predicted_mat[,,1]
+    } else warning("landmark data has been provided as a 2-margin matrix; expected shapes cannot be returned as an array")
   }
 
   return(predicted_mat)
@@ -539,9 +542,8 @@ detrend_shapes <- function(model, xvalue = NULL, tree = NULL, method = "orthogon
 
   if(method == "orthogonal") {
     axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))
-    ycent <- if(!is.null(tree)) t(t(rbind(t(t(rbind(y)) - colMeans(y)))) + grandmean) else y
 
-    ortho_space <- burnaby(x = ycent, axmat = axmat)
+    ortho_space <- suppressWarnings(burnaby(x = y, axmat = axmat, tree = tree))
     ortho_scores <- ortho_space$x
     ortho_rotation <- ortho_space$rotation
     ax <- sum(ortho_space$sdev^2 > 1e-15)
@@ -807,7 +809,7 @@ correct_efourier<-function(ef, index = NULL) {
 ax_transformation <- function(obj, axis = 1, mag = 1) {
 
   if(any(class(obj) %in% c("prcomp", "bg_prcomp", "phy_prcomp", "phyalign_comp",
-                           "pls_shapes", "phy_pls_shapes", "pls_burnaby", "phy_burnaby"))) {
+                           "pls_shapes", "phy_pls_shapes", "burnaby", "phy_burnaby"))) {
     extshapes_mat <- rev_eigen(range(obj$x[,axis]) * mag,
                                obj$rotation[,axis],
                                obj$center)
@@ -999,17 +1001,17 @@ extract_shapes <- function(mspace,
                          center = mspace$ordination$center) * mag
   } else {
     if(!is.null(axis)) {
-      if(!is.null(scores)) warning("an axis has been provided; scores will be ignored")
-      if(nshapes > 1) {
-        if(!is.null(range)) {
-          xrange <- range
-        }  else {
-          xrange <- range(mspace$ordination$x[,axis]) * mag
-        }
-        scores <- seq(xrange[1], xrange[2], length.out = nshapes)
-      } else {
-        stop("At least two shapes are necessary to represent variation along a PC axis")
-      }
+      if(!is.null(nshapes)) {
+        if(!is.null(scores)) warning("an axis has been provided; scores will be ignored")
+        if(nshapes > 1) {
+          if(!is.null(range)) {
+            xrange <- range
+          }  else {
+            xrange <- range(mspace$ordination$x[,axis]) * mag
+          }
+          scores <- seq(xrange[1], xrange[2], length.out = nshapes)
+        } else stop("At least two shapes are necessary to represent variation along a PC axis")
+      } else stop("nshapes must be provided")
     } else {
       axis <- mspace$plotinfo$axes
       if(!is.null(scores)) {
