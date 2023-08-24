@@ -1287,8 +1287,8 @@ rotate_fcoef <- function(fcoef) {
 #'
 #' #get node heights
 #' heights <- phytools::nodeHeights(tree)
-#' node_heights <- c(rep(max(heights), length(tree$tip.label)),
-#'                   unique(heights[,1]))
+#' node_heights <- NULL
+#' for(i in 1:(length(tree$tip.label) + tree$Nnode)) node_heights[i] <- unique(heights[tree$edge == i])
 #'
 #' #plot simple phengram
 #' plot(node_heights, msp$projected$phylo_scores[,1])
