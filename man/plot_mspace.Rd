@@ -110,135 +110,162 @@ variation is shown more clearly.}
 \item{adj_frame}{Numeric of length 2, providing \emph{a posteriori} scaling
 factors for the width and height of the frame, respectively.}
 
+\item{points}{Logical; whether to plot the scatter points corresponding
+to the sampled shapes stored in \code{mspace$projected$scores}.}
+
+\item{models}{Logical; whether to plot background shape models (stored
+in \code{mspace$projected$shapemodels}).}
+
+\item{groups}{Logical; whether to plot the convex hulls/confidence
+ellipses enclosing the groups stored in
+\code{mspace$projected$gr_class}.}
+
+\item{phylo}{Logical; whether to plot phylogenetic relationships stored
+in \code{mspace$projected$phylo}.}
+
+\item{shapeax}{Logical; whether to plot morphometric axes stored in
+\code{mspace$projected$shape_axis}.}
+
+\item{landsc}{Logical; whether to plot landscape surface stored in
+\code{mspace$projected$landsc}.}
+
+\item{legend}{Logical; whether to show legend for groups.}
+
+\item{scalebar}{Logical; whether to show scalebar for landscapes.}
+
+\item{cex.legend}{Numeric; size of legend labels/symbols.}
+
 \item{xlim, ylim, xlab, ylab, asp}{Standard arguments passed to the generic
 \code{\link[graphics:plot.default]{graphics::plot()}} function.}
 
-\item{_.models, _.ldm}{Control how background shape models are displayed.
-\itemize{
-\item{models} { Logical; whether to plot background shape models (stored
-in \code{mspace$projected$shapemodels}).}
-\item{size.models} { Numeric; size factor for shape models.}
-\item{col.models} { Color for wireframes/outlines of shape models.}
-\item{bg.models} { Background color for outlines/meshes of shape models.}
-\item{asp.models} { Numeric; y/x aspect ratio of shape models.}
-\item{rot.models} { Numeric; angle (in degrees) to rotate shape models.}
-\item{lwd.models} { Integer; width of border lines in wireframes/outlines
-of shape models.}
-\item{alpha.models} { Numeric; transparency factor for background models
-(3D only).}
-\item{cex.ldm} { Numeric; size of landmarks/semilandmarks in the background
-models.}
-\item{col.ldm} { Color of landmarks/semilandmarks in the background
-models.}
-}}
+\item{size.models}{Numeric; size factor for shape models.}
 
-\item{_.points}{Control how scatterpoints representing projected shapes are
-represented.
-\itemize{
-\item{points} { Logical; whether to plot the scatter points corresponding
-to the sampled shapes stored in \code{mspace$projected$scores}.}
-\item{pch.points} { Symbol of the scatterpoints.}
-\item{col.points} { Color of the scatterpoints.}
-\item{bg.points} { Background color of the scatterpoints.}
-\item{cex.points} { Numeric; size of the scatterpoints}
-\item{density.points} { Logical; whether to add density distribution for
+\item{asp.models}{Numeric; y/x aspect ratio of shape models.}
+
+\item{rot.models}{Numeric; angle (in degrees) to rotate shape models.}
+
+\item{col.models}{Color for wireframes/outlines of shape models.}
+
+\item{bg.models}{Background color for outlines/meshes of shape models.}
+
+\item{lwd.models}{Integer; width of border lines in wireframes/outlines
+of shape models.}
+
+\item{alpha.models}{Numeric; transparency factor for background models
+(3D only).}
+
+\item{cex.ldm}{Numeric; size of landmarks/semilandmarks in the background
+models.}
+
+\item{col.ldm}{Color of landmarks/semilandmarks in the background
+models.}
+
+\item{pch.points}{Symbol of the scatterpoints.}
+
+\item{col.points}{Color of the scatterpoints.}
+
+\item{bg.points}{Background color of the scatterpoints.}
+
+\item{cex.points}{Numeric; size of the scatterpoints}
+
+\item{density.points}{Logical; whether to add density distribution for
 points (univariate ordinations only). Overriden by
 \code{density.groups = TRUE}}
-}}
 
-\item{_.groups, legend}{Control how groups of shapes are represented.
-\itemize{
-\item{groups} { Logical; whether to plot the convex hulls/confidence
-ellipses enclosing the groups stored in
-\code{mspace$projected$gr_class}.}
-\item{mshapes} { Logical; whether to plot the scatter points corresponding
-to groups' mean shapes stored in \code{mspace$projected$gr_centroids}.}
-\item{col.groups} { Color of the hulls/ellipses and/or scatterpoints
+\item{col.groups}{Color of the hulls/ellipses and/or scatterpoints
 corresponding to groups' mean shapes.}
-\item{bg.groups} { Background color of the scatterpoints corresponding to
+
+\item{bg.groups}{Background color of the scatterpoints corresponding to
 groups' mean shapes.}
-\item{pch.groups} { Symbol of the scatterpoints corresponding to
+
+\item{pch.groups}{Symbol of the scatterpoints corresponding to
 groups' mean shapes.}
-\item{cex.groups} { Numeric; size of the scatterpoints corresponding to
+
+\item{cex.groups}{Numeric; size of the scatterpoints corresponding to
 groups' mean shapes.}
-\item{ellipse.groups} { Logical; whether to use confidence ellipses to
+
+\item{ellipse.groups}{Logical; whether to use confidence ellipses to
 delimit groups (if \code{FALSE} convex hulls are used instead).}
-\item{conflev.groups} { Numeric; confidence level used for confidence
+
+\item{conflev.groups}{Numeric; confidence level used for confidence
 ellipse(s).}
-\item{lwd.groups} { Integer; width of the lines in groups' ellipses/hulls.}
-\item{lty.groups} { Integer; type of the lines in groups' ellipses/hulls.}
-\item{alpha.groups} { Numeric; transparency factor for groups'
+
+\item{lwd.groups}{Integer; width of the lines in groups' ellipses/hulls.}
+
+\item{lty.groups}{Integer; type of the lines in groups' ellipses/hulls.}
+
+\item{alpha.groups}{Numeric; transparency factor for groups'
 ellipses/hulls/density distributions.}
-\item{density.groups} { Logical; whether to add density distribution for
+
+\item{density.groups}{Logical; whether to add density distribution for
 groups (univariate ordinations only).}
-\item{legend} { Logical; whether to show legend for groups.}
-\item{cex.legend} { Numeric; size of legend labels/symbols.}
-}}
 
-\item{_.phylo, _.nodes, _.tips}{Control how phylogenetic relationships are
-represented.
-\itemize{
-\item{phylo} { Logical; whether to plot phylogenetic relationships stored
-in \code{mspace$projected$phylo}.}
-\item{col.phylo} { Color of the lines depicting phylogenetic
+\item{col.phylo}{Color of the lines depicting phylogenetic
 branches.}
-\item{lwd.phylo} { Integer; width of the lines depicting phylogenetic
+
+\item{lwd.phylo}{Integer; width of the lines depicting phylogenetic
 branches.}
-\item{lty.phylo} { Integer; type of the lines depicting phylogenetic
+
+\item{lty.phylo}{Integer; type of the lines depicting phylogenetic
 branches.}
-\item{col.nodes} { Color of the scatterpoints representing the nodes of the
+
+\item{col.nodes}{Color of the scatterpoints representing the nodes of the
 phylogeny.}
-\item{bg.nodes} { Background color of the scatterpoints representing the
-nodes of the phylogeny.}
-\item{pch.nodes} { Symbol of the scatterpoints representing the nodes of
+
+\item{pch.nodes}{Symbol of the scatterpoints representing the nodes of
 the phylogeny.}
-\item{cex.nodes} { Numeric; size of the scatterpoints representing the
-nodes of the phylogeny.}
-\item{col.tips} { Color of the scatterpoints representing the tips of the
-phylogeny.}
-\item{bg.tips} { Background color of the scatterpoints representing the
-tips of the phylogeny.}
-\item{pch.tips} { Symbol of the scatterpoints representing the tips of the
-phylogeny.}
-\item{cex.tips} { Numeric; size of the scatterpoints representing the tips
-of the phylogeny.}
-}}
 
-\item{_.axis}{Control how groups of shapes are represented.
-\itemize{
-\item{shapeax} { Logical; whether to plot morphometric axes stored in
-\code{mspace$projected$shape_axis}.}
-\item{type.axis} { Integer; type of arrows (\code{0} = no arrow;
+\item{bg.nodes}{Background color of the scatterpoints representing the
+nodes of the phylogeny.}
+
+\item{cex.nodes}{Numeric; size of the scatterpoints representing the
+nodes of the phylogeny.}
+
+\item{col.tips}{Color of the scatterpoints representing the tips of the
+phylogeny.}
+
+\item{pch.tips}{Symbol of the scatterpoints representing the tips of the
+phylogeny.}
+
+\item{bg.tips}{Background color of the scatterpoints representing the
+tips of the phylogeny.}
+
+\item{cex.tips}{Numeric; size of the scatterpoints representing the tips
+of the phylogeny.}
+
+\item{type.axis}{Integer; type of arrows (\code{0} = no arrow;
 \code{1} = pointing towards the maximum; \code{2} = pointing towards
 the maximum, \code{3} = pointing in both directions).}
-\item{col.axis} { Color of the lines depicting a morphometric axis.}
-\item{lwd.axis} { Integer; width of the lines depicting a morphometric
-axis.}
-\item{lty.axis} { Integer; type of the lines depicting a morphometric
-axis.}
-}}
 
-\item{_.landsc, scalebar}{Control how landscape surfaces are represented.
-\itemize{
-\item{landsc} { Logical; whether to plot landscape surface stored in
-\code{mspace$projected$landsc}.}
-\item{display.landsc} { How to display landscape representation; options
+\item{lwd.axis}{Integer; width of the lines depicting a morphometric
+axis.}
+
+\item{lty.axis}{Integer; type of the lines depicting a morphometric
+axis.}
+
+\item{col.axis}{Color of the lines depicting a morphometric axis.}
+
+\item{palette.landsc}{A function defining a color palette to use for
+landscape representation.}
+
+\item{display.landsc}{How to display landscape representation; options
 are \code{"contour"} and \code{"filled.contour"}. For bivariate
 landscapes only.}
-\item{nlevels.landsc} { Number of levels (i.e., contours) to use in
-landscape representation.}
-\item{palette.landsc} { A function defining a color palette to use for
-landscape representation.}
-\item{alpha.landsc} { Numeric; transparency factor for filled contours
+
+\item{alpha.landsc}{Numeric; transparency factor for filled contours
 depicting landscapes.}
-\item{lwd.landsc} { Integer; width of the contour lines depicting
-landscapes.}
-\item{lty.landsc} { Integer; type of the contour lines depicting
-landscapes.}
-\item{drawlabels.landsc} { Logical; should the labels indicating the value
+
+\item{nlevels.landsc}{Number of levels (i.e., contours) to use in
+landscape representation.}
+
+\item{drawlabels.landsc}{Logical; should the labels indicating the value
 of each surface contour be plotted?}
-\item{scalebar} { Logical; whether to show scalebar for landscapes.}
-}}
+
+\item{lty.landsc}{Integer; type of the contour lines depicting
+landscapes.}
+
+\item{lwd.landsc}{Integer; width of the contour lines depicting
+landscapes.}
 }
 \description{
 Flexible representation of morphospaces, including their

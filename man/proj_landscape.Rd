@@ -137,131 +137,14 @@ type <- tails$data$type
 
 ##Using the FUN argument
 
-#a function to compute lift/drag ratio on tail shape:
-computeLD <- function(model, MCS = FALSE) {
-
-  tail <- matrix(model, ncol = 2, byrow = TRUE)
-  Ax <- tail[9, 1] ; Ay <- tail[9, 2]
-  Bx <- tail[5, 1] ; By <- tail[5, 2]
-  X <- tail[7, 1] ; Y <- tail[7, 2]
-
-  # determine position of the tip of the inner rectrix relative to the tips
-  # of the outermost rectrices (positive: anterior to the ORT; negative:
-  # posterior to the ORT)
-  tip_pos1 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
-
-  # do the same but for the inner outer rectrices
-  Ax <- tail[8, 1] ; Ay <- tail[8, 2]
-  Bx <- tail[6, 1] ; By <- tail[6, 2]
-  X <- tail[7, 1] ; Y <- tail[7, 2]
-
-  # determine position of the tip of the inner rectrix relative to the tips
-  # of the outermost rectrices (positive: anterior to the ORT; negative:
-  # posterior to the ORT)
-  tip_pos2 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
-
-  # compute the area of the polygon representing the whole tail
-  tail_area <- coo_area(tail[c(1, 3, 5, 6, 7, 8, 9, 4, 2, 1), ])
-
-
-  # if posterior, compute MCS as the distance between the ORTs, and the
-  # lifting area as the polygon enclosed by the ORTs and tail base
-  if(tip_pos1 == -1) {
-    mcs <- dist(rbind(tail[5, ], tail[9, ]))
-    lifting_area <- coo_area(tail[c(1, 3, 5, 9, 4, 2, 1),])
-  }
-
-  # if anterior, find the maximum continuous span as the line perpendicular
-  # to the saggital axis that intersects the ORTs and the IRT
-  if(tip_pos1 == 1 & tip_pos2 == 1) {
-
-    # center tail around the IRT and set MCS as a vertical line passing
-    # through the origin
-    tail_cent <- cbind(tail[, 1] - tail[7, 1],
-                       tail[, 2] - tail[7, 2])
-    mcs_vec <- c(0,10e10)
-
-    ort1 <- rbind(tail_cent[4, ], tail_cent[9, ])
-    ort1_vec <- lm(ort1[, 2] ~ ort1[, 1])$coef
-
-    ort2 <- rbind(tail_cent[3, ], tail_cent[5, ])
-    ort2_vec <- lm(ort2[, 2] ~ ort2[, 1])$coef
-
-    # find tips of MCS
-    A <- matrix(c(mcs_vec[2], -1, ort1_vec[2], -1), byrow = TRUE, nrow = 2)
-    b <- c(-mcs_vec[1], -ort1_vec[1])
-    p1 <- solve(A, b)
-
-    A <- matrix(c(mcs_vec[2], -1, ort2_vec[2], -1), byrow = TRUE, nrow = 2)
-    b <- c(-mcs_vec[1], -ort2_vec[1])
-    p2 <- solve(A, b)
-
-    # define "new tail base", enclosing the polygon using the tips of the MCS
-    newbase <- rbind(tail_cent[c(2, 4), ],
-                     p1,
-                     tail_cent[7, ],
-                     p2,
-                     tail_cent[c(3, 1), ])
-
-    # compute MCS and lifting area
-    lifting_area <- coo_area(newbase[c(1, 2, 3, 4, 5, 6, 7, 1),])
-    mcs <- dist(rbind(p1, p2))
-
-  }
-
-  # if anterior, find the maximum continuous span as the line perpendicular
-  # to the saggital axis that intersects the ORTs and the IRT
-  if(tip_pos1 == 1 & tip_pos2 == -1) {
-
-    # center tail around the IRT and set MCS as a vertical line passing
-    # through the origin
-    tail_cent <- cbind(tail[, 1] - mean(tail[6, 1], tail[8, 1]),
-                       tail[, 2] - mean(tail[6, 2], tail[8, 2]))
-    mcs_vec <- c(0,10e10)
-
-    ort1 <- rbind(tail_cent[4, ], tail_cent[9, ])
-    ort1_vec <- lm(ort1[, 2] ~ ort1[, 1])$coef
-
-    ort2 <- rbind(tail_cent[3, ], tail_cent[5, ])
-    ort2_vec <- lm(ort2[, 2] ~ ort2[, 1])$coef
-
-    # find tips of MCS
-    A <- matrix(c(mcs_vec[2], -1, ort1_vec[2], -1), byrow = TRUE, nrow = 2)
-    b <- c(-mcs_vec[1], -ort1_vec[1])
-    p1 <- solve(A, b)
-
-    A <- matrix(c(mcs_vec[2], -1, ort2_vec[2], -1), byrow = TRUE, nrow = 2)
-    b <- c(-mcs_vec[1], -ort2_vec[1])
-    p2 <- solve(A, b)
-
-    # define "new tail base", enclosing the polygon using the tips of the MCS
-    newbase <- rbind(tail_cent[c(2, 4), ],
-                     p1,
-                     tail_cent[7, ],
-                     p2,
-                     tail_cent[c(3, 1), ])
-
-    # compute MCS and lifting area
-    lifting_area <- coo_area(newbase[c(1, 2, 3, 4, 5, 6, 7, 1),])
-    mcs <- dist(rbind(p1, p2))
-
-  }
-
-  #compute and return lift/drag ratio
-  if(!MCS) LD_ratio <- lifting_area / tail_area
-  if(MCS)  LD_ratio <- (mcs ^ 2) / tail_area
-
-  return(as.numeric(LD_ratio))
-
-}
-
 ###"Theoretical" landscapes
 
 #plot morphospace with its associated adaptive landscape
 mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
        cex.ldm = 0) \%>\%
   proj_shapes(shapes, pch = 16) \%>\%
-  proj_landscape(nlevels = 60, FUN = computeLD, expand = 1.2, lwd = 2)
+  proj_landscape(nlevels = 60, FUN = morphospace:::computeLD, expand = 1.2,
+                 lwd = 2)
 
 ##Using the X argument
 
@@ -270,11 +153,11 @@ msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
               cex.ldm = 0, plot = FALSE)
 shapemodels2d <- two.d.array(extract_shapes(msp)$shapes)
 
-#run computeLD (defined above) through the "two-dimensional" matrix of shapes
-#models (this is the same thing the proj_landscape function is doing
-#internally when FUN is used, but this vector could be replaced with some
-#other variable obtained in a different way)
-LDs <- apply(X = shapemodels2d, FUN = computeLD, MARGIN = 1)
+#run computeLD through the "two-dimensional" matrix of shapes models (this is
+#the same thing the proj_landscape function is doing internally when FUN is
+#used, but this vector could be replaced with some other variable obtained in
+#a different way)
+LDs <- apply(X = shapemodels2d, FUN = morphospace:::computeLD, MARGIN = 1)
 
 #second, plot morphospace with its associated adaptive landscape
 msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
@@ -304,17 +187,19 @@ mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
 mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
        cex.ldm = 0) \%>\%
   proj_shapes(shapes, pch = 16) \%>\%
-  proj_landscape(shapes = shapes[,,type == "NDF"], nlevels = 20, linear = TRUE,
-                 FUN = computeLD, expand = 1.2, display = "filled.contour")
+  proj_landscape(shapes = shapes[,,type == "NDF"], nlevels = 20,
+                 linear = TRUE, FUN = morphospace:::computeLD, expand = 1.2,
+                 display = "filled.contour")
 
 #in this case, the resolution of the projected surface can be improved using
-#the argument resolution (however, be aware this can be computationally intense!
-#especially if a theoretical landscape is being computed)
+#the argument resolution (however, be aware this can be computationally
+#intense! especially if a theoretical landscape is being computed)
 mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
        cex.ldm = 0) \%>\%
   proj_shapes(shapes, pch = 16) \%>\%
-  proj_landscape(shapes = shapes[,,type == "NDF"], nlevels = 20, linear = TRUE,
-                 resolution = 200, FUN = computeLD, expand = 1.2,
+  proj_landscape(shapes = shapes[,,type == "NDF"], nlevels = 20,
+                 linear = TRUE, resolution = 200,
+                 FUN = morphospace:::computeLD, expand = 1.2,
                  display = "filled.contour")
 }
 \seealso{
