@@ -223,13 +223,8 @@ build_template2d <- function(image, nlands, ncurves) {
 hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
                               lty = 1, alpha = 0, ...) {
 
-  #if(length(col) == 1) col <- rep(col, nlevels(fac))
-
   col <- if(length(col) == 1) rep(col, nlevels(fac)) else {
     if(nlevels(fac) > length(col)) {
-      # c(rep(NA, nlevels(fac) - length(unique(col))),
-      #   sort(unique(col)))[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
-      #                              which(levels(fac) %in% unique(fac))))]
       c(rep(NA, nlevels(fac) - length(unique(col))),
         unique(col))[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
                              which(levels(fac) %in% unique(fac))))]
@@ -291,13 +286,8 @@ hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
                                  lty = 1, conflev = 0.95, alpha = 0, ...) {
 
-  #if(length(col) == 1) col <- rep(col, nlevels(fac))
-
   col <- if(length(col) == 1) rep(col, nlevels(fac)) else {
     if(nlevels(fac) > length(col)) {
-      # c(rep(NA, nlevels(fac) - length(unique(col))),
-      #   sort(unique(col)))[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
-      #                              which(levels(fac) %in% unique(fac))))]
       c(rep(NA, nlevels(fac) - length(unique(col))),
         unique(col))[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
                              which(levels(fac) %in% unique(fac))))]
@@ -446,19 +436,15 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1,
 #' @param ... Further arguments passed to [graphics::points()].
 plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
-  if(density) {
+  if(is.null(dim(scores))) scores <- rbind(scores)
+
+  if(density & nrow(scores) > 1) {
     dens <- stats::density(scores)
     graphics::polygon(dens$x, dens$y / max(dens$y), lwd = 2,
                       col = grDevices::adjustcolor(1, alpha.f = 0.5))
   }
 
   graphics::abline(h = 0)
-
-  scores <- if(is.null(dim(scores))) {
-    rbind(scores, scores)
-  } else {
-    if(length(scores) == 1 | nrow(scores) == 1) rbind(scores, scores) else scores
-  }
 
   if(any(pch %in% c(21:25))) {
     graphics::points(cbind(scores, 0), pch = pch, bg = bg, cex = cex, ...)
@@ -483,10 +469,7 @@ plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1
 #' @param ... Further arguments passed to [graphics::points()].
 plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
-  if(is.null(dim(scores))) {
-    scores <- rbind(scores, scores)
-  } else if(nrow(scores) == 1) scores <- rbind(scores, scores)
-
+  if(is.null(dim(scores))) scores <- rbind(scores)
 
   if(any(pch %in% c(21:25))) {
     graphics::points(scores, pch = pch, bg = bg, cex = cex, ...)
@@ -570,5 +553,135 @@ plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
     labels <- round(colMeans(matrix(landscape$z[w.transp], nrow = 3)), 2)
     graphics::text(cbind(x_text, y_text), labels = labels, cex = 0.7, col = label_col)
   }
+}
+
+
+################################################################################
+
+# #' Compute lift-to-drag ratio for shapes from the 'tails' data set
+# #'
+# #' @description Compute lift-to-drag ratio (a proxy for aerodynamic performance
+# #'   on shapes of tails of Tyrannus species (landmark data). To be used as a
+# #'   complement for the 'tails' data set in tests and examples.
+# #'
+# #' @param shapes landmark shape data from the "tails" data set.
+# #' @param MSC Logical; whether to use the maximum continuous span of the tail
+# #'   as a proxy for the amount of lift produced, instead of the lifting area.
+
+computeLD <- function(model, MCS = FALSE) {
+
+  tail <- matrix(model, ncol = 2, byrow = TRUE)
+  Ax <- tail[9, 1] ; Ay <- tail[9, 2]
+  Bx <- tail[5, 1] ; By <- tail[5, 2]
+  X <- tail[7, 1] ; Y <- tail[7, 2]
+
+  # determine position of the tip of the inner rectrix relative to the tips
+  # of the outermost rectrices (positive: anterior to the ORT; negative:
+  # posterior to the ORT)
+  tip_pos1 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
+
+  # do the same but for the inner outer rectrices
+  Ax <- tail[8, 1] ; Ay <- tail[8, 2]
+  Bx <- tail[6, 1] ; By <- tail[6, 2]
+  X <- tail[7, 1] ; Y <- tail[7, 2]
+
+  # determine position of the tip of the inner rectrix relative to the tips
+  # of the outermost rectrices (positive: anterior to the ORT; negative:
+  # posterior to the ORT)
+  tip_pos2 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
+
+  # compute the area of the polygon representing the whole tail
+  tail_area <- Momocs::coo_area(tail[c(1, 3, 5, 6, 7, 8, 9, 4, 2, 1), ])
+
+
+  # if posterior, compute MCS as the distance between the ORTs, and the
+  # lifting area as the polygon enclosed by the ORTs and tail base
+  if(tip_pos1 == -1) {
+    mcs <- stats::dist(rbind(tail[5, ], tail[9, ]))
+    lifting_area <- Momocs::coo_area(tail[c(1, 3, 5, 9, 4, 2, 1),])
+  }
+
+  # if anterior, find the maximum continuous span as the line perpendicular
+  # to the saggital axis that intersects the ORTs and the IRT
+  if(tip_pos1 == 1 & tip_pos2 == 1) {
+
+    # center tail around the IRT and set MCS as a vertical line passing
+    # through the origin
+    tail_cent <- cbind(tail[, 1] - tail[7, 1],
+                       tail[, 2] - tail[7, 2])
+    mcs_vec <- c(0,10e10)
+
+    ort1 <- rbind(tail_cent[4, ], tail_cent[9, ])
+    ort1_vec <- stats::lm(ort1[, 2] ~ ort1[, 1])$coef
+
+    ort2 <- rbind(tail_cent[3, ], tail_cent[5, ])
+    ort2_vec <- stats::lm(ort2[, 2] ~ ort2[, 1])$coef
+
+    # find tips of MCS
+    A <- matrix(c(mcs_vec[2], -1, ort1_vec[2], -1), byrow = TRUE, nrow = 2)
+    b <- c(-mcs_vec[1], -ort1_vec[1])
+    p1 <- solve(A, b)
+
+    A <- matrix(c(mcs_vec[2], -1, ort2_vec[2], -1), byrow = TRUE, nrow = 2)
+    b <- c(-mcs_vec[1], -ort2_vec[1])
+    p2 <- solve(A, b)
+
+    # define "new tail base", enclosing the polygon using the tips of the MCS
+    newbase <- rbind(tail_cent[c(2, 4), ],
+                     p1,
+                     tail_cent[7, ],
+                     p2,
+                     tail_cent[c(3, 1), ])
+
+    # compute MCS and lifting area
+    lifting_area <- Momocs::coo_area(newbase[c(1, 2, 3, 4, 5, 6, 7, 1),])
+    mcs <- stats::dist(rbind(p1, p2))
+
+  }
+
+  # if anterior, find the maximum continuous span as the line perpendicular
+  # to the saggital axis that intersects the ORTs and the IRT
+  if(tip_pos1 == 1 & tip_pos2 == -1) {
+
+    # center tail around the IRT and set MCS as a vertical line passing
+    # through the origin
+    tail_cent <- cbind(tail[, 1] - mean(tail[6, 1], tail[8, 1]),
+                       tail[, 2] - mean(tail[6, 2], tail[8, 2]))
+    mcs_vec <- c(0,10e10)
+
+    ort1 <- rbind(tail_cent[4, ], tail_cent[9, ])
+    ort1_vec <- stats::lm(ort1[, 2] ~ ort1[, 1])$coef
+
+    ort2 <- rbind(tail_cent[3, ], tail_cent[5, ])
+    ort2_vec <- stats::lm(ort2[, 2] ~ ort2[, 1])$coef
+
+    # find tips of MCS
+    A <- matrix(c(mcs_vec[2], -1, ort1_vec[2], -1), byrow = TRUE, nrow = 2)
+    b <- c(-mcs_vec[1], -ort1_vec[1])
+    p1 <- solve(A, b)
+
+    A <- matrix(c(mcs_vec[2], -1, ort2_vec[2], -1), byrow = TRUE, nrow = 2)
+    b <- c(-mcs_vec[1], -ort2_vec[1])
+    p2 <- solve(A, b)
+
+    # define "new tail base", enclosing the polygon using the tips of the MCS
+    newbase <- rbind(tail_cent[c(2, 4), ],
+                     p1,
+                     tail_cent[7, ],
+                     p2,
+                     tail_cent[c(3, 1), ])
+
+    # compute MCS and lifting area
+    lifting_area <- Momocs::coo_area(newbase[c(1, 2, 3, 4, 5, 6, 7, 1),])
+    mcs <- stats::dist(rbind(p1, p2))
+
+  }
+
+  #compute and return lift/drag ratio
+  if(!MCS) LD_ratio <- lifting_area / tail_area
+  if(MCS)  LD_ratio <- (mcs ^ 2) / tail_area
+
+  return(as.numeric(LD_ratio))
+
 }
 
