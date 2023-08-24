@@ -993,131 +993,14 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
 #'
 #' ##Using the FUN argument
 #'
-#' #a function to compute lift/drag ratio on tail shape:
-#' computeLD <- function(model, MCS = FALSE) {
-#'
-#'   tail <- matrix(model, ncol = 2, byrow = TRUE)
-#'   Ax <- tail[9, 1] ; Ay <- tail[9, 2]
-#'   Bx <- tail[5, 1] ; By <- tail[5, 2]
-#'   X <- tail[7, 1] ; Y <- tail[7, 2]
-#'
-#'   # determine position of the tip of the inner rectrix relative to the tips
-#'   # of the outermost rectrices (positive: anterior to the ORT; negative:
-#'   # posterior to the ORT)
-#'   tip_pos1 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
-#'
-#'   # do the same but for the inner outer rectrices
-#'   Ax <- tail[8, 1] ; Ay <- tail[8, 2]
-#'   Bx <- tail[6, 1] ; By <- tail[6, 2]
-#'   X <- tail[7, 1] ; Y <- tail[7, 2]
-#'
-#'   # determine position of the tip of the inner rectrix relative to the tips
-#'   # of the outermost rectrices (positive: anterior to the ORT; negative:
-#'   # posterior to the ORT)
-#'   tip_pos2 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
-#'
-#'   # compute the area of the polygon representing the whole tail
-#'   tail_area <- coo_area(tail[c(1, 3, 5, 6, 7, 8, 9, 4, 2, 1), ])
-#'
-#'
-#'   # if posterior, compute MCS as the distance between the ORTs, and the
-#'   # lifting area as the polygon enclosed by the ORTs and tail base
-#'   if(tip_pos1 == -1) {
-#'     mcs <- dist(rbind(tail[5, ], tail[9, ]))
-#'     lifting_area <- coo_area(tail[c(1, 3, 5, 9, 4, 2, 1),])
-#'   }
-#'
-#'   # if anterior, find the maximum continuous span as the line perpendicular
-#'   # to the saggital axis that intersects the ORTs and the IRT
-#'   if(tip_pos1 == 1 & tip_pos2 == 1) {
-#'
-#'     # center tail around the IRT and set MCS as a vertical line passing
-#'     # through the origin
-#'     tail_cent <- cbind(tail[, 1] - tail[7, 1],
-#'                        tail[, 2] - tail[7, 2])
-#'     mcs_vec <- c(0,10e10)
-#'
-#'     ort1 <- rbind(tail_cent[4, ], tail_cent[9, ])
-#'     ort1_vec <- lm(ort1[, 2] ~ ort1[, 1])$coef
-#'
-#'     ort2 <- rbind(tail_cent[3, ], tail_cent[5, ])
-#'     ort2_vec <- lm(ort2[, 2] ~ ort2[, 1])$coef
-#'
-#'     # find tips of MCS
-#'     A <- matrix(c(mcs_vec[2], -1, ort1_vec[2], -1), byrow = TRUE, nrow = 2)
-#'     b <- c(-mcs_vec[1], -ort1_vec[1])
-#'     p1 <- solve(A, b)
-#'
-#'     A <- matrix(c(mcs_vec[2], -1, ort2_vec[2], -1), byrow = TRUE, nrow = 2)
-#'     b <- c(-mcs_vec[1], -ort2_vec[1])
-#'     p2 <- solve(A, b)
-#'
-#'     # define "new tail base", enclosing the polygon using the tips of the MCS
-#'     newbase <- rbind(tail_cent[c(2, 4), ],
-#'                      p1,
-#'                      tail_cent[7, ],
-#'                      p2,
-#'                      tail_cent[c(3, 1), ])
-#'
-#'     # compute MCS and lifting area
-#'     lifting_area <- coo_area(newbase[c(1, 2, 3, 4, 5, 6, 7, 1),])
-#'     mcs <- dist(rbind(p1, p2))
-#'
-#'   }
-#'
-#'   # if anterior, find the maximum continuous span as the line perpendicular
-#'   # to the saggital axis that intersects the ORTs and the IRT
-#'   if(tip_pos1 == 1 & tip_pos2 == -1) {
-#'
-#'     # center tail around the IRT and set MCS as a vertical line passing
-#'     # through the origin
-#'     tail_cent <- cbind(tail[, 1] - mean(tail[6, 1], tail[8, 1]),
-#'                        tail[, 2] - mean(tail[6, 2], tail[8, 2]))
-#'     mcs_vec <- c(0,10e10)
-#'
-#'     ort1 <- rbind(tail_cent[4, ], tail_cent[9, ])
-#'     ort1_vec <- lm(ort1[, 2] ~ ort1[, 1])$coef
-#'
-#'     ort2 <- rbind(tail_cent[3, ], tail_cent[5, ])
-#'     ort2_vec <- lm(ort2[, 2] ~ ort2[, 1])$coef
-#'
-#'     # find tips of MCS
-#'     A <- matrix(c(mcs_vec[2], -1, ort1_vec[2], -1), byrow = TRUE, nrow = 2)
-#'     b <- c(-mcs_vec[1], -ort1_vec[1])
-#'     p1 <- solve(A, b)
-#'
-#'     A <- matrix(c(mcs_vec[2], -1, ort2_vec[2], -1), byrow = TRUE, nrow = 2)
-#'     b <- c(-mcs_vec[1], -ort2_vec[1])
-#'     p2 <- solve(A, b)
-#'
-#'     # define "new tail base", enclosing the polygon using the tips of the MCS
-#'     newbase <- rbind(tail_cent[c(2, 4), ],
-#'                      p1,
-#'                      tail_cent[7, ],
-#'                      p2,
-#'                      tail_cent[c(3, 1), ])
-#'
-#'     # compute MCS and lifting area
-#'     lifting_area <- coo_area(newbase[c(1, 2, 3, 4, 5, 6, 7, 1),])
-#'     mcs <- dist(rbind(p1, p2))
-#'
-#'   }
-#'
-#'   #compute and return lift/drag ratio
-#'   if(!MCS) LD_ratio <- lifting_area / tail_area
-#'   if(MCS)  LD_ratio <- (mcs ^ 2) / tail_area
-#'
-#'   return(as.numeric(LD_ratio))
-#'
-#' }
-#'
 #' ###"Theoretical" landscapes
 #'
 #' #plot morphospace with its associated adaptive landscape
 #' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
 #'        cex.ldm = 0) %>%
 #'   proj_shapes(shapes, pch = 16) %>%
-#'   proj_landscape(nlevels = 60, FUN = computeLD, expand = 1.2, lwd = 2)
+#'   proj_landscape(nlevels = 60, FUN = morphospace:::computeLD, expand = 1.2,
+#'                  lwd = 2)
 #'
 #' ##Using the X argument
 #'
@@ -1126,11 +1009,11 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
 #'               cex.ldm = 0, plot = FALSE)
 #' shapemodels2d <- two.d.array(extract_shapes(msp)$shapes)
 #'
-#' #run computeLD (defined above) through the "two-dimensional" matrix of shapes
-#' #models (this is the same thing the proj_landscape function is doing
-#' #internally when FUN is used, but this vector could be replaced with some
-#' #other variable obtained in a different way)
-#' LDs <- apply(X = shapemodels2d, FUN = computeLD, MARGIN = 1)
+#' #run computeLD through the "two-dimensional" matrix of shapes models (this is
+#' #the same thing the proj_landscape function is doing internally when FUN is
+#' #used, but this vector could be replaced with some other variable obtained in
+#' #a different way)
+#' LDs <- apply(X = shapemodels2d, FUN = morphospace:::computeLD, MARGIN = 1)
 #'
 #' #second, plot morphospace with its associated adaptive landscape
 #' msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
@@ -1160,17 +1043,19 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
 #' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
 #'        cex.ldm = 0) %>%
 #'   proj_shapes(shapes, pch = 16) %>%
-#'   proj_landscape(shapes = shapes[,,type == "NDF"], nlevels = 20, linear = TRUE,
-#'                  FUN = computeLD, expand = 1.2, display = "filled.contour")
+#'   proj_landscape(shapes = shapes[,,type == "NDF"], nlevels = 20,
+#'                  linear = TRUE, FUN = morphospace:::computeLD, expand = 1.2,
+#'                  display = "filled.contour")
 #'
 #' #in this case, the resolution of the projected surface can be improved using
-#' #the argument resolution (however, be aware this can be computationally intense!
-#' #especially if a theoretical landscape is being computed)
+#' #the argument resolution (however, be aware this can be computationally
+#' #intense! especially if a theoretical landscape is being computed)
 #' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
 #'        cex.ldm = 0) %>%
 #'   proj_shapes(shapes, pch = 16) %>%
-#'   proj_landscape(shapes = shapes[,,type == "NDF"], nlevels = 20, linear = TRUE,
-#'                  resolution = 200, FUN = computeLD, expand = 1.2,
+#'   proj_landscape(shapes = shapes[,,type == "NDF"], nlevels = 20,
+#'                  linear = TRUE, resolution = 200,
+#'                  FUN = morphospace:::computeLD, expand = 1.2,
 #'                  display = "filled.contour")
 proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear = FALSE,
                            resolution = 50, expand = 1, display = "contour", nlevels = 50,
@@ -1380,127 +1265,119 @@ print.mspace <- function(mspace, ...){
 #'   \code{c(1,2)}).
 #' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
 #'   factors for the width and height of the frame, respectively.
-#' @param _.models,_.ldm Control how background shape models are displayed.
-#'   \itemize{
-#'   \item{models} { Logical; whether to plot background shape models (stored
-#'      in \code{mspace$projected$shapemodels}).}
-#'   \item{size.models} { Numeric; size factor for shape models.}
-#'   \item{col.models} { Color for wireframes/outlines of shape models.}
-#'   \item{bg.models} { Background color for outlines/meshes of shape models.}
-#'   \item{asp.models} { Numeric; y/x aspect ratio of shape models.}
-#'   \item{rot.models} { Numeric; angle (in degrees) to rotate shape models.}
-#'   \item{lwd.models} { Integer; width of border lines in wireframes/outlines
-#'      of shape models.}
-#'   \item{alpha.models} { Numeric; transparency factor for background models
-#'      (3D only).}
-#'   \item{cex.ldm} { Numeric; size of landmarks/semilandmarks in the background
-#'      models.}
-#'   \item{col.ldm} { Color of landmarks/semilandmarks in the background
-#'      models.}
-#'   }
-#' @param _.points Control how scatterpoints representing projected shapes are
-#'   represented.
-#'   \itemize{
-#'   \item{points} { Logical; whether to plot the scatter points corresponding
-#'      to the sampled shapes stored in \code{mspace$projected$scores}.}
-#'   \item{pch.points} { Symbol of the scatterpoints.}
-#'   \item{col.points} { Color of the scatterpoints.}
-#'   \item{bg.points} { Background color of the scatterpoints.}
-#'   \item{cex.points} { Numeric; size of the scatterpoints}
-#'   \item{density.points} { Logical; whether to add density distribution for
+#'
+#'
+#' @param models Logical; whether to plot background shape models (stored
+#'      in \code{mspace$projected$shapemodels}).
+#' @param size.models Numeric; size factor for shape models.
+#' @param col.models Color for wireframes/outlines of shape models.
+#' @param bg.models Background color for outlines/meshes of shape models.
+#' @param asp.models Numeric; y/x aspect ratio of shape models.
+#' @param rot.models Numeric; angle (in degrees) to rotate shape models.
+#' @param lwd.models Integer; width of border lines in wireframes/outlines
+#'      of shape models.
+#' @param alpha.models Numeric; transparency factor for background models
+#'      (3D only).
+#' @param cex.ldm Numeric; size of landmarks/semilandmarks in the background
+#'      models.
+#' @param col.ldm Color of landmarks/semilandmarks in the background
+#'      models.
+#'
+#'
+#' @param points Logical; whether to plot the scatter points corresponding
+#'      to the sampled shapes stored in \code{mspace$projected$scores}.
+#' @param pch.points Symbol of the scatterpoints.
+#' @param col.points Color of the scatterpoints.
+#' @param bg.points Background color of the scatterpoints.
+#' @param cex.points Numeric; size of the scatterpoints
+#' @param density.points Logical; whether to add density distribution for
 #'      points (univariate ordinations only). Overriden by
-#'      \code{density.groups = TRUE}}
-#'   }
-#' @param _.groups,legend Control how groups of shapes are represented.
-#'   \itemize{
-#'   \item{groups} { Logical; whether to plot the convex hulls/confidence
+#'      \code{density.groups = TRUE}
+#'
+#'
+#' @param groups Logical; whether to plot the convex hulls/confidence
 #'      ellipses enclosing the groups stored in
-#'      \code{mspace$projected$gr_class}.}
-#'   \item{mshapes} { Logical; whether to plot the scatter points corresponding
-#'      to groups' mean shapes stored in \code{mspace$projected$gr_centroids}.}
-#'   \item{col.groups} { Color of the hulls/ellipses and/or scatterpoints
-#'      corresponding to groups' mean shapes.}
-#'   \item{bg.groups} { Background color of the scatterpoints corresponding to
-#'      groups' mean shapes.}
-#'   \item{pch.groups} { Symbol of the scatterpoints corresponding to
-#'      groups' mean shapes.}
-#'   \item{cex.groups} { Numeric; size of the scatterpoints corresponding to
-#'      groups' mean shapes.}
-#'   \item{ellipse.groups} { Logical; whether to use confidence ellipses to
-#'      delimit groups (if \code{FALSE} convex hulls are used instead).}
-#'   \item{conflev.groups} { Numeric; confidence level used for confidence
-#'      ellipse(s).}
-#'   \item{lwd.groups} { Integer; width of the lines in groups' ellipses/hulls.}
-#'   \item{lty.groups} { Integer; type of the lines in groups' ellipses/hulls.}
-#'   \item{alpha.groups} { Numeric; transparency factor for groups'
-#'      ellipses/hulls/density distributions.}
-#'   \item{density.groups} { Logical; whether to add density distribution for
-#'      groups (univariate ordinations only).}
-#'   \item{legend} { Logical; whether to show legend for groups.}
-#'   \item{cex.legend} { Numeric; size of legend labels/symbols.}
-#'   }
-#' @param _.phylo,_.nodes,_.tips Control how phylogenetic relationships are
-#'   represented.
-#'   \itemize{
-#'   \item{phylo} { Logical; whether to plot phylogenetic relationships stored
-#'      in \code{mspace$projected$phylo}.}
-#'   \item{col.phylo} { Color of the lines depicting phylogenetic
-#'      branches.}
-#'   \item{lwd.phylo} { Integer; width of the lines depicting phylogenetic
-#'      branches.}
-#'   \item{lty.phylo} { Integer; type of the lines depicting phylogenetic
-#'      branches.}
-#'   \item{col.nodes} { Color of the scatterpoints representing the nodes of the
-#'      phylogeny.}
-#'   \item{bg.nodes} { Background color of the scatterpoints representing the
-#'      nodes of the phylogeny.}
-#'   \item{pch.nodes} { Symbol of the scatterpoints representing the nodes of
-#'      the phylogeny.}
-#'   \item{cex.nodes} { Numeric; size of the scatterpoints representing the
-#'      nodes of the phylogeny.}
-#'   \item{col.tips} { Color of the scatterpoints representing the tips of the
-#'      phylogeny.}
-#'   \item{bg.tips} { Background color of the scatterpoints representing the
-#'      tips of the phylogeny.}
-#'   \item{pch.tips} { Symbol of the scatterpoints representing the tips of the
-#'      phylogeny.}
-#'   \item{cex.tips} { Numeric; size of the scatterpoints representing the tips
-#'      of the phylogeny.}
-#'   }
-#' @param _.axis Control how groups of shapes are represented.
-#'   \itemize{
-#'   \item{shapeax} { Logical; whether to plot morphometric axes stored in
-#'      \code{mspace$projected$shape_axis}.}
-#'   \item{type.axis} { Integer; type of arrows (\code{0} = no arrow;
+#'      \code{mspace$projected$gr_class}.
+#' @param col.groups Color of the hulls/ellipses and/or scatterpoints
+#'      corresponding to groups' mean shapes.
+#' @param bg.groups Background color of the scatterpoints corresponding to
+#'      groups' mean shapes.
+#' @param pch.groups Symbol of the scatterpoints corresponding to
+#'      groups' mean shapes.
+#' @param cex.groups Numeric; size of the scatterpoints corresponding to
+#'      groups' mean shapes.
+#' @param ellipse.groups Logical; whether to use confidence ellipses to
+#'      delimit groups (if \code{FALSE} convex hulls are used instead).
+#' @param conflev.groups Numeric; confidence level used for confidence
+#'      ellipse(s).
+#' @param lwd.groups Integer; width of the lines in groups' ellipses/hulls.
+#' @param lty.groups Integer; type of the lines in groups' ellipses/hulls.
+#' @param alpha.groups Numeric; transparency factor for groups'
+#'      ellipses/hulls/density distributions.
+#' @param density.groups Logical; whether to add density distribution for
+#'      groups (univariate ordinations only).
+#' @param legend Logical; whether to show legend for groups.
+#' @param cex.legend Numeric; size of legend labels/symbols.
+#'
+#'
+#' @param phylo Logical; whether to plot phylogenetic relationships stored
+#'      in \code{mspace$projected$phylo}.
+#' @param col.phylo Color of the lines depicting phylogenetic
+#'      branches.
+#' @param lwd.phylo Integer; width of the lines depicting phylogenetic
+#'      branches.
+#' @param lty.phylo Integer; type of the lines depicting phylogenetic
+#'      branches.
+#' @param col.nodes Color of the scatterpoints representing the nodes of the
+#'      phylogeny.
+#' @param bg.nodes Background color of the scatterpoints representing the
+#'      nodes of the phylogeny.
+#' @param pch.nodes Symbol of the scatterpoints representing the nodes of
+#'      the phylogeny.
+#' @param cex.nodes Numeric; size of the scatterpoints representing the
+#'      nodes of the phylogeny.
+#' @param col.tips Color of the scatterpoints representing the tips of the
+#'      phylogeny.
+#' @param bg.tips Background color of the scatterpoints representing the
+#'      tips of the phylogeny.
+#' @param pch.tips Symbol of the scatterpoints representing the tips of the
+#'      phylogeny.
+#' @param cex.tips Numeric; size of the scatterpoints representing the tips
+#'      of the phylogeny.
+#'
+#'
+#' @param shapeax Logical; whether to plot morphometric axes stored in
+#'      \code{mspace$projected$shape_axis}.
+#' @param type.axis Integer; type of arrows (\code{0} = no arrow;
 #'      \code{1} = pointing towards the maximum; \code{2} = pointing towards
-#'      the maximum, \code{3} = pointing in both directions).}
-#'   \item{col.axis} { Color of the lines depicting a morphometric axis.}
-#'   \item{lwd.axis} { Integer; width of the lines depicting a morphometric
-#'      axis.}
-#'   \item{lty.axis} { Integer; type of the lines depicting a morphometric
-#'      axis.}
-#'   }
-#' @param _.landsc,scalebar Control how landscape surfaces are represented.
-#'   \itemize{
-#'   \item{landsc} { Logical; whether to plot landscape surface stored in
-#'      \code{mspace$projected$landsc}.}
-#'   \item{display.landsc} { How to display landscape representation; options
+#'      the maximum, \code{3} = pointing in both directions).
+#' @param col.axis Color of the lines depicting a morphometric axis.
+#' @param lwd.axis Integer; width of the lines depicting a morphometric
+#'      axis.
+#' @param lty.axis Integer; type of the lines depicting a morphometric
+#'      axis.
+#'
+#'
+#' @param landsc Logical; whether to plot landscape surface stored in
+#'      \code{mspace$projected$landsc}.
+#' @param display.landsc How to display landscape representation; options
 #'      are \code{"contour"} and \code{"filled.contour"}. For bivariate
-#'      landscapes only.}
-#'   \item{nlevels.landsc} { Number of levels (i.e., contours) to use in
-#'      landscape representation.}
-#'   \item{palette.landsc} { A function defining a color palette to use for
-#'      landscape representation.}
-#'   \item{alpha.landsc} { Numeric; transparency factor for filled contours
-#'      depicting landscapes.}
-#'   \item{lwd.landsc} { Integer; width of the contour lines depicting
-#'      landscapes.}
-#'   \item{lty.landsc} { Integer; type of the contour lines depicting
-#'      landscapes.}
-#'   \item{drawlabels.landsc} { Logical; should the labels indicating the value
-#'      of each surface contour be plotted?}
-#'   \item{scalebar} { Logical; whether to show scalebar for landscapes.}
-#'   }
+#'      landscapes only.
+#' @param nlevels.landsc Number of levels (i.e., contours) to use in
+#'      landscape representation.
+#' @param palette.landsc A function defining a color palette to use for
+#'      landscape representation.
+#' @param alpha.landsc Numeric; transparency factor for filled contours
+#'      depicting landscapes.
+#' @param lwd.landsc Integer; width of the contour lines depicting
+#'      landscapes.
+#' @param lty.landsc Integer; type of the contour lines depicting
+#'      landscapes.
+#' @param drawlabels.landsc Logical; should the labels indicating the value
+#'      of each surface contour be plotted?
+#' @param scalebar Logical; whether to show scalebar for landscapes.
+#'
+#'
 #' @param xlim,ylim,xlab,ylab,asp Standard arguments passed to the generic
 #'   [graphics::plot()] function.
 #'
