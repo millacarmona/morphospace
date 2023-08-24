@@ -284,12 +284,13 @@ test_that(desc = "testing expected_shapes, numerics, ndims & accuracy, for Fouri
 
 })
 
-#further tests regarding accuracy of the actual shape(s) are implemented in tests_internal_builders
+#further tests covering accuracy of the actual shape(s) are implemented in tests_internal_builders
 
 
 ###########################################
 
-test_that(desc = "testing detrend_shapes, default settings, for factors and numerics", code = {
+test_that(desc = "testing detrend_shapes, method = orthogonal + default settings,
+          for factors and numerics", code = {
   data(shells)
 
   shapes <- shells$shapes$coe
@@ -297,7 +298,7 @@ test_that(desc = "testing detrend_shapes, default settings, for factors and nume
   logsizes <- log(shells$sizes)
 
   model1 <- lm(shapes ~ logsizes)
-  detr_shapes1 <- detrend_shapes(model1)
+  detr_shapes1 <- detrend_shapes(model1, method = "orthogonal")
   result1 <- all(dim(shapes) == dim(detr_shapes1))
 
   totvar_raw <- sum(apply(shapes, 2, stats::var))
@@ -314,7 +315,51 @@ test_that(desc = "testing detrend_shapes, default settings, for factors and nume
 
 
   model2 <- lm(shapes ~ species)
-  detr_shapes2 <- detrend_shapes(model2)
+  detr_shapes2 <- detrend_shapes(model2, method = "orthogonal")
+  result5 <- all(dim(shapes) == dim(detr_shapes2))
+
+  totvar_raw <- sum(apply(shapes, 2, stats::var))
+  totvar_detr <- sum(apply(detr_shapes2, 2, stats::var))
+  result6 <- (totvar_raw > totvar_detr)
+
+  pca <- prcomp(detr_shapes2)
+  testshape2 <- rev_eigen(colMeans(pca$x), pca$rotation, pca$center)
+  detr_mshape2 <- expected_shapes(detr_shapes2)
+  result7 <- all(round(testshape2, 10) == round(detr_mshape2,10))
+
+  result8 <- all(round(lm(detr_shapes2 ~ species)$coefficients[2,], 10) == 0)
+
+  expect_true(all(result1, result2, result3, result4, result5, result6, result7, result8))
+
+})
+
+test_that(desc = "testing detrend_shapes, method = residuals + default settings,
+          for factors and numerics", code = {
+  data(shells)
+
+  shapes <- shells$shapes$coe
+  species <- shells$data$species
+  logsizes <- log(shells$sizes)
+
+  model1 <- lm(shapes ~ logsizes)
+  detr_shapes1 <- detrend_shapes(model1, method = "residuals")
+  result1 <- all(dim(shapes) == dim(detr_shapes1))
+
+  totvar_raw <- sum(apply(shapes, 2, stats::var))
+  totvar_detr <- sum(apply(detr_shapes1, 2, stats::var))
+  result2 <- (totvar_raw > totvar_detr)
+
+  result3 <- all(round(lm(detr_shapes1 ~ logsizes)$coefficients[2,], 10) == 0)
+
+  pca <- prcomp(detr_shapes1)
+  testshape1 <- rev_eigen(colMeans(pca$x), pca$rotation, pca$center)
+  detr_mshape1 <- expected_shapes(detr_shapes1)
+  result4 <- all(round(testshape1, 10) == round(detr_mshape1,10))
+
+
+
+  model2 <- lm(shapes ~ species)
+  detr_shapes2 <- detrend_shapes(model2, method = "residuals")
   result5 <- all(dim(shapes) == dim(detr_shapes2))
 
   totvar_raw <- sum(apply(shapes, 2, stats::var))
@@ -333,7 +378,7 @@ test_that(desc = "testing detrend_shapes, default settings, for factors and nume
 })
 
 
-test_that(desc = "testing detrend_shapes, xvalue, for factors and numerics", code = {
+test_that(desc = "testing detrend_shapes, method = orthogonal, xvalue, for factors and numerics", code = {
   data(shells)
 
   shapes <- shells$shapes$coe
@@ -341,7 +386,7 @@ test_that(desc = "testing detrend_shapes, xvalue, for factors and numerics", cod
   logsizes <- log(shells$sizes)
 
   model1 <- lm(shapes ~ logsizes)
-  detr_shapes1 <- detrend_shapes(model1, xvalue = max(logsizes))
+  detr_shapes1 <- detrend_shapes(model1, xvalue = max(logsizes), method = "orthogonal")
   result1 <- all(dim(shapes) == dim(detr_shapes1))
 
   totvar_raw <- sum(apply(shapes, 2, stats::var))
@@ -358,7 +403,50 @@ test_that(desc = "testing detrend_shapes, xvalue, for factors and numerics", cod
 
 
   model2 <- lm(shapes ~ species)
-  detr_shapes2 <- detrend_shapes(model2, "koeneni")
+  detr_shapes2 <- detrend_shapes(model2, "koeneni", method = "orthogonal")
+  result5 <- all(dim(shapes) == dim(detr_shapes2))
+
+  totvar_raw <- sum(apply(shapes, 2, stats::var))
+  totvar_detr <- sum(apply(detr_shapes2, 2, stats::var))
+  result6 <- (totvar_raw > totvar_detr)
+
+  pca <- prcomp(detr_shapes2)
+  testshape2 <- rev_eigen(colMeans(pca$x[species == "koeneni",]), pca$rotation, pca$center)
+  detr_mshape2 <- expected_shapes(detr_shapes2)
+  result7 <- all(round(testshape2, 10) == round(detr_mshape2,10))
+
+  result8 <- all(round(lm(detr_shapes2 ~ species)$coefficients[2,], 10) == 0)
+
+  expect_true(all(result1, result2, result3, result4, result5, result6, result7, result8))
+
+})
+
+test_that(desc = "testing detrend_shapes, method = residuals, xvalue, for factors and numerics", code = {
+  data(shells)
+
+  shapes <- shells$shapes$coe
+  species <- shells$data$species
+  logsizes <- log(shells$sizes)
+
+  model1 <- lm(shapes ~ logsizes)
+  detr_shapes1 <- detrend_shapes(model1, xvalue = max(logsizes), method = "residuals")
+  result1 <- all(dim(shapes) == dim(detr_shapes1))
+
+  totvar_raw <- sum(apply(shapes, 2, stats::var))
+  totvar_detr <- sum(apply(detr_shapes1, 2, stats::var))
+  result2 <- (totvar_raw > totvar_detr)
+
+  result3 <- all(round(lm(detr_shapes1 ~ logsizes)$coefficients[2,], 10) == 0)
+
+  pca <- prcomp(detr_shapes1)
+  testshape1 <- rev_eigen(lm(pca$x ~ logsizes)$fitted[which.max(logsizes),], pca$rotation, pca$center)
+  detr_mshape1 <- expected_shapes(detr_shapes1)
+  result4 <- all(round(testshape1, 10) == round(detr_mshape1,10))
+
+
+
+  model2 <- lm(shapes ~ species)
+  detr_shapes2 <- detrend_shapes(model2, "koeneni", method = "residuals")
   result5 <- all(dim(shapes) == dim(detr_shapes2))
 
   totvar_raw <- sum(apply(shapes, 2, stats::var))
@@ -377,8 +465,61 @@ test_that(desc = "testing detrend_shapes, xvalue, for factors and numerics", cod
 })
 
 
+test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for numerics", code = {
 
-test_that(desc = "testing detrend_shapes, newdata, for numerics", code = {
+  data('shells3D')
+  shapes <- shells3D$shapes
+  species <- shells3D$data$species
+  sizes <- log(shells3D$sizes)
+
+  index1 <- species == levels(species)[7]
+  shapes1 <- shapes[,,index1]
+  logsizes1 <- sizes[index1]
+
+  index2 <- species == levels(species)[3]
+  shapes2 <- shapes[,,index2]
+  logsizes2 <- sizes[index2]
+
+  mod1 <- lm(geomorph::two.d.array(shapes1) ~ logsizes1)
+  mod2 <- lm(geomorph::two.d.array(shapes2) ~ logsizes2)
+
+
+  general_space <- prcomp(geomorph::two.d.array(shapes))
+
+  burn1 <- burnaby(x = geomorph::two.d.array(shapes1), vars = logsizes1)
+  burn2 <- burnaby(x = geomorph::two.d.array(shapes2), vars = logsizes2)
+
+  detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(sizes[index2]),
+                                     newdata = mod2)
+
+  ax <- c(1:30)
+  na_shapes2minus1 <- rev_eigen(scores = burn2$x[,ax],
+                                vectors = burn2$rotation[,ax] - burn1$rotation[,ax],
+                                center = colMeans(detshapes2using1))
+
+  scores2using1 <- proj_eigen(detshapes2using1,
+                              vectors = general_space$rotation[,1:2],
+                              center = general_space$center)
+  slope2using1 <- lm(scores2using1[,2] ~ scores2using1[,1])$coef[2]
+
+  scores2minus1 <- proj_eigen(na_shapes2minus1,
+                              vectors = general_space$rotation[,1:2],
+                              center = general_space$center)
+  slope2minus1 <- lm(scores2minus1[,2] ~ scores2minus1[,1])$coef[2]
+
+
+  result1 <- round(slope2using1, 3) == round(slope2minus1, 3)
+  expect_true(all(result1))
+
+  # refmesh <- shells3D$mesh_meanspec
+  # template <- Morpho::tps3d(x = refmesh, refmat = shapes[,,geomorph::findMeanSpec(shapes)], tarmat = expected_shapes(shapes))
+  # msp <- mspace(shapes, template = template, bg.models = "gray",
+  #               cex.ldm = 0, alpha.models = 0.7, adj_frame = c(0.93,0.93)) %>%
+  #   proj_shapes(detshapes2using1, pch = 1, col = 4) %>%
+  #   proj_shapes(na_shapes2minus1, pch = 21, bg = 4, cex= 0.5)
+})
+
+test_that(desc = "testing detrend_shapes, method = residuals, newdata, for numerics", code = {
   data(shells)
 
   index1 <- shells$data$species == "koeneni"
@@ -391,7 +532,7 @@ test_that(desc = "testing detrend_shapes, newdata, for numerics", code = {
 
   model_for2 <- lm(shapes2 ~ logsizes2)
   model_for1 <- lm(shapes1 ~ logsizes1)
-  detr_shapes1 <- detrend_shapes(model_for2, newdata = model_for1)
+  detr_shapes1 <- detrend_shapes(model_for2, newdata = model_for1, method = "residuals")
 
   slope1<-lm(shapes1~logsizes1)$coefficients[2,]
   slope2<-lm(shapes2~logsizes2)$coefficients[2,]
@@ -405,7 +546,8 @@ test_that(desc = "testing detrend_shapes, newdata, for numerics", code = {
 })
 
 
-test_that(desc = "testing detrend_shapes, with phylogeny, for factors and numerics", code = {
+test_that(desc = "testing detrend_shapes, method = residuals,
+          with phylogeny, for factors and numerics", code = {
   data(tails)
 
   shapes <- tails$shapes
@@ -417,7 +559,7 @@ test_that(desc = "testing detrend_shapes, with phylogeny, for factors and numeri
   sp_logsizes <- c(tapply(logsizes,species,mean))
 
   model1 <- lm(sp_shapes ~ sp_logsizes)
-  detr_shapes1 <- detrend_shapes(model1, tree = tree)
+  detr_shapes1 <- detrend_shapes(model1, tree = tree, method = "residuals")
   result1 <- all(dim(sp_shapes) == dim(detr_shapes1))
 
   totvar_raw <- sum(apply(sp_shapes, 2, stats::var))
@@ -439,7 +581,7 @@ test_that(desc = "testing detrend_shapes, with phylogeny, for factors and numeri
   sp_type <- rep("NDF", 13) ; sp_type[c(7,10)] <- "DF"
   sp_type <- factor(sp_type) ; sp_type <- setNames(sp_type, levels(species))
   model2 <- lm(sp_shapes ~ sp_type)
-  detr_shapes2 <- detrend_shapes(model2, tree = tree)
+  detr_shapes2 <- detrend_shapes(model2, tree = tree, method = "residuals")
   result5 <- all(dim(sp_shapes) == dim(detr_shapes2))
 
   totvar_raw <- sum(apply(shapes, 2, stats::var))
@@ -456,6 +598,64 @@ test_that(desc = "testing detrend_shapes, with phylogeny, for factors and numeri
   extmean <- apply(sp_shapes, 2, phytools::fastAnc, tree= tree)[1,]
   intres <- t(t(detr_shapes2) - extmean)
   result8 <- all(round(extres,10) == round(intres,10))
+
+  expect_true(all(result1, result2, result3, result4, result5, result6, result7, result8))
+
+})
+
+test_that(desc = "testing detrend_shapes, method = orthogonal,
+          with phylogeny, for factors and numerics", code = {
+
+  data(tails)
+
+  shapes <- tails$shapes
+  species <- tails$data$species
+  logsizes <- log(tails$sizes)
+
+  tree <- tails$tree
+  sp_shapes <- geomorph::two.d.array(expected_shapes(shapes, species))
+  sp_logsizes <- c(tapply(logsizes,species,mean))
+
+  model1 <- lm(sp_shapes ~ sp_logsizes)
+  detr_shapes1 <- detrend_shapes(model1, tree = tree, method = "orthogonal")
+  result1 <- all(dim(sp_shapes) == dim(detr_shapes1))
+
+  totvar_raw <- sum(apply(sp_shapes, 2, stats::var))
+  totvar_detr <- sum(apply(detr_shapes1, 2, stats::var))
+  result2 <- (totvar_raw > totvar_detr)
+
+  exp_shapes1 <- expected_shapes(shapes = sp_shapes, x = sp_logsizes,
+                                 tree = tree, returnarray = FALSE)
+  angle <- Morpho::angle.calc(prcomp(detr_shapes1)$rotation[,1],
+                              prcomp(exp_shapes1)$rotation[,1]) * 57.2958
+  result3 <- all(round(angle,3) == 90)
+
+  pca <- prcomp(detr_shapes1)
+  testshape1 <- matrix(rev_eigen(colMeans(pca$x), pca$rotation, pca$center), ncol = 2, byrow = TRUE)
+  detr_mshape1 <- expected_shapes(geomorph::arrayspecs(detr_shapes1, k = 2, p = 9))
+  result4 <- all(round(testshape1, 10) == round(detr_mshape1,10))
+
+  sp_type <- rep("NDF", 13) ; sp_type[c(7,10)] <- "DF"
+  sp_type <- factor(sp_type) ; sp_type <- setNames(sp_type, levels(species))
+  model2 <- lm(sp_shapes ~ sp_type)
+  detr_shapes2 <- detrend_shapes(model2, tree = tree, method = "orthogonal")
+  result5 <- all(dim(sp_shapes) == dim(detr_shapes2))
+
+  totvar_raw <- sum(apply(shapes, 2, stats::var))
+  totvar_detr <- sum(apply(detr_shapes2, 2, stats::var))
+  result6 <- (totvar_raw > totvar_detr)
+
+  pca <- prcomp(detr_shapes2)
+  testshape2 <- matrix(rev_eigen(colMeans(pca$x), pca$rotation, pca$center), ncol = 2, byrow = TRUE)
+  detr_mshape2 <- expected_shapes(geomorph::arrayspecs(detr_shapes2, k = 2, p = 9))
+  result7 <- all(round(testshape2, 10) == round(detr_mshape2,10))
+
+  exp_shapes2 <- expected_shapes(shapes = sp_shapes, x = sp_type,
+                                 tree = tree, returnarray = FALSE)
+  angle <- Morpho::angle.calc(prcomp(detr_shapes2)$rotation[,1],
+                              prcomp(exp_shapes2)$rotation[,1]) * 57.2958
+  result8 <- all(round(angle,3) == 90)
+
 
   expect_true(all(result1, result2, result3, result4, result5, result6, result7, result8))
 
@@ -567,6 +767,98 @@ test_that(desc = "testing ax_transformations, accuracy of shapes", code = {
 
   expect_true(all(result1, result2))
 })
+
+######################################################################################
+
+test_that(desc = "testing extract_shapes, landmark data, non-interactive behavior and accuracy", code = {
+  data(wings)
+
+  shapes <- wings$shapes
+  temp <- wings$template
+  sizes <- wings$sizes
+  sex <- wings$data$sex
+
+  msp1 <- mspace(shapes, nh = 8, nv = 6, plot = FALSE)
+  es1 <- suppressWarnings(extract_shapes(msp1))
+
+  result1 <- names(es1) == "shapes"
+  result2 <- all(dim(es1$shapes) == dim(msp1$projected$shapemodels))
+  result3 <- all(round(es1$shapes, 10) == round(msp1$projected$shapemodels, 10))
+
+
+  nsh <- 5
+  ax <- 2
+  es2 <- suppressWarnings(extract_shapes(msp1, axis = ax, nshapes = nsh))
+  vals <- seq(from = min(msp1$ordination$x[,ax]), to = max(msp1$ordination$x[,ax]),
+              length.out = nsh)
+  newshps1 <- geomorph::arrayspecs(rev_eigen(scores = vals,
+                                             vectors = msp1$ordination$rotation[,ax],
+                                             center = msp1$ordination$center), k =2, p = 9)
+  result4 <- dim(es2$shapes)[3] == nsh
+  result5 <- all(newshps1 == es2$shapes)
+
+
+  es3 <- suppressWarnings(extract_shapes(msp1, nshapes = 3,
+                                         scores = cbind(0,vals)))
+  result6 <- dim(es3$shapes)[3] == length(vals)
+  result7 <- all(newshps1 == es3$shapes)
+
+
+  msp2 <- mspace(shapes, template = temp, nh = 8, nv = 6, plot = FALSE)
+  es4 <- extract_shapes(msp2)
+  result8 <- all(c("templates", "shapes") %in% names(es4))
+  result9 <- all(dim(es4$templates)[3] == dim(msp1$projected$shapemodels)[3])
+  result10 <- all(dim(es4$templates)[2] + dim(msp1$projected$shapemodels)[2])
+  result11 <- all(dim(es4$templates)[1] + dim(msp1$projected$shapemodels)[1] == dim(temp)[1])
+
+  es5 <- extract_shapes(msp2, scores = c(0,0))
+  mtemp <- Morpho::tps2d(x = temp[-c(1:9),], refmat = temp[1:9,],
+                            tarmat = expected_shapes(shapes))
+  result12 <- all(na.omit(round(mtemp,10) == round(es5$templates[,,1],10)))
+
+
+  expect_true(all(result1, result2, result3, result4, result5, result6, result7, result8,
+                  result9, result10, result11, result12))
+})
+
+
+test_that(desc = "testing extract_shapes, Fourier data, non-interactive behavior and accuracy", code = {
+  data(shells)
+
+  shapes <- shells$shapes$coe
+  temp <- shells$template
+  sizes <- shells$sizes
+  sex <- shells$data$sex
+
+  msp1 <- mspace(shapes, nh = 8, nv = 6, plot = FALSE)
+  es1 <- suppressWarnings(extract_shapes(msp1))
+
+  result1 <- names(es1) == "shapes"
+  result2 <- all(dim(es1$shapes) == dim(msp1$projected$shapemodels))
+  result3 <- all(round(es1$shapes, 10) == round(msp1$projected$shapemodels, 10))
+
+
+  nsh <- 5
+  ax <- 2
+  es2 <- suppressWarnings(extract_shapes(msp1, axis = ax, nshapes = nsh))
+  vals <- seq(from = min(msp1$ordination$x[,ax]), to = max(msp1$ordination$x[,ax]),
+              length.out = nsh)
+  newshps1 <- rev_eigen(scores = vals,
+                        vectors = msp1$ordination$rotation[,ax],
+                        center = msp1$ordination$center)
+  result4 <- dim(es2$shapes)[1] == nsh
+  result5 <- all(newshps1 == es2$shapes)
+
+
+  es3 <- suppressWarnings(extract_shapes(msp1, nshapes = 3,
+                                         scores = cbind(0,vals)))
+  result6 <- dim(es3$shapes)[1] == length(vals)
+  result7 <- all(newshps1 == es3$shapes)
+
+
+  expect_true(all(result1, result2, result3, result4, result5, result6, result7))
+})
+
 
 
 

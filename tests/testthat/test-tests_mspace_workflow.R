@@ -171,7 +171,6 @@ test_that(desc = "testing mspace, burnaby", code = {
   result3 <- all(msp1$ordination$rotation == burn$rotation)
   result4 <- all(msp1$ordination$center == burn$center)
 
-  expect_true(all(result1,result2,result3,result4))
 
   sizeax <- lm(geomorph::two.d.array(shapes) ~ sizes)$coef[2,]
   burn2 <- burnaby(x = geomorph::two.d.array(shapes), axmat = sizeax)
@@ -183,7 +182,8 @@ test_that(desc = "testing mspace, burnaby", code = {
   result7 <- all(msp2$ordination$rotation == burn2$rotation)
   result8 <- all(msp2$ordination$center == burn2$center)
 
-  expect_true(all(result5,result6,result7,result8))
+  expect_true(all(result1,result2,result3,result4,result5,result6,result7,
+                  result8))
 })
 
 
@@ -203,21 +203,19 @@ test_that(desc = "testing mspace, phylogenetic burnaby", code = {
   result3 <- all(msp1$ordination$rotation == phyburn$rotation)
   result4 <- all(msp1$ordination$center == phyburn$center)
 
-  expect_true(all(result1,result2,result3,result4))
-
   sp_sizeax <- lm(geomorph::two.d.array(expected_shapes(shapes, species)) ~ sp_sizes)$coef[2,]
   burn2 <- suppressWarnings(burnaby(x = geomorph::two.d.array(expected_shapes(shapes, species)),
                    axmat = sp_sizeax, tree = tree))
 
-  msp2 <- suppressWarnings(mspace(sp_shapes, FUN = burnaby, axmat = sp_sizeax, tree = tree,
-                                  mag = 0.7, axes = c(1,2), plot = FALSE))
+  msp2 <- suppressWarnings(mspace(expected_shapes(shapes, species), FUN = burnaby, axmat = sp_sizeax,
+                                  tree = tree, mag = 0.7, axes = c(1,2), plot = FALSE))
   result5 <- msp2$ordination$ordtype == "phy_burnaby"
   result6 <- all(msp2$ordination$x == burn2$x)
   result7 <- all(msp2$ordination$rotation == burn2$rotation)
   result8 <- all(msp2$ordination$center == burn2$center)
 
-  expect_true(all(result5,result6,result7,result8))
-
+  expect_true(all(result1,result2,result3,result4,result5,result6,result7,
+                  result8))
 })
 
 ###########################################################
@@ -229,7 +227,7 @@ test_that(desc = "testing proj_shapes, general behavior", code = {
   msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
     proj_shapes(shapes = shapes)
   result1 <- c("scores") %in% names(msp1$projected)
-  result2 <- nrow(msp3$projected$scores) == dim(shapes)[3]
+  result2 <- nrow(msp1$projected$scores) == dim(shapes)[3]
 
   plotinfo1 <- msp1$plotinfo
   result3 <- all(length(plotinfo1$col.points) == dim(shapes)[3],
@@ -332,8 +330,8 @@ test_that(desc = "testing proj_groups, general behavior", code = {
                   length(plotinfo2$bg.groups) == nlevels(species),
                   length(plotinfo2$col.groups) == nlevels(species))
 
-  expect_true(all(result1,result2,result3,result4,result5,result6,result7,result8,
-                  result9,result10,result10,result12,result13,result14))
+  expect_true(all(result1,result2,result3,result4,result5,result6,result7,
+                  result8,result9,result10,result12,result13,result14))
 })
 
 
@@ -400,8 +398,8 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   result10 <- all(plotinfo3$lty.groups == c(rep(1, nlevels(unique(species[!index]))),
                                            rep(2, nlevels(unique(species[index])))))
 
-  expect_true(all(result1,result2,result3,result4,result5,result6,result7,result8,
-                  result9,result10,result10))
+  expect_true(all(result1,result2,result3,result4,result5,result6,
+                  result7,result8,result9,result10))
 })
 
 
@@ -486,133 +484,74 @@ test_that(desc = "testing proj_axis, stacking behavior", code = {
 
 ###########################################################
 
-computeLD <- function(model, MCS = FALSE) {
-
-  tail <- matrix(model, ncol = 2, byrow = TRUE)
-  Ax <- tail[9, 1] ; Ay <- tail[9, 2]
-  Bx <- tail[5, 1] ; By <- tail[5, 2]
-  X <- tail[7, 1] ; Y <- tail[7, 2]
-
-  # determine position of the tip of the inner rectrix relative to the tips
-  # of the outermost rectrices (positive: anterior to the ORT; negative:
-  # posterior to the ORT)
-  tip_pos1 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
-
-  # do the same but for the inner outer rectrices
-  Ax <- tail[8, 1] ; Ay <- tail[8, 2]
-  Bx <- tail[6, 1] ; By <- tail[6, 2]
-  X <- tail[7, 1] ; Y <- tail[7, 2]
-
-  # determine position of the tip of the inner rectrix relative to the tips
-  # of the outermost rectrices (positive: anterior to the ORT; negative:
-  # posterior to the ORT)
-  tip_pos2 <- sign((Bx - Ax) * (Y - Ay) - (By - Ay) * (X - Ax))
-
-  # compute the area of the polygon representing the whole tail
-  tail_area <- coo_area(tail[c(1, 3, 5, 6, 7, 8, 9, 4, 2, 1), ])
-
-
-  # if posterior, compute MCS as the distance between the ORTs, and the
-  # lifting area as the polygon enclosed by the ORTs and tail base
-  if(tip_pos1 == -1) {
-    mcs <- dist(rbind(tail[5, ], tail[9, ]))
-    lifting_area <- coo_area(tail[c(1, 3, 5, 9, 4, 2, 1),])
-  }
-
-  # if anterior, find the maximum continuous span as the line perpendicular
-  # to the saggital axis that intersects the ORTs and the IRT
-  if(tip_pos1 == 1 & tip_pos2 == 1) {
-
-    # center tail around the IRT and set MCS as a vertical line passing
-    # through the origin
-    tail_cent <- cbind(tail[, 1] - tail[7, 1],
-                       tail[, 2] - tail[7, 2])
-    mcs_vec <- c(0,10e10)
-
-    ort1 <- rbind(tail_cent[4, ], tail_cent[9, ])
-    ort1_vec <- lm(ort1[, 2] ~ ort1[, 1])$coef
-
-    ort2 <- rbind(tail_cent[3, ], tail_cent[5, ])
-    ort2_vec <- lm(ort2[, 2] ~ ort2[, 1])$coef
-
-    # find tips of MCS
-    A <- matrix(c(mcs_vec[2], -1, ort1_vec[2], -1), byrow = TRUE, nrow = 2)
-    b <- c(-mcs_vec[1], -ort1_vec[1])
-    p1 <- solve(A, b)
-
-    A <- matrix(c(mcs_vec[2], -1, ort2_vec[2], -1), byrow = TRUE, nrow = 2)
-    b <- c(-mcs_vec[1], -ort2_vec[1])
-    p2 <- solve(A, b)
-
-    # define "new tail base", enclosing the polygon using the tips of the MCS
-    newbase <- rbind(tail_cent[c(2, 4), ],
-                     p1,
-                     tail_cent[7, ],
-                     p2,
-                     tail_cent[c(3, 1), ])
-
-    # compute MCS and lifting area
-    lifting_area <- coo_area(newbase[c(1, 2, 3, 4, 5, 6, 7, 1),])
-    mcs <- dist(rbind(p1, p2))
-
-  }
-
-  # if anterior, find the maximum continuous span as the line perpendicular
-  # to the saggital axis that intersects the ORTs and the IRT
-  if(tip_pos1 == 1 & tip_pos2 == -1) {
-
-    # center tail around the IRT and set MCS as a vertical line passing
-    # through the origin
-    tail_cent <- cbind(tail[, 1] - mean(tail[6, 1], tail[8, 1]),
-                       tail[, 2] - mean(tail[6, 2], tail[8, 2]))
-    mcs_vec <- c(0,10e10)
-
-    ort1 <- rbind(tail_cent[4, ], tail_cent[9, ])
-    ort1_vec <- lm(ort1[, 2] ~ ort1[, 1])$coef
-
-    ort2 <- rbind(tail_cent[3, ], tail_cent[5, ])
-    ort2_vec <- lm(ort2[, 2] ~ ort2[, 1])$coef
-
-    # find tips of MCS
-    A <- matrix(c(mcs_vec[2], -1, ort1_vec[2], -1), byrow = TRUE, nrow = 2)
-    b <- c(-mcs_vec[1], -ort1_vec[1])
-    p1 <- solve(A, b)
-
-    A <- matrix(c(mcs_vec[2], -1, ort2_vec[2], -1), byrow = TRUE, nrow = 2)
-    b <- c(-mcs_vec[1], -ort2_vec[1])
-    p2 <- solve(A, b)
-
-    # define "new tail base", enclosing the polygon using the tips of the MCS
-    newbase <- rbind(tail_cent[c(2, 4), ],
-                     p1,
-                     tail_cent[7, ],
-                     p2,
-                     tail_cent[c(3, 1), ])
-
-    # compute MCS and lifting area
-    lifting_area <- coo_area(newbase[c(1, 2, 3, 4, 5, 6, 7, 1),])
-    mcs <- dist(rbind(p1, p2))
-
-  }
-
-  #compute and return lift/drag ratio
-  if(!MCS) LD_ratio <- lifting_area / tail_area
-  if(MCS)  LD_ratio <- (mcs ^ 2) / tail_area
-
-  return(as.numeric(LD_ratio))
-
-}
-
 test_that(desc = "testing proj_landscape, general behavior", code = {
   data("tails")
   shapes <- tails$shapes
+  type <- tails$data$type
 
-  msp1 <- mspace(shapes, axes = c(1,2), plot = TRUE) %>%
-    proj_landscape(FUN = computeLD)
+  msp1 <- mspace(shapes, axes = c(1,2)) %>%
+    proj_landscape(FUN = morphospace:::computeLD)
 
-  result1 <- all("landsc" %in% names(msp1$projected))
+  result1 <- "landsc" %in% names(msp1$projected)
+  result2 <- all(c("x","z") %in% names(msp1$projected$landsc))
+  result3 <- msp1$projected$landsc$type == "theoretical"
+  result4 <- all(length(msp1$plotinfo$lty.landsc) == 1,
+                 length(msp1$plotinfo$lwd.landsc) == 1,
+                 length(msp1$plotinfo$alpha.landsc) == 1,
+                 length(msp1$plotinfo$display.landsc) == 1,
+                 length(msp1$plotinfo$resolution.landsc) == 1,
+                 length(msp1$plotinfo$nlevels.landsc) == 1,
+                 length(msp1$plotinfo$nlevels.landsc) == 1)
 
-  msp1$projected$landsc$z
 
+  msp2 <- mspace(shapes, axes = 1) %>%
+    proj_landscape(FUN = morphospace:::computeLD)
+
+  result5 <- "landsc" %in% names(msp2$projected)
+  result6 <- all(c("x","z") %in% names(msp2$projected$landsc))
+  result7 <- msp2$projected$landsc$type == "theoretical"
+  result8 <- all(length(msp2$plotinfo$lty.landsc) == 1,
+                 length(msp2$plotinfo$lwd.landsc) == 1,
+                 length(msp2$plotinfo$alpha.landsc) == 1,
+                 length(msp2$plotinfo$display.landsc) == 1,
+                 length(msp2$plotinfo$resolution.landsc) == 1,
+                 length(msp2$plotinfo$nlevels.landsc) == 1,
+                 length(msp2$plotinfo$nlevels.landsc) == 1)
+
+
+  msp3 <- mspace(shapes, axes = c(1,2)) %>%
+    proj_landscape(shapes[,,type == "NDF"], FUN = morphospace:::computeLD)
+
+  result9 <- "landsc" %in% names(msp3$projected)
+  result10 <- all(c("x","z") %in% names(msp3$projected$landsc))
+  result11 <- msp3$projected$landsc$type == "empirical"
+  result12 <- all(length(msp3$plotinfo$lty.landsc) == 1,
+                  length(msp3$plotinfo$lwd.landsc) == 1,
+                  length(msp3$plotinfo$alpha.landsc) == 1,
+                  length(msp3$plotinfo$display.landsc) == 1,
+                  length(msp3$plotinfo$resolution.landsc) == 1,
+                  length(msp3$plotinfo$nlevels.landsc) == 1,
+                  length(msp3$plotinfo$nlevels.landsc) == 1)
+
+
+  msp4 <- mspace(shapes, axes = 1) %>%
+    proj_landscape(shapes[,,type == "NDF"], FUN = morphospace:::computeLD)
+
+  result13 <- "landsc" %in% names(msp4$projected)
+  result14 <- all(c("x","z") %in% names(msp4$projected$landsc))
+  result15 <- msp4$projected$landsc$type == "empirical"
+  result16 <- all(length(msp4$plotinfo$lty.landsc) == 1,
+                  length(msp4$plotinfo$lwd.landsc) == 1,
+                  length(msp4$plotinfo$alpha.landsc) == 1,
+                  length(msp4$plotinfo$display.landsc) == 1,
+                  length(msp4$plotinfo$resolution.landsc) == 1,
+                  length(msp4$plotinfo$nlevels.landsc) == 1,
+                  length(msp4$plotinfo$nlevels.landsc) == 1)
+
+  expect_true(all(result1,result2,result3,result4,result5,result6,result7,
+                  result8,result9,result10,result12,result13,result14,
+                  result15,result16))
+
+  dev.off()
 })
 
