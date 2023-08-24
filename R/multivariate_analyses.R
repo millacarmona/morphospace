@@ -1048,7 +1048,7 @@ burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
   I <- diag(1, ncol(x))
   orthobasis <- I - axmat %*% MASS::ginv(t(axmat) %*% axmat) %*% t(axmat)
 
-  ndims <- ncol(x) - ncol(axmat)
+  ndims <- min(ncol(x) - ncol(axmat), nrow(x))
 
   z <- t(t(rbind(x)) - center)
   covmat <- stats::cov(z %*% orthobasis)
