@@ -1915,16 +1915,18 @@ plot_mspace <- function(mspace,
       if(any(class(x) == "phylo")) {
         tree <- x
         heights <- phytools::nodeHeights(tree)
-        x <- c(rep(max(heights), length(tree$tip.label)),
-               unique(heights[, 1]))
+        x <- NULL
+        for(i in 1:(length(tree$tip.label) + tree$Nnode)) x[i] <- unique(heights[tree$edge == i])
+
         args$xlim <- range(x)
       }
     } else {
       if(any(class(y) == "phylo")) {
         tree <- y
         heights <- phytools::nodeHeights(tree)
-        y <- c(rep(max(heights), length(tree$tip.label)),
-               unique(heights[, 1]))
+        y <- NULL
+        for(i in 1:(length(tree$tip.label) + tree$Nnode)) y[i] <- unique(heights[tree$edge == i])
+
         args$ylim <- range(y)
       }
     }
