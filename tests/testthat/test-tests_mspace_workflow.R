@@ -261,13 +261,11 @@ test_that(desc = "testing proj_shapes, stacking behavior", code = {
   shapes <- tails$shapes
   index <- tails$data$type == "DF"
 
-  msp1 <- mspace(shapes, axes = c(1,2), plot = TRUE) %>%
+  msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
     proj_shapes(shapes = shapes[,,1])
   result1 <- nrow(msp1$projected$scores) == 1
 
-  dev.off()
-
-  msp2 <- mspace(shapes, axes = c(1,2), plot = TRUE) %>%
+  msp2 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
     proj_shapes(shapes = shapes[,,index], pch = 1) %>%
     proj_shapes(shapes = shapes[,,!index], pch = 2, cex = 2)
   result2 <- nrow(msp2$projected$scores) == dim(shapes)[3]
@@ -284,8 +282,6 @@ test_that(desc = "testing proj_shapes, stacking behavior", code = {
 
 
   expect_true(all(result1,result2,result3,result4,result5,result6))
-
-  dev.off()
 })
 
 ###########################################################
@@ -337,6 +333,76 @@ test_that(desc = "testing proj_groups, general behavior", code = {
   expect_true(all(result1,result2,result3,result4,result5,result6,result7,
                   result8,result9,result10,result12,result13,result14))
 })
+
+
+# test_that(desc = "testing proj_groups, stacking behavior", code = {
+#   data("tails")
+#   shapes <- tails$shapes
+#   species <- tails$data$species
+#   index <- tails$data$type == "DF"
+#
+#   msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
+#     proj_groups(shapes = shapes[,,!index], groups = factor(species[!index]),
+#                 col = "red", lty = 1) %>%
+#     proj_groups(shapes = shapes[,,index], groups = factor(species[index]),
+#                 col = "blue", lty = 2)
+#
+#   index_x_in_sc <- as.numeric(unlist
+#                               (apply(msp1$projected$gr_scores, 1, \(x, y) {
+#                                 which(apply(y, 1, \(z, x){
+#                                   all(z == x)}, x))},
+#                                 prcomp(geomorph::two.d.array(shapes))$x)))
+#
+#   result1 <- all(index_x_in_sc == c(which(!index), which(index)))
+#   result2 <- all(as.character(msp1$projected$gr_class) == as.character(c(species[!index], species[index])))
+#
+#   plotinfo1 <- msp1$plotinfo
+#   result3 <- all(plotinfo1$col.groups == c(rep(col2hex("red"), nlevels(factor(species[!index]))),
+#                                            rep(col2hex("blue"), nlevels(factor(species[index])))))
+#   result4 <- all(plotinfo1$lty.groups == c(rep(1, nlevels(factor(species[!index]))),
+#                                            rep(2, nlevels(factor(species[index])))))
+#
+#
+#   msp2 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
+#     proj_groups(shapes = shapes[,,!index], groups = factor(species[!index]),
+#                 col = 1:11, lty = rep(1, 11)) %>%
+#     proj_groups(shapes = shapes[,,index], groups = factor(species[index]),
+#                 col = 12:13, lty = rep(2, 2))
+#
+#   plotinfo2 <- msp2$plotinfo
+#   result5 <- all(plotinfo2$col.groups == col2hex(1:(nlevels(factor(species[!index])) +
+#                                                       nlevels(factor(species[index])))))
+#   result6 <- all(plotinfo2$lty.groups == c(rep(1, nlevels(factor(species[!index]))),
+#                                            rep(2, nlevels(factor(species[index])))))
+#
+#
+#   msp3 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
+#     proj_groups(shapes = shapes[,,!index], groups = species[!index], lty = 1) %>%
+#     proj_groups(shapes = shapes[,,index], groups = species[index], lty = 2)
+#
+#   index_x_in_sc <- as.numeric(unlist
+#                               (apply(msp3$projected$gr_scores, 1, \(x, y) {
+#                                 which(apply(y, 1, \(z, x){
+#                                   all(z == x)}, x))},
+#                                 prcomp(geomorph::two.d.array(shapes))$x)))
+#
+#   result7 <- all(index_x_in_sc == c(which(!index), which(index)))
+#   result8 <- all(as.character(msp3$projected$gr_class) == c(as.character(paste0(species[!index], "_bis.")),
+#                                                             as.character(species[index])))
+#
+#   plotinfo3 <- msp3$plotinfo
+#   cols1 <- cols2 <- col2hex(1:13)
+#   cols1[!levels(species) %in% as.character(unique(species[!index]))] <-
+#     cols2[!levels(species) %in% as.character(unique(species[index]))] <- "#FFFFFF"
+#   result9 <- all(plotinfo3$col.groups == c(cols1,cols2))
+#   result10 <- all(plotinfo3$lty.groups == c(rep(1, nlevels(unique(species[!index]))),
+#                                            rep(2, nlevels(unique(species[index])))))
+#
+#   expect_true(all(result1,result2,result3,result4,result5,result6,
+#                   result7,result8,result9,result10))
+# })
+
+
 
 
 test_that(desc = "testing proj_groups, stacking behavior", code = {
@@ -394,19 +460,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   result8 <- all(as.character(msp3$projected$gr_class) == c(as.character(paste0(species[!index], "_bis.")),
                                                             as.character(species[index])))
 
-  plotinfo3 <- msp3$plotinfo
-  cols1 <- cols2 <- col2hex(1:13)
-  cols1[!levels(species) %in% as.character(unique(species[!index]))] <-
-    cols2[!levels(species) %in% as.character(unique(species[index]))] <- "#FFFFFF"
-  result9 <- all(plotinfo3$col.groups == c(cols1,cols2))
-  result10 <- all(plotinfo3$lty.groups == c(rep(1, nlevels(unique(species[!index]))),
-                                           rep(2, nlevels(unique(species[index])))))
-
-  expect_true(all(result1,result2,result3,result4,result5,result6,
-                  result7,result8,result9,result10))
 })
-
-
 
 ###########################################################
 

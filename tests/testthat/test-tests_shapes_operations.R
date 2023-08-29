@@ -541,7 +541,7 @@ test_that(desc = "testing detrend_shapes, method = residuals, newdata, for numer
   slopedetr1 <- lm(detr_shapes1~logsizes1)$coefficients[2,]
 
   results <- all(round(slope1minus2,10) == round(slopedetr1,10))
-  expect_true(results)
+  expect_true(all(results))
 
 })
 
