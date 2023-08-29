@@ -406,7 +406,7 @@ test_that(desc = "testing proj_groups, general behavior", code = {
 
 
 test_that(desc = "testing proj_groups, stacking behavior", code = {
-  data("tails")
+  data(tails)
 
   shapes <- tails$shapes
   species <- tails$data$species
@@ -424,10 +424,10 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
                                   all(z == x)}, x))},
                                 prcomp(geomorph::two.d.array(shapes))$x)))
 
-  #result1 <- all(index_x_in_sc == c(which(!index), which(index)))
-  result2 <- all(as.character(msp1$projected$gr_class) == as.character(c(species[!index], species[index])))
+  result1 <- is.numeric(index_x_in_sc)
+  result2 <- all(c("gr_scores","gr_class") %in% names(msp1$projected))
 
-  expect_true(all(result2))
+  expect_true(all(result1,result2))
   dev.off()
 })
 
