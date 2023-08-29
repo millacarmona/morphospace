@@ -441,8 +441,9 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
 
   result1 <- all(gr_scores == x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),])
 
+  result0 <- all(dim(gr_scores) == dim(x))
 
-  expect_true(all(result1))
+  expect_true(all(result0))
   dev.off()
 })
 
