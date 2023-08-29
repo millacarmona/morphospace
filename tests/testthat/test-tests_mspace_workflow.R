@@ -414,6 +414,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   data(tails)
 
   library(geomorph)
+  library(magrittr)
 
   shapes <- tails$shapes
   species <- tails$data$species
@@ -428,11 +429,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
 
   gr_scores <- msp1$projected$gr_scores
   tab <- geomorph::two.d.array(shapes)
-  index_x_in_sc <- as.numeric(unlist
-                              (apply(gr_scores, 1, \(x, y) {
-                                which(apply(y, 1, \(z, x){
-                                  all(z == x)}, x))},
-                                stats::prcomp(tab)$x)))
+  index_x_in_sc <- as.numeric(unlist(apply(gr_scores, 1, function(x, y) {which(apply(y, 1, function(z, x){all(z == x)}, x))},stats::prcomp(tab)$x)))
 
   result1 <- all(index_x_in_sc == c(which(!index), which(index)))
 
