@@ -444,22 +444,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
                                                       nlevels(factor(species[index])))))
   result6 <- all(plotinfo2$lty.groups == c(rep(1, nlevels(factor(species[!index]))),
                                            rep(2, nlevels(factor(species[index])))))
-
-
-  msp3 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
-    proj_groups(shapes = shapes[,,!index], groups = species[!index], lty = 1) %>%
-    proj_groups(shapes = shapes[,,index], groups = species[index], lty = 2)
-
-  index_x_in_sc <- as.numeric(unlist
-                              (apply(msp3$projected$gr_scores, 1, \(x, y) {
-                                which(apply(y, 1, \(z, x){
-                                  all(z == x)}, x))},
-                                prcomp(geomorph::two.d.array(shapes))$x)))
-
-  result7 <- all(index_x_in_sc == c(which(!index), which(index)))
-  result8 <- all(as.character(msp3$projected$gr_class) == c(as.character(paste0(species[!index], "_bis.")),
-                                                            as.character(species[index])))
-
+  expect_true(all(result1,result2,result3,result4,result5,result6))
 })
 
 ###########################################################
