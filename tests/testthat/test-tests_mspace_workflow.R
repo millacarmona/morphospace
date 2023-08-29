@@ -424,10 +424,10 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
                                   all(z == x)}, x))},
                                 prcomp(geomorph::two.d.array(shapes))$x)))
 
-  result1 <- all(index_x_in_sc == c(which(!index), which(index)))
-  #result2 <- all(as.character(msp1$projected$gr_class) == as.character(c(species[!index], species[index])))
+  #result1 <- all(index_x_in_sc == c(which(!index), which(index)))
+  result2 <- all(as.character(msp1$projected$gr_class) == as.character(c(species[!index], species[index])))
 
-  expect_true(all(result1))
+  expect_true(all(result2))
   dev.off()
 })
 
