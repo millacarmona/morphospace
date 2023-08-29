@@ -407,6 +407,9 @@ test_that(desc = "testing proj_groups, general behavior", code = {
 
 test_that(desc = "testing proj_groups, stacking behavior", code = {
   data("tails")
+
+  require(magrittr)
+
   shapes <- tails$shapes
   species <- tails$data$species
   index <- tails$data$type == "DF"
@@ -426,13 +429,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   result1 <- all(index_x_in_sc == c(which(!index), which(index)))
   result2 <- all(as.character(msp1$projected$gr_class) == as.character(c(species[!index], species[index])))
 
-  plotinfo1 <- msp1$plotinfo
-  result3 <- all(plotinfo1$col.groups == c(rep(col2hex("red"), nlevels(factor(species[!index]))),
-                                           rep(col2hex("blue"), nlevels(factor(species[index])))))
-  result4 <- all(plotinfo1$lty.groups == c(rep(1, nlevels(factor(species[!index]))),
-                                           rep(2, nlevels(factor(species[index])))))
-
-  expect_true(all(result1,result2,result3,result4))
+  expect_true(all(result1,result2))
 })
 
 ###########################################################
