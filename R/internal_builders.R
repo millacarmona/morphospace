@@ -682,7 +682,7 @@ morphogrid <- function(ordination,
   }
 
   if(rot.models != 0) for(i in seq_len(dim(sh_arr)[3])) {
-    sh_arr[,,i] <- spdep::Rotation(sh_arr[,,i], rot.models * 0.0174532925199)
+    sh_arr[,,i] <- rotate_coords(sh_arr[,,i], rot.models)
   }
 
 

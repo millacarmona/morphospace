@@ -31,8 +31,7 @@ Imports:
     Morpho,
     phytools,
     png,
-    rgl,
-    spdep
+    rgl
 Depends: 
     R (>= 2.10)
 LazyData: true
@@ -40,6 +39,5 @@ Suggests:
     jpeg,
     testthat (>= 3.0.0),
     caper,
-    rmarkdown,
-    sf
+    rmarkdown
 Config/testthat/edition: 3
