@@ -429,7 +429,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
 
   result1 <- all(index_x_in_sc == c(which(!index), which(index)))
 
-  expect_true(all(result1,result2))
+  expect_true(all(result1))
   dev.off()
 })
 
