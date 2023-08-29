@@ -261,11 +261,13 @@ test_that(desc = "testing proj_shapes, stacking behavior", code = {
   shapes <- tails$shapes
   index <- tails$data$type == "DF"
 
-  msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
+  msp1 <- mspace(shapes, axes = c(1,2), plot = TRUE) %>%
     proj_shapes(shapes = shapes[,,1])
   result1 <- nrow(msp1$projected$scores) == 1
 
-  msp2 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
+  dev.off()
+
+  msp2 <- mspace(shapes, axes = c(1,2), plot = TRUE) %>%
     proj_shapes(shapes = shapes[,,index], pch = 1) %>%
     proj_shapes(shapes = shapes[,,!index], pch = 2, cex = 2)
   result2 <- nrow(msp2$projected$scores) == dim(shapes)[3]
@@ -278,10 +280,12 @@ test_that(desc = "testing proj_shapes, stacking behavior", code = {
                                  which(apply(y, 1, \(z, x){
                                    all(z == x)}, x))},
                                  prcomp(geomorph::two.d.array(shapes))$x)))
-  result6 <- index_x_in_sc == c(which(index), which(!index))
+  result6 <- all(index_x_in_sc == c(which(index), which(!index)))
 
 
   expect_true(all(result1,result2,result3,result4,result5,result6))
+
+  dev.off()
 })
 
 ###########################################################
