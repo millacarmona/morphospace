@@ -40,5 +40,6 @@ Suggests:
     jpeg,
     testthat (>= 3.0.0),
     caper,
-    rmarkdown
+    rmarkdown,
+    sf
 Config/testthat/edition: 3
