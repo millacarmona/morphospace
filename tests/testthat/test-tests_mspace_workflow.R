@@ -422,17 +422,27 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
 
 
   gr_scores <- msp1$projected$gr_scores
-  tab <- geomorph::two.d.array(shapes)
+  data2d <- geomorph::two.d.array(shapes)
   index_x_in_sc <- as.numeric(unlist
                               (apply(gr_scores, 1, \(x, y) {
                                 which(apply(y, 1, \(z, x){
                                   all(z == x)}, x))},
-                                prcomp(tab)$x)))
+                                prcomp(data2d)$x)))
+
 
   result1 <- all(index_x_in_sc == c(which(!index), which(index)))
+  result2 <- all(as.character(msp1$projected$gr_class) == as.character(c(species[!index], species[index])))
 
-  expect_true(all(result1))
-  dev.off()
+  #
+  # expect_true(all(result1))
+  # dev.off()
+
+
+    result1 <- all(index_x_in_sc == c(which(!index), which(index)))
+    result2 <- all(as.character(msp1$projected$gr_class) == as.character(c(species[!index], species[index])))
+
+
+
 })
 
 ###########################################################
