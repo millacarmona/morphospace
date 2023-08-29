@@ -408,6 +408,8 @@ test_that(desc = "testing proj_groups, general behavior", code = {
 test_that(desc = "testing proj_groups, stacking behavior", code = {
   data(tails)
 
+  library(geomorph)
+
   shapes <- tails$shapes
   species <- tails$data$species
   index <- tails$data$type == "DF"
