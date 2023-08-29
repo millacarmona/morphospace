@@ -258,6 +258,9 @@ test_that(desc = "testing proj_shapes, general behavior", code = {
 
 test_that(desc = "testing proj_shapes, stacking behavior", code = {
   data("tails")
+
+  library(geomorph)
+
   shapes <- tails$shapes
   index <- tails$data$type == "DF"
 
@@ -273,11 +276,13 @@ test_that(desc = "testing proj_shapes, stacking behavior", code = {
   result4 <- all(msp2$plotinfo$pch.points == c(rep(1, sum(index)), rep(2, sum(!index))))
   result5 <- all(msp2$plotinfo$cex.points == c(rep(1, sum(index)), rep(2, sum(!index))))
 
+  scores <- msp2$projected$scores
+  tab <- geomorph::two.d.array(shapes)
   index_x_in_sc <- as.numeric(unlist
-                               (apply(msp2$projected$scores, 1, \(x, y) {
+                               (apply(scores, 1, \(x, y) {
                                  which(apply(y, 1, \(z, x){
                                    all(z == x)}, x))},
-                                 prcomp(geomorph::two.d.array(shapes))$x)))
+                                 stats::prcomp(tab)$x)))
   result6 <- all(index_x_in_sc == c(which(index), which(!index)))
 
 
@@ -427,7 +432,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
                               (apply(gr_scores, 1, \(x, y) {
                                 which(apply(y, 1, \(z, x){
                                   all(z == x)}, x))},
-                                prcomp(tab)$x)))
+                                stats::prcomp(tab)$x)))
 
   result1 <- all(index_x_in_sc == c(which(!index), which(index)))
 
