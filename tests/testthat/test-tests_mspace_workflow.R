@@ -414,7 +414,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   species <- tails$data$species
   index <- tails$data$type == "DF"
 
-  msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
+  msp1 <- mspace(shapes, axes = c(1,2), plot = TRUE) %>%
     proj_groups(shapes = shapes[,,!index], groups = factor(species[!index]),
                 col = "red", lty = 1) %>%
     proj_groups(shapes = shapes[,,index], groups = factor(species[index]),
@@ -430,6 +430,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   result2 <- all(as.character(msp1$projected$gr_class) == as.character(c(species[!index], species[index])))
 
   expect_true(all(result1,result2))
+  dev.off()
 })
 
 ###########################################################
