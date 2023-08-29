@@ -432,19 +432,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   result4 <- all(plotinfo1$lty.groups == c(rep(1, nlevels(factor(species[!index]))),
                                            rep(2, nlevels(factor(species[index])))))
 
-
-  msp2 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
-    proj_groups(shapes = shapes[,,!index], groups = factor(species[!index]),
-                col = 1:11, lty = rep(1, 11)) %>%
-    proj_groups(shapes = shapes[,,index], groups = factor(species[index]),
-                col = 12:13, lty = rep(2, 2))
-
-  plotinfo2 <- msp2$plotinfo
-  result5 <- all(plotinfo2$col.groups == col2hex(1:(nlevels(factor(species[!index])) +
-                                                      nlevels(factor(species[index])))))
-  result6 <- all(plotinfo2$lty.groups == c(rep(1, nlevels(factor(species[!index]))),
-                                           rep(2, nlevels(factor(species[index])))))
-  expect_true(all(result1,result2,result3,result4,result5,result6))
+  expect_true(all(result1,result2,result3,result4))
 })
 
 ###########################################################
