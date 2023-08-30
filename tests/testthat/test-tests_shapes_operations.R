@@ -558,6 +558,9 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
   burn2 <- burnaby(x = shapes2_2d, vars = logsizes2)
 
   result4 <- all(round(burn1$rotation[1:3],dec) == round(c(0.07201903, -0.07427565, -0.02826254),dec))
+  #checking
+  result5 <- all(round(burn2$rotation[1:3],dec) == round(c(-0.02013429, -0.04429036,  0.01178547),dec))
+  #check
 
   detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(logsizes2),
                                      newdata = mod2)
@@ -590,7 +593,7 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
 
 
   #result1 <- round(slope2using1, 3) == round(slope2minus1, 3)
-  expect_true(all(result1,result2,result3,result4))
+  expect_true(all(result1,result2,result3,result4,result5))
 
   # refmesh <- shells3D$mesh_meanspec
   # template <- Morpho::tps3d(x = refmesh, refmat = shapes[,,geomorph::findMeanSpec(shapes)], tarmat = expected_shapes(shapes))
