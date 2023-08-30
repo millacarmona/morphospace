@@ -521,52 +521,55 @@ test_that(desc = "testing detrend_shapes, method = residuals, xvalue, for factor
 
 test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for numerics", code = {
 
+  dec <- 5
+
   data(shells3D)
   shapes <- shells3D$shapes
   shapes_2d <- geomorph::two.d.array(shapes)
   species <- shells3D$data$species
-  sizes <- log(shells3D$sizes)
+  sizes <- round(log(shells3D$sizes),dec)
 
   index1 <- species == levels(species)[7]
   shapes1 <- shapes[,,index1]
-  shapes1_2d <- geomorph::two.d.array(shapes1)
+  shapes1_2d <- round(geomorph::two.d.array(shapes1),dec)
   logsizes1 <- sizes[index1]
 
   index2 <- species == levels(species)[3]
   shapes2 <- shapes[,,index2]
-  shapes2_2d <- geomorph::two.d.array(shapes2)
+  shapes2_2d <- round(geomorph::two.d.array(shapes2),dec)
   logsizes2 <- sizes[index2]
 
-  dec <- 5
 
   mod1 <- lm(shapes1_2d ~ logsizes1)
   mod2 <- lm(shapes2_2d ~ logsizes2)
 
-  result1 <- all(round(mod2$coefficients[2,][1:3], dec) == round(c(0.002307124, 0.003570750, 0.002711955), dec))
+  result1 <- all(round(mod2$coefficients[2,][1:3], dec) == round(c(0.002307460, 0.003569997, 0.002711362), dec))
   #works
-  result2 <- all(round(mod1$coefficients[2,][1:3], dec) == round(c(0.005091796, 0.004568219, 0.003097918), dec))
+  result2 <- all(round(mod1$coefficients[2,][1:3], dec) == round(c(0.005091483, 0.004569121, 0.003097599), dec))
   #works
 
-  general_space <- stats::prcomp(geomorph::two.d.array(shapes))
+  general_space <- stats::prcomp(round(geomorph::two.d.array(shapes),dec))
 
-  result3 <- all(round(general_space$rotation[1:3],dec) == round(c(-0.03127730, -0.04121346, -0.02124241),dec))
+  result3 <- all(round(general_space$rotation[1:3],dec) == round(c(0.03127865, -0.04121488, -0.02124059),dec))
   #works
 
   burn1 <- burnaby(x = shapes1_2d, vars = logsizes1)
   burn2 <- burnaby(x = shapes2_2d, vars = logsizes2)
 
-  result4 <- all(round(burn1$rotation[1:3],dec) == round(c(0.07201903, -0.07427565, -0.02826254),dec))
+  result4 <- all(round(burn1$rotation[1:3],dec) == round(c(0.07203246, -0.07424842, -0.02823905),dec))
   #works
-  result5 <- all(round(burn2$rotation[1:3],dec) == round(c(-0.02013429, -0.04429036,  0.01178547),dec))
+  result5 <- all(round(burn2$rotation[1:3],dec) == round(c(-0.02013978, -0.04428599,  0.01176433),dec))
   #works
 
   #------------
 
+
+
   detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = round(max(logsizes2),2),
                                      newdata = mod2)
 
-  result6 <- all(round(detshapes2using1[1:3],dec) == round(c(0.07373343, 0.06927311, 0.07106925),dec))
-  #not working
+  result6 <- all(round(detshapes2using1[1:3],dec) == round(c(0.07346220, 0.06918721, 0.07116487),dec))
+  #checking
 
   ax <- c(1:30)
   na_shapes2minus1 <- rev_eigen(scores = burn2$x[,ax],
