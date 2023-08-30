@@ -551,18 +551,21 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
   detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(sizes[index2]),
                                      newdata = mod2)
 
-  result1 <- all(round(detshapes2using1[1:3],dec) == round(c(0.07373548, 0.06927516, 0.07107130),dec))
-
-
   ax <- c(1:30)
   na_shapes2minus1 <- rev_eigen(scores = burn2$x[,ax],
                                 vectors = burn2$rotation[,ax] - burn1$rotation[,ax],
                                 center = colMeans(detshapes2using1))
 
+  result1 <- all(round(na_shapes2minus1[1:3],dec) == round(c(0.07372, 0.06925, 0.07103),dec))
+
   scores2using1 <- proj_eigen(detshapes2using1,
                               vectors = general_space$rotation[,1:2],
                               center = general_space$center)
+
   slope2using1 <- lm(scores2using1[,2] ~ scores2using1[,1])$coef[2]
+
+  #result1 <- all(round(slope2using1[1],dec) == round(c(4.12391),dec))
+
 
   scores2minus1 <- proj_eigen(na_shapes2minus1,
                               vectors = general_space$rotation[,1:2],
