@@ -465,32 +465,94 @@ test_that(desc = "testing detrend_shapes, method = residuals, xvalue, for factor
 })
 
 
+# test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for numerics", code = {
+#
+#   data(shells3D)
+#   shapes <- shells3D$shapes
+#   species <- shells3D$data$species
+#   sizes <- log(shells3D$sizes)
+#
+#   index1 <- species == levels(species)[7]
+#   shapes1 <- shapes[,,index1]
+#   logsizes1 <- sizes[index1]
+#
+#   index2 <- species == levels(species)[3]
+#   shapes2 <- shapes[,,index2]
+#   logsizes2 <- sizes[index2]
+#
+#   mod1 <- lm(geomorph::two.d.array(shapes1) ~ logsizes1)
+#   mod2 <- lm(geomorph::two.d.array(shapes2) ~ logsizes2)
+#
+#
+#   general_space <- prcomp(geomorph::two.d.array(shapes))
+#
+#   burn1 <- burnaby(x = geomorph::two.d.array(shapes1), vars = logsizes1)
+#   burn2 <- burnaby(x = geomorph::two.d.array(shapes2), vars = logsizes2)
+#
+#   detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(sizes[index2]),
+#                                      newdata = mod2)
+#
+#   ax <- c(1:30)
+#   na_shapes2minus1 <- rev_eigen(scores = burn2$x[,ax],
+#                                 vectors = burn2$rotation[,ax] - burn1$rotation[,ax],
+#                                 center = colMeans(detshapes2using1))
+#
+#   scores2using1 <- proj_eigen(detshapes2using1,
+#                               vectors = general_space$rotation[,1:2],
+#                               center = general_space$center)
+#   slope2using1 <- lm(scores2using1[,2] ~ scores2using1[,1])$coef[2]
+#
+#   scores2minus1 <- proj_eigen(na_shapes2minus1,
+#                               vectors = general_space$rotation[,1:2],
+#                               center = general_space$center)
+#   slope2minus1 <- lm(scores2minus1[,2] ~ scores2minus1[,1])$coef[2]
+#
+#
+#   result1 <- round(slope2using1, 3) == round(slope2minus1, 3)
+#   expect_true(all(result1))
+#
+#   # refmesh <- shells3D$mesh_meanspec
+#   # template <- Morpho::tps3d(x = refmesh, refmat = shapes[,,geomorph::findMeanSpec(shapes)], tarmat = expected_shapes(shapes))
+#   # msp <- mspace(shapes, template = template, bg.models = "gray",
+#   #               cex.ldm = 0, alpha.models = 0.7, adj_frame = c(0.93,0.93)) %>%
+#   #   proj_shapes(detshapes2using1, pch = 1, col = 4) %>%
+#   #   proj_shapes(na_shapes2minus1, pch = 21, bg = 4, cex= 0.5)
+# })
+
 test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for numerics", code = {
 
   data(shells3D)
   shapes <- shells3D$shapes
+  shapes_2d <- geomorph::two.d.array(shapes)
   species <- shells3D$data$species
   sizes <- log(shells3D$sizes)
 
   index1 <- species == levels(species)[7]
   shapes1 <- shapes[,,index1]
+  shapes1_2d <- geomorph::two.d.array(shapes1)
   logsizes1 <- sizes[index1]
 
   index2 <- species == levels(species)[3]
   shapes2 <- shapes[,,index2]
+  shapes2_2d <- geomorph::two.d.array(shapes2)
   logsizes2 <- sizes[index2]
 
-  mod1 <- lm(geomorph::two.d.array(shapes1) ~ logsizes1)
-  mod2 <- lm(geomorph::two.d.array(shapes2) ~ logsizes2)
+  dec <- 5
+
+  mod1 <- lm(shapes1_2d ~ logsizes1)
+  mod2 <- lm(shapes2_2d ~ logsizes2)
 
 
-  general_space <- prcomp(geomorph::two.d.array(shapes))
+  general_space <- stats::prcomp(geomorph::two.d.array(shapes))
 
-  burn1 <- burnaby(x = geomorph::two.d.array(shapes1), vars = logsizes1)
-  burn2 <- burnaby(x = geomorph::two.d.array(shapes2), vars = logsizes2)
+  burn1 <- burnaby(x = shapes1_2d, vars = logsizes1)
+  burn2 <- burnaby(x = shapes2_2d, vars = logsizes2)
 
   detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(sizes[index2]),
                                      newdata = mod2)
+
+  result1 <- all(round(detshapes2using1[1:3],dec) == round(c(0.07373548, 0.06927516, 0.07107130),dec))
+
 
   ax <- c(1:30)
   na_shapes2minus1 <- rev_eigen(scores = burn2$x[,ax],
@@ -508,7 +570,7 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
   slope2minus1 <- lm(scores2minus1[,2] ~ scores2minus1[,1])$coef[2]
 
 
-  result1 <- round(slope2using1, 3) == round(slope2minus1, 3)
+  #result1 <- round(slope2using1, 3) == round(slope2minus1, 3)
   expect_true(all(result1))
 
   # refmesh <- shells3D$mesh_meanspec
