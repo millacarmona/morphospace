@@ -452,7 +452,8 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   result6 <- all(round(x[1:3,1], 5) == round(c(-0.3700267, -0.3557404, -0.3689075),5))
   result7 <- all(round(x[275:277,1], 5) == round(c(0.06236774, 0.03428136, 0.06300532),5))
 
-  result8 <- all((x[c(which(!index), which(index)),])[1:3,1] == 0.020701855, 0.002606553, 0.022242310)
+  result8 <- all(round((x[c(which(!index), which(index)),])[1:3,1],5) == round(c(0.020701855, 0.002606553, 0.022242310),5))
+
 
 
   # result1 <- all(gr_scores %in% x) #not working
@@ -463,7 +464,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   # result2 <- all(x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),] %in% gr_scores)
 
   expect_true(all(result0, result1, result2,result3,result4,result5,
-                  result6,result7))
+                  result6,result7,result8))
   dev.off()
 })
 
