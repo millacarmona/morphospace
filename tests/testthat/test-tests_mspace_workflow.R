@@ -459,6 +459,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
 ###
 
   result10 <- all(round(x[c(which(!index), which(index)), ],5) == round(gr_scores,5))
+  result11 <- all(round(msp1$ordination$x[c(which(!index), which(index)), ],5) == round(msp1$projected$gr_scores,5))
   # result1 <- all(gr_scores %in% x) #not working
 
   #bueno al menos las dimensiones estan bien.
@@ -467,7 +468,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   # result2 <- all(x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),] %in% gr_scores)
 
   expect_true(all(result0, result1, result2,result3,result4,result5,
-                  result6,result7,result8,result9,result10))
+                  result6,result7,result8,result9,result10,result11))
   dev.off()
 })
 
