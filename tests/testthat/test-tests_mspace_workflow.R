@@ -410,66 +410,103 @@ test_that(desc = "testing proj_groups, general behavior", code = {
 
 
 
+# test_that(desc = "testing proj_groups, stacking behavior", code = {
+#   data("tails")
+#
+#   library(geomorph)
+#   library(magrittr)
+#
+#   shapes <- tails$shapes
+#   species <- tails$data$species
+#   index <- tails$data$type == "DF"
+#
+#   msp1 <- mspace(shapes, axes = c(1,2), plot = TRUE) %>%
+#     proj_groups(shapes = shapes[,,!index], groups = factor(species[!index]),
+#                 col = "red", lty = 1) %>%
+#     proj_groups(shapes = shapes[,,index], groups = factor(species[index]),
+#                 col = "blue", lty = 2)
+#
+#
+#   # gr_scores <- msp1$projected$gr_scores
+#   # tab <- geomorph::two.d.array(shapes)
+#   # index_x_in_sc <- as.numeric(unlist(apply(gr_scores, 1, function(x, y) {which(apply(y, 1, function(z, x){all(z == x)}, x))},stats::prcomp(tab)$x)))
+#
+#   # index_x_in_sc <- c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168)
+#   # result1 <- all(index_x_in_sc == c(which(!index), which(index)))
+#
+#   gr_scores <- msp1$projected$gr_scores
+#   x <- msp1$ordination$x
+#   #pca <- stats::prcomp(geomorph::two.d.array(shapes[,,1:dim(shapes)[3] %in% c(which(!index), which(index))]))
+#   #result1 <- all(gr_scores == x[c(which(!index), which(index)),])
+#
+#
+#
+#   result0 <- all(dim(gr_scores) == dim(x))
+#   result1 <- all(dim(gr_scores) == c(281, 18))
+#   result2 <- all(round(gr_scores[1:3,1], 5) == round(c(0.020701855, 0.002606553, 0.022242310),5))
+#   result3 <- all(round(gr_scores[275:277,1], 5) == round(c(-0.2049941, -0.2348047, -0.2450408),5))
+#
+#   result4 <- all(c("ordination", "projected") %in% names(msp1))
+#   result5 <- all(c("x") %in% names(msp1$ordination))
+#
+#   result6 <- all(round(x[1:3,1], 5) == round(c(-0.3700267, -0.3557404, -0.3689075),5))
+#   result7 <- all(round(x[275:277,1], 5) == round(c(0.06236774, 0.03428136, 0.06300532),5))
+#
+#   result8 <- all(round((x[c(which(!index), which(index)),])[1:3,1],5) == round(c(0.020701855, 0.002606553, 0.022242310),5))
+#
+# ###
+#   result9 <- all(round((x[c(which(!index), which(index)),])[1:3,1],5) == round(gr_scores[1:3,1], 5))
+# ###
+#
+#   result10 <- all(round(x[c(which(!index), which(index)), ],5) == round(gr_scores,5))
+#   result11 <- all(round(msp1$ordination$x[c(which(!index), which(index)), ],5) == round(msp1$projected$gr_scores,5))
+#   # result1 <- all(gr_scores %in% x) #not working
+#
+#   pca <- stats::prcomp(geomorph::two.d.array(shapes))
+#   result12 <- all(round(pca$x[c(which(!index), which(index)),],5) == round(gr_scores,5))
+#
+#   #bueno al menos las dimensiones estan bien.
+#
+#   # result1 <- all(gr_scores %in% x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),])
+#   # result2 <- all(x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),] %in% gr_scores)
+#
+#   expect_true(all(result0, result1, result2,result3,result4,result5,
+#                   result6,result7,result8,result9,result10,result11))
+#   dev.off()
+# })
+
+
 test_that(desc = "testing proj_groups, stacking behavior", code = {
   data("tails")
-
-  library(geomorph)
-  library(magrittr)
-
   shapes <- tails$shapes
   species <- tails$data$species
   index <- tails$data$type == "DF"
 
-  msp1 <- mspace(shapes, axes = c(1,2), plot = TRUE) %>%
+  msp1 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
     proj_groups(shapes = shapes[,,!index], groups = factor(species[!index]),
                 col = "red", lty = 1) %>%
     proj_groups(shapes = shapes[,,index], groups = factor(species[index]),
                 col = "blue", lty = 2)
 
+  dec <- 5
+  index_x_in_sc <- as.numeric(unlist
+                              (apply(round(msp1$projected$gr_scores,dec), 1, \(x, y) {
+                                which(apply(y, 1, \(z, x){
+                                  all(z == x)}, x))},
+                                round(prcomp(geomorph::two.d.array(shapes))$x,dec))))
 
-  # gr_scores <- msp1$projected$gr_scores
-  # tab <- geomorph::two.d.array(shapes)
-  # index_x_in_sc <- as.numeric(unlist(apply(gr_scores, 1, function(x, y) {which(apply(y, 1, function(z, x){all(z == x)}, x))},stats::prcomp(tab)$x)))
+  result1 <- all(index_x_in_sc == c(which(!index), which(index)))
+  result2 <- all(as.character(msp1$projected$gr_class) == as.character(c(species[!index], species[index])))
 
-  # index_x_in_sc <- c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168)
-  # result1 <- all(index_x_in_sc == c(which(!index), which(index)))
-
-  gr_scores <- msp1$projected$gr_scores
-  x <- msp1$ordination$x
-  #pca <- stats::prcomp(geomorph::two.d.array(shapes[,,1:dim(shapes)[3] %in% c(which(!index), which(index))]))
-  #result1 <- all(gr_scores == x[c(which(!index), which(index)),])
+  plotinfo1 <- msp1$plotinfo
+  result3 <- all(plotinfo1$col.groups == c(rep(col2hex("red"), nlevels(factor(species[!index]))),
+                                           rep(col2hex("blue"), nlevels(factor(species[index])))))
+  result4 <- all(plotinfo1$lty.groups == c(rep(1, nlevels(factor(species[!index]))),
+                                           rep(2, nlevels(factor(species[index])))))
 
 
 
-  result0 <- all(dim(gr_scores) == dim(x))
-  result1 <- all(dim(gr_scores) == c(281, 18))
-  result2 <- all(round(gr_scores[1:3,1], 5) == round(c(0.020701855, 0.002606553, 0.022242310),5))
-  result3 <- all(round(gr_scores[275:277,1], 5) == round(c(-0.2049941, -0.2348047, -0.2450408),5))
-
-  result4 <- all(c("ordination", "projected") %in% names(msp1))
-  result5 <- all(c("x") %in% names(msp1$ordination))
-
-  result6 <- all(round(x[1:3,1], 5) == round(c(-0.3700267, -0.3557404, -0.3689075),5))
-  result7 <- all(round(x[275:277,1], 5) == round(c(0.06236774, 0.03428136, 0.06300532),5))
-
-  result8 <- all(round((x[c(which(!index), which(index)),])[1:3,1],5) == round(c(0.020701855, 0.002606553, 0.022242310),5))
-
-###
-  result9 <- all(round((x[c(which(!index), which(index)),])[1:3,1],5) == round(gr_scores[1:3,1], 5))
-###
-
-  result10 <- all(round(x[c(which(!index), which(index)), ],5) == round(gr_scores,5))
-  result11 <- all(round(msp1$ordination$x[c(which(!index), which(index)), ],5) == round(msp1$projected$gr_scores,5))
-  # result1 <- all(gr_scores %in% x) #not working
-
-  #bueno al menos las dimensiones estan bien.
-
-  # result1 <- all(gr_scores %in% x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),])
-  # result2 <- all(x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),] %in% gr_scores)
-
-  expect_true(all(result0, result1, result2,result3,result4,result5,
-                  result6,result7,result8,result9,result10,result11))
-  dev.off()
+  expect_true(all(result1,result2,result3,result4))
 })
 
 ###########################################################
