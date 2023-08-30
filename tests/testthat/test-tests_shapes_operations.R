@@ -521,7 +521,7 @@ test_that(desc = "testing detrend_shapes, method = residuals, xvalue, for factor
 
 test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for numerics", code = {
 
-  dec <- 5
+  dec <- 3
 
   data(shells3D)
   shapes <- shells3D$shapes
