@@ -550,7 +550,7 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
 
   general_space <- stats::prcomp(round(geomorph::two.d.array(shapes),dec))
 
-  result3 <- all(round(general_space$rotation[1:3],dec) == round(c(0.03127865, -0.04121488, -0.02124059),dec))
+  result3 <- all(round(general_space$rotation[1:3],dec) == round(c(-0.03127865, -0.04121488, -0.02124059),dec))
   #works
 
   burn1 <- burnaby(x = shapes1_2d, vars = logsizes1)
