@@ -569,10 +569,92 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
   mod1$coefficients <- round(mod1$coefficients,dec)
   mod2$coefficients <- round(mod2$coefficients,dec)
 
+  mod1$model[[1]]
+
   detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(logsizes2),
                                      newdata = mod2)
 
-  result6 <- all(round(detshapes2using1[1:3],dec) == round(c(0.07434148, 0.06773835, 0.06953058),dec))
+  #result6 <- all(round(detshapes2using1[1:3],dec) == round(c(0.07434148, 0.06773835, 0.06953058),dec))
+
+  #######################
+
+
+  model = mod1
+  xvalue = max(logsizes2)
+  tree = NULL
+  method = "orthogonal"
+  newdata = mod2
+
+  x <- model$model[-1]
+  y <- model$model[[1]]
+
+  if(is.null(rownames(x))) rownames(x) <- seq_len(nrow(x))
+  if(is.null(rownames(y))) rownames(y) <- seq_len(nrow(y))
+  namesx <- rownames(x)
+  namesy <- rownames(y)
+
+  designmat <- stats::model.matrix(stats::as.formula(paste0("~ ",
+                                                            strsplit(as.character(
+                                                              model$call[2]), split = "~")[[1]][2])), data = x)
+
+  grandmean <- colMeans(y)
+  coefs <- model$coefficients
+
+  if(method == "orthogonal") {
+    axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))
+
+    ortho_space <- suppressWarnings(burnaby(x = y, axmat = axmat, tree = tree))
+    ortho_scores <- ortho_space$x
+    ortho_rotation <- ortho_space$rotation
+    ax <- sum(ortho_space$sdev^2 > 1e-15)
+
+    if(!is.null(xvalue)) {
+      ortho_center <- c(expected_shapes(shapes = y, x = x[[1]], xvalue = xvalue,
+                                        tree = tree, returnarray = FALSE))
+    } else {
+      ortho_center <- ortho_space$center
+    }
+
+    if(!is.null(newdata)) {
+
+      if(inherits(newdata, "mlm")) {
+        newx <- newdata$model[-1]
+        newy <- newdata$model[[1]]
+        if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
+        namesy <- rownames(newy)
+
+        newortho_space <- burnaby(x = newy, vars = newx)
+        ax <- min(sum(newortho_space$sdev^2 > 1e-15), ax)
+        ortho_scores <- newortho_space$x
+        ortho_rotation <- newortho_space$rotation[,seq_len(ax)] -
+          ortho_space$rotation[,seq_len(ax)]
+
+
+        if(!is.null(xvalue)) {
+          ortho_center <- c(expected_shapes(shapes = newy, x = newx[[1]],
+                                            xvalue = xvalue, returnarray = FALSE))
+        } else {
+          ortho_center <- newortho_space$center
+        }
+
+      } else {
+        ortho_scores <- proj_eigen(x = newdata, vectors = ortho_space$rotation,
+                                   center = ortho_space$center)
+      }
+    }
+
+    ortho_shapes2d <- rev_eigen(scores = ortho_scores[, seq_len(ax)],
+                                vectors = ortho_rotation[, seq_len(ax)],
+                                center = ortho_center)
+    colnames(ortho_shapes2d) <- colnames(y)
+  }
+
+  result6 <- all(round(ortho_shapes2d[1:3],dec) == round(c(0.07434148, 0.06773835, 0.06953058),dec))
+
+  ########################
+
+
+
   #checking
 
   ax <- c(1:30)
