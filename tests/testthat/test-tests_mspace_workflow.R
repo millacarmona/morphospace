@@ -454,8 +454,9 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
 
   result8 <- all(round((x[c(which(!index), which(index)),])[1:3,1],5) == round(c(0.020701855, 0.002606553, 0.022242310),5))
 
-
-
+###
+  result9 <- all(round((x[c(which(!index), which(index)),])[1:3,1],5) == round(gr_scores[1:3,1], 5))
+###
   # result1 <- all(gr_scores %in% x) #not working
 
   #bueno al menos las dimensiones estan bien.
@@ -464,7 +465,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   # result2 <- all(x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),] %in% gr_scores)
 
   expect_true(all(result0, result1, result2,result3,result4,result5,
-                  result6,result7,result8))
+                  result6,result7,result8,result9))
   dev.off()
 })
 
