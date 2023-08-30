@@ -543,13 +543,16 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
   mod2 <- lm(shapes2_2d ~ logsizes2)
 
   result1 <- all(round(mod2$coefficients[2,][1:3], dec) == round(c(0.002307124, 0.003570750, 0.002711955), dec))
+  #works
+  result2 <- all(round(mod1$coefficients[2,][1:3], dec) == round(c(0.005091796, 0.004568219, 0.003097918), dec))
+  #works?
 
   general_space <- stats::prcomp(geomorph::two.d.array(shapes))
 
   burn1 <- burnaby(x = shapes1_2d, vars = logsizes1)
   burn2 <- burnaby(x = shapes2_2d, vars = logsizes2)
 
-  detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(sizes[index2]),
+  detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(logsizes2),
                                      newdata = mod2)
 
   #result1 <- all(round(detshapes2using1[1:3],dec) == round(c(0.07373548, 0.06927516, 0.07107130),dec))
@@ -560,8 +563,8 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
                                 vectors = burn2$rotation[,ax] - burn1$rotation[,ax],
                                 center = colMeans(detshapes2using1))
 
-  #result1 <- all(round(na_shapes2minus1[1:3],dec) == round(c(0.07372, 0.06925, 0.07103),dec))
-  #not working
+  #result1 <- all(round(na_shapes2minus1[1:3],dec) == round(c(0.07372329, 0.06925095, 0.07103433),dec))
+  #not working?
 
   scores2using1 <- proj_eigen(detshapes2using1,
                               vectors = general_space$rotation[,1:2],
@@ -580,7 +583,7 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
 
 
   #result1 <- round(slope2using1, 3) == round(slope2minus1, 3)
-  expect_true(all(result1))
+  expect_true(all(result1,result2))
 
   # refmesh <- shells3D$mesh_meanspec
   # template <- Morpho::tps3d(x = refmesh, refmat = shapes[,,geomorph::findMeanSpec(shapes)], tarmat = expected_shapes(shapes))
