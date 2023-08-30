@@ -452,6 +452,9 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   result6 <- all(round(x[1:3,1], 5) == round(c(-0.3700267, -0.3557404, -0.3689075),5))
   result7 <- all(round(x[275:277,1], 5) == round(c(0.06236774, 0.03428136, 0.06300532),5))
 
+  result8 <- all((x[c(which(!index), which(index)),])[1:3,1] == 0.020701855, 0.002606553, 0.022242310)
+
+
   # result1 <- all(gr_scores %in% x) #not working
 
   #bueno al menos las dimensiones estan bien.
