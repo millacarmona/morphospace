@@ -590,7 +590,7 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
 
 
   #result1 <- round(slope2using1, 3) == round(slope2minus1, 3)
-  expect_true(all(result1,result2,result3))
+  expect_true(all(result1,result2,result3,result4))
 
   # refmesh <- shells3D$mesh_meanspec
   # template <- Morpho::tps3d(x = refmesh, refmat = shapes[,,geomorph::findMeanSpec(shapes)], tarmat = expected_shapes(shapes))
