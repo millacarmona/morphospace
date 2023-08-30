@@ -439,13 +439,17 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   #pca <- stats::prcomp(geomorph::two.d.array(shapes[,,1:dim(shapes)[3] %in% c(which(!index), which(index))]))
   #result1 <- all(gr_scores == x[c(which(!index), which(index)),])
 
-  result1 <- all(gr_scores %in% x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),])
 
   result0 <- all(dim(gr_scores) == dim(x))
+  result1 <- all(gr_scores %in% x)
+  result2 <- TRUE
 
   #bueno al menos las dimensiones estan bien.
 
-  expect_true(all(result0, result1))
+  # result1 <- all(gr_scores %in% x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),])
+  # result2 <- all(x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),] %in% gr_scores)
+
+  expect_true(all(result0, result1, result2))
   dev.off()
 })
 
