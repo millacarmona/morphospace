@@ -440,8 +440,10 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   #result1 <- all(gr_scores == x[c(which(!index), which(index)),])
 
 
+
   result0 <- all(dim(gr_scores) == dim(x))
   result1 <- all(dim(gr_scores) == c(281, 18))
+  result2 <- all(round(gr_scores[1:3], 5) == round(c(0.020701855, 0.002606553, 0.022242310),5))
   # result1 <- all(gr_scores %in% x)
   # result2 <- TRUE
 
@@ -450,7 +452,7 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
   # result1 <- all(gr_scores %in% x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),])
   # result2 <- all(x[c(8:52, 75:148, 169:281, 1:7, 53:74, 149:168),] %in% gr_scores)
 
-  expect_true(all(result0, result1))
+  expect_true(all(result0, result1, result2))
   dev.off()
 })
 
