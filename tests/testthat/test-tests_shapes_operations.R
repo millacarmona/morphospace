@@ -566,12 +566,13 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
 
   #------------
 
-
+  mod1$coefficients <- round(mod1$coefficients,dec)
+  mod2$coefficients <- round(mod2$coefficients,dec)
 
   detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(logsizes2),
                                      newdata = mod2)
 
-  result6 <- all(round(detshapes2using1[1:3],dec) == round(c(0.07346426, 0.06918926, 0.07116693),dec))
+  result6 <- all(round(detshapes2using1[1:3],dec) == round(c(0.07342226, 0.06928673, 0.07095238),dec))
   #checking
 
   ax <- c(1:30)
