@@ -18,7 +18,7 @@ plot_morphogrid3d(
   ylim = NULL,
   xlab = NULL,
   ylab = NULL,
-  adj_frame = 1,
+  adj_frame = c(1, 1),
   cex.ldm,
   col.ldm,
   col.models,
