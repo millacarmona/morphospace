@@ -35,6 +35,7 @@ reference:
   - ax_transformation
   - extract_shapes
   - rotate_coords
+- title: internal functions
   desc: |
     functions used internally by morphospace
   contents:
@@ -67,4 +68,4 @@ reference:
   - wings
   - shells
   - shells3D
-- title: internal functions
+
