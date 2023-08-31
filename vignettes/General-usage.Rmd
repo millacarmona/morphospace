@@ -231,14 +231,23 @@ Finally, `"mspace"` objects created using the `mspace %>% proj_*` pipeline can b
 
 For example, PC1 can be plotted against size to explore allometric patterns:
 
-
-```{r}
-# Buld morphospace first
+```{r, eval = FALSE}
+# Build morphospace first
 msp <- mspace(shapes = detr_shapes, links = wf, cex.ldm = 5, plot = FALSE) %>% 
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>% 
   proj_phylogeny(shapes = sp_shapes, tree = phy, col.tips = match(phy$tip.label, levels(spp)))
+```
 
+```{r, echo = FALSE, fig.show='hide', warning=FALSE}
+# Build morphospace first
+msp <- mspace(shapes = detr_shapes, links = wf, cex.ldm = 5, plot = TRUE) %>% 
+  proj_shapes(shapes = detr_shapes, col = spp) %>%
+  proj_groups(shapes = detr_shapes, groups = spp) %>% 
+  proj_phylogeny(shapes = sp_shapes, tree = phy, col.tips = match(phy$tip.label, levels(spp)))
+```
+
+```{r}
 # Plot PC1 against log-size, add legend
 plot_mspace(msp, x = sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
             col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size",

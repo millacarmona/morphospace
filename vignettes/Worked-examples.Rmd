@@ -322,7 +322,7 @@ pile_shapes(shapes, alpha = 0.2)
 rglwidget(width = 700, height = 700)
 ```
 
-```{r eval = FALSE, }
+```{r eval = FALSE}
 # Create morphospace using raw variation. This is interactive, 
 # you need to rotate the 3D model by yourself and then press 
 # enter into the console
@@ -336,7 +336,7 @@ title("Morphospace")
 ```
 
 ```{r echo = FALSE, warning=FALSE}
-# * I just couln't find how to make knitr to generate these figures right 
+# * I just couldn't find how to make knitr to generate these figures right 
 #so my apologies this is the best way I found to show them :(
 knitr::include_graphics("vignette-unnamed-chunk-24-1.png")
 ```
