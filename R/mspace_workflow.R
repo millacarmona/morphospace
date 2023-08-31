@@ -289,8 +289,6 @@ mspace <- function(shapes,
                               size.models = size.models, asp.models = 1, rescale = rescale)
 
     refshape <- expected_shapes(shapes)
-    xlim <- range(ordination$x[,axes[1]])
-    if(ncol(ordination$x) > 1 | length(axes) > 1) ylim <- range(ordination$x[,axes[2]])
 
     plot_morphogrid3d(x = NULL, y = y, morphogrid = shapemodels, refshape = refshape,
                       template = template, links = links, ordtype = ordination$ordtype,
@@ -1903,6 +1901,10 @@ plot_mspace <- function(mspace,
     if(is.null(axes)) {
       args$axes <- rep(args$axes[1], 2)
     }
+
+    args$xlim <- xlim
+    args$ylim <- ylim
+
 
     #if x or y are a phy object, prepare the ground for a phenogram --------------------------------
     if(any(any(class(x) == "phylo"), any(class(y) == "phylo"))) {
