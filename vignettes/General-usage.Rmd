@@ -122,7 +122,7 @@ Finally, landscape surfaces intended to represent functional or performance meas
 
 These landscapes can be computed for either a region of the morphospace from a sample of empirical shapes occupying that region ("*empirical landscapes*") or from the set of synthetic shapes mapping morphometric variation in the background ("*theoretical landscapes*"). For the latter case, leave `shapes = NULL`; if values are been provided using `X` these must have been computed beforehand and arranged in the same order as the shape models in the background (that is, from left to right and from bottom to top), which can be extracted using `extract_shapes`. This last step is not necessary if `FUN` is provided. A scalebar can be added using `plot_mspace` and `scalebar = TRUE`.
 
-```{r}
+```{r, message=FALSE}
 # compute lift/drag ratio for each tail in the data set
 library(Momocs)
 LDs <- apply(two.d.array(detr_shapes), 1, morphospace:::computeLD)
@@ -141,11 +141,13 @@ mspl <- mspace(detr_shapes, links = wf, cex.ldm = 5) %>%
   proj_landscape(shapes = NULL, FUN = morphospace::: computeLD, linear = FALSE, 
                  display = "contour", lwd = 2)
 
-# a scale bar can be added (and changes introduced) by regenerating the "mspace" 
-# object with plot_mspace
+# a scale bar can be added (and changes introduced) by regenerating the 
+# "mspace" object with plot_mspace
 plot_mspace(mspl, display.landsc = "filled.contour", 
             palette.landsc = terrain.colors, scalebar = TRUE)
 ```
+
+(*Note: using the* `FUN` *argument is the easy way to do this, but it needs a function that can go through every shape as stored in a 2-margin matrix in which each row is a shape and each column is a shape descripor (e.g. the output from* `geomorph::two.d.array`*)*)
 
 
 ### Ordination methods
@@ -290,11 +292,9 @@ Or we can combine PC1 (or any other PC axis) with the phylogenetic tree to creat
 # Plot vertical phenogram using PC1, add a legend
 plot_mspace(msp, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             col.groups = 1:nlevels(spp), ylab = "Time", legend = TRUE)
-
-# * Note that the symbols in the legend are taken from proj_shapes and proj_groups 
-# graphical parameters
 ```
-*Note that legend' labels are taken from the factor provided in the* `groups` *argument from* `proj_groups`*, whereas symbols and colors are taken from* `proj_shapes` *and* `proj_groups` *graphical parameters*
+
+(*Note: that legend' labels are taken from the factor provided in the* `groups` *argument from* `proj_groups`*, whereas symbols and colors are taken from* `proj_shapes` *and* `proj_groups` *graphical parameters*)
 
 ### References
 

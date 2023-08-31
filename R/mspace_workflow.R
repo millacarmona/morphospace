@@ -1731,7 +1731,7 @@ plot_mspace <- function(mspace,
 
       if(ncol(mspace$ordination$x) > 1) {
         if(length(args$axes) > 1) {
-          if(!is.null(scores)) {
+          if(!is.null(scores) & points) {
             plot_biv_scatter(scores = scores[-index_sc_in_gr,],
                              col = gr_col.points[-index_sc_in_gr],
                              pch = gr_pch.points[-index_sc_in_gr],
@@ -1741,21 +1741,25 @@ plot_mspace <- function(mspace,
 
           if(!is.null(gr_class)) {
             for(i in seq_len(nlevels(gr_class))) {
-              plot_biv_scatter(scores = scores[index_sc_in_gr[gr_class == levels(gr_class)[i]], args$axes],
-                               col = gr_col.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                               pch = gr_pch.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                               bg = gr_bg.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                               cex = gr_cex.points[index_sc_in_gr][gr_class == levels(gr_class)[i]])
-              if(!args$ellipse.groups) {
-                hulls_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i],],
-                                  fac = gr_class[gr_class == levels(gr_class)[i]],
-                                  col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
-                                  alpha = args$alpha.groups)
-              } else {
-                ellipses_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i],],
-                                     fac = factor(gr_class[gr_class == levels(gr_class)[i]]),
-                                     col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
-                                     alpha = args$alpha.groups, conflev = args$conflev.groups)
+              if(points) {
+                plot_biv_scatter(scores = scores[index_sc_in_gr[gr_class == levels(gr_class)[i]], args$axes],
+                                 col = gr_col.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                                 pch = gr_pch.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                                 bg = gr_bg.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                                 cex = gr_cex.points[index_sc_in_gr][gr_class == levels(gr_class)[i]])
+              }
+              if(groups) {
+                if(!args$ellipse.groups) {
+                  hulls_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i],],
+                                    fac = gr_class[gr_class == levels(gr_class)[i]],
+                                    col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
+                                    alpha = args$alpha.groups)
+                } else {
+                  ellipses_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i],],
+                                       fac = factor(gr_class[gr_class == levels(gr_class)[i]]),
+                                       col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
+                                       alpha = args$alpha.groups, conflev = args$conflev.groups)
+                }
               }
             }
           }
@@ -1765,15 +1769,19 @@ plot_mspace <- function(mspace,
               density_by_group_2D(gr_scores, gr_class, ax = args$axes[1], alpha = args$alpha.groups,
                                   lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
             }
-            plot_univ_scatter(scores = cbind(scores[index_sc_in_gr, args$axes[1]]), density = FALSE,
-                              col = gr_col.points[index_sc_in_gr], pch = gr_pch.points[index_sc_in_gr],
-                              cex = gr_cex.points[index_sc_in_gr], bg = gr_bg.points[index_sc_in_gr])
+            if(points) {
+              plot_univ_scatter(scores = cbind(scores[index_sc_in_gr, args$axes[1]]), density = FALSE,
+                                col = gr_col.points[index_sc_in_gr], pch = gr_pch.points[index_sc_in_gr],
+                                cex = gr_cex.points[index_sc_in_gr], bg = gr_bg.points[index_sc_in_gr])
+            }
           }
-          suppressWarnings(
-            plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr, args$axes[1]]), density = FALSE,
-                              col = gr_col.points[-index_sc_in_gr], pch = gr_pch.points[-index_sc_in_gr],
-                              cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
-          )
+          if(points) {
+            suppressWarnings(
+              plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr, args$axes[1]]), density = FALSE,
+                                col = gr_col.points[-index_sc_in_gr], pch = gr_pch.points[-index_sc_in_gr],
+                                cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
+            )
+          }
         }
       } else {
         if(!is.null(gr_class)) {
@@ -1781,15 +1789,19 @@ plot_mspace <- function(mspace,
             density_by_group_2D(gr_scores, gr_class, ax = 1, alpha = args$alpha.groups,
                                 lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
           }
-          plot_univ_scatter(scores = cbind(scores[index_sc_in_gr,]), density = FALSE, col = gr_col.points[index_sc_in_gr],
-                            pch = gr_pch.points[index_sc_in_gr], cex = gr_cex.points[index_sc_in_gr],
-                            bg = gr_bg.points[index_sc_in_gr])
+          if(points) {
+            plot_univ_scatter(scores = cbind(scores[index_sc_in_gr,]), density = FALSE, col = gr_col.points[index_sc_in_gr],
+                              pch = gr_pch.points[index_sc_in_gr], cex = gr_cex.points[index_sc_in_gr],
+                              bg = gr_bg.points[index_sc_in_gr])
+          }
         }
-        suppressWarnings(
-          plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr,]), density = FALSE,
-                            col = gr_col.points[-index_sc_in_gr], pch = gr_pch.points[-index_sc_in_gr],
-                            cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
-        )
+        if(points) {
+          suppressWarnings(
+            plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr,]), density = FALSE,
+                              col = gr_col.points[-index_sc_in_gr], pch = gr_pch.points[-index_sc_in_gr],
+                              cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
+          )
+        }
       }
     }
 
@@ -2043,7 +2055,7 @@ plot_mspace <- function(mspace,
         } else gr_cex.points <- args$cex.points
 
 
-        if(!is.null(scores)) {
+        if(!is.null(scores) & points) {
           plot_biv_scatter(scores = xy[-index_sc_in_gr,],
                            col = gr_col.points[-index_sc_in_gr],
                            pch = gr_pch.points[-index_sc_in_gr],
@@ -2053,21 +2065,25 @@ plot_mspace <- function(mspace,
 
         if(!is.null(gr_class)) {
           for(i in seq_len(nlevels(gr_class))) {
-            plot_biv_scatter(scores = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
-                             col = gr_col.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                             pch = gr_pch.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                             bg = gr_bg.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                             cex = gr_cex.points[index_sc_in_gr][gr_class == levels(gr_class)[i]])
-            if(!args$ellipse.groups) {
-              hulls_by_group_2D(xy = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
-                                fac = gr_class[gr_class == levels(gr_class)[i]],
-                                col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
-                                alpha = args$alpha.groups)
-            } else {
-              ellipses_by_group_2D(xy = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
-                                   fac = factor(gr_class[gr_class == levels(gr_class)[i]]),
-                                   col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
-                                   alpha = args$alpha.groups, conflev = args$conflev.groups)
+            if(points) {
+              plot_biv_scatter(scores = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
+                               col = gr_col.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                               pch = gr_pch.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                               bg = gr_bg.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                               cex = gr_cex.points[index_sc_in_gr][gr_class == levels(gr_class)[i]])
+            }
+            if(groups) {
+              if(!args$ellipse.groups) {
+                hulls_by_group_2D(xy = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
+                                  fac = gr_class[gr_class == levels(gr_class)[i]],
+                                  col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
+                                  alpha = args$alpha.groups)
+              } else {
+                ellipses_by_group_2D(xy = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
+                                     fac = factor(gr_class[gr_class == levels(gr_class)[i]]),
+                                     col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
+                                     alpha = args$alpha.groups, conflev = args$conflev.groups)
+              }
             }
           }
         }
@@ -2154,7 +2170,6 @@ plot_mspace <- function(mspace,
         gr_scores <- mspace$projected$gr_scores
         scores <- mspace$projected$scores
 
-
         index_sc_in_gr <- apply(scores, 1, \(x, y) {any(
           apply(y, 1, \(z, x) {all(z == x)}, x))}, gr_scores)
         if(length(index_sc_in_gr) == 0) index_sc_in_gr <- 1:nrow(scores)
@@ -2164,6 +2179,9 @@ plot_mspace <- function(mspace,
                                        which(apply(y, 1, \(z, x){
                                          all(z == x)}, x))}, gr_scores)))
         if(length(index_gr_in_sc) == 0) index_gr_in_sc <- 1:nrow(gr_scores)
+
+        if(length(unique(args$cex.points)) > 1)
+          args$cex.points <- rep(1, nrow(cbind(scores[index_sc_in_gr,])))
 
         pt_params <- NULL
         for(i in seq_len(nrow(cbind(scores[index_sc_in_gr,])))) {
@@ -2193,6 +2211,7 @@ plot_mspace <- function(mspace,
         gr_params$col2 <- args$col.groups
         gr_params$lty <- args$lty.groups
         gr_params$lwd <- args$lwd.groups
+
 
         if(any(grepl(gr_params$class, pattern = "_bis."))) {
           index_bis. <- which(grepl(gr_params$class, pattern = "_bis."))
