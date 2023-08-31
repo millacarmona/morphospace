@@ -58,7 +58,7 @@ The starting point of this workflow is morphometric data that is already free of
 # Remove variation associated with sexual dimorphism and compute the 
 # consensus shape of each species
 model <- lm(two.d.array(shapes) ~ sex)
-detr_shapes <- detrend_shapes(model) %>% 
+detr_shapes <- detrend_shapes(model, method = "residuals") %>% 
   arrayspecs(p = nrow(shapes), k = ncol(shapes))
 sp_shapes <- expected_shapes(shapes = detr_shapes, x = spp)
 ```
@@ -87,18 +87,17 @@ title("Morphospace\n+ species differentiation", cex.main = 1)
 # addition of mean shapes corresponding to the tips), convex hulls
 msp3 <- mspace(shapes = detr_shapes, links = wf, cex.ldm = 5) %>% 
   proj_shapes(shapes = detr_shapes, col = spp) %>%
-  proj_consensus(shapes = sp_shapes, bg = 1:nlevels(spp), pch = 21) %>%
-  proj_groups(groups = spp) %>% 
-  proj_phylogeny(tree = phy, lwd = 1.5)
+  proj_shapes(shapes = sp_shapes, bg = 1:nlevels(spp), pch = 21) %>%
+  proj_groups(shapes = detr_shapes, groups = spp) %>% 
+  proj_phylogeny(shapes = sp_shapes, tree = phy, lwd = 1.5)
 title("Morphospace\n+ groups + phylogeny", cex.main = 1)
 
 
-# Check the elements of each mspace object, note the slots corresponding to 
-# groups mean shapes and classification, the phylogenetic structure and scores 
-# for nodes and tips.
-names(msp1)
-names(msp2)
-names(msp3)
+# Check the elements projected in each mspace object, note the slots 
+#corresponding to groups mean shapes and classification, the phylogenetic structure and scores for nodes and tips.
+names(msp1$projected)
+names(msp2$projected)
+names(msp3$projected)
 
 ```
 
@@ -113,8 +112,8 @@ pca <- prcomp(two.d.array(detr_shapes[,,tails$data$type == "NDF"]))
 mspace(detr_shapes, links = wf, cex.ldm = 5) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
-  proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
-  proj_phylogeny(tree = phy, pch = 16) %>%
+  proj_shapes(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
+  proj_phylogeny(shapes = sp_shapes, tree = phy, pch.tips = 16) %>%
   proj_axis(obj = pca, axis = 1, mag = 1, col = "red", lwd = 3, lty = 1) %>%
   proj_axis(obj = pca, axis = 2, mag = 1, col = "red", lwd = 3, lty = 2)
 title("Morphospace\n+ PC1 and PC2 of NDF species projected", cex.main = 1)
@@ -177,7 +176,7 @@ mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
        links = wf, invax = c(1,2), cex.ldm = 5, plot = FALSE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
-  proj_consensus(shapes = sp_shapes, col = "black", pch = 16) %>%
+  proj_shapes(shapes = sp_shapes, col = "black", pch = 16) %>%
   plot_mspace(legend = TRUE)
 title("Morphospace emphasizing interspecific variation", cex.main = 1)
 ```
@@ -189,7 +188,7 @@ msp <- mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
        links = wf, invax = c(1,2), cex.ldm = 5, plot = TRUE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
-  proj_consensus(shapes = sp_shapes, col = "black", pch = 16)
+  proj_shapes(shapes = sp_shapes, col = "black", pch = 16)
 ```
 
 ```{r, echo = FALSE}
@@ -204,7 +203,7 @@ mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
        xlim = c(-0.25, 0.15), ylim = c(-0.2, 0.15), cex.ldm = 5, plot = FALSE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
-  proj_consensus(shapes = sp_shapes, col = "black", pch = 16) %>%
+  proj_shapes(shapes = sp_shapes, col = "black", pch = 16) %>%
   plot_mspace(legend = TRUE)
 title("Phylogenetic morphospace + samples", cex.main = 1)
 ```
@@ -216,7 +215,7 @@ msp <- mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
        xlim = c(-0.25, 0.15), ylim = c(-0.2, 0.15), cex.ldm = 5, plot = TRUE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
-  proj_consensus(shapes = sp_shapes, col = "black", pch = 16)
+  proj_shapes(shapes = sp_shapes, col = "black", pch = 16)
 ```
 
 ```{r, echo = FALSE}
@@ -234,9 +233,15 @@ For example, PC1 can be plotted against size to explore allometric patterns:
 
 
 ```{r}
+# Buld morphospace first
+msp <- mspace(shapes = detr_shapes, links = wf, cex.ldm = 5, plot = FALSE) %>% 
+  proj_shapes(shapes = detr_shapes, col = spp) %>%
+  proj_groups(shapes = detr_shapes, groups = spp) %>% 
+  proj_phylogeny(shapes = sp_shapes, tree = phy, col.tips = match(phy$tip.label, levels(spp)))
+
 # Plot PC1 against log-size, add legend
-plot_mspace(msp3, x = sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
-            col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size", 
+plot_mspace(msp, x = sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
+            col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size",
             legend = TRUE)
 ```
 
@@ -246,7 +251,7 @@ Or we can combine PC1 (or any other PC axis) with the phylogenetic tree to creat
 
 ```{r}
 # Plot vertical phenogram using PC1, add a legend
-plot_mspace(msp3, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
+plot_mspace(msp, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             col.groups = 1:nlevels(spp), ylab = "Time", legend = TRUE)
 ```
 
