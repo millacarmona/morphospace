@@ -1565,6 +1565,8 @@ col2hex <- function(col) {
 #' @param bg Background color for the scatterpoints.
 #' @param cex Numeric; size of the scatterpoints.
 #' @param ... Further arguments passed to [graphics::points()].
+#'
+#' @keywords internal
 plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
   if(is.null(dim(scores))) scores <- rbind(scores)
@@ -1598,6 +1600,8 @@ plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1
 #' @param bg Background color for the scatterpoints.
 #' @param cex Numeric; size of the scatterpoints.
 #' @param ... Further arguments passed to [graphics::points()].
+#'
+#' @keywords internal
 plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
   if(is.null(dim(scores))) scores <- rbind(scores)
@@ -1622,6 +1626,8 @@ plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 #'   surface contour be plotted?
 #' @param col Colors used to represent the landscape curve.
 #' @param lwd Integer; width of the lines depicting the landscape curve.
+#'
+#' @keywords internal
 plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
   if(drawlabels) {
     w.transp <-round(stats::quantile(x = 1:length(landscape$z), probs = c(0.25, 0.5, 0.75)))
@@ -1666,6 +1672,8 @@ plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
 #' @param drawlabels Logical; should the labels indicating the value of each
 #'   surface contour be plotted?
 #' @param alpha Transparency factor for filled contours.
+#'
+#' @keywords internal
 plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, drawlabels, alpha) {
   if(display == "contour") {
     graphics::contour(landscape$x, landscape$y, landscape$z, levels = levels,
