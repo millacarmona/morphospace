@@ -55,6 +55,10 @@ reference:
   - hulls_by_group_2D
   - density_by_group_2D
   - col2hex
+  - plot_univ_scatter
+  - plot_biv_scatter
+  - plot_univ_landscape
+  - plot_biv_landscape
 - title: miscellaneous
   contents:
   - pile_shapes
