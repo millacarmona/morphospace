@@ -65,7 +65,7 @@ mspace(shapes, links = wf, cex.ldm = 5)
 ```
 
 
-The ordination produced by `mspace` is used as a reference frame in which scatter points, groups centroids, convex hulls, confidence ellipses, a phylogeny, or a set of morphometric axes can be projected using the `proj_*` functions:
+The ordination produced by `mspace` is used as a reference frame in which scatter points, convex hulls / confidence ellipses, a phylogeny, a set of morphometric axes or a landscape surface can be projected using the `proj_*` functions:
 
 
 ```{r}
@@ -79,7 +79,8 @@ msp <- mspace(shapes = shapes, links = wf, cex.ldm = 5) %>%
   # convex hulls enclosing groups
   proj_groups(shapes = shapes, groups = spp, alpha = 0.5) %>% 
   # phylogenetic relationships
-  proj_phylogeny(shapes = spp_shapes, tree = phy, lwd = 1.5) 
+  proj_phylogeny(shapes = spp_shapes, tree = phy, lwd = 1.5, 
+                 col.tips = match(phy$tip.label, levels(spp)))
 
 ```
 
@@ -92,6 +93,7 @@ Once the `"mspace"` object has been created, the `plot_mspace` function can be u
 plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
             phylo = FALSE, xlab = "Log-size", legend = TRUE)
+
 ```
 
 
