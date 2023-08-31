@@ -241,12 +241,21 @@ for(i in 1:4) {
 }
 ```
 
-```{r}
+```{r, eval = FALSE}
 # Generate stratomorphospace
 strmsp <- mspace(detr_shapes, FUN = bg_prcomp, groups = species,
                  mag = 0.5, bg.model = "light gray", plot = FALSE) %>%
     proj_shapes(shapes = detr_shapes, pch = 1, col = species)
+```
 
+```{r, echo = FALSE, fig.show='hide', warning=FALSE}
+# Generate stratomorphospace
+strmsp <- mspace(detr_shapes, FUN = bg_prcomp, groups = species,
+                 mag = 0.5, bg.model = "light gray", plot = TRUE) %>%
+    proj_shapes(shapes = detr_shapes, pch = 1, col = species)
+```
+
+```{r}
 # Plot time axis vs first PC
 plot_mspace(mspace = strmsp, x = ages, axes = 1)
 
