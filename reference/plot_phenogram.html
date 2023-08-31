@@ -74,10 +74,14 @@ Used internally.</p>
 <span>  <span class="va">lwd.phylo</span>,</span>
 <span>  <span class="va">lty.phylo</span>,</span>
 <span>  <span class="va">col.phylo</span>,</span>
-<span>  <span class="va">cex.groups</span>,</span>
-<span>  <span class="va">pch.groups</span>,</span>
-<span>  <span class="va">col.groups</span>,</span>
-<span>  <span class="va">bg.groups</span>,</span>
+<span>  <span class="va">cex.nodes</span>,</span>
+<span>  <span class="va">pch.nodes</span>,</span>
+<span>  <span class="va">col.nodes</span>,</span>
+<span>  <span class="va">bg.nodes</span>,</span>
+<span>  <span class="va">cex.tips</span>,</span>
+<span>  <span class="va">pch.tips</span>,</span>
+<span>  <span class="va">col.tips</span>,</span>
+<span>  <span class="va">bg.tips</span>,</span>
 <span>  <span class="va">points</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -95,8 +99,8 @@ the y axis.</p></dd>
 
 
 <dt>tree</dt>
-<dd><p>A <code>"phylo"</code> object containing a phylogenetic tree. Tip labels
-should match the row names from <code>x</code> or <code>y</code>.</p></dd>
+<dd><p>A <code>"phylo"</code> object containing a phylogenetic tree. Tip
+labels should match the row names from <code>x</code> or <code>y</code>.</p></dd>
 
 
 <dt>phylo_scores</dt>
@@ -109,12 +113,12 @@ the phylogeny provided in <code>tree</code>.</p></dd>
 
 
 <dt>lwd.phylo</dt>
-<dd><p>Numeric; the width of the lines depicting phylogenetic
+<dd><p>Integer; the width of the lines depicting phylogenetic
 branches.</p></dd>
 
 
 <dt>lty.phylo</dt>
-<dd><p>Numeric; the type of the lines depicting phylogenetic
+<dd><p>Integer; the type of the lines depicting phylogenetic
 branches.</p></dd>
 
 
@@ -123,24 +127,44 @@ branches.</p></dd>
 branches.</p></dd>
 
 
-<dt>cex.groups</dt>
-<dd><p>Numeric; the size of the scatter points corresponding to
-groups mean shapes.</p></dd>
+<dt>cex.nodes</dt>
+<dd><p>Numeric; size of the scatterpoints representing the nodes
+of the phylogeny.</p></dd>
 
 
-<dt>pch.groups</dt>
-<dd><p>Numeric; the symbol of the scatter points corresponding to
-groups mean shapes.</p></dd>
+<dt>pch.nodes</dt>
+<dd><p>Symbol of the scatterpoints representing the nodes of the
+phylogeny.</p></dd>
 
 
-<dt>col.groups</dt>
-<dd><p>The color of the scatter points corresponding to groups
-mean shapes.</p></dd>
+<dt>col.nodes</dt>
+<dd><p>Color of the scatterpoints representing the nodes of the
+phylogeny.</p></dd>
 
 
-<dt>bg.groups</dt>
-<dd><p>The background color of the scatter points corresponding
-to groups mean shapes.</p></dd>
+<dt>bg.nodes</dt>
+<dd><p>Background color of the scatterpoints representing the
+nodes of the phylogeny.</p></dd>
+
+
+<dt>cex.tips</dt>
+<dd><p>Numeric; size of the scatterpoints representing the tips
+of the phylogeny.</p></dd>
+
+
+<dt>pch.tips</dt>
+<dd><p>Symbol of the scatterpoints representing the tips of the
+phylogeny.</p></dd>
+
+
+<dt>col.tips</dt>
+<dd><p>Color of the scatterpoints representing the tips of the
+phylogeny.</p></dd>
+
+
+<dt>bg.tips</dt>
+<dd><p>Background color of the scatterpoints representing the
+tips of the phylogeny.</p></dd>
 
 
 <dt>points</dt>
@@ -161,22 +185,27 @@ to groups mean shapes.</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#generate basic morphospace, add sampled shapes, species mean shapes, and</span></span></span>
 <span class="r-in"><span><span class="co">#phylogenetic structure</span></span></span>
-<span class="r-in"><span><span class="va">msp</span> <span class="op">&lt;-</span> <span class="fu"><a href="mspace.html">mspace</a></span><span class="op">(</span><span class="va">shapes</span>, mag <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, cex.ldm <span class="op">=</span> <span class="fl">0</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="proj_shapes.html">proj_shapes</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span><span class="op">[</span><span class="va">species</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">1</span>, cex <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="proj_consensus.html">proj_consensus</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">sp_shapes</span>, pch <span class="op">=</span> <span class="fl">21</span>, bg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">13</span>, cex <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="proj_phylogeny.html">proj_phylogeny</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">msp</span> <span class="op">&lt;-</span> <span class="fu"><a href="mspace.html">mspace</a></span><span class="op">(</span><span class="va">shapes</span>, mag <span class="op">=</span> <span class="fl">0.7</span>, axes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, cex.ldm <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>              plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="proj_shapes.html">proj_shapes</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span><span class="op">[</span><span class="va">species</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>              cex <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="proj_shapes.html">proj_shapes</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">sp_shapes</span>, pch <span class="op">=</span> <span class="fl">21</span>, bg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">13</span>, cex <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="proj_phylogeny.html">proj_phylogeny</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">sp_shapes</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot.xy(xy.coords(x, y), type = type, ...):</span> plot.new has not been called yet</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#get node heights</span></span></span>
 <span class="r-in"><span><span class="va">heights</span> <span class="op">&lt;-</span> <span class="fu">phytools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/phytools/man/nodeHeights.html" class="external-link">nodeHeights</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">node_heights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">heights</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">heights</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">node_heights</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span></span>
+<span class="r-in"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span> <span class="op">+</span> <span class="va">tree</span><span class="op">$</span><span class="va">Nnode</span><span class="op">)</span><span class="op">)</span> <span class="va">node_heights</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">heights</span><span class="op">[</span><span class="va">tree</span><span class="op">$</span><span class="va">edge</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#plot simple phengram</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">node_heights</span>, <span class="va">msp</span><span class="op">$</span><span class="va">phylo_scores</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">node_heights</span>, <span class="va">msp</span><span class="op">$</span><span class="va">projected</span><span class="op">$</span><span class="va">phylo_scores</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'msp' not found</span>
-<span class="r-in"><span><span class="fu">plot_phenogram</span><span class="op">(</span>tree <span class="op">=</span> <span class="va">tree</span>, x <span class="op">=</span> <span class="va">node_heights</span>, phylo_scores <span class="op">=</span> <span class="va">msp</span><span class="op">$</span><span class="va">phylo_scores</span>,</span></span>
-<span class="r-in"><span>               axis <span class="op">=</span> <span class="fl">1</span>, lwd.phylo <span class="op">=</span> <span class="fl">1</span>, lty.phylo <span class="op">=</span> <span class="fl">1</span>, col.phylo <span class="op">=</span> <span class="fl">1</span>, cex.groups <span class="op">=</span> <span class="fl">1</span>,</span></span>
-<span class="r-in"><span>               col.groups <span class="op">=</span> <span class="fl">1</span>, pch.groups <span class="op">=</span> <span class="fl">1</span>, points <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_phenogram</span><span class="op">(</span>tree <span class="op">=</span> <span class="va">tree</span>, x <span class="op">=</span> <span class="va">node_heights</span>,</span></span>
+<span class="r-in"><span>               phylo_scores <span class="op">=</span> <span class="va">msp</span><span class="op">$</span><span class="va">projected</span><span class="op">$</span><span class="va">phylo_scores</span>, axis <span class="op">=</span> <span class="fl">1</span>, lwd.phylo <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>               lty.phylo <span class="op">=</span> <span class="fl">1</span>, col.phylo <span class="op">=</span> <span class="fl">1</span>, cex.tips <span class="op">=</span> <span class="fl">1</span>, col.tips <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>               pch.tips <span class="op">=</span> <span class="fl">1</span>, cex.nodes <span class="op">=</span> <span class="fl">1</span>, col.nodes <span class="op">=</span> <span class="fl">1</span>, pch.nodes <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>               points <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'msp' not found</span>
 </code></pre></div>
     </div>

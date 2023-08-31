@@ -75,11 +75,12 @@ containing a linear model or a multivariate ordination analysis.</p>
     <dl><dt>obj</dt>
 <dd><p>An object containing either a multivariate ordination of class
 <code>"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes"</code> or
-<code>"phy_pls_shapes"</code> or a <code>"mlm"</code> object fitted using <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code>.</p></dd>
+<code>"phy_pls_shapes"</code> or a <code>"mlm"</code> object fitted using
+<code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code>.</p></dd>
 
 
 <dt>axis</dt>
-<dd><p>An optional numeric value specifying the axis of the multivariate
+<dd><p>An optional integer value specifying the axis of the multivariate
 ordination which is to be represented.</p></dd>
 
 
@@ -97,14 +98,14 @@ landmark data and <code>2 x (4 x nb.h)</code> for the case of Fourer data (where
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>If an object of class <code>"mlm"</code> fitting shape to a factor (only two
-levels allowed) is supplied in <code>obj</code>, magnification of the axis range
-is attained through bgPCA.</p>
+    <p>If an object of class <code>"mlm"</code> fitting shape to a factor (only
+two levels allowed) is supplied in <code>obj</code>, magnification of the axis
+range is attained through bgPCA.</p>
     </div>
     <div id="references">
     <h2>References</h2>
-    <p>MacLeod, N. (2009). <em>Form &amp; shape models</em>. Palaeontological
-Association Newsletter, 72(620), 14-27.</p>
+    <p>MacLeod, N. (2009). <em>Form &amp; shape models</em>. Palaeontological Association
+Newsletter, 72(620), 14-27.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -138,14 +139,16 @@ Association Newsletter, 72(620), 14-27.</p>
 <span class="r-in"><span><span class="fu"><a href="pile_shapes.html">pile_shapes</a></span><span class="op">(</span><span class="va">extshapes</span>, links <span class="op">=</span> <span class="va">links</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ax_transformation-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#perform lm of shape on size, compute and plot extreme shapes at its natural range</span></span></span>
+<span class="r-in"><span><span class="co">#perform lm of shape on size, compute and plot extreme shapes at its natural</span></span></span>
+<span class="r-in"><span><span class="co">#range</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">tails</span><span class="op">$</span><span class="va">shapes</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">tails</span><span class="op">$</span><span class="va">sizes</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">extshapes2d</span> <span class="op">&lt;-</span> <span class="fu">ax_transformation</span><span class="op">(</span>obj <span class="op">=</span> <span class="va">model</span>, mag <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">extshapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/arrayspecs.html" class="external-link">arrayspecs</a></span><span class="op">(</span><span class="va">extshapes2d</span>, k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>, p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="pile_shapes.html">pile_shapes</a></span><span class="op">(</span><span class="va">extshapes</span>, links <span class="op">=</span> <span class="va">links</span>, mshape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ax_transformation-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#perform lm of shape on size, compute and plot extreme shapes at its natural range</span></span></span>
+<span class="r-in"><span><span class="co">#perform lm of shape on size, compute and plot extreme shapes at its natural</span></span></span>
+<span class="r-in"><span><span class="co">#range</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">tails</span><span class="op">$</span><span class="va">shapes</span><span class="op">)</span> <span class="op">~</span> <span class="va">tails</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">sex</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">extshapes2d</span> <span class="op">&lt;-</span> <span class="fu">ax_transformation</span><span class="op">(</span>obj <span class="op">=</span> <span class="va">model</span>, mag <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">extshapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/arrayspecs.html" class="external-link">arrayspecs</a></span><span class="op">(</span><span class="va">extshapes2d</span>, k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span>, p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">shapes</span><span class="op">)</span><span class="op">)</span></span></span>

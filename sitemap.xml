@@ -40,7 +40,16 @@
     <loc>https://millacarmona.github.io/morphospace/reference/build_template2d.html</loc>
   </url>
   <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/burnaby.html</loc>
+  </url>
+  <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/col2hex.html</loc>
+  </url>
+  <url>
     <loc>https://millacarmona.github.io/morphospace/reference/correct_efourier.html</loc>
+  </url>
+  <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/density_by_group_2D.html</loc>
   </url>
   <url>
     <loc>https://millacarmona.github.io/morphospace/reference/detrend_shapes.html</loc>
@@ -53,6 +62,9 @@
   </url>
   <url>
     <loc>https://millacarmona.github.io/morphospace/reference/expected_shapes.html</loc>
+  </url>
+  <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/extract_shapes.html</loc>
   </url>
   <url>
     <loc>https://millacarmona.github.io/morphospace/reference/hulls_by_group_2D.html</loc>
@@ -76,7 +88,16 @@
     <loc>https://millacarmona.github.io/morphospace/reference/phy_prcomp.html</loc>
   </url>
   <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/phyalign_comp.html</loc>
+  </url>
+  <url>
     <loc>https://millacarmona.github.io/morphospace/reference/pile_shapes.html</loc>
+  </url>
+  <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/plot_biv_landscape.html</loc>
+  </url>
+  <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/plot_biv_scatter.html</loc>
   </url>
   <url>
     <loc>https://millacarmona.github.io/morphospace/reference/plot_morphogrid2d.html</loc>
@@ -91,22 +112,31 @@
     <loc>https://millacarmona.github.io/morphospace/reference/plot_phenogram.html</loc>
   </url>
   <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/plot_univ_landscape.html</loc>
+  </url>
+  <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/plot_univ_scatter.html</loc>
+  </url>
+  <url>
     <loc>https://millacarmona.github.io/morphospace/reference/pls2b.html</loc>
   </url>
   <url>
     <loc>https://millacarmona.github.io/morphospace/reference/pls_shapes.html</loc>
   </url>
   <url>
-    <loc>https://millacarmona.github.io/morphospace/reference/proj_axis.html</loc>
+    <loc>https://millacarmona.github.io/morphospace/reference/print.mspace.html</loc>
   </url>
   <url>
-    <loc>https://millacarmona.github.io/morphospace/reference/proj_consensus.html</loc>
+    <loc>https://millacarmona.github.io/morphospace/reference/proj_axis.html</loc>
   </url>
   <url>
     <loc>https://millacarmona.github.io/morphospace/reference/proj_eigen.html</loc>
   </url>
   <url>
     <loc>https://millacarmona.github.io/morphospace/reference/proj_groups.html</loc>
+  </url>
+  <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/proj_landscape.html</loc>
   </url>
   <url>
     <loc>https://millacarmona.github.io/morphospace/reference/proj_phylogeny.html</loc>
@@ -116,6 +146,9 @@
   </url>
   <url>
     <loc>https://millacarmona.github.io/morphospace/reference/rev_eigen.html</loc>
+  </url>
+  <url>
+    <loc>https://millacarmona.github.io/morphospace/reference/rotate_coords.html</loc>
   </url>
   <url>
     <loc>https://millacarmona.github.io/morphospace/reference/rotate_fcoef.html</loc>

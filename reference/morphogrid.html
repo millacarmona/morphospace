@@ -69,6 +69,7 @@ Used internally.</p>
 <span>  <span class="va">ordination</span>,</span>
 <span>  <span class="va">axes</span>,</span>
 <span>  <span class="va">datype</span>,</span>
+<span>  rescale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  template <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  x <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -89,7 +90,7 @@ Used internally.</p>
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>ordination</dt>
-<dd><p>An ordination (i.e. a <code>"prcomp"</code>, <code>"bg_prcomp"</code>,
+<dd><p>An ordination (i.e., a <code>"prcomp"</code>, <code>"bg_prcomp"</code>,
 <code>"phy_prcomp"</code> or <code>"pls_shape"</code> object).</p></dd>
 
 
@@ -104,11 +105,17 @@ first value of this argument is considered.</p></dd>
 <code>"landm"</code>).</p></dd>
 
 
+<dt>rescale</dt>
+<dd><p>Logical; whether to re-scale background shape models so shape
+variation is shown more clearly.</p></dd>
+
+
 <dt>template</dt>
 <dd><p>A 2-column matrix containing landmarks/semilandmarks followed
-by coordinates defining a curve or set of curves describing additional aspects
-of morphology, which will be warped using TPS interpolation to produce the set
-of background shell models(see <code><a href="build_template2d.html">build_template2d</a></code>).</p></dd>
+by coordinates defining a curve or set of curves describing additional
+aspects of morphology, which will be warped using TPS interpolation to
+produce the set of background shell models (see
+<code><a href="build_template2d.html">build_template2d</a></code>).</p></dd>
 
 
 <dt>x</dt>
@@ -163,15 +170,17 @@ landmarks/semilandmarks (for landmark data only).</p></dd>
     <h2>Value</h2>
     
 
-<p>A list of length 2 containing:</p><ul><li><p><code>$models_mat:</code> a 2-column matrix with the (x,y) coordinates of
+<p>A list of length 3 containing:</p><ul><li><p><code>$models_mat:</code> a 2-column matrix with the (x,y) coordinates of
 all the shape models in the background.</p></li>
 <li><p><code>$models_arr:</code> same as <code>models_mat</code> but in 3-margins array
 format.</p></li>
+<li><p><code>$grid:</code> coordinates marking the centroid of each shape model.
+Intended for internal use.</p></li>
 </ul></div>
     <div id="references">
     <h2>References</h2>
-    <p>MacLeod, N. (2009). <em>Form &amp; shape models</em>. Palaeontological
-Association Newsletter, 72(620), 14-27.</p>
+    <p>MacLeod, N. (2009). <em>Form &amp; shape models</em>. Palaeontological Association
+Newsletter, 72(620), 14-27.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>

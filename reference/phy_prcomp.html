@@ -75,8 +75,8 @@ rows. Row must be named and match tip labels from the phylogenetic
 
 
 <dt>tree</dt>
-<dd><p>A <code>"phylo"</code> object containing a phylogenetic tree. Tip labels
-should match the row names from <code>x</code>.</p></dd>
+<dd><p>A <code>"phylo"</code> object containing a phylogenetic tree. Tip
+labels should match the row names from <code>x</code>.</p></dd>
 
 
 <dt>corr</dt>
@@ -95,14 +95,14 @@ as input.</p></dd>
 <p>A <code>"phy_prcomp"</code> object formatted following the <code>"prcomp"</code></p>
 
 
-<p>class:</p><ul><li><p><code>$sdev:</code> the standard deviations of the principal components
-(i.e. the square roots of the eigenvalues of the covariance/correlation
-matrix).</p></li>
+<p>class:</p><ul><li><p><code>$x:</code> a matrix with the scores of observations in the new
+ordination axes.</p></li>
+<li><p><code>$values:</code> singular values from the SVD of the phylogenetic
+rate matrix.</p></li>
 <li><p><code>$rotation:</code> a matrix of eigenvector coefficients.</p></li>
-<li><p><code>$center:</code> the phylogenetic mean (i.e. the shape estimated
+<li><p><code>$center:</code> the phylogenetic mean (i.e., the shape estimated
 for the root of the tree).</p></li>
-<li><p><code>$totvar:</code> the sum of the variances from all the original
-variables.</p></li>
+<li><p><code>$totvar:</code> the sum of the variances of the original data.</p></li>
 <li><p><code>$lambda, $logL:</code> fitted value of lambda and log-likelihood
 of the model; see <code><a href="https://rdrr.io/pkg/phytools/man/phyl.pca.html" class="external-link">phyl.pca</a></code>.</p></li>
 </ul></div>
@@ -111,31 +111,39 @@ of the model; see <code><a href="https://rdrr.io/pkg/phytools/man/phyl.pca.html"
     <p>Phylogenetic PCA finds the linear combination of variables (in
 the context of <code>morphospace</code> will generally be a series of shapes
 arranged as 2-margin matrix) maximizing the residual variation left after
-removing covariation explained by phylogenetic history (i.e. they reflect
-the covariance that would correspond to a star phylogeny).</p>
-<p>Phylogenetic PCA has some important differences to regular PCA. First, the
-resulting ordination is centered around the phylogenetic mean (i.e. the
-values estimated for the root of the tree) instead of the overall centroid
-of the original variables. More importantly, both phylogenetic PCA's
-eigenvectors and eigenvalues have been constructed using covariation that
-is independent of phylogenetic structure. However, only the orientation of
-the scores on those axes, and not their variances, reflect this adjustment.
-In other words, orientation of the phylogenetic PC axes are devoid of
-phylogenetic structure, but magnitudes measured in the resulting morphospace
-(e.g. distances, variances) still retain phylogenetic information. Stemming
-from this same fact, the variances computed using phylogenetic scores differ
-from the ones calculated from the phylogenetic eigenvalues (which represent
-the total amount of variance among the taxa after removing covariance
-accounted by phylogeny, although their magnitude depends on the units used
-to measure branch length), and do not necessarily decrease for subordinate
-axes. Also, the set of phylogenetic scores are not uncorrelated, meaning
-they can contain redundant information. For more details, see Polly et al.
-2013.</p>
+removing covariation explained by phylogenetic history (i.e., they reflect
+the covariance that would correspond to a star phylogeny), assuming a
+Brownian model of evolution.</p>
+<p>Phylogenetic PCA has some important differences relative to regular PCA.
+First, the resulting ordination is centered around the phylogenetic mean
+(i.e., the values estimated for the root of the tree) instead of the
+overall centroid of the original variables. More importantly, both
+phylogenetic PCA's eigenvectors and eigenvalues have been constructed using
+covariation that is independent of phylogenetic structure. However, only
+the orientation of the scores on those axes, and not their variances,
+reflect this adjustment. In other words, orientation of the phylogenetic
+PC axes are devoid of phylogenetic structure, but magnitudes measured in
+the resulting morphospace (e.g. distances, variances) still retain
+phylogenetic information.</p>
+<p>Because of these properties, eigenvalues and variances computed from
+phylogenetic PC scores will differ. The former represents the amount of
+variation among the taxa after removing covariance accounted by phylogeny
+-- although their magnitude depends on the units used to measure
+branch length, and thus cannot be simply interpreted as a proportion of the
+original variance. Also, variance computed from pPC scores do not
+necessarily decrease for lower axes, and are not uncorrelated, meaning they
+can contain redundant information. For more details on the difference
+between phylogenetic and regular PCA, see Polly et al. 2013.</p>
+<p>Like PCA, phylogenetic PCA does not change the dimensionality of the shape
+data set -- the number of resulting pPC axes will be be equal to the
+number of original variables (unless this is higher than the number of
+observations, in which case the number of resulting pPC will be equal
+to the latter).</p>
     </div>
     <div id="references">
     <h2>References</h2>
-    <p>Revell, L. J. (2009). <em>Size-correction and principal components
-for interspecific comparative studies</em>. Evolution, 63, 3258-3268.</p>
+    <p>Revell, L. J. (2009). <em>Size-correction and principal components for
+interspecific comparative studies</em>. Evolution, 63, 3258-3268.</p>
 <p>Polly, P. D., Lawing, A. M., Fabre, A. C., &amp; Goswami, A. (2013).
 <em>Phylogenetic principal components analysis and geometric
 morphometrics</em>. Hystrix, 24(1), 33-41.</p>
@@ -162,25 +170,26 @@ of Mammalogy, 24(1), 25-32.</p>
 <span class="r-in"><span><span class="co">#perform phylogenetic PCA</span></span></span>
 <span class="r-in"><span><span class="va">ppca</span> <span class="op">&lt;-</span> <span class="fu">phy_prcomp</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/geomorph/man/two.d.array.html" class="external-link">two.d.array</a></span><span class="op">(</span><span class="va">sp_shapes</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#look at the results</span></span></span>
+<span class="r-in"><span><span class="co">#inspect results</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ppca</span><span class="op">)</span> <span class="co">#the contents of the resulting object</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "sdev"     "rotation" "x"        "center"   "totvar"  </span>
-<span class="r-in"><span><span class="fu"><a href="exp_var.html">exp_var</a></span><span class="op">(</span><span class="va">ppca</span><span class="op">)</span> <span class="co">#variance explained by each axis</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         variance cummulative</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC1  75.67476    75.67476</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC2  21.40326    97.07802</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC3   1.85156    98.92957</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC4   0.79018    99.71975</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC5   0.25384    99.97359</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC6   0.02137    99.99496</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC7   0.00504   100.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC8   0.00000   100.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC9   0.00000   100.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC10  0.00000   100.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC11  0.00000   100.00000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> phyPC12  0.00000   100.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "values"   "rotation" "x"        "center"  </span>
+<span class="r-in"><span><span class="co">#exp_var(ppca) ##interpretation of eigenvalues is complex! not yet implemented</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ppca</span><span class="op">$</span><span class="va">x</span><span class="op">)</span> <span class="co">#ordination</span></span></span>
 <span class="r-plt img"><img src="phy_prcomp-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#compare shape variation as summarized by different methods</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#build morphospace using phylogenetic PCA</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="mspace.html">mspace</a></span><span class="op">(</span><span class="va">sp_shapes</span>, links <span class="op">=</span> <span class="va">tails</span><span class="op">$</span><span class="va">links</span>, nh <span class="op">=</span> <span class="fl">8</span>, nv <span class="op">=</span> <span class="fl">6</span>, FUN <span class="op">=</span> <span class="va">phy_prcomp</span>,</span></span>
+<span class="r-in"><span>       tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="proj_phylogeny.html">proj_phylogeny</a></span><span class="op">(</span><span class="va">sp_shapes</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="phy_prcomp-2.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#compare against morphospace built with ordinary PCA</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="mspace.html">mspace</a></span><span class="op">(</span><span class="va">sp_shapes</span>, links <span class="op">=</span> <span class="va">tails</span><span class="op">$</span><span class="va">links</span>, nh <span class="op">=</span> <span class="fl">8</span>, nv <span class="op">=</span> <span class="fl">6</span>, invax <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="proj_phylogeny.html">proj_phylogeny</a></span><span class="op">(</span><span class="va">sp_shapes</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="phy_prcomp-3.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </div>

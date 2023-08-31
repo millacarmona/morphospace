@@ -89,7 +89,7 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of morphospace from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>You can install the development version of <code>morphospace</code> from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"millacarmona/morphospace"</span><span class="op">)</span></span></code></pre></div>
@@ -127,12 +127,10 @@
 <span><span class="va">msp</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/mspace.html">mspace</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, links <span class="op">=</span> <span class="va">wf</span>, cex.ldm <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="co"># scatter points</span></span>
 <span>  <span class="fu"><a href="reference/proj_shapes.html">proj_shapes</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, col <span class="op">=</span> <span class="va">spp</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="co"># groups centroids (mean shapes)</span></span>
-<span>  <span class="fu"><a href="reference/proj_consensus.html">proj_consensus</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">spp_shapes</span>, bg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">spp</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fl">21</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="co"># convex hulls enclosing groups</span></span>
-<span>  <span class="fu"><a href="reference/proj_groups.html">proj_groups</a></span><span class="op">(</span>groups <span class="op">=</span> <span class="va">spp</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="reference/proj_groups.html">proj_groups</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, groups <span class="op">=</span> <span class="va">spp</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="co"># phylogenetic relationships</span></span>
-<span>  <span class="fu"><a href="reference/proj_phylogeny.html">proj_phylogeny</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="va">phy</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> </span></code></pre></div>
+<span>  <span class="fu"><a href="reference/proj_phylogeny.html">proj_phylogeny</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">spp_shapes</span>, tree <span class="op">=</span> <span class="va">phy</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> </span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-3-1.png" width="100%"></p>
 <p>Once the <code>"mspace"</code> object has been created, the <code>plot_mspace</code> function can be used to either regenerate/modify the plot, add a legend, or to combine morphometric axes with other non-shape variables to produce ‘hybrid’ morphospaces. For example, PC1 can be plotted against size to explore allometric patterns.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -147,7 +145,7 @@
 <span><span class="fu"><a href="reference/plot_mspace.html">plot_mspace</a></span><span class="op">(</span><span class="va">msp</span>, y <span class="op">=</span> <span class="va">phy</span>, axes <span class="op">=</span> <span class="fl">1</span>, nh <span class="op">=</span> <span class="fl">6</span>, nv <span class="op">=</span> <span class="fl">6</span>, cex.ldm <span class="op">=</span> <span class="fl">4</span>, </span>
 <span>            col.groups <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">spp</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="st">"Time"</span>, legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-5-1.png" width="100%"></p>
-<p><code>morphospace</code> can also handle closed outlines (in the form of elliptic Fourier coefficients) and 3D landmark data, as shown below briefly using the <code>shells</code> and <code>shells3D</code>data sets:</p>
+<p><code>morphospace</code> can also handle closed outlines (in the form of elliptic Fourier coefficients) and 3D landmark data, as shown below briefly using the <code>shells</code> and <code>shells3D</code> data sets:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"shells"</span><span class="op">)</span></span>
@@ -181,16 +179,16 @@
 <span>  <span class="fu"><a href="reference/proj_groups.html">proj_groups</a></span><span class="op">(</span>shapes <span class="op">=</span> <span class="va">shapes</span>, groups <span class="op">=</span> <span class="va">spp</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Preparing for snapshot: rotate mean shape to the desired orientation</span></span>
 <span><span class="co">#&gt;  (don't close or minimize the rgl device).Press &lt;Enter&gt; in the console to continue:</span></span>
-<span><span class="co">#&gt; This will take a minute...</span></span>
+<span><span class="co">#&gt; This can take a few seconds...</span></span>
 <span><span class="co">#&gt; DONE.</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-8-1.png" width="100%"></p>
 <p>Aside from working with these types of morphometric data, <code>morphospace</code> provides functions to perform some useful shape operations, use TPS interpolation of curves/meshes to improve visualizations, and supports a variety of multivariate methods (bgPCA, phylogenetic PCA, PLS, phylogenetic PLS) to produce ordinations. For these and other options and details, go to <a href="https://millacarmona.github.io/morphospace/articles/General-usage.html">General usage</a> and <a href="https://millacarmona.github.io/morphospace/articles/Worked-examples.html">Worked examples</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="update-august-2022">Update (August 2022)<a class="anchor" aria-label="anchor" href="#update-august-2022"></a>
+<h2 id="update-1-august-2022">Update 1 (August 2022)<a class="anchor" aria-label="anchor" href="#update-1-august-2022"></a>
 </h2>
 <ul>
-<li><p>Different behavior for <code>proj_shapes</code> (now replaces <code>mspace$x</code> with the actual scores being projected) and <code>proj_axis</code> (now adds one or more axes into an <code>mspace$shapes_axis</code>).</p></li>
+<li><p>Different behavior for <code>proj_shapes</code> (now replaces <code>mspace$x</code> with the actual scores being projected) and <code>proj_axis</code> (now adds one or more axes into an <code>mspace$shape_axis</code>).</p></li>
 <li><p>New <code>ellipses_by_groups_2D</code> (uses <code><a href="https://rdrr.io/pkg/car/man/Ellipses.html" class="external-link">car::ellipse</a></code>) function as an option for <code>proj_groups</code> and <code>plot_mspace</code>.</p></li>
 <li><p>Morphospaces without background shape models are now an option (for both <code>mspace</code> and <code>plot_mspace</code>).</p></li>
 <li><p><code>plot_mspace</code> now regenerates the original mspace plot by default (<code>proj_*</code> functions were modified such that all the relevant graphical parameters are inherited downstream to <code>plot_mspace</code>), has further flexibility regarding hybrid morphospaces (<code>plot_phenogram</code> has been updated) and allows adding a legend (and some various bugs were fixed as well).</p></li>
@@ -200,11 +198,26 @@
 </ul>
 </div>
 <div class="section level2">
+<h2 id="update-2-august-2023">Update 2 (August 2023)<a class="anchor" aria-label="anchor" href="#update-2-august-2023"></a>
+</h2>
+<ul>
+<li><p>The structure of <code>"mspace"</code> objects has been reorganized and now contain 3 main slots: <code>$ordination</code> (multivariate ordination details), <code>$projected</code> (elements added using <code>proj_*</code> functions) and <code>$plotinfo</code> (used for regeneration using <code>plot_mspace</code>). This has been complemented with a <code>print</code> method for the <code>"mspace"</code> class.</p></li>
+<li><p>New <code>proj_landscape</code> function has been added to represent adaptive surfaces interpolated from functional or performance indices (although can be used for any numerical variable).</p></li>
+<li><p><code>proj_consensus</code> has been removed.</p></li>
+<li><p>New <code>extract_shapes</code> function for extracting synthetic shapes from <code>"mspace"</code> objects (background shape models, shapes along ordination axes, or specific coordinates selected interactively).</p></li>
+<li><p>New <code>burnaby</code> function, implementing Burnaby’s approach for standardization of morphometric data by computing a shape subspace orthogonal to an arbitrary vector or variable</p></li>
+<li><p>New <code>phyalign_comp</code> function, implementing Phylogenetically aligned component analysis, which finds the linear combination of variables maximizing covariation between trait variation and phylogenetic structure (Collyer &amp; Adams 2021). Still a work in progress.</p></li>
+<li><p>Several internal adjustments have been introduced to the <code>mspace</code>, <code>proj_*</code> and <code>plot_mspace</code> functions in order to improve visualization and make the workflow more flexible.</p></li>
+<li><p>Legends created using <code>plot_mspace</code> have been improved, and scale bars for interpreting landscapes have also been made available.</p></li>
+</ul>
+</div>
+<div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <p>Adams D.C., Collyer M.L., Kaliontzopoulou A., &amp; Baken E.K. (2021). <em>geomorph: Software for geometric morphometric analyses</em>. R package version 4.0.2. <a href="https://cran.r-project.org/package=geomorph" class="external-link uri">https://cran.r-project.org/package=geomorph</a>.</p>
-<p>Bache S.F., &amp; Wickham H. (2022). m<em>agrittr: A Forward-Pipe Operator for R</em>. R package version 2.0.3. <a href="https://CRAN.R-project.org/package=magrittr" class="external-link uri">https://CRAN.R-project.org/package=magrittr</a>.</p>
+<p>Bache S.F., &amp; Wickham H. (2022). <em>magrittr: A Forward-Pipe Operator for R</em>. R package version 2.0.3. <a href="https://CRAN.R-project.org/package=magrittr" class="external-link uri">https://CRAN.R-project.org/package=magrittr</a>.</p>
 <p>Bonhomme V., Picq S., Gaucherel C., &amp; Claude J. (2014). <em>Momocs: Outline Analysis Using R</em>. Journal of Statistical Software, 56(13), 1-24. <a href="http://www.jstatsoft.org/v56/i13/" class="external-link uri">http://www.jstatsoft.org/v56/i13/</a>.</p>
+<p>Collyer, M. L., &amp; Adams, D. (2021). <em>Phylogenetically aligned component analysis</em>. Methods in Ecology and Evolution, 12(2), 359-372. <a href="https://doi.org/10.1111/2041-210X.13515" class="external-link uri">https://doi.org/10.1111/2041-210X.13515</a>.</p>
 <p>Dryden, I.L. (2019). <em>shapes: statistical shape analysis</em>. R package version 1.2.5. <a href="https://CRAN.R-project.org/package=shapes" class="external-link uri">https://CRAN.R-project.org/package=shapes</a>.</p>
 <p>Fasanelli M.N., Milla Carmona P.S., Soto I.M., &amp; Tuero, D.T. (2022). <em>Allometry, sexual selection and evolutionary lines of least resistance shaped the evolution of exaggerated sexual traits within the genus</em> Tyrannus. Journal of Evolutionary Biology, in press. <a href="https://doi.org/10.1111/jeb.14000" class="external-link uri">https://doi.org/10.1111/jeb.14000</a>.</p>
 <p>Revell, L.J. (2009). <em>Size-correction and principal components for interspecific comparative studies</em>. Evolution, 63, 3258-3268 <a href="https://doi.org/10.1111/j.1558-5646.2009.00804.x" class="external-link uri">https://doi.org/10.1111/j.1558-5646.2009.00804.x</a>.</p>
@@ -248,7 +261,7 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 </ul>
 </div>
 
