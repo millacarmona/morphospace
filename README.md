@@ -240,6 +240,9 @@ examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.ht
 - Legends created using `plot_mspace` have been improved, and scale bars
   for interpreting landscapes have also been made available.
 
+If you find any bugs please send me an email at `pablomillac@gmail.com`.
+Thanks!!
+
 ## References
 
 Adams D.C., Collyer M.L., Kaliontzopoulou A., & Baken E.K. (2021).

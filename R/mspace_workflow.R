@@ -851,10 +851,10 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
       }
 
       tips <- seq_len(length(tree$tip.label))
-      plot_biv_scatter(scores = phylo_scores[-tips,], pch = pch.nodes, bg = bg.nodes,
-                       col = col.nodes, cex = cex.nodes)
-      plot_biv_scatter(scores = phylo_scores[tips,], pch = pch.tips, bg = bg.tips,
-                       col = col.tips, cex = cex.tips)
+      plot_biv_scatter(scores = phylo_scores[-tips, mspace$plotinfo$axes], pch = pch.nodes,
+                       bg = bg.nodes, col = col.nodes, cex = cex.nodes)
+      plot_biv_scatter(scores = phylo_scores[tips, mspace$plotinfo$axes], pch = pch.tips,
+                       bg = bg.tips, col = col.tips, cex = cex.tips)
 
     } else {
       warning("phylogenetic relationships are not projected into univariate morphospaces")
