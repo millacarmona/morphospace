@@ -1931,6 +1931,7 @@ plot_mspace <- function(mspace,
         heights <- phytools::nodeHeights(tree)
         x <- NULL
         for(i in 1:(length(tree$tip.label) + tree$Nnode)) x[i] <- unique(heights[tree$edge == i])
+        x <- x - max(x)
 
         args$xlim <- range(x)
       }
@@ -1940,6 +1941,7 @@ plot_mspace <- function(mspace,
         heights <- phytools::nodeHeights(tree)
         y <- NULL
         for(i in 1:(length(tree$tip.label) + tree$Nnode)) y[i] <- unique(heights[tree$edge == i])
+        y <- y - max(y)
 
         args$ylim <- range(y)
       }
