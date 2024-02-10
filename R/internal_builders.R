@@ -615,25 +615,25 @@ adapt_ordination <- function(ordination) {
 #'   Newsletter, 72(620), 14-27.
 #'
 #' @examples
-#'  #load data and packages
-#'  library(geomorph)
-#'  data("tails")
+#' #load data and packages
+#' library(geomorph)
+#' data("tails")
 #'
-#'  #perform pca on tails shapes
-#'  pca <- prcomp(two.d.array(tails$shapes))
+#' #perform pca on tails shapes
+#' pca <- prcomp(two.d.array(tails$shapes))
 #'
-#'  #generate grid of shape models sampling the range of variation
-#'  #at 4 locations (the 4 corners of the scatterplot)
-#'  shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
-#'                            k = ncol(tails$shapes), p = nrow(tails$shapes),
-#'                            nh = 2, nv = 2)
+#' #generate grid of shape models sampling the range of variation
+#' #at 4 locations (the 4 corners of the scatterplot)
+#' shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
+#'                           k = ncol(tails$shapes), p = nrow(tails$shapes),
+#'                           nh = 2, nv = 2)
 #'
-#'  #plot grid from $models_mat and project each shape in models_arr
-#'  plot(shapes_grid$models_mat)
-#'  points(shapes_grid$models_arr[,,1], pch=16, col = 1)
-#'  points(shapes_grid$models_arr[,,2], pch=16, col = 2)
-#'  points(shapes_grid$models_arr[,,3], pch=16, col = 3)
-#'  points(shapes_grid$models_arr[,,4], pch=16, col = 4)
+#' #plot grid from $models_mat and project each shape in models_arr
+#' plot(shapes_grid$models_mat)
+#' points(shapes_grid$models_arr[,,1], pch=16, col = 1)
+#' points(shapes_grid$models_arr[,,2], pch=16, col = 2)
+#' points(shapes_grid$models_arr[,,3], pch=16, col = 3)
+#' points(shapes_grid$models_arr[,,4], pch=16, col = 4)
 morphogrid <- function(ordination,
                        axes,
                        datype,
@@ -741,6 +741,8 @@ morphogrid <- function(ordination,
     sh_arr <- adjust_models2d(sh_arr, gridcoords, wh[1], wh[2])
 
     sh_arr[,2,] <- sh_arr[,2,] * asp.models
+
+    for(i in seq_len(dim(sh_arr)[3])) sh_arr[,2,i] <- sh_arr[,2,i] * (wh[2] / wh[1])
   }
   sh_arr <- sh_arr * size.models
 
