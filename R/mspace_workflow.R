@@ -16,8 +16,10 @@
 #'    data). See details below.
 #' @param FUN The function (method) to be used for ordination of shape
 #'    variation. Supported alternatives include \code{\link[stats]{prcomp}},
-#'    \code{\link{phy_prcomp}}, \code{\link{bg_prcomp}} and
-#'    \code{\link{pls_shapes}}.
+#'    \code{\link{phy_prcomp}}, \code{\link{bg_prcomp}},
+#'    \code{\link{pls_shapes}}, \code{\link[geomorph]{gm.prcomp}},
+#'    \code{\link[Morpho]{bgPCA}}, \code{\link[Morpho]{pls2B}} and
+#'    \code{\link[phytools]{phyl.pca}}.
 #' @param p Numeric, indicating the number of landmarks/semilandmarks used (only
 #'   for landmark data in 2-margin matrices format).
 #' @param k Numeric, indicating the number of cartesian dimensions of
@@ -261,8 +263,11 @@ mspace <- function(shapes,
 
   FUN <- match.fun(FUN)
   ordination <- FUN(data2d, ...)
-  ordination$ordtype <- class(ordination)
+  ordination <- adapt_ordination(ordination)
+  ordination$ordtype <- class(ordination)[1]
   ordination$datype <- datype
+
+
 
   if(!is.null(invax)) {
     ordination$x[,axes[invax]] <- ordination$x[,axes[invax]] * -1

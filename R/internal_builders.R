@@ -509,6 +509,56 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 
 }
 
+
+################################################################################
+
+#' Adapt format of foreign multivariate analyses
+#'
+#' @description Reorganize results from [geomorph::gm.prcomp()],
+#'   [Morpho::groupPCA()], [Morpho::pls2B()] and [phytools::phyl.pca()] for
+#'   their use in the mspace workflow. Used internally.
+#'
+#' @param ordination An object of class \code{\link[geomorph]{gm.prcomp}},
+#'    \code{\link[Morpho]{bgPCA}}, \code{\link[Morpho]{pls2B}} and
+#'    \code{\link[phytools]{phyl.pca}}.
+#'
+#' @export
+adapt_ordination <- function(ordination) {
+
+  if(class(ordination)[1] == "phyl.pca") {
+    names(ordination)[which(names(ordination)) == c("S", "Evec", "Eval", "a")] <-
+      c("x", "rotation", "values", "center")
+  }
+
+  if(class(ordination)[1] == "bgPCA") {
+    ordination$eigenvalues <- sqrt(ordination$eigenvalues)
+
+    names(ordination)[which(names(ordination)) == c("Scores", "groupPCs", "eigenvalues", "Grandmean", "groupmeans")] <-
+      c("x", "rotation", "sdev", "center", "grcenters")
+  }
+
+  if(class(ordination)[1] == "pls2B") {
+    ordination$xrotation <- ordination$svd$u
+    ordination$yrotation <- ordination$svd$v
+    ordination$sdev <- sqrt(ordination$svd$d)
+    ordination$svd <- NULL
+
+    names(ordination)[which(names(ordination)) == c("Xscores", "Yscores")] <-
+      c("xscores", "yscores")
+
+    ordination <- list(sdev = apply(ordination$yscores, 2, stats::sd),
+                       rotation = ordination$yrotation,
+                       x = ordination$yscores,
+                       x2 = ordination$xscores,
+                       center = ordination$ycenter,
+                       totvar = ordination$ytotvar,
+                       raw_pls = ordination)
+  }
+
+  return(ordination)
+}
+
+
 ################################################################################
 
 #' Generate background shape models
@@ -828,22 +878,22 @@ plot_morphogrid2d <- function(x = NULL,
       if(ordtype == "prcomp") {
         xlab <- paste0("PC", axes[1])
       }
-      if(ordtype == "bg_prcomp") {
+      if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
         xlab <- paste0("bgPC", axes[1])
       }
-      if(ordtype == "phy_prcomp") {
+      if(any(c("phy_prcomp", "phyl.pca") %in% ordtype)) {
         xlab <- paste0("phyPC", axes[1])
       }
       if(ordtype == "phyalign_comp") {
         xlab <- paste0("PAC", axes[1])
       }
-      if(ordtype == "pls_shapes") {
+      if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         xlab <- paste0("PLS-", axes[1])
       }
       if(ordtype == "phy_pls_shapes") {
         xlab <- paste0("phyPLS-", axes[1])
       }
-      if(any(c("burnaby", "phy_burnaby") %in% ordtype)) {
+      if(any(c("burnaby", "phy_burnaby", "gm.prcomp") %in% ordtype)) {
         xlab <- paste0("Axis ", axes[1])
       }
     }
@@ -855,22 +905,22 @@ plot_morphogrid2d <- function(x = NULL,
       if(ordtype == "prcomp") {
         ylab <- paste0("PC", axes[2])
       }
-      if(ordtype == "bg_prcomp") {
+      if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
         ylab <- paste0("bgPC", axes[2])
       }
-      if(ordtype == "phy_prcomp") {
+      if(any(c("phy_prcomp", "phyl.pca") %in% ordtype)) {
         ylab <- paste0("phyPC", axes[2])
       }
       if(ordtype == "phyalign_comp") {
         ylab <- paste0("PAC", axes[2])
       }
-      if(ordtype == "pls_shapes") {
+      if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         ylab <- paste0("PLS-", axes[2])
       }
       if(ordtype == "phy_pls_shapes") {
         ylab <- paste0("phyPLS-", axes[2])
       }
-      if(any(c("burnaby", "phy_burnaby") %in% ordtype)) {
+      if(any(c("burnaby", "phy_burnaby", "gm.prcomp") %in% ordtype)) {
         ylab <- paste0("Axis ", axes[2])
       }
     }
@@ -1041,22 +1091,22 @@ plot_morphogrid3d <- function(x = NULL,
       if(ordtype == "prcomp") {
         xlab <- paste0("PC", axes[1])
       }
-      if(ordtype == "bg_prcomp") {
+      if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
         xlab <- paste0("bgPC", axes[1])
       }
-      if(ordtype == "phy_prcomp") {
+      if(any(c("phy_prcomp", "phyl.pca") %in% ordtype)) {
         xlab <- paste0("phyPC", axes[1])
       }
       if(ordtype == "phyalign_comp") {
         xlab <- paste0("PAC", axes[1])
       }
-      if(ordtype == "pls_shapes") {
+      if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         xlab <- paste0("PLS-", axes[1])
       }
       if(ordtype == "phy_pls_shapes") {
         xlab <- paste0("phyPLS-", axes[1])
       }
-      if(any(c("burnaby", "phy_burnaby") %in% ordtype)) {
+      if(any(c("burnaby", "phy_burnaby", "gm.prcomp") %in% ordtype)) {
         xlab <- paste0("Axis ", axes[1])
       }
     }
@@ -1068,22 +1118,22 @@ plot_morphogrid3d <- function(x = NULL,
       if(ordtype == "prcomp") {
         ylab <- paste0("PC", axes[2])
       }
-      if(ordtype == "bg_prcomp") {
+      if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
         ylab <- paste0("bgPC", axes[2])
       }
-      if(ordtype == "phy_prcomp") {
+      if(any(c("phy_prcomp", "phyl.pca") %in% ordtype)) {
         ylab <- paste0("phyPC", axes[2])
       }
       if(ordtype == "phyalign_comp") {
         ylab <- paste0("PAC", axes[2])
       }
-      if(ordtype == "pls_shapes") {
+      if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         ylab <- paste0("PLS-", axes[2])
       }
       if(ordtype == "phy_pls_shapes") {
         ylab <- paste0("phyPLS-", axes[2])
       }
-      if(any(c("burnaby", "phy_burnaby") %in% ordtype)) {
+      if(any(c("burnaby", "phy_burnaby", "gm.prcomp") %in% ordtype)) {
         ylab <- paste0("Axis ", axes[2])
       }
     }
@@ -1344,3 +1394,4 @@ col2hex <- function(col) {
   }
   return(hexcols)
 }
+
