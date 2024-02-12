@@ -502,10 +502,16 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL, tree = NULL, return
 #'  title("P. esbelta morphospace, refined using \n allometric variation from P. koeneni")
 detrend_shapes <- function(model, xvalue = NULL, tree = NULL, method = "orthogonal", newdata = NULL) {
 
+  #data preparation
   if(!any(method == "residuals", method == "orthogonal")) stop("method should be one of 'residuals' or 'orthogonal'")
 
-  x <- model$model[-1]
-  y <- model$model[[1]]
+  designmat <- model.matrix(model)
+
+  admod <- adapt_model(model, tree)
+  coefs <- admod$coefs
+  grandmean <- admod$grandmean
+  y <- admod$y
+  x <- admod$x
 
   if(ncol(x) > 1 & !is.null(xvalue)) stop("xvalue can only be specified for a single explanatory variable")
 
@@ -514,11 +520,7 @@ detrend_shapes <- function(model, xvalue = NULL, tree = NULL, method = "orthogon
   namesx <- rownames(x)
   namesy <- rownames(y)
 
-  designmat <- stats::model.matrix(stats::as.formula(paste0("~ ",
-                                              strsplit(as.character(
-                                                model$call[2]), split = "~")[[1]][2])), data = x)
-
-  if(!is.null(tree)){
+  if(!is.null(tree)) {
     if(!all(length(tree$tip.label) == nrow(x), length(tree$tip.label) == nrow(y))) {
       stop("\nNumber of tips in the tree does not match the number of observations in x and/or y data sets")
     }
@@ -529,17 +531,9 @@ detrend_shapes <- function(model, xvalue = NULL, tree = NULL, method = "orthogon
       y <- cbind(y[tree$tip.label,])
       designmat <- cbind(designmat[tree$tip.label,])
     }
-
-    grandmean <- apply(y, 2, phytools::fastAnc, tree = tree)[1,]
-    C <- ape::vcv.phylo(tree)
-    coefs <- solve(t(designmat) %*% solve(C) %*% designmat) %*%
-      t(designmat) %*% solve(C) %*% y
-
-  } else {
-    grandmean <- colMeans(y)
-    coefs <- model$coefficients
   }
 
+  #detrending
   if(method == "orthogonal") {
     axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))
 
@@ -640,6 +634,146 @@ detrend_shapes <- function(model, xvalue = NULL, tree = NULL, method = "orthogon
 
   }
 }
+# detrend_shapes <- function(model, xvalue = NULL, tree = NULL, method = "orthogonal", newdata = NULL) {
+#
+#   if(!any(method == "residuals", method == "orthogonal")) stop("method should be one of 'residuals' or 'orthogonal'")
+#
+#   x <- model$model[-1]
+#   y <- model$model[[1]]
+#
+#   if(ncol(x) > 1 & !is.null(xvalue)) stop("xvalue can only be specified for a single explanatory variable")
+#
+#   if(is.null(rownames(x))) rownames(x) <- seq_len(nrow(x))
+#   if(is.null(rownames(y))) rownames(y) <- seq_len(nrow(y))
+#   namesx <- rownames(x)
+#   namesy <- rownames(y)
+#
+#   designmat <- stats::model.matrix(stats::as.formula(paste0("~ ",
+#                                               strsplit(as.character(
+#                                                 model$call[2]), split = "~")[[1]][2])), data = x)
+#
+#   if(!is.null(tree)){
+#     if(!all(length(tree$tip.label) == nrow(x), length(tree$tip.label) == nrow(y))) {
+#       stop("\nNumber of tips in the tree does not match the number of observations in x and/or y data sets")
+#     }
+#     if(!all(tree$tip.label %in% namesy, tree$tip.label %in% namesx)) {
+#       stop("\nNames in phylogenetic tree does not match names in x and/or y data sets")
+#     } else {
+#       x <- cbind(x[tree$tip.label,])
+#       y <- cbind(y[tree$tip.label,])
+#       designmat <- cbind(designmat[tree$tip.label,])
+#     }
+#
+#     grandmean <- apply(y, 2, phytools::fastAnc, tree = tree)[1,]
+#     C <- ape::vcv.phylo(tree)
+#     coefs <- solve(t(designmat) %*% solve(C) %*% designmat) %*%
+#       t(designmat) %*% solve(C) %*% y
+#
+#   } else {
+#     grandmean <- colMeans(y)
+#     coefs <- model$coefficients
+#   }
+#
+#   if(method == "orthogonal") {
+#     axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))
+#
+#     ortho_space <- suppressWarnings(burnaby(x = y, axmat = axmat, tree = tree))
+#     ortho_scores <- ortho_space$x
+#     ortho_rotation <- ortho_space$rotation
+#     ax <- sum(ortho_space$sdev^2 > 1e-15)
+#
+#     if(!is.null(xvalue)) {
+#       ortho_center <- c(expected_shapes(shapes = y, x = x[[1]], xvalue = xvalue,
+#                                         tree = tree, returnarray = FALSE))
+#     } else {
+#       ortho_center <- ortho_space$center
+#     }
+#
+#     if(!is.null(newdata)) {
+#
+#       if(inherits(newdata, "mlm")) {
+#         newx <- newdata$model[-1]
+#         newy <- newdata$model[[1]]
+#         if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
+#         namesy <- rownames(newy)
+#
+#         newortho_space <- burnaby(x = newy, vars = newx)
+#         ax <- min(sum(newortho_space$sdev^2 > 1e-15), ax)
+#         ortho_scores <- newortho_space$x
+#         ortho_rotation <- newortho_space$rotation[,seq_len(ax)] -
+#           ortho_space$rotation[,seq_len(ax)]
+#
+#
+#         if(!is.null(xvalue)) {
+#           ortho_center <- c(expected_shapes(shapes = newy, x = newx[[1]],
+#                                             xvalue = xvalue, returnarray = FALSE))
+#         } else {
+#           ortho_center <- newortho_space$center
+#         }
+#
+#       } else {
+#         ortho_scores <- proj_eigen(x = newdata, vectors = ortho_space$rotation,
+#                                    center = ortho_space$center)
+#       }
+#     }
+#
+#     ortho_shapes2d <- rev_eigen(scores = ortho_scores[, seq_len(ax)],
+#                                 vectors = ortho_rotation[, seq_len(ax)],
+#                                 center = ortho_center)
+#     colnames(ortho_shapes2d) <- colnames(y)
+#     return(ortho_shapes2d)
+#   }
+#
+#   if(method == "residuals") {
+#     which_na <- is.na(apply(coefs,1,sum))
+#     resids <- y - designmat[,!which_na] %*% coefs[!which_na,]
+#
+#     if(!is.null(newdata)) {
+#       newx <- newdata$model[-1]
+#       newy <- newdata$model[[1]]
+#       if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
+#       namesy <- rownames(newy)
+#
+#       formula <- stats::as.formula(paste0("~ ", strsplit(as.character(newdata$call[2]),
+#                                                          split = "~")[[1]][2]))
+#       newdesignmat <- stats::model.matrix(formula, data = newx)
+#
+#       which_na <- is.na(apply(coefs,1,sum))
+#       resids <- newy - newdesignmat[,!which_na] %*% coefs[!which_na,]
+#
+#     }
+#
+#     n <- nrow(resids)
+#
+#     if(is.null(xvalue)) {
+#
+#       grandmean_vec <- rep(1, n) %*% t(grandmean)
+#       predicted_mat <- resids + grandmean_vec
+#
+#     } else {
+#
+#       if(is.numeric(x[[1]]) == TRUE) {
+#         designmat <- cbind(1, xvalue)
+#       }
+#
+#       if(is.factor(x[[1]]) == TRUE) {
+#         designmat <- rep(0, nlevels(x[[1]]))
+#         designmat[which(levels(x[[1]]) == xvalue)] <- 1
+#
+#         if(isFALSE(designmat[1] == 1)) designmat[1] <- 1
+#       }
+#
+#       fitted <- as.numeric(designmat %*% coefs)
+#
+#       fitted_vec <- rep(1, n) %*% t(fitted)
+#       predicted_mat <- resids + fitted_vec
+#     }
+#
+#     predicted_mat <- predicted_mat[namesy,]
+#     return(rbind(predicted_mat))
+#
+#   }
+# }
 
 
 ################################################################################
