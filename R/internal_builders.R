@@ -519,7 +519,7 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #'   their use in the mspace workflow. Used internally.
 #'
 #' @param ordination An object of class \code{\link[geomorph]{gm.prcomp}},
-#'    \code{\link[Morpho]{bgPCA}}, \code{\link[Morpho]{pls2B}} and
+#'    \code{\link[Morpho]{bgPCA}}, \code{\link[Morpho]{pls2B}} or
 #'    \code{\link[phytools]{phyl.pca}}.
 #'
 #' @export
@@ -556,6 +556,64 @@ adapt_ordination <- function(ordination) {
   }
 
   return(ordination)
+}
+
+
+################################################################################
+
+#' Adapt format of different linear model functions
+#'
+#' @description Extract and format results from [stats::lm()],
+#'   [geomorph::procD.lm()], [geomorph::procD.pgls()], [RRPP::lm.rrpp()] and
+#'   [mvMORPH::mvgls()] for their use in the mspace workflow and shape
+#'   operations. Used internally.
+#'
+#' @param ordination An object of class \code{\link[stats]{lm}},
+#'    \code{\link[geomorph]{procD.lm}}, \code{\link[geomorph]{procD.pgls}},
+#'    \code{\link[RRPP]{lm.rrpp}} or \code{\link[mvMORPH]{mvgls}}.
+#'
+#' @export
+adapt_model <- function(model, tree) {
+
+  if(class(model)[1] == "mlm") {
+    if(!is.null(tree)) warning("A phylogenetic tree has been provided together with an ordinary linear model; coefficients won't be corrected for phylogenetic non-independence (try with geomorph::procD.pgls or mvMorph::mvgls)")
+    coefs <- model$coefficients
+    y <- model$model[[1]]
+    x <- model$model[-1]
+    grandmean <- colMeans(y)
+  }
+
+  if(class(model)[1] == "procD.lm") {
+    y <- model$data[[1]]
+    x <- cbind(setNames(model$data[[2]], rownames(y)))
+    if("pgls.coefficients" %in% names(model)) {
+      if(is.null(tree)) stop("A phylogenetic linear model has been specified; provide the corresponding phylogenetic tree as well")
+      coefs <- model$pgls.coefficients
+      grandmean <- apply(y, 2, phytools::fastAnc, tree = tree)[1,]
+    } else {
+      if(!is.null(tree)) warning("A phylogenetic tree has been provided together with an ordinary linear model; coefficients won't be corrected for phylogenetic non-independence (try with geomorph::procD.pgls or mvMorph::mvgls)")
+      coefs <- model$coefficients
+      grandmean <- colMeans(y)
+    }
+  }
+
+  if(class(model)[1] == "mvgls") {
+    if(is.null(tree)) stop("A phylogenetic linear model has been specified; provide the corresponding phylogenetic tree as well")
+    coefs <- model$coefficients
+    y <- model$variables[[1]]
+    x <- cbind(model$variables[[2]][,-1])
+    grandmean <- apply(y, 2, phytools::fastAnc, tree = tree)[1,]
+  }
+
+  if(class(model)[1] == "lm.rrpp") {
+    coefs <- model$LM$coefficients
+    y <- model$LM$data[[1]]
+    x <- cbind(setNames(model$LM$data[[2]], rownames(y)))
+    grandmean <- colMeans(y)
+  }
+
+  adapted <- list(coefs = coefs, grandmean = grandmean, y = y, x = x)
+  return(adapted)
 }
 
 
