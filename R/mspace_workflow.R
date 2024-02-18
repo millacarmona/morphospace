@@ -212,11 +212,13 @@
 #'
 #' #inspect the contents of the object
 #' morphosp_F
-mspace <- function(shapes,
+mspace <- function(shapes = NULL,
+                   ord = NULL,
                    axes = c(1,2),
                    links = NULL,
                    template = NULL,
                    FUN = stats::prcomp,
+                   datype = NULL,
                    p = NULL,
                    k = NULL,
                    nh = 5,
@@ -244,9 +246,58 @@ mspace <- function(shapes,
                    models = TRUE,
                    ...) {
 
-  dat <- shapes_mat(shapes)
-  data2d <- dat$data2d
-  datype <- dat$datype
+  # dat <- shapes_mat(shapes)
+  # data2d <- dat$data2d
+  # datype <- dat$datype
+  #
+  # if(datype == "landm") {
+  #   if(is.null(p) | is.null(k)) {
+  #     if(length(dim(shapes)) == 3){
+  #       p <- nrow(shapes)
+  #       k <- ncol(shapes)
+  #     } else {stop("Provide values for p and k, or provide shapes as an array")}
+  #   }
+  # } else {
+  #   links <- NULL
+  #   p <- 300
+  #   k <- 2
+  # }
+  #
+  # FUN <- match.fun(FUN)
+  # ordination <- FUN(data2d, ...)
+  # ordination <- adapt_ordination(ordination)
+  # ordination$ordtype <- class(ordination)[1]
+  # ordination$datype <- datype
+  if(is.null(shapes) & is.null(ord)) stop("Either (1) shapes (and optionally FUN), or (2) ord and datype must be provided")
+
+  if(!is.null(shapes)) {
+
+    if(!is.null(ord)) stop("Drop one of shapes or ord; cannot be used simultaneously")
+
+    dat <- shapes_mat(shapes)
+    data2d <- dat$data2d
+    datype <- dat$datype
+
+    FUN <- match.fun(FUN)
+    ordination <- FUN(data2d, ...)
+    ordination <- adapt_ordination(ordination)
+    ordination$ordtype <- class(ordination)[1]
+    ordination$datype <- datype
+  }
+
+  if(!is.null(ord)) {
+
+    if(is.null(datype)) stop("provide a value for datype ('landm' or 'fcoef')")
+
+    ordination <- adapt_ordination(ord)
+
+    ordination$ordtype <- class(ordination)
+    ordination$datype <- datype
+
+    data2d <- rev_eigen(ordination$x,
+                        ordination$rotation,
+                        ordination$center)
+  }
 
   if(datype == "landm") {
     if(is.null(p) | is.null(k)) {
@@ -260,14 +311,6 @@ mspace <- function(shapes,
     p <- 300
     k <- 2
   }
-
-  FUN <- match.fun(FUN)
-  ordination <- FUN(data2d, ...)
-  ordination <- adapt_ordination(ordination)
-  ordination$ordtype <- class(ordination)[1]
-  ordination$datype <- datype
-
-
 
   if(!is.null(invax)) {
     ordination$x[,axes[invax]] <- ordination$x[,axes[invax]] * -1
@@ -816,7 +859,7 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
 #'   proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1,
 #'               cex = 0.7) %>%
 #'   proj_phylogeny(shapes = sp_shapes, tree = tree)
-proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
+proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", pipe = TRUE,
                            pch.nodes = 16, col.nodes = "gray", bg.nodes = 1, cex.nodes = 0.8,
                            pch.tips = 16, bg.tips = 1, col.tips = 1, cex.tips = 1, ...) {
 
@@ -846,7 +889,9 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
                             vectors = mspace$ordination$rotation,
                             center = mspace$ordination$center)
 
-  nodes_scores <- apply(tips_scores, 2, phytools::fastAnc, tree = tree)
+  #nodes_scores <- apply(tips_scores, 2, phytools::fastAnc, tree = tree)
+  mvmod <- mvMORPH::mvgls(tips_scores ~ 1, tree = tree, model = evmodel)
+  nodes_scores <- mvMORPH::ancestral(mvmod)
   phylo_scores <- rbind(tips_scores, nodes_scores)
 
   if(.Device != "null device") {
@@ -870,6 +915,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, pipe = TRUE,
 
   mspace$projected$phylo_scores <- phylo_scores
   mspace$projected$phylo <- tree
+  mspace$projected$evmodel <- mvmod$model
 
   if(is.null(args$col)) args$col <- 1
 
@@ -1187,13 +1233,20 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
 #'
 #' @details Will return information about how the ordination was obtained
 #'   (method and data) as well as the elements projected into it.
-print.mspace <- function(mspace, ...){
+print.mspace <- function(mspace, ...) {
 
-  if(mspace$ordination$ordtype == "prcomp") ordtype <- "Principal Component Analysis"
-  if(mspace$ordination$ordtype == "bg_prcomp") ordtype <- "Between-Groups Principal Component Analysis"
-  if(mspace$ordination$ordtype == "phy_prcomp") ordtype <- "Phylogenetic Principal Component Analysis"
-  if(any(c("pls_shapes", "pls2b") %in% mspace$ordination$ordtype)) ordtype <- "Two-Block Partial Least Squares"
-  if(any(c("phy_pls_shapes", "phy_pls2b") %in% mspace$ordination$ordtype)) ordtype <- "Phylogenetic Two-Block Partial Least Squares"
+  if(any(c("prcomp", "mvgls.pca") %in% mspace$ordination$ordtype)) ordtype <- "Principal Component Analysis"
+  if(mspace$ordination$ordtype == "gm.prcomp") {
+    ord <- adapt_ordination(mspace$ordination)
+    if(is.null(ord$phy)) ordtype <- "Principal Component Analysis" else {
+      if(ord$alignment == "principal") ordtype <- "Phylogenetic Principal Component Analysis"
+      if(ord$alignment == "phy") ordtype <- "Phylogenetically aligned Component Analysis"
+    }
+  }
+  if(any(c("bg_prcomp", "bgPCA") %in% mspace$ordination$ordtype)) ordtype <- "Between-Groups Principal Component Analysis"
+  if(any(c("phy_prcomp", "phyl.pca") %in% mspace$ordination$ordtype)) ordtype <- "Phylogenetic Principal Component Analysis"
+  if(any(c("pls_shapes", "pls2b", "pls2B") %in% mspace$ordination$ordtype)) ordtype <- "Two-Block Partial Least Squares"
+  if(any(c("phy_pls_shapes", "phy_pls_shapes") %in% mspace$ordination$ordtype)) ordtype <- "Phylogenetic Two-Block Partial Least Squares"
   if(any(c("burnaby", "phy_burnaby") %in% mspace$ordination$ordtype)) ordtype <- "Burnaby's approach"
 
 

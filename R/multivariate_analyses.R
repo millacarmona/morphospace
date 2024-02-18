@@ -589,7 +589,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' names(ppls2) #the contents of the resulting object
 #' exp_var(ppls2) #variance explained by each axis
 #' plot(ppls2$x2, ppls2$x) #ordination
-pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
+pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = FALSE) {
 
   x <- cbind(x)
   y <- cbind(y)
@@ -613,9 +613,60 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
       y <- cbind(y[tree$tip.label,])
     }
 
-    anc <- apply(cbind(x, y), 2, phytools::fastAnc, tree = tree)[1,]
-    x_center <- anc[seq_len(ncol(x))]
-    y_center <- anc[(ncol(x) + 1):(ncol(x) + ncol(y))]
+    #anc <- apply(cbind(x, y), 2, phytools::fastAnc, tree = tree)[1,]
+    # x_center <- anc[seq_len(ncol(x))]
+    # y_center <- anc[(ncol(x) + 1):(ncol(x) + ncol(y))]
+
+    # mvmod <- mvMORPH::mvgls(y ~ cbind(x), tree = tree, model = evmodel)
+    # x_ <- if(ncol(x) == 1) cbind(x = x,x) else x
+    # uvmod <- mvMORPH::mvgls(x_ ~ 1, tree = tree, model = evmodel)
+    #
+    # ancx <- cbind(x = mvMORPH::ancestral(uvmod)[,ncol(x)])
+    # y_center <- mvMORPH::ancestral(object = mvmod, newdata = data.frame(ancx))[1,]
+    # x_center <- ancx[1,]
+
+    # mvmod <- mvMORPH::mvgls(y ~ cbind(x), tree = tree, model = evmodel)
+    #
+    # xname <- colnames(mvmod$variables$X)[-1]
+    # x_ <- if(ncol(x) == 1) cbind(x,x) else x
+    # uvmod <- mvMORPH::mvgls(x_ ~ 1, tree = tree, model = evmodel)
+    #
+    # ancx <- data.frame(mvMORPH::ancestral(uvmod)[,ncol(x)])
+    # colnames(ancx) <- xname
+    # y_center <- mvMORPH::ancestral(object = mvmod, newdata = ancx)[1,]
+    # x_center <- ancx[1,]
+
+    # mvmod <- mvMORPH::mvgls(y ~ cbind(x), tree = tree, model = evmodel)
+    # x_ <- if(ncol(x) == 1) cbind(x = x,x) else x
+    # xmod <- mvMORPH::mvgls(x_ ~ 1, tree = tree, model = evmodel)
+    #
+    # y_center <- colMeans(mvmod$fitted)
+    # x_center <- ancx[1,]
+
+    mvmod <- mvMORPH::mvgls(y ~ 1, tree = tree, model = evmodel)
+    x_anc <- matrix(NA, nrow = tree$Nnode, ncol = ncol(x))
+    for(i in seq_len(ncol(x))) {
+
+      x.int <- as.integer(x[,i])
+
+      if(inherits(x[,i], "factor") | all(x.int == x[,i])) {
+        anc. <- ape::ace(x[,i], phy, model = "ER", type = "discrete")$lik.anc
+        for(j in seq_len(nrow(anc.))) x_anc[j,i] <- as.numeric(colnames(anc.)[which.max(anc.[j,])])
+        cat(paste0("\nReconstruction for discrete character '",
+                   colnames(x)[i], "' was performed assuming an equal-rates model using ape::ace"))
+      }
+
+      if(inherits(x[,i], "numeric") & all(x.int != x[,i])) {
+        xname <- colnames(x)[i]
+        x_ <- cbind(x[,i],x[,i])
+        colnames(x_) <- c(xname, xname)
+
+        xmod <- mvMORPH::mvgls(x_ ~ 1, tree = tree, model = evmodel)
+        x_anc[,i] <- mvMORPH::ancestral(xmod)[,1]
+      }
+    }
+    y_center <- colMeans(mvmod$fitted)
+    x_center <- x_anc[1,]
 
   } else {
     y_center <- colMeans(y)
@@ -625,7 +676,8 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
   totvar_x <- sum(apply(x, 2, stats::var))
   totvar_y <- sum(apply(y, 2, stats::var))
 
-  svd <- svd_block(x, y, tree)
+  #svd <- svd_block(x, y, tree)
+  svd <- svd_block(x, y, tree, evmodel)
 
   ndims <- length(svd$d)
   values <- svd$d
@@ -833,12 +885,14 @@ pls2b <- function(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
 #' names(ppls) #the contents of the resulting object
 #' exp_var(ppls) #variance explained by each axis
 #' plot(ppls$x2, ppls$x) #ordination
-pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE) {
+pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = FALSE) {
 
   y <- shapes_mat(shapes)$data2d
   x <- cbind(X)
 
-  pls <- pls2b(y = y, x = x, tree = tree, LOOCV = LOOCV, recompute = recompute)
+  # pls <- pls2b(y = y, x = x, tree = tree, LOOCV = LOOCV, recompute = recompute)
+  pls <- pls2b(y = y, x = x, tree = tree, evmodel = evmodel,
+               LOOCV = LOOCV, recompute = recompute)
 
   results <- list(sdev = apply(pls$yscores, 2, stats::sd),
                   rotation = pls$yrotation,
@@ -996,7 +1050,7 @@ pls_shapes <- function(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
 #'   proj_axis(reg, lwd = 2) %>%
 #'   proj_groups(grid_shapes, alpha = 0.2, col = "red")
 #' }
-burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
+burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL) {
 
   totvar <- sum(apply(x, 2, stats::var))
 
@@ -1004,8 +1058,10 @@ burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
 
   if(!is.null(axmat)) {
     axmat <- cbind(axmat)
-    center <- if(is.null(tree)) colMeans(x) else apply(x, 2, phytools::fastAnc, tree = tree)[1,]
-    if(!is.null(tree)) warning("\naxmat has been provided directly, it will be assumed its orientation is already phylogenetically corrected; tree will be only used to center x")
+    # center <- if(is.null(tree)) colMeans(x) else apply(x, 2, phytools::fastAnc, tree = tree)[1,]
+    # if(!is.null(tree)) warning("\naxmat has been provided directly, it will be assumed its orientation is already phylogenetically corrected; tree will be only used to center x")
+    center <- if(is.null(tree)) colMeans(x) else colMeans(mvMORPH::mvgls(x ~ 1, tree = tree, model = evmodel)$fitted)
+    if(!is.null(tree)) warning("\naxmat has been provided directly: it will be assumed its orientation is already phylogenetically corrected; tree will be only used to center x at the raw phylogenetic mean (i.e., x ~ 1)")
   } else {
     vars <- as.data.frame(vars)
 
@@ -1014,9 +1070,8 @@ burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
     namesvars <- rownames(vars)
     namesx <- rownames(x)
 
-    formula <- stats::as.formula(paste("~", paste(colnames(vars), collapse = " + ")))
-    designmat <- stats::model.matrix(formula, data = vars)
-
+    # formula <- stats::as.formula(paste("~", paste(colnames(vars), collapse = " + ")))
+    # designmat <- stats::model.matrix(formula, data = vars)
 
     if(!is.null(tree)) {
 
@@ -1027,18 +1082,46 @@ burnaby <- function(x, vars = NULL, tree = NULL, axmat = NULL) {
         stop("Names in phylogenetic tree does not match names in vars and/or x data sets")
       } else {
         vars <- cbind(vars[tree$tip.label,])
+        if(is.null(rownames(vars))) rownames(vars) <- tree$tip.label
         x <- cbind(x[tree$tip.label,])
-        designmat <- cbind(designmat[tree$tip.label,])
+        # designmat <- cbind(designmat[tree$tip.label,])
       }
 
-      center <- apply(x, 2, phytools::fastAnc, tree = tree)[1,]
-      C <- ape::vcv.phylo(tree)
-      coefs <- solve(t(designmat) %*% solve(C) %*% designmat) %*%
-        t(designmat) %*% solve(C) %*% x
+      # center <- apply(x, 2, phytools::fastAnc, tree = tree)[1,]
+      # C <- ape::vcv.phylo(tree)
+      # coefs <- solve(t(designmat) %*% solve(C) %*% designmat) %*%
+      #   t(designmat) %*% solve(C) %*% x
+
+      # mvmod <- mvMORPH::mvgls(x ~ vars, tree = tree, model = evmodel)
+      # coefs <- mvmod$coefficients
+      # center <- colMeans(mvmod$fitted)
+
+      # mvmod <- mvMORPH::mvgls(x ~ cbind(vars), tree = tree, model = evmodel)
+      # coefs <- mvmod$coefficients
+      #
+      # vars_ <- if(ncol(vars) == 1) cbind(vars = vars,vars) else vars
+      # uvmod <- mvMORPH::mvgls(vars_ ~ 1, tree = tree, model = evmodel)
+      # ancvars <- cbind(vars = mvMORPH::ancestral(uvmod)[,ncol(vars)])
+      # center <- mvMORPH::ancestral(object = mvmod, newdata = data.frame(ancvars))[1,]
+
+      # mvmod <- mvMORPH::mvgls(x ~ cbind(vars), tree = tree, model = evmodel)
+      # coefs <- mvmod$coefficients
+      #
+      # varsname <- colnames(mvmod$variables$X)[-1]
+      # vars_ <- if(ncol(vars) == 1) cbind(vars,vars) else vars
+      # uvmod <- mvMORPH::mvgls(vars_ ~ 1, tree = tree, model = evmodel)
+      # ancvars <- data.frame(mvMORPH::ancestral(uvmod)[,ncol(vars)])
+      # colnames(ancvars) <- varsname
+      # center <- mvMORPH::ancestral(object = mvmod, newdata = ancvars)[1,]
+
+      mvmod <- mvMORPH::mvgls(x ~ cbind(vars), tree = tree, model = evmodel)
+      coefs <- mvmod$coefficients
+      center <- colMeans(mvMORPH::mvgls(x ~ 1, tree = tree, model = evmodel)$fitted)
 
     } else {
       center <- colMeans(x)
-      coefs <- solve(t(designmat) %*% designmat) %*% t(designmat) %*% x
+      # coefs <- solve(t(designmat) %*% designmat) %*% t(designmat) %*% x
+      coefs <- lm(x ~ as.matrix(vars))$coef
     }
 
     axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))

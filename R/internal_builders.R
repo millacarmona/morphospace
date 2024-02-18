@@ -131,13 +131,15 @@ proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors
 #'
 #' #perform partial svd on phylogenetic structure
 #' svd_block(x = sp_sizes, y = two.d.array(sp_shapes), tree = tree)
-svd_block <- function(x, y, tree = NULL) {
+svd_block <- function(x, y, tree = NULL, evmodel) {
 
   x <- cbind(x)
   y <- cbind(y)
 
   if(!is.null(tree)) {
-    C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
+    #C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
+    adj_tree <- mvMORPH::mvgls(y ~ x, tree = tree, model = evmodel)$corrSt$phy
+    C <- ape::vcv.phylo(adj_tree)[rownames(x), rownames(x)]
     xy <- cbind(x,y)
     Clambda <- phytools::phyl.vcv(xy, C, 1)$C
 
@@ -151,7 +153,6 @@ svd_block <- function(x, y, tree = NULL) {
     part_vcv <- vcv[seq_len(ncol(x)), (ncol(x) + 1):(ncol(x) + ncol(y))]
 
     svd <- svd(part_vcv)
-
 
   }
 
@@ -515,26 +516,49 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #' Adapt format of foreign multivariate analyses
 #'
 #' @description Reorganize results from [geomorph::gm.prcomp()],
-#'   [Morpho::groupPCA()], [Morpho::pls2B()] and [phytools::phyl.pca()] for
-#'   their use in the mspace workflow. Used internally.
+#'   [Morpho::groupPCA()], [Morpho::pls2B()], [phytools::phyl.pca()] and
+#'   [mvMORPH::mvgls.pca()] for their use in the mspace workflow. Used
+#'   internally.
 #'
 #' @param ordination An object of class \code{\link[geomorph]{gm.prcomp}},
-#'    \code{\link[Morpho]{bgPCA}}, \code{\link[Morpho]{pls2B}} or
-#'    \code{\link[phytools]{phyl.pca}}.
+#'    \code{\link[Morpho]{bgPCA}}, \code{\link[Morpho]{pls2B}},
+#'    \code{\link[phytools]{phyl.pca}} or \code{\link[mvMORPH]{mvgls.pca}}.
 #'
 #' @export
 adapt_ordination <- function(ordination) {
 
+  if(class(ordination)[1] == "gm.prcomp") {
+    if(ordination$GLS) ordination$center <- c(ordination$center)
+    class(ordination) <- "gm.prcomp"
+  }
+
   if(class(ordination)[1] == "phyl.pca") {
-    names(ordination)[which(names(ordination)) == c("S", "Evec", "Eval", "a")] <-
-      c("x", "rotation", "values", "center")
+    ordination$a <- c(ordination$a)
+
+    names(ordination)[which(names(ordination) == "S")] <- "x"
+    names(ordination)[which(names(ordination) == "Evec")] <- "rotation"
+    names(ordination)[which(names(ordination) == "Eval")] <- "values"
+    names(ordination)[which(names(ordination) == "a")] <- "center"
   }
 
   if(class(ordination)[1] == "bgPCA") {
     ordination$eigenvalues <- sqrt(ordination$eigenvalues)
+    ordination$Scores <- cbind(ordination$Scores)
 
-    names(ordination)[which(names(ordination)) == c("Scores", "groupPCs", "eigenvalues", "Grandmean", "groupmeans")] <-
-      c("x", "rotation", "sdev", "center", "grcenters")
+    names(ordination)[which(names(ordination) == "Scores")] <- "x"
+    names(ordination)[which(names(ordination) == "groupPCs")] <- "rotation"
+    names(ordination)[which(names(ordination) == "eigenvalues")] <- "sdev"
+    names(ordination)[which(names(ordination) == "Grandmean")] <- "center"
+    names(ordination)[which(names(ordination) == "groupmeans")] <- "grcenters"
+  }
+
+  if(class(ordination)[1] == "mvgls.pca") {
+    if(!("center" %in% names(ordination))) stop("Please assign a $center slot containing the centroid/phylgenetic mean to the 'mvgls.pca' object (see examples in ?adapt_model)")
+    ordination$values <- sqrt(ordination$values)
+
+    names(ordination)[which(names(ordination) == "scores")] <- "x"
+    names(ordination)[which(names(ordination) == "vectors")] <- "rotation"
+    names(ordination)[which(names(ordination) == "values")] <- "sdev"
   }
 
   if(class(ordination)[1] == "pls2B") {
@@ -543,8 +567,8 @@ adapt_ordination <- function(ordination) {
     ordination$sdev <- sqrt(ordination$svd$d)
     ordination$svd <- NULL
 
-    names(ordination)[which(names(ordination)) == c("Xscores", "Yscores")] <-
-      c("xscores", "yscores")
+    names(ordination)[which(names(ordination) == "Xscores")] <- "xscores"
+    names(ordination)[which(names(ordination) == "Yscores")] <- "yscores"
 
     ordination <- list(sdev = apply(ordination$yscores, 2, stats::sd),
                        rotation = ordination$yrotation,
@@ -564,55 +588,109 @@ adapt_ordination <- function(ordination) {
 #' Adapt format of different linear model functions
 #'
 #' @description Extract and format results from [stats::lm()],
-#'   [geomorph::procD.lm()], [geomorph::procD.pgls()], [RRPP::lm.rrpp()] and
-#'   [mvMORPH::mvgls()] for their use in the mspace workflow and shape
-#'   operations. Used internally.
+#'   [geomorph::procD.lm()], [geomorph::procD.pgls()], [RRPP::lm.rrpp()],
+#'   [mvMORPH::mvgls()] and [mvMORPH::mvols()] for their use in the mspace
+#'   workflow and shape operations. Used internally.
 #'
-#' @param ordination An object of class \code{\link[stats]{lm}},
-#'    \code{\link[geomorph]{procD.lm}}, \code{\link[geomorph]{procD.pgls}},
-#'    \code{\link[RRPP]{lm.rrpp}} or \code{\link[mvMORPH]{mvgls}}.
+#' @param model An object of class \code{\link[stats]{mlm}},
+#'    \code{\link[geomorph]{procD.lm}}, \code{\link[RRPP]{lm.rrpp}},
+#'    \code{\link[mvMORPH]{mvgls}} or \code{\link[mvMORPH]{mvols}}.
 #'
 #' @export
-adapt_model <- function(model, tree) {
+adapt_model <- function(model) {
 
   if(class(model)[1] == "mlm") {
-    if(!is.null(tree)) warning("A phylogenetic tree has been provided together with an ordinary linear model; coefficients won't be corrected for phylogenetic non-independence (try with geomorph::procD.pgls or mvMorph::mvgls)")
     coefs <- model$coefficients
     y <- model$model[[1]]
-    x <- model$model[-1]
+    x <- cbind(model$model[-1][[1]])
     grandmean <- colMeans(y)
+    modtype <- "ols"
   }
 
   if(class(model)[1] == "procD.lm") {
-    y <- model$data[[1]]
-    x <- cbind(setNames(model$data[[2]], rownames(y)))
+    # y <- model$data[[1]]
+    # x <- cbind(setNames(model$data[[2]], rownames(y)))
+    y <- model$Y
+    x <- cbind(model$X[,-1])
     if("pgls.coefficients" %in% names(model)) {
-      if(is.null(tree)) stop("A phylogenetic linear model has been specified; provide the corresponding phylogenetic tree as well")
       coefs <- model$pgls.coefficients
-      grandmean <- apply(y, 2, phytools::fastAnc, tree = tree)[1,]
+      grandmean <- model$pgls.mean
+      modtype <- "pgls"
     } else {
-      if(!is.null(tree)) warning("A phylogenetic tree has been provided together with an ordinary linear model; coefficients won't be corrected for phylogenetic non-independence (try with geomorph::procD.pgls or mvMorph::mvgls)")
       coefs <- model$coefficients
       grandmean <- colMeans(y)
+      modtype <- "ols"
     }
   }
 
-  if(class(model)[1] == "mvgls") {
-    if(is.null(tree)) stop("A phylogenetic linear model has been specified; provide the corresponding phylogenetic tree as well")
+  # if(any(class(model)[1] == c("mvgls", "mvols"))) {
+  #   coefs <- model$coefficients
+  #   y <- model$variables$Y
+  #   # x <- cbind(model$variables$X)
+  #   x <- cbind(model$variables$X[,-1])
+  #   grandmean <- colMeans(model$fitted)
+  #   modtype <- if(class(model)[1] == "mvgls") "pgls" else "ols"
+  # }
+
+
+  # if(any(class(model)[1] == c("mvgls", "mvols"))) {
+  #   coefs <- model$coefficients
+  #   y <- model$variables$Y
+  #   x <- cbind(model$variables$X[,-1])
+  #
+  #   if(ncol(x) > 0) {
+  #     tree <- model$variables$tree
+  #     evmodel <- model$model
+  #
+  #     xname <- colnames(model$variables$X)[-1]
+  #     x_ <- if(ncol(x) == 1) cbind(x,x) else x
+  #     uvmod <- mvMORPH::mvgls(x_ ~ 1, tree = tree, model = evmodel)
+  #     ancx <- data.frame(mvMORPH::ancestral(uvmod)[,ncol(x)])
+  #     colnames(ancx) <- xname
+  #     grandmean <- mvMORPH::ancestral(object = model, newdata = ancx)[1,]
+  #   } else grandmean <- colMeans(model$fitted)
+  #
+  #   modtype <- if(class(model)[1] == "mvgls") "pgls" else "ols"
+  # }
+
+  if(any(class(model)[1] == c("mvgls", "mvols"))) {
     coefs <- model$coefficients
-    y <- model$variables[[1]]
-    x <- cbind(model$variables[[2]][,-1])
-    grandmean <- apply(y, 2, phytools::fastAnc, tree = tree)[1,]
+    y <- model$variables$Y
+    x <- cbind(model$variables$X[,-1])
+
+    tree <- model$variables$tree
+    evmodel <- model$model
+    mvmod <- mvMORPH::mvgls(y ~ 1, tree = tree, model = evmodel)
+    #grandmean <- colMeans(mvmod$fitted)
+    grandmean <- colMeans(model$fitted)
+
+    modtype <- if(class(model)[1] == "mvgls") "pgls" else "ols"
+    if(modtype == "pgls") {
+      y <- y[rownames(stats::model.matrix(model)), ]
+      x <- x[rownames(stats::model.matrix(model)), ]
+    }
   }
+
 
   if(class(model)[1] == "lm.rrpp") {
-    coefs <- model$LM$coefficients
-    y <- model$LM$data[[1]]
-    x <- cbind(setNames(model$LM$data[[2]], rownames(y)))
-    grandmean <- colMeans(y)
+    if(model$LM$ols) {
+      coefs <- model$LM$coefficients
+      grandmean <- model$LM$mean
+      modtype <- "ols"
+    }
+    if(model$LM$gls) {
+      coefs <- model$LM$gls.coefficients
+      grandmean <- model$LM$gls.mean
+      modtype <- "gls"
+    }
+    # y <- model$LM$data[[1]]
+    # x <- cbind(setNames(model$LM$data[[2]], rownames(y)))
+    y <- model$LM$Y
+    x <- cbind(model$LM$X[,-1])
   }
 
-  adapted <- list(coefs = coefs, grandmean = grandmean, y = y, x = x)
+  adapted <- list(coefs = coefs, grandmean = grandmean,
+                  y = y, x = x, modtype = modtype)
   return(adapted)
 }
 
@@ -953,7 +1031,7 @@ plot_morphogrid2d <- function(x = NULL,
       if(ordtype == "phy_pls_shapes") {
         xlab <- paste0("phyPLS-", axes[1])
       }
-      if(any(c("burnaby", "phy_burnaby", "gm.prcomp") %in% ordtype)) {
+      if(any(c("burnaby", "phy_burnaby", "gm.prcomp", "mvgls.pca") %in% ordtype)) {
         xlab <- paste0("Axis ", axes[1])
       }
     }
@@ -980,7 +1058,7 @@ plot_morphogrid2d <- function(x = NULL,
       if(ordtype == "phy_pls_shapes") {
         ylab <- paste0("phyPLS-", axes[2])
       }
-      if(any(c("burnaby", "phy_burnaby", "gm.prcomp") %in% ordtype)) {
+      if(any(c("burnaby", "phy_burnaby", "gm.prcomp", "mvgls.pca") %in% ordtype)) {
         ylab <- paste0("Axis ", axes[2])
       }
     }
@@ -1166,7 +1244,7 @@ plot_morphogrid3d <- function(x = NULL,
       if(ordtype == "phy_pls_shapes") {
         xlab <- paste0("phyPLS-", axes[1])
       }
-      if(any(c("burnaby", "phy_burnaby", "gm.prcomp") %in% ordtype)) {
+      if(any(c("burnaby", "phy_burnaby", "gm.prcomp", "mvgls.pca") %in% ordtype)) {
         xlab <- paste0("Axis ", axes[1])
       }
     }
@@ -1193,7 +1271,7 @@ plot_morphogrid3d <- function(x = NULL,
       if(ordtype == "phy_pls_shapes") {
         ylab <- paste0("phyPLS-", axes[2])
       }
-      if(any(c("burnaby", "phy_burnaby", "gm.prcomp") %in% ordtype)) {
+      if(any(c("burnaby", "phy_burnaby", "gm.prcomp", "mvgls.pca") %in% ordtype)) {
         ylab <- paste0("Axis ", axes[2])
       }
     }

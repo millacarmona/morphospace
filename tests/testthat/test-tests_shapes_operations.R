@@ -545,6 +545,7 @@ test_that(desc = "testing detrend_shapes, method = residuals, newdata, for numer
 
 })
 
+########### correct this
 
 test_that(desc = "testing detrend_shapes, method = residuals,
           with phylogeny, for factors and numerics", code = {
@@ -558,7 +559,7 @@ test_that(desc = "testing detrend_shapes, method = residuals,
   sp_shapes <- geomorph::two.d.array(expected_shapes(shapes, species))
   sp_logsizes <- c(tapply(logsizes,species,mean))
 
-  model1 <- lm(sp_shapes ~ sp_logsizes)
+  model1 <- lm(sp_shapes ~ sp_logsizes) #### models need to be created ith procD.pgls or mvgls
   detr_shapes1 <- detrend_shapes(model1, tree = tree, method = "residuals")
   result1 <- all(dim(sp_shapes) == dim(detr_shapes1))
 
@@ -580,7 +581,7 @@ test_that(desc = "testing detrend_shapes, method = residuals,
 
   sp_type <- rep("NDF", 13) ; sp_type[c(7,10)] <- "DF"
   sp_type <- factor(sp_type) ; sp_type <- setNames(sp_type, levels(species))
-  model2 <- lm(sp_shapes ~ sp_type)
+  model2 <- lm(sp_shapes ~ sp_type)  #### models need to be created ith procD.pgls or mvgls
   detr_shapes2 <- detrend_shapes(model2, tree = tree, method = "residuals")
   result5 <- all(dim(sp_shapes) == dim(detr_shapes2))
 
@@ -603,6 +604,8 @@ test_that(desc = "testing detrend_shapes, method = residuals,
 
 })
 
+########### correct this
+
 test_that(desc = "testing detrend_shapes, method = orthogonal,
           with phylogeny, for factors and numerics", code = {
 
@@ -616,7 +619,7 @@ test_that(desc = "testing detrend_shapes, method = orthogonal,
   sp_shapes <- geomorph::two.d.array(expected_shapes(shapes, species))
   sp_logsizes <- c(tapply(logsizes,species,mean))
 
-  model1 <- lm(sp_shapes ~ sp_logsizes)
+  model1 <- lm(sp_shapes ~ sp_logsizes) #### models need to be created ith procD.pgls or mvgls
   detr_shapes1 <- detrend_shapes(model1, tree = tree, method = "orthogonal")
   result1 <- all(dim(sp_shapes) == dim(detr_shapes1))
 
@@ -637,7 +640,7 @@ test_that(desc = "testing detrend_shapes, method = orthogonal,
 
   sp_type <- rep("NDF", 13) ; sp_type[c(7,10)] <- "DF"
   sp_type <- factor(sp_type) ; sp_type <- setNames(sp_type, levels(species))
-  model2 <- lm(sp_shapes ~ sp_type)
+  model2 <- lm(sp_shapes ~ sp_type) #### models need to be created ith procD.pgls or mvgls
   detr_shapes2 <- detrend_shapes(model2, tree = tree, method = "orthogonal")
   result5 <- all(dim(sp_shapes) == dim(detr_shapes2))
 
