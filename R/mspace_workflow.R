@@ -859,9 +859,10 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
 #'   proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1,
 #'               cex = 0.7) %>%
 #'   proj_phylogeny(shapes = sp_shapes, tree = tree)
-proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", pipe = TRUE,
-                           pch.nodes = 16, col.nodes = "gray", bg.nodes = 1, cex.nodes = 0.8,
-                           pch.tips = 16, bg.tips = 1, col.tips = 1, cex.tips = 1, ...) {
+proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.tips = FALSE,
+                           labels.nodes = FALSE, pch.nodes = 16, col.nodes = "gray", bg.nodes = 1,
+                           cex.nodes = 0.8, pch.tips = 16, bg.tips = 1, col.tips = 1, cex.tips = 1,
+                           pipe = TRUE, ...) {
 
   args <- as.list(environment())
 
@@ -908,6 +909,17 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", pipe = T
       plot_biv_scatter(scores = phylo_scores[tips,], pch = pch.tips, bg = bg.tips,
                        col = col.tips, cex = cex.tips)
 
+      if(is.character(labels.tips)) {
+        label.scores <- tips_scores[labels.tips,]
+        label.text <- labels.tips
+      } else {
+        if(labels.tips) {
+          label.scores <- tips_scores
+          label.text <- rownames(tips_scores)
+        }
+      }
+      graphics::text(label.scores, label.text)
+
     } else {
       warning("phylogenetic relationships are not projected into univariate morphospaces")
     }
@@ -926,6 +938,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", pipe = T
   mspace$plotinfo$bg.nodes <- col2hex(args$bg.nodes)
   mspace$plotinfo$pch.nodes <- args$pch.nodes
   mspace$plotinfo$cex.nodes <- args$cex.nodes
+  mspace$plotinfo$labels.tips <- args$label.tips
   mspace$plotinfo$col.tips <- col2hex(args$col.tips)
   mspace$plotinfo$bg.tips <- col2hex(args$bg.tips)
   mspace$plotinfo$pch.tips <- args$pch.tips
@@ -1635,6 +1648,7 @@ plot_mspace <- function(mspace,
                         col.tips,
                         pch.tips,
                         bg.tips,
+                        labels.tips = FALSE,
                         cex.tips,
                         type.axis,
                         lwd.axis = 1,
@@ -1869,6 +1883,17 @@ plot_mspace <- function(mspace,
         plot_biv_scatter(scores = mspace$projected$phylo_scores[tips, args$axes], pch = args$pch.tips,
                          bg = args$bg.tips, col = args$col.tips, cex = args$cex.tips)
 
+        if(is.character(labels.tips)) {
+          label.scores <- mspace$projected$phylo_scores[tree$tip.label,][labels.tips,]
+          label.text <- labels.tips
+        } else {
+          if(labels.tips) {
+            label.scores <- mspace$projected$phylo_scores[tree$tip.label,]
+            label.text <- rownames(mspace$projected$phylo_scores[tree$tip.label,])
+          }
+        }
+        graphics::text(label.scores, label.text, pos = 1)
+
       } else {
         warning("phylogenetic relationships are not projected into univariate morphospaces")
       }
@@ -1975,6 +2000,7 @@ plot_mspace <- function(mspace,
         heights <- phytools::nodeHeights(tree)
         x <- c(rep(max(heights), length(tree$tip.label)),
                unique(heights[, 1]))
+        x <- x - max(x) ###########
         args$xlim <- range(x)
       }
     } else {
@@ -1983,6 +2009,7 @@ plot_mspace <- function(mspace,
         heights <- phytools::nodeHeights(tree)
         y <- c(rep(max(heights), length(tree$tip.label)),
                unique(heights[, 1]))
+        y <- y - max(y) #########
         args$ylim <- range(y)
       }
     }
@@ -2043,12 +2070,13 @@ plot_mspace <- function(mspace,
       maptips <- order(match(rownames(mspace$projected$phylo_scores[tips,]), tree$tip.label))
 
       plot_phenogram(x = x, y = y, tree = tree, phylo_scores = mspace$projected$phylo_scores,
-                     axis = args$axes, points = points, pch.tips = args$pch.tips[maptips],
-                     cex.tips = args$cex.tips[maptips], col.tips = args$col.tips[maptips],
-                     bg.tips = args$bg.tips[maptips], pch.nodes = args$pch.tips[maptips],
-                     cex.nodes = args$cex.nodes[maptips], col.nodes = args$col.nodes[maptips],
-                     bg.nodes = args$bg.nodes[maptips], lwd.phylo = args$lwd.phylo,
-                     lty.phylo = args$lty.phylo, col.phylo = args$col.phylo)
+                     axis = args$axes, points = points, labels.tips = labels.tips,
+                     pch.tips = args$pch.tips[maptips], cex.tips = args$cex.tips[maptips],
+                     col.tips = args$col.tips[maptips], bg.tips = args$bg.tips[maptips],
+                     pch.nodes = args$pch.tips[maptips], cex.nodes = args$cex.nodes[maptips],
+                     col.nodes = args$col.nodes[maptips], bg.nodes = args$bg.nodes[maptips],
+                     lwd.phylo = args$lwd.phylo, lty.phylo = args$lty.phylo,
+                     col.phylo = args$col.phylo)
 
     } else {
       #if x or y are regular variables, go for a generic hybrid morphospace -----------------------
@@ -2184,6 +2212,16 @@ plot_mspace <- function(mspace,
           plot_biv_scatter(scores = phyloxy[tips,], pch = args$pch.tips,
                            bg = args$bg.tips, col = args$col.tips, cex = args$cex.tips)
 
+          if(is.character(labels.tips)) {
+            label.scores <- phylo_scores[labels.tips,]
+            label.text <- labels.tips
+          } else {
+            if(labels.tips) {
+              label.scores <- phylo_scores[tree$tip.label,]
+              label.text <- rownames(phylo_scores[tree$tip.label,])
+            }
+          }
+          graphics::text(label.scores, label.text, pos = 1)
         }
       }
     }
@@ -2303,8 +2341,6 @@ plot_mspace <- function(mspace,
 
       }
     }
-
     graphics::layout(matrix(1, nrow=1))
-
   }
 }

@@ -1497,6 +1497,7 @@ plot_phenogram <- function(x = NULL,
                            pch.nodes,
                            col.nodes,
                            bg.nodes,
+                           labels.tips,
                            cex.tips,
                            pch.tips,
                            col.tips,
@@ -1509,7 +1510,7 @@ plot_phenogram <- function(x = NULL,
                           phyloxy[tree$edge[i, 2],]),
                     lwd = lwd.phylo, lty = lty.phylo, col = col.phylo)
   }
-  if(points == TRUE) {
+  if(points) {
     ntips <- length(tree$tip.label)
     plot_biv_scatter(phyloxy[-c(seq_len(ntips)),], bg = bg.nodes, pch = pch.nodes,
                      cex = cex.nodes, col = col.nodes)
@@ -1517,6 +1518,16 @@ plot_phenogram <- function(x = NULL,
                      bg = bg.tips, pch = pch.tips, cex = cex.tips, col = col.tips)
 
   }
+  if(is.character(labels.tips)) {
+    label.scores <- phyloxy[tree$tip.label,][labels.tips,]
+    label.text <- labels.tips
+  } else {
+    if(labels.tips) {
+      label.scores <- phyloxy[tree$tip.label,]
+      label.text <- rownames(phyloxy[tree$tip.label,])
+    }
+  }
+  graphics::text(label.scores, label.text, pos = 1)
 }
 
 
