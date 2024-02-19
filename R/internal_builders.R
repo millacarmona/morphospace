@@ -1493,6 +1493,7 @@ plot_phenogram <- function(x = NULL,
                            lwd.phylo,
                            lty.phylo,
                            col.phylo,
+                           labels.nodes,
                            cex.nodes,
                            pch.nodes,
                            col.nodes,
@@ -1519,7 +1520,7 @@ plot_phenogram <- function(x = NULL,
 
   }
   add_labels(phyloxy[tree$tip.label,], labels.tips)
-  ##### add_labels(mspace$projected$phylo_scores[-tips,], labels.nodes)
+  add_labels(phyloxy[-seq_len(ntips),], labels.nodes)
   # if(is.character(labels.tips)) {
   #   label.scores <- phyloxy[tree$tip.label,][labels.tips,]
   #   label.text <- labels.tips
@@ -1908,15 +1909,19 @@ plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, 
 #'   containing specific names to be added.
 #'
 #' @keywords internal
-add_labels <- function(xy, labels) {
-  if(is.character(labels)) {
-    label.scores <- xy[labels,]
-    label.text <- labels
-  } else {
-    if(labels) {
-      label.scores <- xy
-      label.text <- rownames(xy)
+add_labels <- function(xy, labels = NULL) {
+  if(!is.null(labels)) {
+    if(is.character(labels)) {
+      label.scores <- xy[labels,]
+      label.text <- labels
+      graphics::text(rbind(label.scores), label.text, pos = 1)
+    } else {
+      if(labels) {
+        label.scores <- xy
+        label.text <- rownames(xy)
+        graphics::text(rbind(label.scores), label.text, pos = 1)
+      }
     }
+
   }
-  graphics::text(label.scores, label.text, pos = 1)
 }

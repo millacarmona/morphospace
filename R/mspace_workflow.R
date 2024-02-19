@@ -908,7 +908,9 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
                        bg = bg.tips, col = col.tips, cex = cex.tips)
 
       add_labels(tips_scores, labels.tips)
-      #######add_labels(nodes_scores, labels.nodes)
+      if(all(labels.nodes %in% rownames(tips_scores)))
+        labels.nodes <- paste0("node_", ape::getMRCA(phy = tree, tip = labels.nodes))
+      add_labels(nodes_scores, labels.nodes)
       # if(is.character(labels.tips)) {
       #   label.scores <- tips_scores[labels.tips,]
       #   label.text <- labels.tips
@@ -927,7 +929,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 
   mspace$projected$phylo_scores <- phylo_scores
   mspace$projected$phylo <- tree
-  mspace$projected$evmodel <- mvmod$model
+  mspace$projected$phylo_evmodel <- mvmod$model
 
   if(is.null(args$col)) args$col <- 1
 
@@ -938,7 +940,8 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
   mspace$plotinfo$bg.nodes <- col2hex(args$bg.nodes)
   mspace$plotinfo$pch.nodes <- args$pch.nodes
   mspace$plotinfo$cex.nodes <- args$cex.nodes
-  mspace$plotinfo$labels.tips <- args$label.tips
+  mspace$plotinfo$labels.tips <- args$labels.tips
+  mspace$plotinfo$labels.nodes <- args$labels.nodes
   mspace$plotinfo$col.tips <- col2hex(args$col.tips)
   mspace$plotinfo$bg.tips <- col2hex(args$bg.tips)
   mspace$plotinfo$pch.tips <- args$pch.tips
@@ -1641,6 +1644,7 @@ plot_mspace <- function(mspace,
                         col.phylo = 1,
                         lwd.phylo = 1,
                         lty.phylo = 1,
+                        labels.nodes,
                         col.nodes,
                         pch.nodes,
                         bg.nodes,
@@ -1648,7 +1652,7 @@ plot_mspace <- function(mspace,
                         col.tips,
                         pch.tips,
                         bg.tips,
-                        labels.tips = FALSE,
+                        labels.tips,
                         cex.tips,
                         type.axis,
                         lwd.axis = 1,
@@ -1895,8 +1899,12 @@ plot_mspace <- function(mspace,
         plot_biv_scatter(scores = mspace$projected$phylo_scores[tips, args$axes], pch = args$pch.tips,
                          bg = args$bg.tips, col = args$col.tips, cex = args$cex.tips)
 
-        add_labels(mspace$projected$phylo_scores[tree$tip.label,], labels.tips)
-        ##### add_labels(mspace$projected$phylo_scores[-tips,], labels.nodes)
+        add_labels(mspace$projected$phylo_scores[mspace$projected$phylo$tip.label,], args$labels.tips)
+        if(all(args$labels.nodes %in%
+               rownames(mspace$projected$phylo_scores[mspace$projected$phylo$tip.label,])))
+          args$labels.nodes <- paste0("node_", ape::getMRCA(phy = mspace$projected$phylo,
+                                                            tip = args$labels.nodes))
+        add_labels(mspace$projected$phylo_scores[-tips,], args$labels.nodes)
         # if(is.character(labels.tips)) {
         #   label.scores <- mspace$projected$phylo_scores[tree$tip.label,][labels.tips,]
         #   label.text <- labels.tips
@@ -2090,13 +2098,13 @@ plot_mspace <- function(mspace,
       maptips <- order(match(rownames(mspace$projected$phylo_scores[tips,]), tree$tip.label))
 
       plot_phenogram(x = x, y = y, tree = tree, phylo_scores = mspace$projected$phylo_scores,
-                     axis = args$axes, points = points, labels.tips = labels.tips,
+                     axis = args$axes, points = points, labels.tips = args$labels.tips,
                      pch.tips = args$pch.tips[maptips], cex.tips = args$cex.tips[maptips],
                      col.tips = args$col.tips[maptips], bg.tips = args$bg.tips[maptips],
-                     pch.nodes = args$pch.tips[maptips], cex.nodes = args$cex.nodes[maptips],
-                     col.nodes = args$col.nodes[maptips], bg.nodes = args$bg.nodes[maptips],
-                     lwd.phylo = args$lwd.phylo, lty.phylo = args$lty.phylo,
-                     col.phylo = args$col.phylo)
+                     labels.nodes = args$labels.nodes, pch.nodes = args$pch.tips[maptips],
+                     cex.nodes = args$cex.nodes[maptips], col.nodes = args$col.nodes[maptips],
+                     bg.nodes = args$bg.nodes[maptips], lwd.phylo = args$lwd.phylo,
+                     lty.phylo = args$lty.phylo, col.phylo = args$col.phylo)
 
     } else {
       #if x or y are regular variables, go for a generic hybrid morphospace -----------------------
@@ -2184,6 +2192,7 @@ plot_mspace <- function(mspace,
 
         tree <- mspace$projected$phylo
         phylo_scores <- mspace$projected$phylo_scores
+        evmodel <- mspace$projected$phylo_evmodel
 
         if(nrow(cbind(x, y)) == nrow(cbind(phylo_scores[tree$tip.label, ]))) {
 
@@ -2223,7 +2232,34 @@ plot_mspace <- function(mspace,
 
         if(nrow(cbind(x, y)) == nrow(cbind(phylo_scores[tree$tip.label, ]))) {
           xy.tips <- cbind(x, phylo_scores[tree$tip.label, mspace$plotinfo$axes[1]], y)[tree$tip.label,]
-          xy.nodes <- apply(xy.tips[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
+          # xy.nodes <- apply(xy.tips[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
+
+          xy <- cbind(x,y)
+          #name var
+          xy_anc <- matrix(NA, nrow = tree$Nnode, ncol = 1)
+          xy.int <- as.integer(xy[,1])
+          if(inherits(xy[,1], "factor") | all(xy.int == xy[,1])) {
+            anc. <- ape::ace(xy[,1], phy, model = "ER", type = "discrete")$lik.anc
+            for(j in seq_len(nrow(anc.))) xy_anc[j,1] <- as.numeric(colnames(anc.)[which.max(anc.[j,])])
+            cat(paste0("\nReconstruction for discrete character '",
+                       colnames(xy)[1], "' was performed assuming an equal-rates model using ape::ace"))
+          }
+
+          if(inherits(xy[,1], "numeric") & all(xy.int != xy[,1])) {
+            xyname <- colnames(xy)[1]
+            xy_ <- cbind(xy[,1],xy[,1])
+            colnames(xy_) <- c(xyname, xyname)
+
+            xymod <- mvMORPH::mvgls(xy_ ~ 1, tree = tree, model = evmodel)
+            xy_anc[,1] <- mvMORPH::ancestral(xymod)[,1]
+          }
+
+          if(!is.null(x)) xy.nodes <- cbind(xy_anc,
+                                            phylo_scores[!rownames(phylo_scores) %in% tree$tip.label,
+                                                         mspace$plotinfo$axes[1]])
+          if(!is.null(y)) xy.nodes <- cbind(phylo_scores[!rownames(phylo_scores) %in% tree$tip.label,
+                                                         mspace$plotinfo$axes[1]],
+                                            xy_anc)
           phyloxy <- rbind(xy.tips, xy.nodes)
 
           for(i in seq_len(nrow(tree$edge))) {
@@ -2236,8 +2272,10 @@ plot_mspace <- function(mspace,
           plot_biv_scatter(scores = phyloxy[tips,], pch = args$pch.tips,
                            bg = args$bg.tips, col = args$col.tips, cex = args$cex.tips)
 
-          add_labels(phylo_scores[tree$tip.label,], labels.tips)
-          ########add_labels(phylo_scores[-tips,], labels.nodes)
+          add_labels(xy.tips[tree$tip.label,], args$labels.tips)
+          if(all(args$labels.nodes %in% rownames(xy.tips[tree$tip.label,])))
+            args$labels.nodes <- paste0("node_", ape::getMRCA(phy = tree, tip = args$labels.nodes))
+          add_labels(xy.nodes, args$labels.nodes)
           # if(is.character(labels.tips)) {
           #   label.scores <- phylo_scores[labels.tips,]
           #   label.text <- labels.tips
