@@ -58,7 +58,7 @@ The starting point of this workflow is morphometric data that is already free of
 # Remove variation associated with sexual dimorphism and compute the 
 # consensus shape of each species
 model <- lm(two.d.array(shapes) ~ sex)
-detr_shapes <- detrend_shapes(model) %>% 
+detr_shapes <- detrend_shapes(model, method = "residuals") %>%
   arrayspecs(p = nrow(shapes), k = ncol(shapes))
 sp_shapes <- expected_shapes(shapes = detr_shapes, x = spp)
 ```
@@ -82,23 +82,22 @@ msp2 <- mspace(detr_shapes, links = wf, cex.ldm = 5) %>%
 title("Morphospace\n+ species differentiation", cex.main = 1)
 
 
-# Generate morphospace, project specimens, species' mean shapes and 
-# phylogenetic structure (requires a "phy" object and the earlier 
-# addition of mean shapes corresponding to the tips), convex hulls
+# Generate morphospace, project specimens, delimit groups of them 
+# with convex hulls, project phylogenetic tree (requires a "phy" 
+# object)
 msp3 <- mspace(shapes = detr_shapes, links = wf, cex.ldm = 5) %>% 
   proj_shapes(shapes = detr_shapes, col = spp) %>%
-  proj_consensus(shapes = sp_shapes, bg = 1:nlevels(spp), pch = 21) %>%
-  proj_groups(groups = spp) %>% 
-  proj_phylogeny(tree = phy, lwd = 1.5)
+  proj_groups(shapes = detr_shapes, groups = spp) %>% 
+  proj_phylogeny(shapes = sp_shapes, tree = phy, lwd = 1.5)
 title("Morphospace\n+ groups + phylogeny", cex.main = 1)
 
 
-# Check the elements of each mspace object, note the slots corresponding to 
-# groups mean shapes and classification, the phylogenetic structure and scores 
-# for nodes and tips.
-names(msp1)
-names(msp2)
-names(msp3)
+# Check the elements projected in each mspace object, note the slots 
+# corresponding to projected scores, groups classification and scores 
+# included on each, the phylogenetic tree and scores for nodes and tips.
+names(msp1$projected)
+names(msp2$projected)
+names(msp3$projected)
 
 ```
 
@@ -107,18 +106,48 @@ Another potentially interesting element that can be projected into morphospaces 
 
 
 ```{r}
-# perform PCA of refined shape variables, create morphospace, and project 
-# the first 2 axes from the former into  the latter
+# perform PCA of refined shape variables (for the subset of NDF species), create 
+# morphospace, and project the first 2 axes from the former into the latter
 pca <- prcomp(two.d.array(detr_shapes[,,tails$data$type == "NDF"]))
 mspace(detr_shapes, links = wf, cex.ldm = 5) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
-  proj_consensus(shapes = sp_shapes, pch = 21, bg = 1:13, cex = 1.2) %>%
-  proj_phylogeny(tree = phy, pch = 16) %>%
+  proj_phylogeny(shapes = sp_shapes, tree = phy, pch.tips = 16) %>%
   proj_axis(obj = pca, axis = 1, mag = 1, col = "red", lwd = 3, lty = 1) %>%
   proj_axis(obj = pca, axis = 2, mag = 1, col = "red", lwd = 3, lty = 2)
 title("Morphospace\n+ PC1 and PC2 of NDF species projected", cex.main = 1)
 ```
+
+Finally, landscape surfaces intended to represent functional or performance measurements can be projected as contour maps with `proj_landscape`. These surfaces are interpolated using the `akima` package (Akima & Gebhardt 2022) from values provided directly through the argument `X` and corresponding to the shapes provided through the `shapes` argument, or computed through the latter using an arbitrary function, provided using the argument `FUN`. 
+
+These landscapes can be computed for either a region of the morphospace from a sample of empirical shapes occupying that region ("*empirical landscapes*") or from the set of synthetic shapes mapping morphometric variation in the background ("*theoretical landscapes*"). For the latter case, leave `shapes = NULL`; if values are been provided using `X` these must have been computed beforehand and arranged in the same order as the shape models in the background (that is, from left to right and from bottom to top), which can be extracted using `extract_shapes`. This last step is not necessary if `FUN` is provided. A scalebar can be added using `plot_mspace` and `scalebar = TRUE`.
+
+```{r, message=FALSE}
+# compute lift/drag ratio for each tail in the data set
+library(Momocs)
+LDs <- apply(two.d.array(detr_shapes), 1, morphospace:::computeLD)
+
+# use LDs values to project an empirical landscape
+mspace(detr_shapes, links = wf, cex.ldm = 5) %>%
+  proj_shapes(shapes = detr_shapes) %>% 
+  proj_landscape(shapes = detr_shapes, X = LDs, linear = TRUE, 
+                 display = "filled.contour", resolution = 300)
+
+
+# project theoretical landscape, this time using the argument FUN to run
+# the computeLD function through the set of background shape models
+mspl <- mspace(detr_shapes, links = wf, cex.ldm = 5) %>%
+  proj_shapes(shapes = detr_shapes) %>% 
+  proj_landscape(shapes = NULL, FUN = morphospace::: computeLD, linear = FALSE, 
+                 display = "contour", lwd = 2)
+
+# a scale bar can be added (and changes introduced) by regenerating the 
+# "mspace" object with plot_mspace
+plot_mspace(mspl, display.landsc = "filled.contour", 
+            palette.landsc = terrain.colors, scalebar = TRUE)
+```
+
+(*Note: using the* `FUN` *argument is the easy way to do this, but it needs a function that can go through every shape as stored in a 2-margin matrix in which each row is a shape and each column is a shape descripor (e.g. the output from* `geomorph::two.d.array`*)*)
 
 
 ### Ordination methods
@@ -177,7 +206,7 @@ mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
        links = wf, invax = c(1,2), cex.ldm = 5, plot = FALSE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
-  proj_consensus(shapes = sp_shapes, col = "black", pch = 16) %>%
+  proj_shapes(shapes = sp_shapes, col = "black", pch = 16) %>%
   plot_mspace(legend = TRUE)
 title("Morphospace emphasizing interspecific variation", cex.main = 1)
 ```
@@ -189,7 +218,7 @@ msp <- mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp,
        links = wf, invax = c(1,2), cex.ldm = 5, plot = TRUE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
-  proj_consensus(shapes = sp_shapes, col = "black", pch = 16)
+  proj_shapes(shapes = sp_shapes, col = "black", pch = 16)
 ```
 
 ```{r, echo = FALSE}
@@ -204,7 +233,7 @@ mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
        xlim = c(-0.25, 0.15), ylim = c(-0.2, 0.15), cex.ldm = 5, plot = FALSE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
-  proj_consensus(shapes = sp_shapes, col = "black", pch = 16) %>%
+  proj_shapes(shapes = sp_shapes, col = "black", pch = 16) %>%
   plot_mspace(legend = TRUE)
 title("Phylogenetic morphospace + samples", cex.main = 1)
 ```
@@ -216,7 +245,7 @@ msp <- mspace(sp_shapes, FUN = phy_prcomp, tree = phy, links = wf,
        xlim = c(-0.25, 0.15), ylim = c(-0.2, 0.15), cex.ldm = 5, plot = TRUE) %>%
   proj_shapes(shapes = detr_shapes, col = spp) %>%
   proj_groups(shapes = detr_shapes, groups = spp) %>%
-  proj_consensus(shapes = sp_shapes, col = "black", pch = 16)
+  proj_shapes(shapes = sp_shapes, col = "black", pch = 16)
 ```
 
 ```{r, echo = FALSE}
@@ -233,10 +262,26 @@ Finally, `"mspace"` objects created using the `mspace %>% proj_*` pipeline can b
 For example, PC1 can be plotted against size to explore allometric patterns:
 
 
+```{r, eval = FALSE}
+# Build morphospace first
+msp <- mspace(shapes = detr_shapes, links = wf, cex.ldm = 5, plot = FALSE) %>% 
+  proj_shapes(shapes = detr_shapes, col = spp) %>%
+  proj_groups(shapes = detr_shapes, groups = spp) %>% 
+  proj_phylogeny(shapes = sp_shapes, tree = phy, col.tips = match(phy$tip.label, levels(spp)))
+```
+
+```{r, echo = FALSE, fig.show='hide', warning=FALSE}
+# Build morphospace first
+msp <- mspace(shapes = detr_shapes, links = wf, cex.ldm = 5, plot = TRUE) %>% 
+  proj_shapes(shapes = detr_shapes, col = spp) %>%
+  proj_groups(shapes = detr_shapes, groups = spp) %>% 
+  proj_phylogeny(shapes = sp_shapes, tree = phy, col.tips = match(phy$tip.label, levels(spp)))
+```
+
 ```{r}
 # Plot PC1 against log-size, add legend
-plot_mspace(msp3, x = sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
-            col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size", 
+plot_mspace(msp, x = sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
+            col.points = spp, col.groups = 1:nlevels(spp), xlab = "Log-size",
             legend = TRUE)
 ```
 
@@ -246,14 +291,18 @@ Or we can combine PC1 (or any other PC axis) with the phylogenetic tree to creat
 
 ```{r}
 # Plot vertical phenogram using PC1, add a legend
-plot_mspace(msp3, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
+plot_mspace(msp, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
             col.groups = 1:nlevels(spp), ylab = "Time", legend = TRUE)
 ```
+
+(*Note: that legend' labels are taken from the factor provided in the* `groups` *argument from* `proj_groups`*, whereas symbols and colors are taken from* `proj_shapes` *and* `proj_groups` *graphical parameters*)
 
 
 ### References
 
 Adams D.C., Collyer M.L., Kaliontzopoulou A., & Baken E.K. (2021). *geomorph: Software for geometric morphometric analyses*. R package version 4.0.2. <https://cran.r-project.org/package=geomorph>.
+
+Akima H., & Gebhardt A. (2022). *akima: Interpolation of Irregularly and Regularly Spaced Data*. R package version 0.6-3.4 <https://CRAN.R-project.org/package=akima>.
 
 Bache S.F., & Wickham H. (2022). m*agrittr: A Forward-Pipe Operator for R*. R package version 2.0.3. <https://CRAN.R-project.org/package=magrittr>.
 

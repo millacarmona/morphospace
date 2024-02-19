@@ -467,7 +467,7 @@ test_that(desc = "testing detrend_shapes, method = residuals, xvalue, for factor
 
 test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for numerics", code = {
 
-  data('shells3D')
+  data(shells3D)
   shapes <- shells3D$shapes
   species <- shells3D$data$species
   sizes <- log(shells3D$sizes)
@@ -519,6 +519,181 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
   #   proj_shapes(na_shapes2minus1, pch = 21, bg = 4, cex= 0.5)
 })
 
+# test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for numerics", code = {
+#
+#   dec <- 3
+#
+#   data(shells3D)
+#   shapes <- shells3D$shapes
+#   shapes_2d <- geomorph::two.d.array(shapes)
+#   species <- shells3D$data$species
+#   sizes <- round(log(shells3D$sizes),dec)
+#
+#   index1 <- species == levels(species)[7]
+#   shapes1 <- shapes[,,index1]
+#   shapes1_2d <- round(geomorph::two.d.array(shapes1),dec)
+#   logsizes1 <- sizes[index1]
+#
+#   index2 <- species == levels(species)[3]
+#   shapes2 <- shapes[,,index2]
+#   shapes2_2d <- round(geomorph::two.d.array(shapes2),dec)
+#   logsizes2 <- sizes[index2]
+#
+#
+#   mod1 <- lm(shapes1_2d ~ sizes,
+#              data = data.frame(sizes = logsizes1))
+#   mod2 <- lm(shapes2_2d ~ sizes,
+#              data = data.frame(sizes = logsizes2))
+#
+#
+#   #result1 <- all(round(mod2$coefficients[2,][1:3], dec) == round(c(0.002307460, 0.003569997, 0.002711362), dec))
+#   #works
+#   #result2 <- all(round(mod1$coefficients[2,][1:3], dec) == round(c(0.005091483, 0.004569121, 0.003097599), dec))
+#   #works
+#
+#   general_space <- stats::prcomp(round(geomorph::two.d.array(shapes),dec))
+#
+#   #result3 <- all(round(general_space$rotation[1:3],dec) == round(c(-0.03127865, -0.04121488, -0.02124059),dec))
+#   #works
+#
+#   burn1 <- burnaby(x = shapes1_2d, vars = logsizes1)
+#   burn2 <- burnaby(x = shapes2_2d, vars = logsizes2)
+#
+#   #result4 <- all(round(burn1$rotation[1:3],dec) == round(c(0.07203246, -0.07424842, -0.02823905),dec))
+#   #works
+#   #result5 <- all(round(burn2$rotation[1:3],dec) == round(c(-0.02013978, -0.04428599,  0.01176433),dec))
+#   #works
+#
+#   #------------
+#
+#   mod1$coefficients <- round(mod1$coefficients,dec)
+#   mod2$coefficients <- round(mod2$coefficients,dec)
+#
+#   mod1$model[[1]]
+#
+#   detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(logsizes2),
+#                                      newdata = mod2)
+#
+#   #result6 <- all(round(detshapes2using1[1:3],dec) == round(c(0.07434148, 0.06773835, 0.06953058),dec))
+#
+#   #######################
+#
+#
+#   model = mod1
+#   xvalue = max(logsizes2)
+#   tree = NULL
+#   method = "orthogonal"
+#   newdata = mod2
+#
+#   x <- model$model[-1]
+#   y <- model$model[[1]]
+#
+#   if(is.null(rownames(x))) rownames(x) <- seq_len(nrow(x))
+#   if(is.null(rownames(y))) rownames(y) <- seq_len(nrow(y))
+#   namesx <- rownames(x)
+#   namesy <- rownames(y)
+#
+#   designmat <- stats::model.matrix(stats::as.formula(paste0("~ ",
+#                                                             strsplit(as.character(
+#                                                               model$call[2]), split = "~")[[1]][2])), data = x)
+#
+#   grandmean <- colMeans(y)
+#   coefs <- model$coefficients
+#
+#   if(method == "orthogonal") {
+#     axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))
+#
+#     ortho_space <- suppressWarnings(burnaby(x = y, axmat = axmat, tree = tree))
+#     ortho_scores <- ortho_space$x
+#     ortho_rotation <- ortho_space$rotation
+#     ax <- sum(ortho_space$sdev^2 > 1e-15)
+#
+#     if(!is.null(xvalue)) {
+#       ortho_center <- c(expected_shapes(shapes = y, x = x[[1]], xvalue = xvalue,
+#                                         tree = tree, returnarray = FALSE))
+#     } else {
+#       ortho_center <- ortho_space$center
+#     }
+#
+#     if(!is.null(newdata)) {
+#
+#       if(inherits(newdata, "mlm")) {
+#         newx <- newdata$model[-1]
+#         newy <- newdata$model[[1]]
+#         if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
+#         namesy <- rownames(newy)
+#
+#         newortho_space <- burnaby(x = newy, vars = newx)
+#         ax <- min(sum(newortho_space$sdev^2 > 1e-15), ax)
+#         ortho_scores <- newortho_space$x
+#         ortho_rotation <- newortho_space$rotation[,seq_len(ax)] -
+#           ortho_space$rotation[,seq_len(ax)]
+#
+#
+#         if(!is.null(xvalue)) {
+#           ortho_center <- c(expected_shapes(shapes = newy, x = newx[[1]],
+#                                             xvalue = xvalue, returnarray = FALSE))
+#         } else {
+#           ortho_center <- newortho_space$center
+#         }
+#
+#       } else {
+#         ortho_scores <- proj_eigen(x = newdata, vectors = ortho_space$rotation,
+#                                    center = ortho_space$center)
+#       }
+#     }
+#
+#     ortho_shapes2d <- rev_eigen(scores = ortho_scores[, seq_len(ax)],
+#                                 vectors = ortho_rotation[, seq_len(ax)],
+#                                 center = ortho_center)
+#     colnames(ortho_shapes2d) <- colnames(y)
+#   }
+#
+#   result6 <- all(round(ortho_shapes2d[1:3],dec) == round(c(0.07434148, 0.06773835, 0.06953058),dec))
+#
+#   ortho_shapes2d[1:3]
+#   detshapes2using1[1:3]
+#   ########################
+#
+#
+#
+#   #checking
+#
+#   ax <- c(1:30)
+#   na_shapes2minus1 <- rev_eigen(scores = burn2$x[,ax],
+#                                 vectors = burn2$rotation[,ax] - burn1$rotation[,ax],
+#                                 center = colMeans(detshapes2using1))
+#
+#   #result1 <- all(round(na_shapes2minus1[1:3],dec) == round(c(0.07372329, 0.06925095, 0.07103433),dec))
+#   #not working?
+#
+#   scores2using1 <- proj_eigen(detshapes2using1,
+#                               vectors = general_space$rotation[,1:2],
+#                               center = general_space$center)
+#
+#   slope2using1 <- lm(scores2using1[,2] ~ scores2using1[,1])$coef[2]
+#
+#   #result1 <- all(round(slope2using1[1],dec) == round(c(4.12391),dec))
+#   #not working
+#
+#
+#   scores2minus1 <- proj_eigen(na_shapes2minus1,
+#                               vectors = general_space$rotation[,1:2],
+#                               center = general_space$center)
+#   slope2minus1 <- lm(scores2minus1[,2] ~ scores2minus1[,1])$coef[2]
+#
+#
+#   #result1 <- round(slope2using1, 3) == round(slope2minus1, 3)
+#   expect_true(all(result6))
+#
+#   # refmesh <- shells3D$mesh_meanspec
+#   # template <- Morpho::tps3d(x = refmesh, refmat = shapes[,,geomorph::findMeanSpec(shapes)], tarmat = expected_shapes(shapes))
+#   # msp <- mspace(shapes, template = template, bg.models = "gray",
+#   #               cex.ldm = 0, alpha.models = 0.7, adj_frame = c(0.93,0.93)) %>%
+#   #   proj_shapes(detshapes2using1, pch = 1, col = 4) %>%
+#   #   proj_shapes(na_shapes2minus1, pch = 21, bg = 4, cex= 0.5)
+# })
+
 test_that(desc = "testing detrend_shapes, method = residuals, newdata, for numerics", code = {
   data(shells)
 
@@ -541,7 +716,7 @@ test_that(desc = "testing detrend_shapes, method = residuals, newdata, for numer
   slopedetr1 <- lm(detr_shapes1~logsizes1)$coefficients[2,]
 
   results <- all(round(slope1minus2,10) == round(slopedetr1,10))
-  expect_true(results)
+  expect_true(all(results))
 
 })
 

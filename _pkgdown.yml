@@ -8,43 +8,33 @@ reference:
   contents:
   - mspace
   - proj_shapes
-  - proj_consensus
   - proj_groups
   - proj_phylogeny
   - proj_axis
+  - proj_landscape
   - plot_mspace
+  - print.mspace
 - title: multivariate methods
   desc: |
     functions for ordination of multivariate data
   contents:
   - phy_prcomp
+  - phyalign_comp
   - bg_prcomp
   - pls2b
   - pls_shapes
+  - burnaby
   - exp_var
 - title: shape operations
   desc: |
-    funtions to perform various transformations/manipulations of shape data
+    functions to perform various transformations/manipulations of shape data
   contents:
   - expected_shapes
   - detrend_shapes
   - correct_efourier
   - ax_transformation
-- title: miscellaneous
-  contents:
-  - pile_shapes
-  - ellipses_by_group_2D
-  - hulls_by_group_2D
-  - hulls_by_group_3D
-  - build_template2d
-- title: data
-  desc: |
-    sample data
-  contents:
-  - tails
-  - wings
-  - shells
-  - shells3D
+  - extract_shapes
+  - rotate_coords
 - title: internal functions
   desc: |
     functions used internally by morphospace
@@ -61,4 +51,24 @@ reference:
   - plot_morphogrid3d
   - rotate_fcoef
   - plot_phenogram
-
+  - ellipses_by_group_2D
+  - hulls_by_group_2D
+  - density_by_group_2D
+  - col2hex
+  - plot_univ_scatter
+  - plot_biv_scatter
+  - plot_univ_landscape
+  - plot_biv_landscape
+- title: miscellaneous
+  contents:
+  - pile_shapes
+  - build_template2d
+  - hulls_by_group_3D
+- title: data
+  desc: |
+    build-in data sets
+  contents:
+  - tails
+  - wings
+  - shells
+  - shells3D

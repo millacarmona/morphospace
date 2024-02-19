@@ -868,7 +868,7 @@ morphogrid <- function(ordination,
   }
 
   if(rot.models != 0) for(i in seq_len(dim(sh_arr)[3])) {
-    sh_arr[,,i] <- spdep::Rotation(sh_arr[,,i], rot.models * 0.0174532925199)
+    sh_arr[,,i] <- rotate_coords(sh_arr[,,i], rot.models)
   }
 
 
@@ -1203,7 +1203,7 @@ plot_morphogrid3d <- function(x = NULL,
                               ylim = NULL,
                               xlab = NULL,
                               ylab = NULL,
-                              adj_frame = 1,
+                              adj_frame = c(1,1),
                               cex.ldm,
                               col.ldm,
                               col.models,
@@ -1475,8 +1475,8 @@ rotate_fcoef <- function(fcoef) {
 #'
 #' #get node heights
 #' heights <- phytools::nodeHeights(tree)
-#' node_heights <- c(rep(max(heights), length(tree$tip.label)),
-#'                   unique(heights[,1]))
+#' node_heights <- NULL
+#' for(i in 1:(length(tree$tip.label) + tree$Nnode)) node_heights[i] <- unique(heights[tree$edge == i])
 #'
 #' #plot simple phengram
 #' plot(node_heights, msp$projected$phylo_scores[,1])
@@ -1518,21 +1518,227 @@ plot_phenogram <- function(x = NULL,
                      bg = bg.tips, pch = pch.tips, cex = cex.tips, col = col.tips)
 
   }
-  if(is.character(labels.tips)) {
-    label.scores <- phyloxy[tree$tip.label,][labels.tips,]
-    label.text <- labels.tips
-  } else {
-    if(labels.tips) {
-      label.scores <- phyloxy[tree$tip.label,]
-      label.text <- rownames(phyloxy[tree$tip.label,])
-    }
-  }
-  graphics::text(label.scores, label.text, pos = 1)
+  add_labels(phyloxy[tree$tip.label,], labels.tips)
+  ##### add_labels(mspace$projected$phylo_scores[-tips,], labels.nodes)
+  # if(is.character(labels.tips)) {
+  #   label.scores <- phyloxy[tree$tip.label,][labels.tips,]
+  #   label.text <- labels.tips
+  # } else {
+  #   if(labels.tips) {
+  #     label.scores <- phyloxy[tree$tip.label,]
+  #     label.text <- rownames(phyloxy[tree$tip.label,])
+  #   }
+  # }
+  # graphics::text(label.scores, label.text, pos = 1)
 }
 
 
 ################################################################################
 
+#' Plot 2D convex hulls for a series of groups
+#'
+#' @description Plot convex hulls for different groups in 2D scatterplots
+#'   created using the generic [graphics::plot()] function. Used internally
+#'   (mostly).
+#'
+#' @param xy Coordinates of the scatterplot.
+#' @param fac A factor grouping data points.
+#' @param col A vector (either character or numeric) indicating the colors used
+#'   for each group.
+#' @param lty A numeric vector indicating the type of line used to draw hulls.
+#' @param alpha Numeric; transparency factor for hulls.
+#' @param ... Further arguments passed to [graphics::polygon()].
+#'
+#' @seealso \code{\link{ellipses_by_group_2D}}, \code{\link{hulls_by_group_3D}}
+#'
+#' @export
+#'
+#' @examples
+#' #load landmark data and necessary packages
+#' library(geomorph)
+#' data("tails")
+#' shapes <- tails$shapes
+#' species <- tails$data$species
+#'
+#' #perform PCA
+#' pca <- prcomp(two.d.array(shapes))
+#'
+#' #plot and add convex hulls
+#' plot(pca$x)
+#' hulls_by_group_2D(pca$x, fac = species, col = "black")
+hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
+                              lty = 1, alpha = 0, ...) {
+
+  col <- if(length(col) == 1) rep(col, nlevels(fac)) else {
+    if(nlevels(fac) > length(col)) {
+      c(rep(NA, nlevels(fac) - length(unique(col))),
+        unique(col))[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+                             which(levels(fac) %in% unique(fac))))]
+    } else col
+  }
+
+  lty <- if(length(lty) == 1) rep(lty, nlevels(fac)) else if(nlevels(fac) > length(lty)) {
+    c(rep(0, nlevels(fac) - length(lty)),
+      lty)[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+                   which(levels(fac) %in% unique(fac))))]
+  } else lty
+
+
+  for(i in seq_len(nlevels(fac))) {
+    x <- xy[fac == levels(fac)[i], 1]
+    y <- xy[fac == levels(fac)[i], 2]
+    hullp <- grDevices::chull(x = x, y = y)
+    graphics::polygon(x[hullp], y[hullp], border = col[i],
+                      col = grDevices::adjustcolor(col[i], alpha.f = alpha), lty = lty[i], ...)
+  }
+}
+
+
+################################################################################
+
+#' Plot 2D confidence ellipses for a series of groups
+#'
+#' @description Plot confidence ellipses for different groups in 2D scatterplots
+#'   created using the generic [graphics::plot()] function. Used internally
+#'   (mostly).
+#'
+#' @param xy Coordinates of the scatterplot.
+#' @param fac A factor grouping data points.
+#' @param col A vector (either character or numeric) indicating the colors used
+#'   for each group.
+#' @param lty A numeric vector indicating the type of line used to draw
+#'   ellipses.
+#' @param alpha Numeric; transparency factor for ellipses.
+#' @param conflev Numeric, specifying the confidence level for drawing ellipses.
+#' @param ... Further arguments passed to [graphics::polygon()].
+#'
+#' @seealso \code{\link{hulls_by_group_2D}}, \code{\link[car]{ellipse}}
+#'
+#' @export
+#'
+#' @examples
+#' #load landmark data and necessary packages
+#' library(geomorph)
+#' data("wings")
+#' shapes <- wings$shapes
+#' species <- wings$data$species
+#'
+#' #perform PCA
+#' pca <- prcomp(two.d.array(shapes))
+#'
+#' #plot and add 95% confidence ellipses
+#' plot(pca$x)
+#' ellipses_by_group_2D(pca$x, fac = species, col = "black", conflev = 0.95)
+ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
+                                 lty = 1, conflev = 0.95, alpha = 0, ...) {
+
+  col <- if(length(col) == 1) rep(col, nlevels(fac)) else {
+    if(nlevels(fac) > length(col)) {
+      c(rep(NA, nlevels(fac) - length(unique(col))),
+        unique(col))[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+                             which(levels(fac) %in% unique(fac))))]
+    } else col
+  }
+
+  lty <- if(length(lty) == 1) rep(lty, nlevels(fac)) else if(nlevels(fac) > length(lty)) {
+    c(rep(0, nlevels(fac) - length(lty)),
+      lty)[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+                   which(levels(fac) %in% unique(fac))))]
+  } else lty
+
+  for(i in seq_len(nlevels(fac))) {
+    cent <- colMeans(xy[fac == levels(fac)[i], 1:2])
+    vcv <- stats::var(xy[fac == levels(fac)[i], 1:2])
+    if(any(!is.na(vcv))) {
+      ell <- car::ellipse(center = cent, shape = vcv,
+                          radius = stats::qnorm((1 - conflev) / 2, lower.tail = F),
+                          draw = FALSE)
+      graphics::polygon(ell, border = col[i],
+                        col = grDevices::adjustcolor(col[i], alpha.f = alpha), lty = lty[i], ...)
+    }
+  }
+}
+
+
+################################################################################
+
+#' Plot univariate density distributions for a series of groups
+#'
+#' @description Plot density distribution for different groups in "univariate"
+#'   scatterplots. Used internally.
+#'
+#' @param xy Coordinates of the scatterplot.
+#' @param fac A factor grouping data points.
+#' @param ax the axis of \code{xy} corresponding to the active variable.
+#' @param lty A vector indicating the type of line (integer) used to draw density
+#'   distributions.
+#' @param lwd A vector indicating the width of line (integer) used to draw
+#'   density distributions.
+#' @param alpha Numeric; transparency factor for density distributions.
+#' @param col A vector (either character or numeric) indicating the colors used
+#'   for each group.
+#'
+#' @export
+#'
+#' @examples
+#' #load Fourier data and necessary packages
+#' library(geomorph)
+#' data("shells")
+#' shapes <- shells$shapes$coe
+#' species <- shells$data$species
+#'
+#' #perform PCA
+#' pca <- prcomp(shapes)
+#'
+#' #bind 1st axis with a column of 0s, plot and add density distributions
+#' xy <- cbind(pca$x[,1], 0)
+#' plot(xy, ylim = c(0,1))
+#' density_by_group_2D(xy, fac = species, ax = 1)
+density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1,
+                                col = seq_len(nlevels(fac))) {
+
+  if(length(col) == 1) col <- rep(col, nlevels(fac))
+  lty <- if(length(lty) == 1) rep(lty, nlevels(fac)) else if(nlevels(fac) > length(lty)) {
+    c(rep(0, nlevels(fac) - length(lty)),
+      lty)[order(c((1:nlevels(fac))[-which(levels(fac) %in% unique(fac))],
+                   which(levels(fac) %in% unique(fac))))]
+  } else lty
+
+  dens <- lapply(seq_len(nlevels(fac)), function(i) {
+    if(sum(fac == levels(fac)[i]) > 2) {
+      subdens <- stats::density(xy[fac == levels(fac)[i], ax])
+      list(x = subdens$x, y = subdens$y)
+    }
+  })
+  ymax <- max(unlist(lapply(dens, function(x) {x$y})))
+
+
+  for(i in seq_len(nlevels(fac))) {
+    graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
+                      lty = lty[i], col = grDevices::adjustcolor(col[i], alpha.f = alpha))
+  }
+}
+
+
+################################################################################
+
+#' Express colors as hexadecimal coding
+#'
+#' @description Little function intended for internal use; will transform colors
+#'   (expressed either as numerical or characters) into hexadecimal code.
+#'
+#' @param col Either numeric or character; color(s) to be transformed.
+#'
+#' @return The color(s) used as input, but expressed as hexadecimal code(s).
+#'
+#' @export
+#'
+#' @examples
+#' plot(rnorm(n = 100), pch = 16, col = "red")
+#' plot(rnorm(n = 100), pch = 16, col = col2hex("red"))
+#'
+#' plot(rnorm(n = 100), pch = 16, col = 2)
+#' plot(rnorm(n = 100), pch = 16, col = col2hex(2))
 col2hex <- function(col) {
 
   rgbcols <- grDevices::col2rgb(col)
@@ -1544,3 +1750,173 @@ col2hex <- function(col) {
   return(hexcols)
 }
 
+
+################################################################################
+
+#' Plot scatterpoints into univariate morphospace
+#'
+#' @description An \code{ad hoc} wrapper for [stats::density()] +
+#'   [graphics::polygon()] / [graphics::points()]. Used internally for
+#'   projecting scatterpoints into univariate morphospaces.
+#'
+#' @param scores a matrix of (x,y) coordinates to plot.
+#' @param density Logical; whether to plot density curve.
+#' @param col Color of the scatterpoints.
+#' @param pch Symbol of the scatterpoints.
+#' @param bg Background color for the scatterpoints.
+#' @param cex Numeric; size of the scatterpoints.
+#' @param ... Further arguments passed to [graphics::points()].
+#'
+#' @keywords internal
+plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1, ...) {
+
+  if(is.null(dim(scores))) scores <- rbind(scores)
+
+  if(density & nrow(scores) > 1) {
+    dens <- stats::density(scores)
+    graphics::polygon(dens$x, dens$y / max(dens$y), lwd = 2,
+                      col = grDevices::adjustcolor(1, alpha.f = 0.5))
+  }
+
+  graphics::abline(h = 0)
+
+  if(any(pch %in% c(21:25))) {
+    graphics::points(cbind(scores, 0), pch = pch, bg = bg, cex = cex, ...)
+  } else {
+    graphics::points(cbind(scores, 0), pch = pch, col = col, cex = cex, ...)
+  }
+}
+
+
+################################################################################
+
+#' Plot scatterpoints into bivariate morphospace
+#'
+#' @description An \code{ad hoc} wrapper for [graphics::points()]. Used
+#'   internally for projecting scatterpoints into bivariate morphospaces.
+#'
+#' @param scores a matrix of (x,y) coordinates to plot.
+#' @param col Color of the scatterpoints.
+#' @param pch Symbol of the scatterpoints.
+#' @param bg Background color for the scatterpoints.
+#' @param cex Numeric; size of the scatterpoints.
+#' @param ... Further arguments passed to [graphics::points()].
+#'
+#' @keywords internal
+plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
+
+  if(is.null(dim(scores))) scores <- rbind(scores)
+
+  if(any(pch %in% c(21:25))) {
+    graphics::points(scores, pch = pch, bg = bg, cex = cex, ...)
+  } else {
+    graphics::points(scores, pch = pch, col = col, cex = cex, ...)
+  }
+}
+
+
+################################################################################
+
+#' Plot univariate landscape into morphospace
+#'
+#' @description Plot a curve representing a "univariate" landscape. Used
+#'   internally for projecting landscapes into univariate morphospaces.
+#'
+#' @param landscape A list containing the results of [akima::interp()].
+#' @param drawlabels Logical; should the labels indicating the value of each
+#'   surface contour be plotted?
+#' @param col Colors used to represent the landscape curve.
+#' @param lwd Integer; width of the lines depicting the landscape curve.
+#'
+#' @keywords internal
+plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
+  if(drawlabels) {
+    w.transp <-round(stats::quantile(x = 1:length(landscape$z), probs = c(0.25, 0.5, 0.75)))
+    w.transp <- sort(c(w.transp - 1, w.transp, w.transp + 1))
+
+    label_col <- col[w.transp[c(2,5,8)]]
+    col[w.transp] <- NA
+  }
+
+  for(i in 1:(length(landscape$x) - 1)) {
+    graphics::lines(rbind(c(landscape$x[i], landscape$z[i]),
+                          c(landscape$x[i + 1], landscape$z[i + 1])),
+                    col = col[i], lwd = lwd)
+  }
+  graphics::box()
+
+  if(drawlabels == TRUE) {
+    x_text <- colMeans(matrix(landscape$x[w.transp + 1], nrow = 3))
+    y_text <- colMeans(matrix(landscape$z[w.transp + 1], nrow = 3))
+    labels <- round(colMeans(matrix(landscape$z[w.transp], nrow = 3)), 2)
+    graphics::text(cbind(x_text, y_text), labels = labels, cex = 0.7, col = label_col)
+  }
+}
+
+
+################################################################################
+
+#' Plot bivariate landscape into morphospace
+#'
+#' @description An \code{ad hoc} wrapper for [graphics::contour()] /
+#'   [graphics::.filled.contour()] /  [graphics::image()]. Used internally for
+#'   projecting landscapes into bivariate morphospaces.
+#'
+#' @param landscape A list containing the results of [akima::interp()].
+#' @param display Either \code{"contour"} or \code{"filled.contour"}.
+#' @param type Type of landscape to be plotted. Options are \code{"theoretical"}
+#'   or \code{"empirical"}.
+#' @param levels Levels to be used to create the contours.
+#' @param lty Integer; type of the lines depicting contours.
+#' @param lwd Integer; width of the lines depicting contours.
+#' @param col Colors used to represent the landscape contours.
+#' @param drawlabels Logical; should the labels indicating the value of each
+#'   surface contour be plotted?
+#' @param alpha Transparency factor for filled contours.
+#'
+#' @keywords internal
+plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, drawlabels, alpha) {
+  if(display == "contour") {
+    graphics::contour(landscape$x, landscape$y, landscape$z, levels = levels,
+                      lwd = lwd, lty = lty, col = col, labels = round(levels, digits = 3),
+                      drawlabels = drawlabels, add = TRUE)
+    graphics::box()
+  }
+
+  if(display == "filled.contour") {
+    if(type == "theoretical") {
+      graphics::.filled.contour(landscape$x, landscape$y, landscape$z, levels = levels,
+                                col = grDevices::adjustcolor(col = col, alpha = alpha))
+    }
+    if(type == "empirical") {
+      graphics::image(landscape$x, landscape$y, landscape$z, add = TRUE,
+                      col = grDevices::adjustcolor(col = col, alpha = alpha))
+    }
+  }
+}
+
+
+################################################################################
+
+#' Add labels to scatterplots
+#'
+#' @description A wrapper for [graphics::text()]. Used internally.
+#'
+#' @param xy A matrix with scatter point coordinates.
+#' @param labels Either logical, indicating whether to add labels to all the
+#'   points in the scatter plot (taken from row names), or character string
+#'   containing specific names to be added.
+#'
+#' @keywords internal
+add_labels <- function(xy, labels) {
+  if(is.character(labels)) {
+    label.scores <- xy[labels,]
+    label.text <- labels
+  } else {
+    if(labels) {
+      label.scores <- xy
+      label.text <- rownames(xy)
+    }
+  }
+  graphics::text(label.scores, label.text, pos = 1)
+}

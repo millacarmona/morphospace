@@ -1,6 +1,6 @@
 Package: morphospace
-Title: Build, Visualize and Explore Morphospaces
-Version: 0.0.0.9000
+Title: Build, Visualize and Explore Multivariate Ordinations of Shape Data
+Version: 0.0.1
 Authors@R: 
     person(given = "Pablo", family = "Milla Carmona", email = "pablomillac@gmail.com", role = c("aut", "cre"),
          comment = c(ORCID = "0000-0002-0396-6244"))
@@ -31,8 +31,7 @@ Imports:
     Morpho,
     phytools,
     png,
-    rgl,
-    spdep
+    rgl
 Depends: 
     R (>= 2.10)
 LazyData: true

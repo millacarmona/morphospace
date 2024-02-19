@@ -337,8 +337,6 @@ mspace <- function(shapes = NULL,
                               size.models = size.models, asp.models = 1, rescale = rescale)
 
     refshape <- expected_shapes(shapes)
-    xlim <- range(ordination$x[,axes[1]])
-    if(ncol(ordination$x) > 1 | length(axes) > 1) ylim <- range(ordination$x[,axes[2]])
 
     plot_morphogrid3d(x = NULL, y = y, morphogrid = shapemodels, refshape = refshape,
                       template = template, links = links, ordtype = ordination$ordtype,
@@ -904,21 +902,23 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
       }
 
       tips <- seq_len(length(tree$tip.label))
-      plot_biv_scatter(scores = phylo_scores[-tips,], pch = pch.nodes, bg = bg.nodes,
-                       col = col.nodes, cex = cex.nodes)
-      plot_biv_scatter(scores = phylo_scores[tips,], pch = pch.tips, bg = bg.tips,
-                       col = col.tips, cex = cex.tips)
+      plot_biv_scatter(scores = phylo_scores[-tips, mspace$plotinfo$axes], pch = pch.nodes,
+                       bg = bg.nodes, col = col.nodes, cex = cex.nodes)
+      plot_biv_scatter(scores = phylo_scores[tips, mspace$plotinfo$axes], pch = pch.tips,
+                       bg = bg.tips, col = col.tips, cex = cex.tips)
 
-      if(is.character(labels.tips)) {
-        label.scores <- tips_scores[labels.tips,]
-        label.text <- labels.tips
-      } else {
-        if(labels.tips) {
-          label.scores <- tips_scores
-          label.text <- rownames(tips_scores)
-        }
-      }
-      graphics::text(label.scores, label.text)
+      add_labels(tips_scores, labels.tips)
+      #######add_labels(nodes_scores, labels.nodes)
+      # if(is.character(labels.tips)) {
+      #   label.scores <- tips_scores[labels.tips,]
+      #   label.text <- labels.tips
+      # } else {
+      #   if(labels.tips) {
+      #     label.scores <- tips_scores
+      #     label.text <- rownames(tips_scores)
+      #   }
+      # }
+      # graphics::text(label.scores, label.text = 1)
 
     } else {
       warning("phylogenetic relationships are not projected into univariate morphospaces")
@@ -1805,7 +1805,7 @@ plot_mspace <- function(mspace,
 
       if(ncol(mspace$ordination$x) > 1) {
         if(length(args$axes) > 1) {
-          if(!is.null(scores)) {
+          if(!is.null(scores) & points) {
             plot_biv_scatter(scores = scores[-index_sc_in_gr,],
                              col = gr_col.points[-index_sc_in_gr],
                              pch = gr_pch.points[-index_sc_in_gr],
@@ -1815,21 +1815,25 @@ plot_mspace <- function(mspace,
 
           if(!is.null(gr_class)) {
             for(i in seq_len(nlevels(gr_class))) {
-              plot_biv_scatter(scores = scores[index_sc_in_gr[gr_class == levels(gr_class)[i]], args$axes],
-                               col = gr_col.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                               pch = gr_pch.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                               bg = gr_bg.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                               cex = gr_cex.points[index_sc_in_gr][gr_class == levels(gr_class)[i]])
-              if(!args$ellipse.groups) {
-                hulls_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i],],
-                                  fac = gr_class[gr_class == levels(gr_class)[i]],
-                                  col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
-                                  alpha = args$alpha.groups)
-              } else {
-                ellipses_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i],],
-                                     fac = factor(gr_class[gr_class == levels(gr_class)[i]]),
-                                     col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
-                                     alpha = args$alpha.groups, conflev = args$conflev.groups)
+              if(points) {
+                plot_biv_scatter(scores = scores[index_sc_in_gr[gr_class == levels(gr_class)[i]], args$axes],
+                                 col = gr_col.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                                 pch = gr_pch.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                                 bg = gr_bg.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                                 cex = gr_cex.points[index_sc_in_gr][gr_class == levels(gr_class)[i]])
+              }
+              if(groups) {
+                if(!args$ellipse.groups) {
+                  hulls_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i],],
+                                    fac = gr_class[gr_class == levels(gr_class)[i]],
+                                    col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
+                                    alpha = args$alpha.groups)
+                } else {
+                  ellipses_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i],],
+                                       fac = factor(gr_class[gr_class == levels(gr_class)[i]]),
+                                       col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
+                                       alpha = args$alpha.groups, conflev = args$conflev.groups)
+                }
               }
             }
           }
@@ -1839,15 +1843,19 @@ plot_mspace <- function(mspace,
               density_by_group_2D(gr_scores, gr_class, ax = args$axes[1], alpha = args$alpha.groups,
                                   lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
             }
-            plot_univ_scatter(scores = cbind(scores[index_sc_in_gr, args$axes[1]]), density = FALSE,
-                              col = gr_col.points[index_sc_in_gr], pch = gr_pch.points[index_sc_in_gr],
-                              cex = gr_cex.points[index_sc_in_gr], bg = gr_bg.points[index_sc_in_gr])
+            if(points) {
+              plot_univ_scatter(scores = cbind(scores[index_sc_in_gr, args$axes[1]]), density = FALSE,
+                                col = gr_col.points[index_sc_in_gr], pch = gr_pch.points[index_sc_in_gr],
+                                cex = gr_cex.points[index_sc_in_gr], bg = gr_bg.points[index_sc_in_gr])
+            }
           }
-          suppressWarnings(
-            plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr, args$axes[1]]), density = FALSE,
-                              col = gr_col.points[-index_sc_in_gr], pch = gr_pch.points[-index_sc_in_gr],
-                              cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
-          )
+          if(points) {
+            suppressWarnings(
+              plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr, args$axes[1]]), density = FALSE,
+                                col = gr_col.points[-index_sc_in_gr], pch = gr_pch.points[-index_sc_in_gr],
+                                cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
+            )
+          }
         }
       } else {
         if(!is.null(gr_class)) {
@@ -1855,15 +1863,19 @@ plot_mspace <- function(mspace,
             density_by_group_2D(gr_scores, gr_class, ax = 1, alpha = args$alpha.groups,
                                 lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
           }
-          plot_univ_scatter(scores = cbind(scores[index_sc_in_gr,]), density = FALSE, col = gr_col.points[index_sc_in_gr],
-                            pch = gr_pch.points[index_sc_in_gr], cex = gr_cex.points[index_sc_in_gr],
-                            bg = gr_bg.points[index_sc_in_gr])
+          if(points) {
+            plot_univ_scatter(scores = cbind(scores[index_sc_in_gr,]), density = FALSE, col = gr_col.points[index_sc_in_gr],
+                              pch = gr_pch.points[index_sc_in_gr], cex = gr_cex.points[index_sc_in_gr],
+                              bg = gr_bg.points[index_sc_in_gr])
+          }
         }
-        suppressWarnings(
-          plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr,]), density = FALSE,
-                            col = gr_col.points[-index_sc_in_gr], pch = gr_pch.points[-index_sc_in_gr],
-                            cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
-        )
+        if(points) {
+          suppressWarnings(
+            plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr,]), density = FALSE,
+                              col = gr_col.points[-index_sc_in_gr], pch = gr_pch.points[-index_sc_in_gr],
+                              cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
+          )
+        }
       }
     }
 
@@ -1883,16 +1895,18 @@ plot_mspace <- function(mspace,
         plot_biv_scatter(scores = mspace$projected$phylo_scores[tips, args$axes], pch = args$pch.tips,
                          bg = args$bg.tips, col = args$col.tips, cex = args$cex.tips)
 
-        if(is.character(labels.tips)) {
-          label.scores <- mspace$projected$phylo_scores[tree$tip.label,][labels.tips,]
-          label.text <- labels.tips
-        } else {
-          if(labels.tips) {
-            label.scores <- mspace$projected$phylo_scores[tree$tip.label,]
-            label.text <- rownames(mspace$projected$phylo_scores[tree$tip.label,])
-          }
-        }
-        graphics::text(label.scores, label.text, pos = 1)
+        add_labels(mspace$projected$phylo_scores[tree$tip.label,], labels.tips)
+        ##### add_labels(mspace$projected$phylo_scores[-tips,], labels.nodes)
+        # if(is.character(labels.tips)) {
+        #   label.scores <- mspace$projected$phylo_scores[tree$tip.label,][labels.tips,]
+        #   label.text <- labels.tips
+        # } else {
+        #   if(labels.tips) {
+        #     label.scores <- mspace$projected$phylo_scores[tree$tip.label,]
+        #     label.text <- rownames(mspace$projected$phylo_scores[tree$tip.label,])
+        #   }
+        # }
+        # graphics::text(label.scores, label.text, pos = 1)
 
       } else {
         warning("phylogenetic relationships are not projected into univariate morphospaces")
@@ -1987,6 +2001,10 @@ plot_mspace <- function(mspace,
       args$axes <- rep(args$axes[1], 2)
     }
 
+    args$xlim <- xlim
+    args$ylim <- ylim
+
+
     #if x or y are a phy object, prepare the ground for a phenogram --------------------------------
     if(any(any(class(x) == "phylo"), any(class(y) == "phylo"))) {
       phenogr <- TRUE
@@ -1998,18 +2016,20 @@ plot_mspace <- function(mspace,
       if(any(class(x) == "phylo")) {
         tree <- x
         heights <- phytools::nodeHeights(tree)
-        x <- c(rep(max(heights), length(tree$tip.label)),
-               unique(heights[, 1]))
-        x <- x - max(x) ###########
+        x <- NULL
+        for(i in 1:(length(tree$tip.label) + tree$Nnode)) x[i] <- unique(heights[tree$edge == i])
+        x <- x - max(x)
+
         args$xlim <- range(x)
       }
     } else {
       if(any(class(y) == "phylo")) {
         tree <- y
         heights <- phytools::nodeHeights(tree)
-        y <- c(rep(max(heights), length(tree$tip.label)),
-               unique(heights[, 1]))
-        y <- y - max(y) #########
+        y <- NULL
+        for(i in 1:(length(tree$tip.label) + tree$Nnode)) y[i] <- unique(heights[tree$edge == i])
+        y <- y - max(y)
+
         args$ylim <- range(y)
       }
     }
@@ -2125,7 +2145,7 @@ plot_mspace <- function(mspace,
         } else gr_cex.points <- args$cex.points
 
 
-        if(!is.null(scores)) {
+        if(!is.null(scores) & points) {
           plot_biv_scatter(scores = xy[-index_sc_in_gr,],
                            col = gr_col.points[-index_sc_in_gr],
                            pch = gr_pch.points[-index_sc_in_gr],
@@ -2135,21 +2155,25 @@ plot_mspace <- function(mspace,
 
         if(!is.null(gr_class)) {
           for(i in seq_len(nlevels(gr_class))) {
-            plot_biv_scatter(scores = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
-                             col = gr_col.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                             pch = gr_pch.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                             bg = gr_bg.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                             cex = gr_cex.points[index_sc_in_gr][gr_class == levels(gr_class)[i]])
-            if(!args$ellipse.groups) {
-              hulls_by_group_2D(xy = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
-                                fac = gr_class[gr_class == levels(gr_class)[i]],
-                                col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
-                                alpha = args$alpha.groups)
-            } else {
-              ellipses_by_group_2D(xy = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
-                                   fac = factor(gr_class[gr_class == levels(gr_class)[i]]),
-                                   col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
-                                   alpha = args$alpha.groups, conflev = args$conflev.groups)
+            if(points) {
+              plot_biv_scatter(scores = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
+                               col = gr_col.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                               pch = gr_pch.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                               bg = gr_bg.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                               cex = gr_cex.points[index_sc_in_gr][gr_class == levels(gr_class)[i]])
+            }
+            if(groups) {
+              if(!args$ellipse.groups) {
+                hulls_by_group_2D(xy = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
+                                  fac = gr_class[gr_class == levels(gr_class)[i]],
+                                  col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
+                                  alpha = args$alpha.groups)
+              } else {
+                ellipses_by_group_2D(xy = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
+                                     fac = factor(gr_class[gr_class == levels(gr_class)[i]]),
+                                     col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
+                                     alpha = args$alpha.groups, conflev = args$conflev.groups)
+              }
             }
           }
         }
@@ -2161,7 +2185,7 @@ plot_mspace <- function(mspace,
         tree <- mspace$projected$phylo
         phylo_scores <- mspace$projected$phylo_scores
 
-        if(nrow(cbind(x, y)) == nrow(phylo_scores[tree$tip.label, ]))  {
+        if(nrow(cbind(x, y)) == nrow(cbind(phylo_scores[tree$tip.label, ]))) {
 
           if(!is.null(x)) {
             x <- cbind(x)
@@ -2197,7 +2221,7 @@ plot_mspace <- function(mspace,
           }
         }
 
-        if(nrow(cbind(x, y)) == nrow(phylo_scores[tree$tip.label, ]))  {
+        if(nrow(cbind(x, y)) == nrow(cbind(phylo_scores[tree$tip.label, ]))) {
           xy.tips <- cbind(x, phylo_scores[tree$tip.label, mspace$plotinfo$axes[1]], y)[tree$tip.label,]
           xy.nodes <- apply(xy.tips[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
           phyloxy <- rbind(xy.tips, xy.nodes)
@@ -2212,16 +2236,18 @@ plot_mspace <- function(mspace,
           plot_biv_scatter(scores = phyloxy[tips,], pch = args$pch.tips,
                            bg = args$bg.tips, col = args$col.tips, cex = args$cex.tips)
 
-          if(is.character(labels.tips)) {
-            label.scores <- phylo_scores[labels.tips,]
-            label.text <- labels.tips
-          } else {
-            if(labels.tips) {
-              label.scores <- phylo_scores[tree$tip.label,]
-              label.text <- rownames(phylo_scores[tree$tip.label,])
-            }
-          }
-          graphics::text(label.scores, label.text, pos = 1)
+          add_labels(phylo_scores[tree$tip.label,], labels.tips)
+          ########add_labels(phylo_scores[-tips,], labels.nodes)
+          # if(is.character(labels.tips)) {
+          #   label.scores <- phylo_scores[labels.tips,]
+          #   label.text <- labels.tips
+          # } else {
+          #   if(labels.tips) {
+          #     label.scores <- phylo_scores[tree$tip.label,]
+          #     label.text <- rownames(phylo_scores[tree$tip.label,])
+          #   }
+          # }
+          # graphics::text(label.scores, label.text, pos = 1)
         }
       }
     }
@@ -2246,7 +2272,6 @@ plot_mspace <- function(mspace,
         gr_scores <- mspace$projected$gr_scores
         scores <- mspace$projected$scores
 
-
         index_sc_in_gr <- apply(scores, 1, \(x, y) {any(
           apply(y, 1, \(z, x) {all(z == x)}, x))}, gr_scores)
         if(length(index_sc_in_gr) == 0) index_sc_in_gr <- 1:nrow(scores)
@@ -2256,6 +2281,9 @@ plot_mspace <- function(mspace,
                                        which(apply(y, 1, \(z, x){
                                          all(z == x)}, x))}, gr_scores)))
         if(length(index_gr_in_sc) == 0) index_gr_in_sc <- 1:nrow(gr_scores)
+
+        if(length(unique(args$cex.points)) > 1)
+          args$cex.points <- rep(1, nrow(cbind(scores[index_sc_in_gr,])))
 
         pt_params <- NULL
         for(i in seq_len(nrow(cbind(scores[index_sc_in_gr,])))) {
@@ -2285,6 +2313,7 @@ plot_mspace <- function(mspace,
         gr_params$col2 <- args$col.groups
         gr_params$lty <- args$lty.groups
         gr_params$lwd <- args$lwd.groups
+
 
         if(any(grepl(gr_params$class, pattern = "_bis."))) {
           index_bis. <- which(grepl(gr_params$class, pattern = "_bis."))

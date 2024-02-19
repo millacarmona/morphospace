@@ -1111,3 +1111,53 @@ extract_shapes <- function(mspace,
 
   return(invisible((results)))
 }
+
+
+################################################################################
+
+#' Rotate x,y coordinates
+#'
+#' @description Rotate x,y coordinates by an arbitrary amount of degrees
+#'
+#' @param xy (x,y) coordinates
+#' @param degrees Numeric; angle to rotate \code{(x,y)}
+#'
+#' @export
+#'
+#' @examples
+#' #load data
+#' data(wings)
+#'
+#' shapes <- wings$shapes
+#' links <- wings$links
+#'
+#' # rotate first shape from the data set
+#' rot_shape <- rotate_coords(shapes[,,1], 180)
+#'
+#' #plot and compare
+#' plot(shapes[,,1], pch = 1)
+#' Morpho::lineplot(shapes[,,1], links)
+#'
+#' points(rot_shape, pch = 16, col = "red")
+#' Morpho::lineplot(rot_shape, links, col = "red")
+rotate_coords <- function(xy, degrees) {
+
+  # Convert angle from degrees to radians
+  radians <- degrees * pi / 180
+
+  #split x and y coordinates
+  x <- xy[,1]
+  y <- xy[,2]
+
+  # Calculate the cosine and sine of the angle
+  cos_angle <- cos(radians)
+  sin_angle <- sin(radians)
+
+  # Apply rotation transformation to each coordinate pair
+  rotated_x <- x * cos_angle - y * sin_angle
+  rotated_y <- x * sin_angle + y * cos_angle
+
+  # Return the rotated coordinates
+  rotated_coordinates <- cbind(x = rotated_x, y = rotated_y)
+  return(rotated_coordinates)
+}
