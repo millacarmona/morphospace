@@ -1297,8 +1297,12 @@ print.mspace <- function(mspace, ...) {
     cat(paste0("\n   - ", length(mspace$projected$shape_axis), " shape", nax))
   }
   if(!is.null(mspace$projected$phylo_scores)) {
-    cat(paste0("\n   - a phylogenetic structure for ", mspace$projected$phylo$Nnode + 1,
-               " tips and ", mspace$projected$phylo$Nnode, " nodes"))
+    cat(paste0("\n   - a set of shapes for ",
+               mspace$projected$phylo$Nnode + 1, " tips and ", mspace$projected$phylo$Nnode, " nodes"))
+    cat(paste0("\n   - a phylogenetic tree"))
+    cat(paste0("\n   - an evolutionary model (", mspace$projected$phylo_evmodel,
+               ") used for ancestral character estimation"))
+
   }
   if(!is.null(mspace$projected$landsc)) {
     if(length(mspace$plotinfo$axes) == 1) {
@@ -2029,7 +2033,9 @@ plot_mspace <- function(mspace,
         x <- x - max(x)
 
         args$xlim <- range(x)
+        if(is.null(args$xlab)) args$xlab <- "Time"
       }
+      if(is.null(args$xlab)) args$xlab <- deparse(substitute(x))
     } else {
       if(any(class(y) == "phylo")) {
         tree <- y
@@ -2039,7 +2045,9 @@ plot_mspace <- function(mspace,
         y <- y - max(y)
 
         args$ylim <- range(y)
+        if(is.null(args$ylab)) args$ylab <- "Time"
       }
+      if(is.null(args$ylab)) args$ylab <- deparse(substitute(y))
     }
 
     if(mspace$plotinfo$k == 3 & mspace$ordination$datype == "landm") {
@@ -2108,6 +2116,7 @@ plot_mspace <- function(mspace,
 
     } else {
       #if x or y are regular variables, go for a generic hybrid morphospace -----------------------
+
 
       if(points | groups) {
 
