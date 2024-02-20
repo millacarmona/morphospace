@@ -802,7 +802,8 @@ morphogrid <- function(ordination,
     }
   } else {
 
-    if(length(axes) > 1) warning("x or y has been specified, axes[2] will be ignored")
+    if(length(axes) > 1) warning(paste0(c("x","y")[which(c(!is.null(x), !is.null(y)))],
+                                        " has been specified, axes[2] will be ignored"))
     axes <- axes[1]
 
     if(!is.null(x)) {
@@ -1081,14 +1082,21 @@ plot_morphogrid2d <- function(x = NULL,
                    xlab = "", ylab = "", axes = FALSE)
     graphics::box()
     if(is.factor(x)) {
-      graphics::axis(side = 1, x, at = unique(as.numeric(x)),
+      graphics::axis(side = 1, x, at = seq_len(nlevels(x)),
                      labels = levels(x), las = 2)
     } else {
       graphics::axis(side = 1)
-      mtext(side = 1, line = 3, text = xlab)
+      graphics::mtext(side = 1, line = 3, text = xlab)
     }
-    graphics::axis(side = 2)
-    mtext(side = 2, line = 3, text = ylab)
+
+    if(is.factor(y)) {
+      graphics::axis(side = 2, y, at = seq_len(nlevels(y)),
+                     labels = levels(y), las = 2)
+    } else {
+      graphics::axis(side = 2)
+      graphics::mtext(side = 2, line = 3, text = ylab)
+    }
+
     ####!
 
     if(models) {
@@ -1366,10 +1374,29 @@ plot_morphogrid3d <- function(x = NULL,
                 adj$ylim[2] - (diff(adj$ylim) * (1 - adj_frame[2]) / 2))
 
 
-  if(plot == TRUE) {
-    plot(0, type = "n", xlim = new_xlim, ylim = new_ylim, xlab = xlab, ylab = ylab)
+  if(plot) {
+    #graphics::plot(0, type = "n", xlim = new_xlim, ylim = new_ylim, xlab = xlab, ylab = ylab)
+    ###!
+    graphics::plot(0, type = "n", xlim = new_xlim, ylim = new_ylim,
+                   xlab = "", ylab = "", axes = FALSE)
+    graphics::box()
+    if(is.factor(x)) {
+      graphics::axis(side = 1, x, at = seq_len(nlevels(x)),
+                     labels = levels(x), las = 2)
+    } else {
+      graphics::axis(side = 1)
+      graphics::mtext(side = 1, line = 3, text = xlab)
+    }
 
-    if(plot.models == TRUE) {
+    if(is.factor(y)) {
+      graphics::axis(side = 2, y, at = seq_len(nlevels(y)),
+                     labels = levels(y), las = 2)
+    } else {
+      graphics::axis(side = 2)
+      graphics::mtext(side = 2, line = 3, text = ylab)
+    }
+    ####!
+    if(plot.models) {
 
       for(i in seq_len((length(models) - 1))) {
       graphics::rasterImage(models[[i]], model_frames[[i]][1,1], model_frames[[i]][1,2],

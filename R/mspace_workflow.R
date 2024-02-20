@@ -1678,7 +1678,9 @@ plot_mspace <- function(mspace,
   merged_args <- utils::modifyList(inh_args, new_args)
   args <- merged_args
 
+  #1 - prepare data ##############################################################
 
+  #invert orientation of variables and vectors
   if(!is.null(invax)) {
     mspace$ordination$x[,args$axes[invax]] <- mspace$ordination$x[,args$axes[invax]]  * -1
     mspace$ordination$rotation[,args$axes[invax]] <- mspace$ordination$rotation[,args$axes[invax]] * -1
@@ -1697,6 +1699,7 @@ plot_mspace <- function(mspace,
 
   if(!is.null(x) & !is.null(y)) stop("Only one of x or y can be included")
 
+  #if legend and/or scalebar has been provided, set an adequate layout
   if(any(legend, scalebar)) {
 
     layout_mat <- matrix(c(rep(1, 4), 2), nrow = 1)
@@ -1710,9 +1713,10 @@ plot_mspace <- function(mspace,
 
   }
 
-  #if neither x nor y were provided, plot pure morphospace #######################################
+  #2 - if neither x nor y were provided, plot pure morphospace #######################################
   if(is.null(x) & is.null(y)) {
 
+    #2.1 - if a single ordination axes is present, set ground for univariate morphospace
     if(ncol(ordination$x) == 1 | length(args$axes) == 1) {
       y <- rep(1, nrow(ordination$x))
       args$ylim <- c(0, 1)
@@ -1721,6 +1725,7 @@ plot_mspace <- function(mspace,
       y <- NULL
     }
 
+    #2.2 - plot axes and map morphospace -------------------------------------------
     if(mspace$plotinfo$k == 3 & mspace$ordination$datype == "landm") {
 
       shapemodels <- morphogrid(ordination = ordination, axes = args$axes, rescale = args$rescale,
@@ -1768,7 +1773,11 @@ plot_mspace <- function(mspace,
                         models = args$models, )
     }
 
-    #add scatterpoints and hulls/ellipses (intercalated if there are groups present)
+
+    #2.3 - project elements -----------------------------------------------------
+
+    #2.3.1 - add scatterpoints and hulls/ellipses (intercalated if there are
+    #groups present)
     if(points | groups) {
 
       scores <- mspace$projected$scores
@@ -1887,7 +1896,7 @@ plot_mspace <- function(mspace,
       }
     }
 
-    #add phylogeny
+    #2.3.2 - add phylogeny
     if(phylo & !is.null(mspace$projected$phylo)) {
 
       if(length(args$axes) > 1) {
@@ -1925,7 +1934,7 @@ plot_mspace <- function(mspace,
       }
     }
 
-    #add shape axes
+    #2.3.3 - add shape axes
     if(shapeax & !is.null(mspace$projected$shape_axis)) {
 
       if(length(args$axes) > 1) {
@@ -1956,7 +1965,7 @@ plot_mspace <- function(mspace,
       }
     }
 
-    #add landscape
+    #2.3.4 - add landscape
     if(landsc & !is.null(mspace$projected$landsc)) {
 
       if(all(args$axes %in% mspace$plotinfo$axes)) { #all specified vectors must be in the original mspace object
@@ -2007,8 +2016,8 @@ plot_mspace <- function(mspace,
     }
 
   } else {
-    #if either x or y have been provided, deploy hybrid morphospace ################################
 
+    #3 - if either x or y has been provided, deploy hybrid morphospace #################################
     if(is.null(axes)) {
       args$axes <- rep(args$axes[1], 2)
     }
@@ -2016,8 +2025,51 @@ plot_mspace <- function(mspace,
     args$xlim <- xlim
     args$ylim <- ylim
 
+    #3.1 - prepare ground ----------------------------------------------------------------
 
-    #if x or y are a phy object, prepare the ground for a phenogram --------------------------------
+    #3.1.1 - if either x or y is a factor, prepare ground for violin plot
+    if(is.factor(x) | is.factor(y)) {
+      fac <- if(is.factor(x)) x else if(is.factor(y)) y
+
+      if(is.factor(fac)) {
+
+        violins <- vector(mode = "list", length = nlevels(fac))
+        for(i in seq_len(nlevels(fac))) {
+          d <- density_by_group_2D(xy = cbind(mspace$projected$scores[,args$axes[1]], 0),
+                                   fac = fac, ax = 1, plot = FALSE)
+
+          if(is.factor(x)) {
+            poly.i.half1 <- cbind(d$dens[[i]]$y / d$ymax, d$dens[[i]]$x)
+            poly.i.half2 <- cbind(poly.i.half1[nrow(poly.i.half1):1,1] * -1,
+                                  poly.i.half1[nrow(poly.i.half1):1,2])
+            poly.i <- rbind(poly.i.half1, poly.i.half2)
+            poly.i <- cbind(poly.i[,1] + i, poly.i[,2])
+          } else {
+            if(is.factor(y)) {
+              poly.i.half1 <- cbind(d$dens[[i]]$x, d$dens[[i]]$y / d$ymax)
+              poly.i.half2 <- cbind(poly.i.half1[nrow(poly.i.half1):1,1],
+                                    poly.i.half1[nrow(poly.i.half1):1,2] * -1)
+              poly.i <- rbind(poly.i.half1, poly.i.half2)
+              poly.i <- cbind(poly.i[,1], poly.i[,2] + i)
+            }
+          }
+
+          violins[[i]] <- poly.i
+        }
+
+        dxvals <- NULL
+        dyvals <- NULL
+        for(i in 1:length(violins)) {
+          dxvals <- c(dxvals, violins[[i]][,1])
+          dyvals <- c(dyvals, violins[[i]][,2])
+        }
+
+        args$xlim <- range(dxvals)
+        args$ylim <- range(dyvals)
+      }
+    }
+
+    #3.1.2 - if either x or y is a phy object, prepare the ground for phenogram
     if(any(any(class(x) == "phylo"), any(class(y) == "phylo"))) {
       phenogr <- TRUE
     } else {
@@ -2035,38 +2087,37 @@ plot_mspace <- function(mspace,
         args$xlim <- range(x)
         if(is.null(args$xlab)) args$xlab <- "Time"
       }
-
       if(is.null(args$xlab)) args$xlab <- deparse(substitute(x))
-
       #############!
-      if(is.factor(x)) {
-
-        violins <- vector(mode = "list", length = nlevels(x))
-        for(i in seq_len(nlevels(x))) {
-          d <- density_by_group_2D(xy = cbind(mspace$projected$scores[,args$axes[1]], 0),
-                                   fac = x, ax = 1, plot = FALSE)
-
-          poly.i.half1 <- cbind(d$dens[[i]]$y / d$ymax, d$dens[[i]]$x)
-          poly.i.half2 <- cbind(poly.i.half1[nrow(poly.i.half1):1,1] * -1,
-                                poly.i.half1[nrow(poly.i.half1):1,2])
-
-          poly.i <- rbind(poly.i.half1, poly.i.half2)
-          poly.i <- cbind(poly.i[,1] + i, poly.i[,2])
-
-          violins[[i]] <- poly.i
-        }
-
-        dxvals <- NULL
-        dyvals <- NULL
-        for(i in 1:length(violins)) {
-          dxvals <- c(dxvals, violins[[i]][,1])
-          dyvals <- c(dyvals, violins[[i]][,2])
-        }
-
-        args$xlim <- range(dxvals)
-        args$ylim <- range(dyvals)
-      }
-      ###########!
+      # #if x is a factor, get violin shapes
+      # if(is.factor(x)) {
+      #
+      #   violins <- vector(mode = "list", length = nlevels(x))
+      #   for(i in seq_len(nlevels(x))) {
+      #     d <- density_by_group_2D(xy = cbind(mspace$projected$scores[,args$axes[1]], 0),
+      #                              fac = x, ax = 1, plot = FALSE)
+      #
+      #     poly.i.half1 <- cbind(d$dens[[i]]$y / d$ymax, d$dens[[i]]$x)
+      #     poly.i.half2 <- cbind(poly.i.half1[nrow(poly.i.half1):1,1] * -1,
+      #                           poly.i.half1[nrow(poly.i.half1):1,2])
+      #
+      #     poly.i <- rbind(poly.i.half1, poly.i.half2)
+      #     poly.i <- cbind(poly.i[,1] + i, poly.i[,2])
+      #
+      #     violins[[i]] <- poly.i
+      #   }
+      #
+      #   dxvals <- NULL
+      #   dyvals <- NULL
+      #   for(i in 1:length(violins)) {
+      #     dxvals <- c(dxvals, violins[[i]][,1])
+      #     dyvals <- c(dyvals, violins[[i]][,2])
+      #   }
+      #
+      #   args$xlim <- range(dxvals)
+      #   args$ylim <- range(dyvals)
+      # }
+      # ###########!
 
     } else {
       if(any(class(y) == "phylo")) {
@@ -2082,6 +2133,8 @@ plot_mspace <- function(mspace,
       if(is.null(args$ylab)) args$ylab <- deparse(substitute(y))
     }
 
+
+    #3.2 - plot hybrid morphospace -----------------------------------------------
     if(mspace$plotinfo$k == 3 & mspace$ordination$datype == "landm") {
 
       shapemodels <- morphogrid(ordination = ordination, axes = args$axes, datype = mspace$ordination$datype,
@@ -2122,7 +2175,10 @@ plot_mspace <- function(mspace,
     }
 
 
-    if(phenogr) { #if x/y is a phy object, plot a phenogram
+    #3.3 - add elements and variables
+
+    #3.3.1 - if either x or y is a phylo object, add phenogram -----------------------------
+    if(phenogr) {
 
       tips <- seq_len(length(tree$tip.label))
       if(length(args$col.tips) == 1) args$col.tips <- rep(args$col.tips, length(tips))
@@ -2147,9 +2203,11 @@ plot_mspace <- function(mspace,
                      lty.phylo = args$lty.phylo, col.phylo = args$col.phylo)
 
     } else {
-      #if x or y are regular variables, go for a generic hybrid morphospace -----------------------
 
+    #3.3.2 - if either x or y is a regular variable, add typical elements
+    #hybrid morphospace -----------------------------------------------------------------
 
+      #3.3.2.1 - add scatterpoints and hulls / ellipses
       if(points | groups) {
 
         scores <- mspace$projected$scores
@@ -2200,18 +2258,24 @@ plot_mspace <- function(mspace,
                            pch = gr_pch.points[-index_sc_in_gr],
                            bg = gr_bg.points[-index_sc_in_gr],
                            cex = gr_cex.points[-index_sc_in_gr])
-          ####!
-          if(is.factor(x)) {
-            for(i in 1:length(violins)) {
-              graphics::polygon(violins[[i]], lwd = args$lwd.groups, border = i, lty = args$lty.groups,
-                                col = grDevices::adjustcolor(i, alpha.f = args$alpha.groups))
-
-              cents <- tapply(mspace$projected$scores[,args$axes[1]], INDEX = x, FUN = mean)
-              graphics::points(cbind(i, cents[i]),
-                               pch = 21, bg = i, cex = args$cex.points + .5)
-            }
-          }
-          #####!
+          # ####!
+          # if(is.factor(x) | is.factor(y))  {
+          #   for(i in 1:length(violins)) {
+          #     graphics::polygon(violins[[i]], lwd = args$lwd.groups, border = i, lty = args$lty.groups,
+          #                       col = grDevices::adjustcolor(i, alpha.f = 0.2))
+          #
+          #     cents <- tapply(mspace$projected$scores[,args$axes[1]], INDEX = fac, FUN = mean)
+          #     graphics::points(if(is.factor(x)) cbind(i, cents[i]) else  cbind(cents[i], i),
+          #                      pch = 21, bg = i, cex = args$cex.points + .5)
+          #   }
+          #   if(phylo & !is.null(mspace$projected$phylo))
+          #     warning("phylogenetic relationships are not projected into violin plots")
+          #   if(shapeax & !is.null(mspace$projected$shape_axis))
+          #     warning("morphometric axes are not projected into violin plots")
+          #   if(landsc & !is.null(mspace$projected$landsc))
+          #     warning("landscape surfaces are not projected into violin plots")
+          # }
+          # #####!
         }
 
         if(!is.null(gr_class)) {
@@ -2238,9 +2302,29 @@ plot_mspace <- function(mspace,
             }
           }
         }
+        ####!
+        if(is.factor(x) | is.factor(y))  {
+          for(i in 1:length(violins)) {
+            graphics::polygon(violins[[i]], lwd = args$lwd.groups, border = i, lty = args$lty.groups,
+                              col = grDevices::adjustcolor(i, alpha.f = 0.2))
+
+            cents <- tapply(mspace$projected$scores[,args$axes[1]], INDEX = fac, FUN = mean)
+            graphics::points(if(is.factor(x)) cbind(i, cents[i]) else  cbind(cents[i], i),
+                             pch = 21, bg = i, cex = args$cex.points + .5)
+          }
+          if(phylo & !is.null(mspace$projected$phylo))
+            warning("phylogenetic relationships are not projected into violin plots")
+          if(shapeax & !is.null(mspace$projected$shape_axis))
+            warning("morphometric axes are not projected into violin plots")
+          if(landsc & !is.null(mspace$projected$landsc))
+            warning("landscape surfaces are not projected into violin plots")
+
+          return(invisible(NULL))
+        }
+        #####!
       }
 
-      #add phylogeny
+      #3.3.2.2 - add phylogeny
       if(phylo & !is.null(mspace$projected$phylo)) {
 
         tree <- mspace$projected$phylo
@@ -2344,14 +2428,17 @@ plot_mspace <- function(mspace,
     }
   }
 
-  #add references ###########################################################################
+  #4 - add references ###########################################################################
+
+
   if(any(legend, scalebar)) {
 
+    #4.1 - add legend for groups --------------------------------------------------------
     if(legend) {
+
       if(is.null(mspace$projected$gr_class)) {
         stop("Groups levels ($gr_class) are necessary to generate legend labels")
       } else {
-
 
         #graphics::par(mar = c(5.1, 1, 4.1, 1))
         graphics::par(mar = c(5.1, 0, 4.1, 0))
@@ -2435,6 +2522,7 @@ plot_mspace <- function(mspace,
       }
     }
 
+    #4.2 - add scalebar for landscape ---------------------------------------------------------
     if(scalebar) {
       if(is.null(mspace$projected$landsc)) {
         stop("Landscape values ($landsc) is necessary to generate a scalebar")
@@ -2463,4 +2551,5 @@ plot_mspace <- function(mspace,
     }
     graphics::layout(matrix(1, nrow=1))
   }
+  return(violins)
 }
