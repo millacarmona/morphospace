@@ -807,7 +807,8 @@ morphogrid <- function(ordination,
 
     if(!is.null(x)) {
       if(is.null(xlim)) {
-        plotframe_x <- range(x)
+        # plotframe_x <- range(x)
+        plotframe_x <- range(as.numeric(x))
       } else {
         plotframe_x <- sort(xlim)
       }
@@ -821,7 +822,9 @@ morphogrid <- function(ordination,
 
     if(!is.null(y)) {
       if(is.null(ylim)){
-        plotframe_y <- range(y)
+        # plotframe_y <- range(y)
+        plotframe_y <- range(as.numeric(y))
+
       } else {
         plotframe_y <- sort(ylim)
       }
@@ -1064,16 +1067,31 @@ plot_morphogrid2d <- function(x = NULL,
     }
   }
 
-  if(plot == TRUE) {
+  if(plot) {
 
     xlim <- c(xlim[1] + (diff(xlim) * (1 - adj_frame[1]) / 2),
               xlim[2] - (diff(xlim) * (1 - adj_frame[1]) / 2))
     ylim <- c(ylim[1] + (diff(ylim) * (1 - adj_frame[2]) / 2),
               ylim[2] - (diff(ylim) * (1 - adj_frame[2]) / 2))
 
-    plot(morphogrid$models_mat, type = "n", xlim = xlim, ylim = ylim , xlab = xlab, ylab = ylab)
+    # graphics::plot(morphogrid$models_mat, type = "n", xlim = xlim, ylim = ylim ,
+    #                xlab = xlab, ylab = ylab)
+    ###!
+    graphics::plot(morphogrid$models_mat, type = "n", xlim = xlim, ylim = ylim ,
+                   xlab = "", ylab = "", axes = FALSE)
+    graphics::box()
+    if(is.factor(x)) {
+      graphics::axis(side = 1, x, at = unique(as.numeric(x)),
+                     labels = levels(x), las = 2)
+    } else {
+      graphics::axis(side = 1)
+      mtext(side = 1, line = 3, text = xlab)
+    }
+    graphics::axis(side = 2)
+    mtext(side = 2, line = 3, text = ylab)
+    ####!
 
-    if(models == TRUE) {
+    if(models) {
 
       for(i in seq_len(dim(morphogrid$models_arr)[3])) {
         if(datype == "landm") {
@@ -1096,6 +1114,7 @@ plot_morphogrid2d <- function(x = NULL,
     }
   }
 }
+
 
 ################################################################################
 
@@ -1695,7 +1714,7 @@ ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 #' xy <- cbind(pca$x[,1], 0)
 #' plot(xy, ylim = c(0,1))
 #' density_by_group_2D(xy, fac = species, ax = 1)
-density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1,
+density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1, plot = TRUE,###!
                                 col = seq_len(nlevels(fac))) {
 
   if(length(col) == 1) col <- rep(col, nlevels(fac))
@@ -1714,10 +1733,20 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1,
   ymax <- max(unlist(lapply(dens, function(x) {x$y})))
 
 
-  for(i in seq_len(nlevels(fac))) {
-    graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
-                      lty = lty[i], col = grDevices::adjustcolor(col[i], alpha.f = alpha))
+  # for(i in seq_len(nlevels(fac))) {
+  #   graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
+  #                     lty = lty[i], col = grDevices::adjustcolor(col[i], alpha.f = alpha))
+  # }
+  ###!
+  if(plot) {
+    for(i in seq_len(nlevels(fac))) {
+      graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
+                        lty = lty[i], col = grDevices::adjustcolor(col[i], alpha.f = alpha))
+    }
+  } else {
+    return(list(ymax = ymax, dens = dens))
   }
+  ###!
 }
 
 

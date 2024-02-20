@@ -362,7 +362,7 @@ mspace <- function(shapes = NULL,
 
   }
 
-  if(points == TRUE) graphics::points(ordination$x[,axes])
+  if(points) graphics::points(ordination$x[,axes])
 
   if(length(axes) == 1) {
     if(datype == "landm") shapemodels <- shapemodels$shapemodels[,,1:nh]
@@ -2007,7 +2007,7 @@ plot_mspace <- function(mspace,
     }
 
   } else {
-    #if any of x or y have been provided, deploy hybrid morphospace ################################
+    #if either x or y have been provided, deploy hybrid morphospace ################################
 
     if(is.null(axes)) {
       args$axes <- rep(args$axes[1], 2)
@@ -2035,7 +2035,39 @@ plot_mspace <- function(mspace,
         args$xlim <- range(x)
         if(is.null(args$xlab)) args$xlab <- "Time"
       }
+
       if(is.null(args$xlab)) args$xlab <- deparse(substitute(x))
+
+      #############!
+      if(is.factor(x)) {
+
+        violins <- vector(mode = "list", length = nlevels(x))
+        for(i in seq_len(nlevels(x))) {
+          d <- density_by_group_2D(xy = cbind(mspace$projected$scores[,args$axes[1]], 0),
+                                   fac = x, ax = 1, plot = FALSE)
+
+          poly.i.half1 <- cbind(d$dens[[i]]$y / d$ymax, d$dens[[i]]$x)
+          poly.i.half2 <- cbind(poly.i.half1[nrow(poly.i.half1):1,1] * -1,
+                                poly.i.half1[nrow(poly.i.half1):1,2])
+
+          poly.i <- rbind(poly.i.half1, poly.i.half2)
+          poly.i <- cbind(poly.i[,1] + i, poly.i[,2])
+
+          violins[[i]] <- poly.i
+        }
+
+        dxvals <- NULL
+        dyvals <- NULL
+        for(i in 1:length(violins)) {
+          dxvals <- c(dxvals, violins[[i]][,1])
+          dyvals <- c(dyvals, violins[[i]][,2])
+        }
+
+        args$xlim <- range(dxvals)
+        args$ylim <- range(dyvals)
+      }
+      ###########!
+
     } else {
       if(any(class(y) == "phylo")) {
         tree <- y
@@ -2168,6 +2200,18 @@ plot_mspace <- function(mspace,
                            pch = gr_pch.points[-index_sc_in_gr],
                            bg = gr_bg.points[-index_sc_in_gr],
                            cex = gr_cex.points[-index_sc_in_gr])
+          ####!
+          if(is.factor(x)) {
+            for(i in 1:length(violins)) {
+              graphics::polygon(violins[[i]], lwd = args$lwd.groups, border = i, lty = args$lty.groups,
+                                col = grDevices::adjustcolor(i, alpha.f = args$alpha.groups))
+
+              cents <- tapply(mspace$projected$scores[,args$axes[1]], INDEX = x, FUN = mean)
+              graphics::points(cbind(i, cents[i]),
+                               pch = 21, bg = i, cex = args$cex.points + .5)
+            }
+          }
+          #####!
         }
 
         if(!is.null(gr_class)) {
@@ -2244,14 +2288,14 @@ plot_mspace <- function(mspace,
           # xy.nodes <- apply(xy.tips[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
 
           xy <- cbind(x,y)
-          #name var
           xy_anc <- matrix(NA, nrow = tree$Nnode, ncol = 1)
+          colnames(xy_anc) <- if(!is.null(x)) deparse(substitute(x)) else deparse(substitute(y))
           xy.int <- as.integer(xy[,1])
           if(inherits(xy[,1], "factor") | all(xy.int == xy[,1])) {
             anc. <- ape::ace(xy[,1], phy, model = "ER", type = "discrete")$lik.anc
             for(j in seq_len(nrow(anc.))) xy_anc[j,1] <- as.numeric(colnames(anc.)[which.max(anc.[j,])])
             cat(paste0("\nReconstruction for discrete character '",
-                       colnames(xy)[1], "' was performed assuming an equal-rates model using ape::ace"))
+                       colnames(xy_anc)[1], "' was performed assuming an equal-rates model using ape::ace"))
           }
 
           if(inherits(xy[,1], "numeric") & all(xy.int != xy[,1])) {
