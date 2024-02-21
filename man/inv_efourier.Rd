@@ -25,7 +25,7 @@ set of Fourier coefficients into (x,y) coordinates. Used internally.
 data("shells")
 shape_coe <- shells$shapes$coe[1,]
 
-#get and plot (x,y) coordinates for using different number of coordinares
+#get and plot (x,y) coordinates for using different number of coordinates
 shape_xy <- inv_efourier(shape_coe, nb.pts = 10)
 plot(shape_xy)
 shape_xy <- inv_efourier(shape_coe, nb.pts = 30)
@@ -36,3 +36,4 @@ plot(shape_xy)
 \seealso{
 \code{\link[Momocs]{efourier_i}}
 }
+\keyword{internal}

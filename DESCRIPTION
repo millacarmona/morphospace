@@ -1,13 +1,11 @@
 Package: morphospace
 Title: Build, Visualize and Explore Multivariate Ordinations of Shape Data
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: 
     person(given = "Pablo", family = "Milla Carmona", email = "pablomillac@gmail.com", role = c("aut", "cre"),
          comment = c(ORCID = "0000-0002-0396-6244"))
-Description: 'morphospace' provide functions aimed at building, visualizing, and exploring multivariate 
-    ordinations of shape data resulting from geometric morphometrics analyses. The package has been built 
-    to integrate with other widely used R packages for geometric morphometrics data manipulation and 
-    analysis.
+Description: Tools for building, visualizing, and exploring multivariate ordinations of shape data 
+    resulting from geometric morphometrics analyses.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -29,6 +27,7 @@ Imports:
     MASS,
     Momocs,
     Morpho,
+    mvMORPH,
     phytools,
     png,
     rgl

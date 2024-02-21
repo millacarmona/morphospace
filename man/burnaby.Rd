@@ -4,7 +4,7 @@
 \alias{burnaby}
 \title{Burnaby's orthogonal subspace computation}
 \usage{
-burnaby(x, vars = NULL, tree = NULL, axmat = NULL)
+burnaby(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL)
 }
 \arguments{
 \item{x}{A matrix with one or more variables as columns and observations as
@@ -17,6 +17,11 @@ as rows, representing the source of variation the user wants to remove from
 
 \item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip
 labels should match the row names from \code{x} and \code{vars}.}
+
+\item{evmodel}{Character, specifying an evolutionary model to perform
+ancestral character reconstruction; options are "BM" (Brownian motion),
+"EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
+\code{\link[mVMORPH]{?mvgls}} for more details).}
 
 \item{axmat}{An optional matrix of axes coefficients to render \code{x}
 orthogonal to. If provided, is used instead of \code{vars} to orthogonalize
@@ -67,6 +72,10 @@ effectively lost during standardization procedures that remove non-shape
 variation, and therefore showing null eigenvalues). Therefore, projection
 of the original shape variables into the orthogonal subspace should be
 attempted after removing (at least) these null axes.
+
+The phylogenetic version of this method (i.e., the correction of
+non-phylogenetic independence from the relationship between \code{x} and
+\code{vars}) is achieved through \code{\link[mvMORPH:mvgls]{mvMORPH::mvgls()}}.
 }
 \examples{
 #load packages

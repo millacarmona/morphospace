@@ -39,8 +39,8 @@ shapes <- shells3D$shapes
 \dontrun{
 #pile shapes
 pile_shapes(shapes, mshape = FALSE) #bare
-pile_shapes(shapes, mshape = FALSE, links = list(1:10)) #with false links (just as an example)
-pile_shapes(shapes, mshape = TRUE, links = list(1:10)) #with false links and mean shape
+pile_shapes(shapes, mshape = FALSE, links = list(1:10)) #with false links
+pile_shapes(shapes, mshape = TRUE, links = list(1:10)) #false links + mshape
 }
 
 

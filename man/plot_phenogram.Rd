@@ -13,10 +13,12 @@ plot_phenogram(
   lwd.phylo,
   lty.phylo,
   col.phylo,
+  labels.nodes,
   cex.nodes,
   pch.nodes,
   col.nodes,
   bg.nodes,
+  labels.tips,
   cex.tips,
   pch.tips,
   col.tips,
@@ -48,6 +50,11 @@ branches.}
 \item{col.phylo}{Numeric; the color of the lines depicting phylogenetic
 branches.}
 
+\item{labels.nodes}{Either logical, indicating whether to include node
+labels, or a character string with the exact names of the nodes whose
+labels should be included (with the form of "node_n", e.g., "node_14"
+corresponds to the root of a tree with 13 tips).}
+
 \item{cex.nodes}{Numeric; size of the scatterpoints representing the nodes
 of the phylogeny.}
 
@@ -59,6 +66,10 @@ phylogeny.}
 
 \item{bg.nodes}{Background color of the scatterpoints representing the
 nodes of the phylogeny.}
+
+\item{labels.tips}{Either logical, indicating whether to include tip labels,
+or a character string with the exact names of the tips whose labels
+should be included.}
 
 \item{cex.tips}{Numeric; size of the scatterpoints representing the tips
 of the phylogeny.}
@@ -99,8 +110,8 @@ msp <- mspace(shapes, mag = 0.7, axes = c(1,2), cex.ldm = 0,
 
 #get node heights
 heights <- phytools::nodeHeights(tree)
-node_heights <- c(rep(max(heights), length(tree$tip.label)),
-                  unique(heights[,1]))
+node_heights <- NULL
+for(i in 1:(length(tree$tip.label) + tree$Nnode)) node_heights[i] <- unique(heights[tree$edge == i])
 
 #plot simple phengram
 plot(node_heights, msp$projected$phylo_scores[,1])
@@ -110,3 +121,4 @@ plot_phenogram(tree = tree, x = node_heights,
                pch.tips = 1, cex.nodes = 1, col.nodes = 1, pch.nodes = 1,
                points = TRUE)
 }
+\keyword{internal}

@@ -4,21 +4,29 @@
 # morphospace <img src="man/figures/morphosp_hex.png" align="right" width="200"/>
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml)
+
+[![R-CMD-check](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of `morphospace` is to enhance representation and heuristic
 exploration of multivariate ordinations of shape data. This package can
 handle the most common types of shape data working in integration with
 other widely used R packages such as `Morpho` (Schlager 2017),
-`geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs`
-(Bonhome et al. 2014), which cover other more essential steps in the
-geometric morphometrics pipeline (e.g. importation, normalization,
-statistical analysis).
+`geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), `Momocs`
+(Bonhome et al. 2014) and `mvMORPH` (Clavel et al.2015), which cover
+other more essential steps in the geometric morphometrics pipeline
+(e.g. importation, normalization, statistical analysis, phylogenetic
+modelling).
+
+Below there is broad-strokes account of the `morphospace` capacities;
+for more specific guidance, refer to [General
+usage](https://millacarmona.github.io/morphospace/articles/General-usage.html)
+and [Worked
+examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
 
 ## Installation
 
-You can install the development version of morphospace from
+You can install the development version of `morphospace` from
 [GitHub](https://github.com/) with:
 
 ``` r
@@ -41,13 +49,14 @@ The starting point of the `morphospace` workflow is a set of shapes
 differences in orientation, position and scale). These are fed to the
 `mspace` function, which generates a morphospace using a variety of
 multivariate methods related to Principal Component Analysis. This
-general workflow is broadly outlined below using the `tails` data set
-from Fasanelli et al. (2022), which contains tail shapes from 281
-specimens belonging to 13 species of the genus *Tyrannus*.
+general workflow is outlined below using the `tails` data set from
+Fasanelli et al. (2022), which contains tail shapes from 281 specimens
+belonging to 13 species of the genus *Tyrannus*.
 
 ``` r
 library(morphospace)
 library(geomorph)
+#> Warning: package 'Matrix' was built under R version 4.3.2
 library(Morpho)
 library(Momocs)
 library(magrittr)
@@ -70,9 +79,9 @@ mspace(shapes, links = wf, cex.ldm = 5)
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
 The ordination produced by `mspace` is used as a reference frame in
-which scatter points, groups centroids, convex hulls, confidence
-ellipses, a phylogeny, or a set of morphometric axes can be projected
-using the `proj_*` functions:
+which scatter points, convex hulls / confidence ellipses, a phylogeny, a
+set of morphometric axes or a landscape surface can be projected using
+the `proj_*` functions:
 
 ``` r
 # Get mean shapes of each species
@@ -82,12 +91,11 @@ spp_shapes <- expected_shapes(shapes = tails$shapes, x = tails$data$species)
 msp <- mspace(shapes = shapes, links = wf, cex.ldm = 5) %>% 
   # scatter points
   proj_shapes(shapes = shapes, col = spp) %>% 
-  # groups centroids (mean shapes)
-  proj_consensus(shapes = spp_shapes, bg = 1:nlevels(spp), pch = 21) %>% 
   # convex hulls enclosing groups
-  proj_groups(groups = spp, alpha = 0.5) %>% 
+  proj_groups(shapes = shapes, groups = spp, alpha = 0.5) %>%
   # phylogenetic relationships
-  proj_phylogeny(tree = phy, lwd = 1.5) 
+    proj_phylogeny(shapes = spp_shapes, tree = phy, lwd = 1.5, 
+                 col.tips = match(phy$tip.label, levels(spp)))
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
@@ -96,9 +104,12 @@ Once the `"mspace"` object has been created, the `plot_mspace` function
 can be used to either regenerate/modify the plot, add a legend, or to
 combine morphometric axes with other non-shape variables to produce
 ‘hybrid’ morphospaces. For example, PC1 can be plotted against size to
-explore allometric patterns.
+explore allometric patterns, or against taxonomic classification to
+assess patterns of intra- and/or interspecific variation.
 
 ``` r
+layout(rbind(c(1,2)))
+
 # Plot PC1 against log-size, add legend
 plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
@@ -106,6 +117,16 @@ plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+``` r
+
+# Plot PC1 against species classification
+plot_mspace(msp, x = spp, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
+            alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
+            phylo = FALSE, xlab = "Log-size", legend = TRUE)
+```
+
+<img src="man/figures/README-unnamed-chunk-4-2.png" width="100%" />
 
 Or ordination axes could be combined with a phylogenetic tree to create
 a phenogram:
@@ -120,7 +141,7 @@ plot_mspace(msp, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
 
 `morphospace` can also handle closed outlines (in the form of elliptic
 Fourier coefficients) and 3D landmark data, as shown below briefly using
-the `shells` and `shells3D`data sets:
+the `shells` and `shells3D` data sets:
 
 ``` r
 # Load data
@@ -158,7 +179,7 @@ mspace(shapes, mag = 1, bg.model = "gray", cex.ldm = 0, template = meanmesh,
   proj_groups(shapes = shapes, groups = spp, alpha = 0.3)
 #> Preparing for snapshot: rotate mean shape to the desired orientation
 #>  (don't close or minimize the rgl device).Press <Enter> in the console to continue:
-#> This will take a minute...
+#> This can take a few seconds...
 #> DONE.
 ```
 
@@ -174,37 +195,116 @@ usage](https://millacarmona.github.io/morphospace/articles/General-usage.html)
 and [Worked
 examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
 
-## Update (August 2022)
+## Update 1 (August 2022)
 
--   Different behavior for `proj_shapes` (now replaces `mspace$x` with
-    the actual scores being projected) and `proj_axis` (now adds one or
-    more axes into an `mspace$shapes_axis`).
+- Different behavior for `proj_shapes` (now replaces `mspace$x` with the
+  actual scores being projected) and `proj_axis` (now adds one or more
+  axes into an `mspace$shape_axis`).
 
--   New `ellipses_by_groups_2D` (uses `car::ellipse`) function as an
-    option for `proj_groups` and `plot_mspace`.
+- New `ellipses_by_groups_2D` (uses `car::ellipse`) function as an
+  option for `proj_groups` and `plot_mspace`.
 
--   Morphospaces without background shape models are now an option (for
-    both `mspace` and `plot_mspace`).
+- Morphospaces without background shape models are now an option (for
+  both `mspace` and `plot_mspace`).
 
--   `plot_mspace` now regenerates the original mspace plot by default
-    (`proj_*` functions were modified such that all the relevant
-    graphical parameters are inherited downstream to `plot_mspace`), has
-    further flexibility regarding hybrid morphospaces (`plot_phenogram`
-    has been updated) and allows adding a legend (and some various bugs
-    were fixed as well).
+- `plot_mspace` now regenerates the original mspace plot by default
+  (`proj_*` functions were modified such that all the relevant graphical
+  parameters are inherited downstream to `plot_mspace`), has further
+  flexibility regarding hybrid morphospaces (`plot_phenogram` has been
+  updated) and allows adding a legend (and some various bugs were fixed
+  as well).
 
--   Univariate morphospaces and associated density distributions are now
-    an option (all the `mspace` workflow functions have been modified
-    accordingly, especially `proj_shapes` and `proj_groups`).
+- Univariate morphospaces and associated density distributions are now
+  an option (all the `mspace` workflow functions have been modified
+  accordingly, especially `proj_shapes` and `proj_groups`).
 
--   `consensus` and `expected_shapes` have been merged in a single
-    function (the name `expected_shapes` was retained as the former was
-    clashing with `ape::consensus`), which can handle both factors and
-    numerics.
+- `consensus` and `expected_shapes` have been merged in a single
+  function (the name `expected_shapes` was retained as the former was
+  clashing with `ape::consensus`), which can handle both factors and
+  numerics.
 
--   Both `detrend_shapes` and `expected_shapes` can now calculate
-    phylogenetically-corrected coefficients for interspecific data sets
-    (Revell 2009).
+- Both `detrend_shapes` and `expected_shapes` can now calculate
+  phylogenetically-corrected coefficients for interspecific data sets
+  (Revell 2009).
+
+## Update 2 (August 2023)
+
+- The structure of `"mspace"` objects has been reorganized and now
+  contain 3 main slots: `$ordination` (multivariate ordination details),
+  `$projected` (elements added using `proj_*` functions) and `$plotinfo`
+  (used for regeneration using `plot_mspace`). This has been
+  complemented with a `print` method for the `"mspace"` class.
+
+- New `proj_landscape` function has been added to represent adaptive
+  surfaces interpolated from functional or performance indices (although
+  can be used for any numerical variable).
+
+- `proj_consensus` has been removed.
+
+- New `extract_shapes` function for extracting synthetic shapes from
+  `"mspace"` objects (background shape models, shapes along ordination
+  axes, or specific coordinates selected interactively).
+
+- New `burnaby` function, implementing Burnaby’s approach for
+  standardization of morphometric data by computing a shape subspace
+  orthogonal to an arbitrary vector or variable
+
+- New `phyalign_comp` function, implementing Phylogenetically aligned
+  component analysis, which finds the linear combination of variables
+  maximizing covariation between trait variation and phylogenetic
+  structure (Collyer & Adams 2021). Still a work in progress.
+
+- Several internal adjustments have been introduced to the `mspace`,
+  `proj_*` and `plot_mspace` functions in order to improve visualization
+  and make the workflow more flexible.
+
+- Legends created using `plot_mspace` have been improved, and scale bars
+  for interpreting landscapes have also been made available.
+
+## Update 3 (February 2024)
+
+Significant changes aimed at enhancing integration with other GM/MV R
+packages and improving procedures involving phylogenetic data, as well
+as a couple of new features:
+
+- The internal behavior of the `mspace` workflow has been modified so
+  objects containing multivariate ordinations produced by `geomorph`,
+  `Morpho`, `mvMORPH` and `phytools` can be now used as input.
+
+- `mspace` can now be fed with an object containing a multivariate
+  ordination directly. This is implemented through an alternative
+  combination of arguments for the `mspace` function (`ord` + `datype`
+  as an alternative to `shapes` + `FUN` + `...`).
+
+- `ax_transformation` (and by extension `proj_axis`) and
+  `detrend_shapes` can now be fed with objects containing a linear model
+  fitted using functions from `geomorph`, `RRPP` and `mvMORPH`. Internal
+  phylogenetic correction of linear coefficients in `detrend_shapes` has
+  been abandoned (and so has the `tree` argument), relying now on the
+  (phylogenetic) linear model provided.
+
+- `phy_prcomp` and the experimental `phyalign_comp` have been removed
+  (users interested in these methods should use `phytools::phyl.pca`,
+  `geomorph::gm.prcomp` and/or `mvMORPH::mvgls.pca`).
+
+- Estimation of ancestral shapes (performed internally by
+  `expected_shapes`, `detrend_shapes`, `proj_phylogeny`, `pls2b`,
+  `pls_shapes`, `burnaby` and `plot_mspace`) now relies on
+  `mvMORPH::mvgls`, which has the advantage of allowing estimation under
+  evolutionary models other than Brownian motion. In addition, ancestral
+  character estimation of discrete non-shape variables (attempted
+  internally by the phylogenetic version of `pls2b` (and by extension
+  `pls_shapes`) and `plot_mspace` in certain situations) is performed
+  under a simple Equal rates model via `ape::ace`.
+
+- Introduction of violin plots for combining shape ordination axes with
+  categorical variables via `plot_mspace`.
+
+- Tip and node labels can now be included in phylomorphospaces,
+  phenogram and hybrid phylomorphospaces.
+
+If you find any bugs please send me an email at `pablomillac@gmail.com`.
+Thanks!!
 
 ## References
 
@@ -212,13 +312,22 @@ Adams D.C., Collyer M.L., Kaliontzopoulou A., & Baken E.K. (2021).
 *geomorph: Software for geometric morphometric analyses*. R package
 version 4.0.2. <https://cran.r-project.org/package=geomorph>.
 
-Bache S.F., & Wickham H. (2022). m*agrittr: A Forward-Pipe Operator for
+Bache S.F., & Wickham H. (2022). *magrittr: A Forward-Pipe Operator for
 R*. R package version 2.0.3.
 <https://CRAN.R-project.org/package=magrittr>.
 
 Bonhomme V., Picq S., Gaucherel C., & Claude J. (2014). *Momocs: Outline
 Analysis Using R*. Journal of Statistical Software, 56(13), 1-24.
 <http://www.jstatsoft.org/v56/i13/>.
+
+Clavel, J., Escarguel, G., & Merceron, G. (2015). *mvMORPH: an R package
+for fitting multivariate evolutionary models to morphometric data*.
+Methods in Ecology and Evolution, 6(11), 1311-1319.
+<https://doi.org/10.1111/2041-210X.12420>
+
+Collyer, M. L., & Adams, D. (2021). *Phylogenetically aligned component
+analysis*. Methods in Ecology and Evolution, 12(2), 359-372.
+<https://doi.org/10.1111/2041-210X.13515>.
 
 Dryden, I.L. (2019). *shapes: statistical shape analysis*. R package
 version 1.2.5. <https://CRAN.R-project.org/package=shapes>.

@@ -15,14 +15,18 @@
 #'   level(s) are used.
 #' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
 #'   labels should match names in \code{x} and \code{shapes}.
+#' @param evmodel Character, specifying an evolutionary model to perform
+#'   ancestral character reconstruction; options are "BM" (Brownian motion),
+#'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
+#'   \code{\link[mVMORPH]{?mvgls}} for more details).
 #' @param returnarray Logical, indicating whether shapes should be returned
 #'   in "3D" array format (landmark shapes only). Mostly intended for internal
 #'   use.
 #'
 #' @details If a phylogenetic tree is supplied for interspecific shape data, the
 #'   procedure is performed using the phylogenetically-corrected regression
-#'   coefficients (see Revell, 2009) assuming a Brownian Motion model of
-#'   evolution.
+#'   coefficients (see Revell, 2009) under different possible evolutionary
+#'   models using \code{\link{mVMORPH::mvgls}}.
 #'
 #' @return For landmark data, either a \code{p x k} matrix defining a single
 #'   mean shape or a \code{p x k x n} array containing \code{n} mean shapes,
@@ -138,6 +142,7 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
   if(is.null(tree)) {
     coefs <- solve(t(designmat) %*% designmat) %*% t(designmat) %*% data2d
   } else {
+    #!
     # designmat <- cbind(designmat[tree$tip.label,])
     # data2d <- cbind(data2d[tree$tip.label,])
     # C <- ape::vcv.phylo(tree)
@@ -207,19 +212,19 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'   data and some external explanatory variable(s) (works for both factors and
 #'   numerics).
 #'
-#' @param model A \code{"mlm"} object created using [stats::lm()].
+#' @param model An object of class \code{\link[stats]{"mlm"}},
+#'   \code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
+#'   \code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
+#'   containing a linear model fit to shape data.
 #' @param xvalue A value (numeric) or level (character) at which shape data is
 #'   to be standardized (i.e., centered); If NULL, the mean of the complete
 #'   sample is used (only available if there is a single explanatory variable).
-#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
-#'   labels should match row names from \code{x}.
 #' @param method Method used for detrending; options are \code{"orthogonal"}
 #'   (the default) and \code{"residuals"} (see details).
 #' @param newdata New data to be standardized. It should be provided as either
-#'   an \code{"mlm"} object fitting the same variables used in \code{model}
-#'   measured in a new sample, created through [stats::lm()], or a 2-margin
-#'   matrix of shape descriptors (only for \code{method = "orthogonal"}). See
-#'   details.
+#'   a linear model object fitting the same variables used in \code{model}
+#'   measured in a new sample, or a 2-margin matrix of shape descriptors (only
+#'   for \code{method = "orthogonal"}). See details.
 #'
 #' @details This function detrends (or standardizes, or corrects) shapes from
 #'   variation associated with non-shape variables, using either the residuals
@@ -228,10 +233,10 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'   that is orthogonal to variation associated to non-shape variables, computed
 #'   using the Burnaby approach (\code{method = "orthogonal"}).
 #'
-#'   If \code{newdata} is provided as an \code{"mlm"} object, shapes from
-#'   \code{newdata} are detrended by "correcting" their relationship with the
-#'   explanatory variables using the relationship estimated for the data
-#'   provided in \code{model} ("partial detrending"). Specifically, if
+#'   If \code{newdata} is provided as an object containing a linear model fit,
+#'   shapes from \code{newdata} are detrended by "correcting" their relationship
+#'   with the explanatory variables using the relationship estimated for the
+#'   data provided in \code{model} ("partial detrending"). Specifically, if
 #'   \code{method = "residuals"}, shape residuals will be computed by
 #'   subtracting values fitted to the coefficients from \code{model} to the
 #'   shapes provided in \code{newdata}; whereas if \code{method = "orthogonal"},
@@ -250,11 +255,10 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'   the explanatory variable in \code{model} to center shapes at can be
 #'   provided. This shift can only be applied for one explanatory variable.
 #'
-#'   If a phylogenetic tree is supplied for interspecific shape data, the
-#'   procedure is performed using the phylogenetically-corrected coefficients
-#'   (and the phylogenetic mean is used instead of the grand mean for
-#'   re-centering data; see Revell, 2009), assuming a Brownian motion model of
-#'   evolution.
+#'   If a phylogenetic linear model is supplied to \code{model} (e.g., a linear
+#'   model fitted using [geomorph::procD.pgls()] or [mvMORPH::mvgls()], the
+#'   procedure will use phylogenetically-corrected coefficients and phylogenetic
+#'   mean (see Revell, 2009) as calculated by the source function.
 #'
 #' @return A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
 #'   landmark data and \code{n x (4 x nb.h)} for the case of Fourier data (where
@@ -515,6 +519,7 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
   #data preparation
   if(!any(method == "residuals", method == "orthogonal")) stop("method should be one of 'residuals' or 'orthogonal'")
 
+  #!
   # x <- model$model[-1]
   # y <- model$model[[1]]
   designmat <- stats::model.matrix(model)
@@ -534,6 +539,7 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
   namesx <- rownames(x)
   namesy <- rownames(y)
 
+  #!
   # designmat <- stats::model.matrix(stats::as.formula(paste0("~ ",
   #                                                           strsplit(as.character(
   #                                                             model$call[2]), split = "~")[[1]][2])), data = x)
@@ -568,7 +574,7 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
 
     if(!is.null(xvalue)) {
       # ortho_center <- c(expected_shapes(shapes = y, x = x[[1]], xvalue = xvalue,
-      #                                   tree = tree, returnarray = FALSE))
+      #                                   tree = tree, returnarray = FALSE)) #!
       ortho_center <- c(expected_shapes(shapes = y, x = x[[1]], xvalue = xvalue,
                                         tree = tree, evmodel = evmodel, returnarray = FALSE))
     } else {
@@ -592,7 +598,7 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
 
         if(!is.null(xvalue)) {
           # ortho_center <- c(expected_shapes(shapes = newy, x = newx[[1]],
-          #                                   xvalue = xvalue, returnarray = FALSE))
+          #                                   xvalue = xvalue, returnarray = FALSE)) #!
           ortho_center <- c(expected_shapes(shapes = newy, x = newx[[1]], evmodel = evmodel,
                                             xvalue = xvalue, returnarray = FALSE))
         } else {
@@ -760,18 +766,25 @@ correct_efourier<-function(ef, index = NULL) {
 #'
 #' @description This function computes the theoretical shapes corresponding to
 #'   the extremes of a morphometric axis, which can be supplied as an object
-#'   containing a linear model or a multivariate ordination analysis.
+#'   containing a linear model or a multivariate ordination.
 #'
-#' @param obj An object containing either a multivariate ordination of class
-#'   \code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes"} or
-#'   \code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using
-#'   [stats::lm()].
+#' @param obj An object of class \code{\link[stats]{"mlm"}},
+#'   \code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
+#'   \code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
+#'   containing a linear model fit to shape data, or an object of class
+#'   \code{\link[stats]{"prcomp"}}, \code{\link{"bg_prcomp"}},
+#'   \code{\link{"pls_shapes"}}, \code{\link{"phy_pls_shapes"}},
+#'   \code{\link{"burnaby"}}, \code{\link{"phy_burnaby"}},
+#'   \code{\link[geomorph]{"gm.prcomp"}}, \code{\link[Morpho]{"bgPCA"}},
+#'   \code{\link[Morpho]{"pls2B"}}, \code{\link[phytools]{"phyl.pca"}} or
+#'   \code{\link[mvMORPH]{"mvgls.pca"}} with the results of multivariate
+#'   ordination of shape data.
 #' @param axis An optional integer value specifying the axis of the multivariate
 #'   ordination which is to be represented.
 #' @param mag Numeric; magnifying factor for representing shape transformation.
 #'
 #' @return A 2-margins matrix, of dimensions \code{2 x (k x p)} for the case of
-#'   landmark data and \code{2 x (4 x nb.h)} for the case of Fourer data (where
+#'   landmark data and \code{2 x (4 x nb.h)} for the case of Fourier data (where
 #'   \code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
 #'
 #' @details If an object of class \code{"mlm"} fitting shape to a factor (only
@@ -831,7 +844,7 @@ correct_efourier<-function(ef, index = NULL) {
 ax_transformation <- function(obj, axis = 1, mag = 1) {
 
   # if(any(class(obj) %in% c("prcomp", "bg_prcomp", "phy_prcomp", "phyalign_comp",
-  #                          "pls_shapes", "phy_pls_shapes", "burnaby", "phy_burnaby"))) {
+  #                          "pls_shapes", "phy_pls_shapes", "burnaby", "phy_burnaby"))) { #!
   if(any(class(obj) == c("pls2b", "phy_pls2b"))) stop("pls2b objects are not allowed; use pls_shapes instead")
   if(any(class(obj)[1] %in% c("prcomp", "bg_prcomp", "phy_prcomp", "phyalign_comp",
                               "pls_shapes", "phy_pls_shapes", "burnaby", "phy_burnaby",
@@ -843,10 +856,10 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
                                obj$center)
   }
 
-  #if(any(class(obj) %in% "mlm")) {
+  #if(any(class(obj) %in% "mlm")) {  #!
   if(any(class(obj)[1] %in% c("mlm", "procD.lm", "lm.rrpp", "mvgls", "mvols"))) {
 
-    # x <- obj$model[,ncol(obj$model)]
+    # x <- obj$model[,ncol(obj$model)]  #!
     obj <- adapt_model(obj)
     x <- obj$x
 
@@ -856,7 +869,7 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
       newrange <- c(cent - (halfdif * mag),
                     cent + (halfdif * mag))
 
-      # coefs <- obj$coefficients
+      # coefs <- obj$coefficients  #!
       coefs <- obj$coefs
       designmat <- cbind(1, newrange)
       extshapes_mat <- rbind(designmat %*% coefs)
@@ -866,7 +879,7 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 
       if(nlevels(x) > 2) stop("Only two levels are allowed for extracting axes from mlm objects; try with a bg_prcomp object")
 
-      # Y <- obj$model[,1]
+      # Y <- obj$model[,1]  #!
       Y <- obj$y
       mshapes <- apply(X = Y, MARGIN = 2, FUN = tapply, x, mean)
       bgpca <- stats::prcomp(mshapes)
@@ -1112,52 +1125,3 @@ extract_shapes <- function(mspace,
   return(invisible((results)))
 }
 
-
-################################################################################
-
-#' Rotate x,y coordinates
-#'
-#' @description Rotate x,y coordinates by an arbitrary amount of degrees
-#'
-#' @param xy (x,y) coordinates
-#' @param degrees Numeric; angle to rotate \code{(x,y)}
-#'
-#' @export
-#'
-#' @examples
-#' #load data
-#' data(wings)
-#'
-#' shapes <- wings$shapes
-#' links <- wings$links
-#'
-#' # rotate first shape from the data set
-#' rot_shape <- rotate_coords(shapes[,,1], 180)
-#'
-#' #plot and compare
-#' plot(shapes[,,1], pch = 1)
-#' Morpho::lineplot(shapes[,,1], links)
-#'
-#' points(rot_shape, pch = 16, col = "red")
-#' Morpho::lineplot(rot_shape, links, col = "red")
-rotate_coords <- function(xy, degrees) {
-
-  # Convert angle from degrees to radians
-  radians <- degrees * pi / 180
-
-  #split x and y coordinates
-  x <- xy[,1]
-  y <- xy[,2]
-
-  # Calculate the cosine and sine of the angle
-  cos_angle <- cos(radians)
-  sin_angle <- sin(radians)
-
-  # Apply rotation transformation to each coordinate pair
-  rotated_x <- x * cos_angle - y * sin_angle
-  rotated_y <- x * sin_angle + y * cos_angle
-
-  # Return the rotated coordinates
-  rotated_coordinates <- cbind(x = rotated_x, y = rotated_y)
-  return(rotated_coordinates)
-}

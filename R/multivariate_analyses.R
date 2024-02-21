@@ -67,8 +67,6 @@
 #' @seealso \code{\link[phytools]{phyl.pca}}, \code{\link[stats]{prcomp}},
 #'   \code{\link{exp_var}}
 #'
-#' @export
-#'
 #' @references
 #' Revell, L. J. (2009). \emph{Size-correction and principal components for
 #'   interspecific comparative studies}. Evolution, 63, 3258-3268.
@@ -115,7 +113,7 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
   center <- colMeans(x)
   # totvar <- sum(prcomp(x)$sdev^2)
 
-  phypca <- suppressWarnings(phytools::phyl.pca(Y = x, tree = tree, mode = mode))#, ...))
+  phypca <- suppressWarnings(phytools::phyl.pca(Y = x, tree = tree, mode = mode, ...))
 
   lambda <- if(is.null(phypca$lambda)) 1 else phypca$lambda
   C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
@@ -186,8 +184,6 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #'   \item \code{$center:} {the phylogenetic mean (i.e., the shape estimated
 #'     for the root of the tree).}
 #'   }
-#'
-#' @export
 #'
 #' @seealso \code{\link[geomorph]{gm.prcomp}}, \code{\link{phy_prcomp}}
 #'
@@ -275,9 +271,9 @@ phyalign_comp <- function(x, tree, corr = FALSE) {
 #'   produce ordinations maximizing separation between groups because it avoids
 #'   spherization of shape variation carried out for the former methods.
 #'
-#'   Recently, it has been pointed out that bgPCA produces spurious separation
-#'   between groups when the number of variables exceeds the number of
-#'   observations (which is a common situation in geometric morphometrics
+#'   Recently, it has been pointed out that the scores of bgPC axes show
+#'   spurious separation between groups when the number of variables exceeds the
+#'   number of observations (a common situation in geometric morphometrics
 #'   analyses). This problem can be alleviated by carrying out a
 #'   leave-one-out cross-validation (LOOCV; i.e., each observation is
 #'   excluded from the calculation of bgPCA prior to its projection in the
@@ -364,9 +360,8 @@ phyalign_comp <- function(x, tree, corr = FALSE) {
 #' mspace(shapes, links = links, nh = 8, nv = 6, invax = c(1,2)) %>%
 #'   proj_shapes(shapes) %>%
 #'   proj_groups(shapes, groups = species, alpha = 0.5)
-bg_prcomp <- function(x, groups, gweights = TRUE,
-                      LOOCV = FALSE, recompute = FALSE,
-                      corr = FALSE) {
+bg_prcomp <- function(x, groups, gweights = TRUE, LOOCV = FALSE,
+                      recompute = FALSE, corr = FALSE) {
 
   grandmean <- colMeans(x)
   groupmeans <- apply(X = x, MARGIN = 2, FUN = tapply, groups, mean)
@@ -447,7 +442,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' Two-blocks Partial Least Squares
 #'
 #' @description Performs 2B Partial Least Squares allowing for leave-one-out
-#'   cross-validation and removal of phylogenetic covariation (experimental).
+#'   cross-validation and removal of phylogenetic covariation.
 #'
 #' @param x A matrix with one or more variables as columns and observations as
 #'   rows, representing the first block.
@@ -455,6 +450,10 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'   rows, representing the second block.
 #' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
 #'   labels should match the row number and names from \code{x} and \code{y}.
+#' @param evmodel Character, specifying an evolutionary model to perform
+#'   ancestral character reconstruction; options are "BM" (Brownian motion),
+#'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
+#'   ?mvMORPH::mvgls for more details).
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
 #'   scores resulting from LOOCV.
@@ -465,20 +464,20 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #'   context of \code{morphospace}, one or both of these blocks will usually
 #'   be a series of shapes arranged as a 2-margins matrix.
 #'
-#'   It has been reported that PLS (as an algebraic equivalent of bgPCA)
-#'   produces spurious covariation between blocks when the number of variables
-#'   exceeds the number of observations (which is a common situation in
-#'   geometric morphometrics analyses). This problem can be alleviated by
-#'   carrying out a leave-one-out cross-validation (LOOCV; i.e., each
-#'   observation is excluded from the calculation of PLS axes before its
-#'   projection in the resulting ordination as a way to calculate its score).
+#'   It has been reported that PLS scores from the different blocks can show
+#'   spurious covariation when the number of variables exceeds the number of
+#'   observations (a common situation in geometric morphometrics analyses). This
+#'   problem can be alleviated by carrying out a leave-one-out cross-validation
+#'   (LOOCV; i.e., each observation is excluded from the calculation of PLS axes
+#'   before its projection in the resulting ordination as a way to calculate its
+#'   score).
 #'
 #'   If \code{tree} is supplied, rows of \code{x} and \code{y} are assumed to
 #'   be linked by those phylogenetic relationships. In this case, the resulting
 #'   axes maximize the residual covariation among blocks left after removing
-#'   covariation among blocks accounted by phylogenetic history (assuming a
-#'   Brownian model of evolution and 100% phylogenetic signal, which is
-#'   equivalent to setting \code{method = "BM"} in [phytools::phyl.pca()]).
+#'   covariation among blocks accounted by phylogenetic history (estimated under
+#'   different possible evolutionary models using [mvMORPH::mvgls]; Clavel et
+#'   al. 2015).
 #'
 #'   The phylogenetic version of [pls2b()] displays the same variational
 #'   properties than phylogenetic PCA (i.e., centering on the phylogenetic mean;
@@ -542,6 +541,10 @@ bg_prcomp <- function(x, groups, gweights = TRUE,
 #' Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
 #'   components analysis in geometric morphometrics}. Evolutionary Biology,
 #'   46(4), 271-302.
+#'
+#' Clavel, J., Escarguel, G., & Merceron, G. (2015). \emph{mvMORPH: an R package
+#'    for fitting multivariate evolutionary models to morphometric data}.
+#'    Methods in Ecology and Evolution, 6(11), 1311-1319.
 #'
 #' @examples
 #' #load data and packages
@@ -613,6 +616,7 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
       y <- cbind(y[tree$tip.label,])
     }
 
+    #!
     #anc <- apply(cbind(x, y), 2, phytools::fastAnc, tree = tree)[1,]
     # x_center <- anc[seq_len(ncol(x))]
     # y_center <- anc[(ncol(x) + 1):(ncol(x) + ncol(y))]
@@ -676,7 +680,7 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
   totvar_x <- sum(apply(x, 2, stats::var))
   totvar_y <- sum(apply(y, 2, stats::var))
 
-  #svd <- svd_block(x, y, tree)
+  #svd <- svd_block(x, y, tree) #!
   svd <- svd_block(x, y, tree, evmodel)
 
   ndims <- length(svd$d)
@@ -780,6 +784,10 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
 #' \code{pls2b}.
 #' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
 #'   labels should match the row number and names from \code{x} and \code{y}.
+#' @param evmodel Character, specifying an evolutionary model to perform
+#'   ancestral character reconstruction; options are "BM" (Brownian motion),
+#'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
+#'   \code{\link[mVMORPH]{?mvgls}} for more details).
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
 #'   scores resulting from LOOCV.
@@ -795,13 +803,13 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
 #'   history (assuming a Brownian model of evolution and 100% phylogenetic
 #'   signal).
 #'
-#'   It has been reported that PLS (as an algebraic equivalent of bgPCA)
-#'   produces spurious covariation between blocks when the number of variables
-#'   exceeds the number of observations (which is a common situation in
-#'   geometric morphometrics analyses). This problem can be alleviated by
-#'   carrying out a leave-one-out cross-validation (LOOCV; i.e., each
-#'   observation is excluded from the calculation of PLS axes before its
-#'   projection in the resulting ordination as a way to calculate its score).
+#'   It has been reported that PLS scores from the different blocks can show
+#'   spurious covariation when the number of variables exceeds the number of
+#'   observations (a common situation in geometric morphometrics analyses). This
+#'   problem can be alleviated by carrying out a leave-one-out cross-validation
+#'   (LOOCV; i.e., each observation is excluded from the calculation of PLS axes
+#'   before its projection in the resulting ordination as a way to calculate its
+#'   score).
 #'
 #'   The number of axes in both blocks will be equal to the number of variables
 #'   in the smallest block (i.e., the one with less variables), unless the
@@ -809,7 +817,7 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
 #'   number PLS axes).
 #'
 #' @return A \code{"pls_shapes"} or \code{"phy_pls_shapes"} object formatted
-#' following the \code{"prcomp"} class:
+#'   following the \code{"prcomp"} class:
 #' \itemize{
 #'   \item \code{$x:} {the scores from the shapes block.}
 #'   \item \code{$x2:} {the scores from the supervising block (i.e., the
@@ -890,7 +898,7 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
   y <- shapes_mat(shapes)$data2d
   x <- cbind(X)
 
-  # pls <- pls2b(y = y, x = x, tree = tree, LOOCV = LOOCV, recompute = recompute)
+  # pls <- pls2b(y = y, x = x, tree = tree, LOOCV = LOOCV, recompute = recompute) #!
   pls <- pls2b(y = y, x = x, tree = tree, evmodel = evmodel,
                LOOCV = LOOCV, recompute = recompute)
 
@@ -927,6 +935,10 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
 #'   \code{x}.
 #' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
 #'   labels should match the row names from \code{x} and \code{vars}.
+#' @param evmodel Character, specifying an evolutionary model to perform
+#'   ancestral character reconstruction; options are "BM" (Brownian motion),
+#'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
+#'   \code{\link[mVMORPH]{?mvgls}} for more details).
 #' @param axmat An optional matrix of axes coefficients to render \code{x}
 #'   orthogonal to. If provided, is used instead of \code{vars} to orthogonalize
 #'   \code{x}.
@@ -957,6 +969,10 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
 #'   variation, and therefore showing null eigenvalues). Therefore, projection
 #'   of the original shape variables into the orthogonal subspace should be
 #'   attempted after removing (at least) these null axes.
+#'
+#'   The phylogenetic version of this method (i.e., the correction of
+#'   non-phylogenetic independence from the relationship between \code{x} and
+#'   \code{vars}) is achieved through [mvMORPH::mvgls()].
 #'
 #' @return A \code{"burnaby"} or \code{"phy_burnaby"} object, containing:
 #' \itemize{
@@ -1058,6 +1074,7 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL) {
 
   if(!is.null(axmat)) {
     axmat <- cbind(axmat)
+    #!
     # center <- if(is.null(tree)) colMeans(x) else apply(x, 2, phytools::fastAnc, tree = tree)[1,]
     # if(!is.null(tree)) warning("\naxmat has been provided directly, it will be assumed its orientation is already phylogenetically corrected; tree will be only used to center x")
     center <- if(is.null(tree)) colMeans(x) else colMeans(mvMORPH::mvgls(x ~ 1, tree = tree, model = evmodel)$fitted)
@@ -1070,6 +1087,7 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL) {
     namesvars <- rownames(vars)
     namesx <- rownames(x)
 
+    #!
     # formula <- stats::as.formula(paste("~", paste(colnames(vars), collapse = " + ")))
     # designmat <- stats::model.matrix(formula, data = vars)
 
@@ -1084,9 +1102,10 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL) {
         vars <- cbind(vars[tree$tip.label,])
         if(is.null(rownames(vars))) rownames(vars) <- tree$tip.label
         x <- cbind(x[tree$tip.label,])
-        # designmat <- cbind(designmat[tree$tip.label,])
+        # designmat <- cbind(designmat[tree$tip.label,]) #!
       }
 
+      #!
       # center <- apply(x, 2, phytools::fastAnc, tree = tree)[1,]
       # C <- ape::vcv.phylo(tree)
       # coefs <- solve(t(designmat) %*% solve(C) %*% designmat) %*%
@@ -1120,7 +1139,7 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL) {
 
     } else {
       center <- colMeans(x)
-      # coefs <- solve(t(designmat) %*% designmat) %*% t(designmat) %*% x
+      # coefs <- solve(t(designmat) %*% designmat) %*% t(designmat) %*% x #!
       coefs <- lm(x ~ as.matrix(vars))$coef
     }
 

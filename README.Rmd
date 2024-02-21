@@ -21,7 +21,9 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 
-The goal of `morphospace` is to enhance representation and heuristic exploration of multivariate ordinations of shape data. This package can handle the most common types of shape data working in integration with other widely used R packages such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014), which cover other more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis).
+The goal of `morphospace` is to enhance representation and heuristic exploration of multivariate ordinations of shape data. This package can handle the most common types of shape data working in integration with other widely used R packages such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), `Momocs` (Bonhome et al. 2014) and `mvMORPH` (Clavel et al.2015), which cover other more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis, phylogenetic modelling).
+
+Below there is broad-strokes account of the `morphospace` capacities; for more specific guidance, refer to [General usage](https://millacarmona.github.io/morphospace/articles/General-usage.html) and [Worked examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
 
 
 ## Installation
@@ -38,7 +40,7 @@ devtools::install_github("millacarmona/morphospace")
 
 The basic idea behind `morphospace` is to build empirical morphospaces using multivariate ordination methods, then use the resulting ordination as a reference frame in which elements representing different aspects of morphometric variation are projected. These elements are added to both graphic representations and objects as consecutive 'layers' and list slots, respectively, using the `%>%` pipe operator from `magrittr` (Bache & Wickham 2022).
 
-The starting point of the `morphospace` workflow is a set of shapes (i.e. morphometric data that is already free of variation due to differences in orientation, position and scale). These are fed to the `mspace` function, which generates a morphospace using a variety of multivariate methods related to Principal Component Analysis. This general workflow is broadly outlined below using the `tails` data set from Fasanelli et al. (2022), which contains tail shapes from 281 specimens belonging to 13 species of the genus *Tyrannus*.
+The starting point of the `morphospace` workflow is a set of shapes (i.e. morphometric data that is already free of variation due to differences in orientation, position and scale). These are fed to the `mspace` function, which generates a morphospace using a variety of multivariate methods related to Principal Component Analysis. This general workflow is outlined below using the `tails` data set from Fasanelli et al. (2022), which contains tail shapes from 281 specimens belonging to 13 species of the genus *Tyrannus*.
 
 
 ```{r, message = FALSE}
@@ -85,12 +87,19 @@ msp <- mspace(shapes = shapes, links = wf, cex.ldm = 5) %>%
 ```
 
 
-Once the `"mspace"` object has been created, the `plot_mspace` function can be used to either regenerate/modify the plot, add a legend, or to combine morphometric axes with other non-shape variables to produce 'hybrid' morphospaces. For example, PC1 can be plotted against size to explore allometric patterns.
+Once the `"mspace"` object has been created, the `plot_mspace` function can be used to either regenerate/modify the plot, add a legend, or to combine morphometric axes with other non-shape variables to produce 'hybrid' morphospaces. For example, PC1 can be plotted against size to explore allometric patterns, or against taxonomic classification to assess patterns of intra- and/or interspecific variation.
 
 
 ```{r}
+layout(rbind(c(1,2)))
+
 # Plot PC1 against log-size, add legend
 plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
+            alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
+            phylo = FALSE, xlab = "Log-size", legend = TRUE)
+
+# Plot PC1 against species classification
+plot_mspace(msp, x = spp, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
             phylo = FALSE, xlab = "Log-size", legend = TRUE)
 
@@ -159,7 +168,6 @@ Aside from working with these types of morphometric data, `morphospace` provides
 
 ## Update 1 (August 2022)
 
-
 - Different behavior for `proj_shapes` (now replaces `mspace$x` with the actual scores being projected) and `proj_axis` (now adds one or more axes into an `mspace$shape_axis`).
 
 - New `ellipses_by_groups_2D` (uses `car::ellipse`) function as an option for `proj_groups` and `plot_mspace`.
@@ -193,6 +201,26 @@ Aside from working with these types of morphometric data, `morphospace` provides
 
 - Legends created using `plot_mspace` have been improved, and scale bars for interpreting landscapes have also been made available.
 
+
+## Update 3 (February 2024)
+
+Significant changes aimed at enhancing integration with other GM/MV R packages and improving procedures involving phylogenetic data, as well as a couple of new features:
+
+- The internal behavior of the `mspace` workflow has been modified so objects containing multivariate ordinations produced by `geomorph`, `Morpho`, `mvMORPH` and `phytools` can be now used as input.
+
+- `mspace` can now be fed with an object containing a multivariate ordination directly. This is implemented through an alternative combination of arguments for the `mspace` function (`ord` + `datype` as an alternative to `shapes` + `FUN` + `...`).
+
+- `ax_transformation` (and by extension `proj_axis`) and `detrend_shapes` can now be fed with objects containing a linear model fitted using functions from `geomorph`, `RRPP` and `mvMORPH`. Internal phylogenetic correction of linear coefficients in `detrend_shapes` has been abandoned (and so has the `tree` argument), relying now on the (phylogenetic) linear model provided.
+
+- `phy_prcomp` and the experimental `phyalign_comp` have been removed (users interested in these methods should use `phytools::phyl.pca`, `geomorph::gm.prcomp` and/or `mvMORPH::mvgls.pca`).
+
+- Estimation of ancestral shapes (performed internally by `expected_shapes`, `detrend_shapes`, `proj_phylogeny`, `pls2b`, `pls_shapes`, `burnaby` and `plot_mspace`) now relies on `mvMORPH::mvgls`, which has the advantage of allowing estimation under evolutionary models other than Brownian motion. In addition, ancestral character estimation of discrete non-shape variables (attempted internally by the phylogenetic version of `pls2b` (and by extension `pls_shapes`) and `plot_mspace` in certain situations) is performed under a simple Equal rates model via `ape::ace`.
+
+- Introduction of violin plots for combining shape ordination axes with categorical variables via `plot_mspace`.
+
+- Tip and node labels can now be included in phylomorphospaces, phenogram and hybrid phylomorphospaces.
+
+
 If you find any bugs please send me an email at `pablomillac@gmail.com`. Thanks!!
 
 
@@ -203,7 +231,9 @@ Adams D.C., Collyer M.L., Kaliontzopoulou A., & Baken E.K. (2021). *geomorph: So
 
 Bache S.F., & Wickham H. (2022). *magrittr: A Forward-Pipe Operator for R*. R package version 2.0.3. <https://CRAN.R-project.org/package=magrittr>.
 
-Bonhomme V., Picq S., Gaucherel C., & Claude J. (2014). *Momocs: Outline Analysis Using R*. Journal of Statistical Software, 56(13), 1-24.  <http://www.jstatsoft.org/v56/i13/>.
+Bonhomme V., Picq S., Gaucherel C., & Claude J. (2014). *Momocs: Outline Analysis Using R*. Journal of Statistical Software, 56(13), 1-24. <http://www.jstatsoft.org/v56/i13/>.
+
+Clavel, J., Escarguel, G., & Merceron, G. (2015). *mvMORPH: an R package for fitting multivariate evolutionary models to morphometric data*. Methods in Ecology and Evolution, 6(11), 1311-1319. <https://doi.org/10.1111/2041-210X.12420>
 
 Collyer, M. L., & Adams, D. (2021). *Phylogenetically aligned component analysis*. Methods in Ecology and Evolution, 12(2), 359-372. <https://doi.org/10.1111/2041-210X.13515>.
 

@@ -4,32 +4,25 @@
 \alias{detrend_shapes}
 \title{Remove shape variation associated to external variables}
 \usage{
-detrend_shapes(
-  model,
-  xvalue = NULL,
-  tree = NULL,
-  method = "orthogonal",
-  newdata = NULL
-)
+detrend_shapes(model, method = "residuals", xvalue = NULL, newdata = NULL)
 }
 \arguments{
-\item{model}{A \code{"mlm"} object created using \code{\link[stats:lm]{stats::lm()}}.}
+\item{model}{An object of class \code{\link[stats]{"mlm"}},
+\code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
+\code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
+containing a linear model fit to shape data.}
+
+\item{method}{Method used for detrending; options are \code{"orthogonal"}
+(the default) and \code{"residuals"} (see details).}
 
 \item{xvalue}{A value (numeric) or level (character) at which shape data is
 to be standardized (i.e., centered); If NULL, the mean of the complete
 sample is used (only available if there is a single explanatory variable).}
 
-\item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip
-labels should match row names from \code{x}.}
-
-\item{method}{Method used for detrending; options are \code{"orthogonal"}
-(the default) and \code{"residuals"} (see details).}
-
 \item{newdata}{New data to be standardized. It should be provided as either
-an \code{"mlm"} object fitting the same variables used in \code{model}
-measured in a new sample, created through \code{\link[stats:lm]{stats::lm()}}, or a 2-margin
-matrix of shape descriptors (only for \code{method = "orthogonal"}). See
-details.}
+a linear model object fitting the same variables used in \code{model}
+measured in a new sample, or a 2-margin matrix of shape descriptors (only
+for \code{method = "orthogonal"}). See details.}
 }
 \value{
 A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
@@ -49,10 +42,10 @@ computed from a linear model fitting the former to the latter
 that is orthogonal to variation associated to non-shape variables, computed
 using the Burnaby approach (\code{method = "orthogonal"}).
 
-If \code{newdata} is provided as an \code{"mlm"} object, shapes from
-\code{newdata} are detrended by "correcting" their relationship with the
-explanatory variables using the relationship estimated for the data
-provided in \code{model} ("partial detrending"). Specifically, if
+If \code{newdata} is provided as an object containing a linear model fit,
+shapes from \code{newdata} are detrended by "correcting" their relationship
+with the explanatory variables using the relationship estimated for the
+data provided in \code{model} ("partial detrending"). Specifically, if
 \code{method = "residuals"}, shape residuals will be computed by
 subtracting values fitted to the coefficients from \code{model} to the
 shapes provided in \code{newdata}; whereas if \code{method = "orthogonal"},
@@ -71,11 +64,10 @@ variation, although an \code{xvalue} specifying a level or numeric value of
 the explanatory variable in \code{model} to center shapes at can be
 provided. This shift can only be applied for one explanatory variable.
 
-If a phylogenetic tree is supplied for interspecific shape data, the
-procedure is performed using the phylogenetically-corrected coefficients
-(and the phylogenetic mean is used instead of the grand mean for
-re-centering data; see Revell, 2009), assuming a Brownian motion model of
-evolution.
+If a phylogenetic linear model is supplied to \code{model} (e.g., a linear
+model fitted using \code{\link[geomorph:procD.pgls]{geomorph::procD.pgls()}} or \code{\link[mvMORPH:mvgls]{mvMORPH::mvgls()}}, the
+procedure will use phylogenetically-corrected coefficients and phylogenetic
+mean (see Revell, 2009) as calculated by the source function.
 }
 \examples{
  #### Landmark data

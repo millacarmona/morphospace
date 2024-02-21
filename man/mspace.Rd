@@ -5,11 +5,13 @@
 \title{Generate morphospace}
 \usage{
 mspace(
-  shapes,
+  shapes = NULL,
+  ord = NULL,
   axes = c(1, 2),
   links = NULL,
   template = NULL,
   FUN = stats::prcomp,
+  datype = NULL,
   p = NULL,
   k = NULL,
   nh = 5,
@@ -41,6 +43,12 @@ mspace(
 \arguments{
 \item{shapes}{Shape data.}
 
+\item{ord}{Optional object of class \code{\link[geomorph]{"gm.prcomp"}},
+\code{\link[Morpho]{"bgPCA"}}, \code{\link[Morpho]{"pls2B"}},
+\code{\link[phytools]{"phyl.pca"}} or \code{\link[mvMORPH]{"mvgls.pca"}},
+containing the results of multivariate ordination of shape data. To be used
+instead of the \code{shapes} argument.}
+
 \item{axes}{Numeric of length 1 (univariate morphospace) or 2 (bivariate
 morphospace), indicating the axes to be plotted.}
 
@@ -54,8 +62,15 @@ data). See details below.}
 
 \item{FUN}{The function (method) to be used for ordination of shape
 variation. Supported alternatives include \code{\link[stats]{prcomp}},
-\code{\link{phy_prcomp}}, \code{\link{bg_prcomp}} and
-\code{\link{pls_shapes}}.}
+\code{\link{bg_prcomp}}, \code{\link{pls_shapes}},
+\code{\link[geomorph]{gm.prcomp}}, \code{\link[geomorph]{procD.lm}},
+\code{\link[geomorph]{procD.pgls}}, \code{\link[Morpho]{bgPCA}},
+\code{\link[Morpho]{pls2B}} and \code{\link[phytools]{phyl.pca}}. Ignored
+if \code{ord} is provided.}
+
+\item{datype}{Character; the type of shape data used (either \code{"fcoef"}
+or \code{"landm"}). Only required if \code{ord} is provided instead of
+\code{shapes}.}
 
 \item{p}{Numeric, indicating the number of landmarks/semilandmarks used (only
 for landmark data in 2-margin matrices format).}
@@ -136,23 +151,34 @@ and depict shape variation represented by the resulting ordination axes.
 \details{
 This function is the heart of the \code{morphospace} workflow. It
 computes a new ordination space from a sample of normalized shapes using
-eigenanalysis-based multivariate methods (supported alternatives include
-PCA, between groups PCA, phylogenetic PCA, two-block PLS); it will also
-generate a series of shape models depicting the range of variation. The
-resulting \code{"mspace"} object stores all the information necessary to
-project and/or retrieve new shapes into the ordination space. The output
-of \code{mspace} can be expanded using the \code{proj_*} family of
-functions and the \code{\%>\%} operator from \code{magrittr}.
+a variety of eigenanalysis-based multivariate methods. Alternatively,
+the results of multivariate ordination achieved using functions from
+\code{geomorph}, \code{Morpho}, \code{phytools} or \code{mvMORPH} can be
+provided directly using the \code{ord} argument. Overall, the user can use
+a range of ordination methods to capture the signal of interest that
+include PCA, Between-groups PCA, Phylogenetic PCA,
+Phylogenetically-aligned component analysis, 2-blocks PLS, Phylogenetic
+2-block PLS, and the Burnaby approach for orthogonalization against
+external variables (also including a phylogenetic variant).
+
+\code{mspace} will also generate a series of shape models depicting the
+range of variation. The resulting \code{"mspace"} object stores all the
+information necessary to project and/or retrieve new shapes into the
+ordination space. The latter can be populated using the \code{proj_*}
+family of functions and the \code{\%>\%} operator from \code{magrittr}.
+Background shapes, shape axes, or other elements projected into
+morphospace can be extracted for other uses through
+\code{\link{extract_shapes}}.
 
 For landmark data, representation of shape variation can be further
-aided by providing a template, which contains additional geometric
+enhanced by providing a template, which contains additional geometric
 features from the structure the landmark/semilandmarks were placed upon.
 Templates will be warped using TPS interpolation to produce the set of
 background shape models. For 2D landmark data, templates must be provided
 as a 2-column matrix containing the actual landmarks/semilandmarks,
 followed by the coordinates defining a curve or set of curves, separated
-from the former and from each other by a row of \code{NA}s
-(see \code{\link{build_template2d}}). For 3D landmark data, the template
+from the former and from each other by a row of \code{NA}s (see
+\code{\link{?build_template2d}}). For 3D landmark data, the template
 must be a \code{"mesh3d"} object corresponding to the \strong{actual mean
 shape of the sample} (which can be obtained using
 \code{\link{expected_shapes}} + \code{\link[Morpho:tps3d]{Morpho::tps3d()}}; see examples below).
@@ -166,6 +192,7 @@ shapes <- tails$shapes
 species <- tails$data$species
 links <- tails$links
 tree <- tails$tree
+sp_shapes <- expected_shapes(shapes, species)
 
 #generate morphospace using the basic sample of shapes, PCA as ordination
 #method and the links between landmarks provided for backround models
@@ -182,17 +209,43 @@ mspace(shapes, links = links, mag = 1.5, axes = c(1,3), points = TRUE)
 mspace(shapes, links = links, FUN = bg_prcomp, groups = species, mag = 0.7,
        axes = c(1,2), invax = 1, points = TRUE)
 
-#generate morphospace using species' consensus shapes, phylogenetic PCA as
-#ordination method, and links between landmarks for background models
-sp_shapes <- expected_shapes(shapes, species)
-mspace(sp_shapes, links = links, FUN = phy_prcomp, tree = tree, mag = 0.7,
-       axes = c(1,2), points = TRUE)
-
 #just create a morphospace without plotting, save into an object, and inspect
 morphosp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
                    plot = FALSE)
 morphosp #general info about the object
 names(morphosp) #slots
+
+
+# Generate morphospaces using functions from other packages (note that
+# aside from replacing the shape argument with the ord one, additional
+#information on number of dimensions and coordinates is required for
+#landmark data):
+
+#phylogenetically-aligned component analysis via geomorph::gm.prcomp
+library(geomorph)
+paca <- gm.prcomp(A = two.d.array(sp_shapes), phy = phy,
+                  align.to.phy = TRUE)
+mspace(ord = paca, datype = "landm", p = 9, k = 2, links = links,
+       points = TRUE)
+
+#phylogenetic PCA via phytools::phyl.pca
+library(phytools)
+phypca <- phyl.pca(Y = two.d.array(sp_shapes), tree = tree)
+mspace(ord = phypca, datype = "landm", p = 9, k = 2, links = links,
+       points = TRUE)
+
+#between-groups PCA via Morpho::groupPCA
+library(Morpho)
+bgpca <- groupPCA(two.d.array(sp_shapes), groups = species)
+mspace(ord = bgpca, datype = "landm", p = 9, k = 2, links = links,
+       points = TRUE)
+
+#phylogenetic PCA via mvMORPH::mvgls.pca
+library(mvMORPH)
+phypca2 <- mvgls.pca(object = mvgls(two.d.array(sp_shapes) ~ 1, tree = tree,
+                     model = "BM"), plot = FALSE)
+mspace(ord = phypca2, datype = "landm", p = 9, k = 2, links = links,
+       points = TRUE)
 
 
 #load wing data for a quick demo with templates
@@ -268,10 +321,11 @@ morphosp_F <- mspace(shapes, mag = 1, axes = c(1,2), nh = 5, nv = 4,
 morphosp_F
 }
 \seealso{
-\code{\link{print.mspace}}, \code{\link{proj_shapes}},
-\code{\link{proj_groups}}, \code{\link{proj_phylogeny}},
-\code{\link{proj_axis}}, \code{\link{proj_landscape}},
-\code{\link{extract_shapes}}, \code{\link{prcomp}},
-\code{\link{bg_prcomp}}, \code{\link{phy_prcomp}},
-\code{\link{pls_shapes}},
+\code{\link{proj_shapes}}, \code{\link{proj_groups}},
+\code{\link{proj_phylogeny}}, \code{\link{proj_axis}},
+\code{\link{proj_landscape}}, \code{\link{extract_shapes}},
+\code{\link{prcomp}}, \code{\link{bg_prcomp}}, \code{\link{pls_shapes}},
+\code{\link[geomorph]{gm.prcomp}}, \code{\link[Morpho]{groupPCA}},
+\code{\link[Morpho]{pls2B}}, \code{\link[phytools]{phyl.pca}},
+\code{\link[mvMORPH]{mvgls.pca}}
 }

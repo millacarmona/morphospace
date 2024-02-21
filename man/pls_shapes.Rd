@@ -4,7 +4,14 @@
 \alias{pls_shapes}
 \title{2B Partial Least Squares for shape data}
 \usage{
-pls_shapes(X, shapes, tree = NULL, LOOCV = FALSE, recompute = FALSE)
+pls_shapes(
+  X,
+  shapes,
+  tree = NULL,
+  evmodel = "BM",
+  LOOCV = FALSE,
+  recompute = FALSE
+)
 }
 \arguments{
 \item{X}{A matrix with variables as columns and observations as rows,
@@ -16,6 +23,11 @@ representing the external variables that supervise ordination
 
 \item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip
 labels should match the row number and names from \code{x} and \code{y}.}
+
+\item{evmodel}{Character, specifying an evolutionary model to perform
+ancestral character reconstruction; options are "BM" (Brownian motion),
+"EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
+\code{\link[mVMORPH]{?mvgls}} for more details).}
 
 \item{LOOCV}{Logical; whether to apply leave-one-out cross-validation.}
 
@@ -56,13 +68,13 @@ left after removing covariation among blocks accounted by phylogenetic
 history (assuming a Brownian model of evolution and 100\% phylogenetic
 signal).
 
-It has been reported that PLS (as an algebraic equivalent of bgPCA)
-produces spurious covariation between blocks when the number of variables
-exceeds the number of observations (which is a common situation in
-geometric morphometrics analyses). This problem can be alleviated by
-carrying out a leave-one-out cross-validation (LOOCV; i.e., each
-observation is excluded from the calculation of PLS axes before its
-projection in the resulting ordination as a way to calculate its score).
+It has been reported that PLS scores from the different blocks can show
+spurious covariation when the number of variables exceeds the number of
+observations (a common situation in geometric morphometrics analyses). This
+problem can be alleviated by carrying out a leave-one-out cross-validation
+(LOOCV; i.e., each observation is excluded from the calculation of PLS axes
+before its projection in the resulting ordination as a way to calculate its
+score).
 
 The number of axes in both blocks will be equal to the number of variables
 in the smallest block (i.e., the one with less variables), unless the

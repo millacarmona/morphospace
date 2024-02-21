@@ -14,7 +14,9 @@
 #' @return A 2-margins matrix of variables on their original scale.
 #'
 #' @seealso \code{\link{proj_eigen}}
+#'
 #' @export
+#' @keywords internal
 #'
 #' @examples
 #' #load data and packages
@@ -66,6 +68,7 @@ rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + ce
 #' @return A 2-margins matrix with the scores on the supplied vector(s).
 #'
 #' @export
+#' @keywords internal
 #'
 #' @seealso \code{\link{rev_eigen}}
 #'
@@ -103,16 +106,22 @@ proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors
 #'
 #' @description Just a wrapper for [svd()] that returns an adequate output
 #'   when used on blocks of variables. Can deal with phylogenetic data too
-#'   using \code{ape} and \code{phytools} functions. Used internally.
+#'   using \code{ape}, \code{phytools} and \code{mvMORPH} functions.
+#'   Used internally.
 #'
-#' @param x First block of variables
-#' @param y Second block of variables
+#' @param x First block of variables.
+#' @param y Second block of variables.
 #' @param tree An optional \code{"phylo"} object containing a phylogenetic
 #'   tree whose tip.labels match rownames of \code{x} and \code{y}.
-#'
-#' @return Mimics the [svd()] output.
+#' @param evmodel Character, specifying an evolutionary model to perform
+#'   ancestral character reconstruction; options are "BM" (Brownian motion),
+#'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
+#'   \code{\link[mVMORPH]{?mvgls}} for more details).
 #'
 #' @export
+#' @keywords internal
+#'
+#' @return Mimics the [svd()] output.
 #'
 #' @examples
 #' #laod data and packages
@@ -137,7 +146,7 @@ svd_block <- function(x, y, tree = NULL, evmodel) {
   y <- cbind(y)
 
   if(!is.null(tree)) {
-    #C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
+    #C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)] #!
     adj_tree <- mvMORPH::mvgls(y ~ x, tree = tree, model = evmodel)$corrSt$phy
     C <- ape::vcv.phylo(adj_tree)[rownames(x), rownames(x)]
     xy <- cbind(x,y)
@@ -190,6 +199,7 @@ svd_block <- function(x, y, tree = NULL, evmodel) {
 #'   single outline shape.
 #'
 #' @export
+#' @keywords internal
 #'
 #' @seealso \code{\link[Momocs]{efourier_i}}
 #'
@@ -198,7 +208,7 @@ svd_block <- function(x, y, tree = NULL, evmodel) {
 #' data("shells")
 #' shape_coe <- shells$shapes$coe[1,]
 #'
-#' #get and plot (x,y) coordinates for using different number of coordinares
+#' #get and plot (x,y) coordinates for using different number of coordinates
 #' shape_xy <- inv_efourier(shape_coe, nb.pts = 10)
 #' plot(shape_xy)
 #' shape_xy <- inv_efourier(shape_coe, nb.pts = 30)
@@ -241,6 +251,7 @@ inv_efourier <- function(coe, nb.pts = 120) {
 #'  }
 #'
 #' @export
+#' @keywords internal
 #'
 #' @examples
 #' #apply on shells dataset
@@ -313,9 +324,10 @@ shapes_mat <- function(shapes) {
 #' @param model_height Numeric; the height of a reference shape model (usually
 #'   the consensus).
 #'
-#' @return An array containing the adjusted shape models.
-#'
 #' @export
+#' @keywords internal
+#'
+#' @return An array containing the adjusted shape models.
 #'
 #' @examples
 #' #load package and data
@@ -417,6 +429,7 @@ adjust_models2d <- function(models, frame, model_width, model_height) {
 #'   \code{frame}.
 #'
 #' @export
+#' @keywords internal
 #'
 #' @seealso \code{\link{morphogrid}}, \code{\link{plot_morphogrid3d}}
 #'
@@ -466,7 +479,7 @@ adjust_models2d <- function(models, frame, model_width, model_height) {
 #'               adj$model_frames[[i]][2,2])
 #' }
 #'
-#' #kind of. Anyway, use plot_morphogrid3d that do the full process.
+#' #kind of. Anyway, use plot_morphogrid3d that go thru the full process.
 #' }
 adjust_models3d <- function(models, frame, size.models, asp.models) {
 
@@ -524,7 +537,12 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #'    \code{\link[Morpho]{bgPCA}}, \code{\link[Morpho]{pls2B}},
 #'    \code{\link[phytools]{phyl.pca}} or \code{\link[mvMORPH]{mvgls.pca}}.
 #'
+#' @return An object of equivalent class with scores, eigenvectors, eigenvalues/
+#'    standard deviations, and original centroid arranged so they can be used
+#'    in downstream \code{morphospace} operations.
+#'
 #' @export
+#' @keywords internal
 adapt_ordination <- function(ordination) {
 
   if(class(ordination)[1] == "gm.prcomp") {
@@ -592,11 +610,17 @@ adapt_ordination <- function(ordination) {
 #'   [mvMORPH::mvgls()] and [mvMORPH::mvols()] for their use in the mspace
 #'   workflow and shape operations. Used internally.
 #'
-#' @param model An object of class \code{\link[stats]{mlm}},
-#'    \code{\link[geomorph]{procD.lm}}, \code{\link[RRPP]{lm.rrpp}},
-#'    \code{\link[mvMORPH]{mvgls}} or \code{\link[mvMORPH]{mvols}}.
+#' @param model An object of class \code{\link[stats]{"mlm"}},
+#'    \code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
+#'    \code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}}.
+#'
+#' @return A list containing the response and explanatory variables,
+#'    coefficients, original centroid of response variables (or phylogenetic
+#'    mean in the case of phylogenetic linear models), and method used for
+#'    linear model fitting.
 #'
 #' @export
+#' @keywords internal
 adapt_model <- function(model) {
 
   if(class(model)[1] == "mlm") {
@@ -609,7 +633,7 @@ adapt_model <- function(model) {
 
   if(class(model)[1] == "procD.lm") {
     # y <- model$data[[1]]
-    # x <- cbind(setNames(model$data[[2]], rownames(y)))
+    # x <- cbind(setNames(model$data[[2]], rownames(y))) #!
     y <- model$Y
     x <- cbind(model$X[,-1])
     if("pgls.coefficients" %in% names(model)) {
@@ -623,6 +647,7 @@ adapt_model <- function(model) {
     }
   }
 
+  #!
   # if(any(class(model)[1] == c("mvgls", "mvols"))) {
   #   coefs <- model$coefficients
   #   y <- model$variables$Y
@@ -661,7 +686,7 @@ adapt_model <- function(model) {
     tree <- model$variables$tree
     evmodel <- model$model
     mvmod <- mvMORPH::mvgls(y ~ 1, tree = tree, model = evmodel)
-    #grandmean <- colMeans(mvmod$fitted)
+    #grandmean <- colMeans(mvmod$fitted) #!
     grandmean <- colMeans(model$fitted)
 
     modtype <- if(class(model)[1] == "mvgls") "pgls" else "ols"
@@ -684,7 +709,7 @@ adapt_model <- function(model) {
       modtype <- "gls"
     }
     # y <- model$LM$data[[1]]
-    # x <- cbind(setNames(model$LM$data[[2]], rownames(y)))
+    # x <- cbind(setNames(model$LM$data[[2]], rownames(y))) #!
     y <- model$LM$Y
     x <- cbind(model$LM$X[,-1])
   }
@@ -702,8 +727,8 @@ adapt_model <- function(model) {
 #' @description Calculate and arrange background shape models for morphospaces.
 #'   Used internally.
 #'
-#' @param ordination An ordination (i.e., a \code{"prcomp"}, \code{"bg_prcomp"},
-#'   \code{"phy_prcomp"} or \code{"pls_shape"} object).
+#' @param ordination An object containing and ordination, formatted in the style
+#'   of the \code{"prcomp"} class
 #' @param axes Numeric of length 1 or 2, indicating the morphometric axes to be
 #'   plotted. If values for either \code{x} or \code{y} are provided, only the
 #'   first value of this argument is considered.
@@ -743,6 +768,7 @@ adapt_model <- function(model) {
 #' }
 #'
 #' @export
+#' @keywords internal
 #'
 #' @seealso \code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}}
 #'
@@ -808,7 +834,7 @@ morphogrid <- function(ordination,
 
     if(!is.null(x)) {
       if(is.null(xlim)) {
-        # plotframe_x <- range(x)
+        # plotframe_x <- range(x) #!
         plotframe_x <- range(as.numeric(x))
       } else {
         plotframe_x <- sort(xlim)
@@ -823,9 +849,8 @@ morphogrid <- function(ordination,
 
     if(!is.null(y)) {
       if(is.null(ylim)){
-        # plotframe_y <- range(y)
+        # plotframe_y <- range(y) #!
         plotframe_y <- range(as.numeric(y))
-
       } else {
         plotframe_y <- sort(ylim)
       }
@@ -913,7 +938,6 @@ morphogrid <- function(ordination,
     models_mat <- rbind(models_mat, (sh_arr[,,i]) + descentmat)
   }
 
-
   return(list(models_mat = models_mat, models_arr = models_arr, shapemodels = sh_originals))
 
 }
@@ -941,8 +965,9 @@ morphogrid <- function(ordination,
 #' @param datype Character; type of shape data used (\code{"landm"} or
 #'   \code{"fcoef"}).
 #' @param ordtype Character; method used for multivariate ordination
-#'   (\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
-#'   \code{"pls_shapes"} or \code{"phy_pls_shapes"}).
+#'   (\code{"prcomp"}, \code{"gm.prcomp"}, \code{"mvgls.pca"},
+#'   \code{"phyl.pca"}, \code{"bg_prcomp"}, \code{"bgPCA"}, code{"pls_shapes"}
+#'   / \code{"phy_pls_shapes"}, or \code{"pls2B"}).
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
 #' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
 #'   factors for the width and height of the frame, respectively.
@@ -959,6 +984,7 @@ morphogrid <- function(ordination,
 #' @param xlab,ylab Standard arguments passed to the generic plot function.
 #'
 #' @export
+#' @keywords internal
 #'
 #' @seealso \code{\link{morphogrid}}, \code{\link{adjust_models2d}}
 #'
@@ -1145,8 +1171,9 @@ plot_morphogrid2d <- function(x = NULL,
 #' @param refshape reference shape (i.e., the mean landmark configuration)
 #'   corresponding to the mesh provided in \code{template}.
 #' @param ordtype Character; method used for multivariate ordination
-#'   (\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
-#'   \code{"pls_shapes"} or \code{"phy_pls_shapes"}).
+#'   (\code{"prcomp"}, \code{"gm.prcomp"}, \code{"mvgls.pca"},
+#'   \code{"phyl.pca"}, \code{"bg_prcomp"}, \code{"bgPCA"}, code{"pls_shapes"}
+#'   / \code{"phy_pls_shapes"}, or \code{"pls2B"}).
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
 #' @param rotmat Optional rotation matrix for background shape models. If
 #'   \code{NULL}, the user will be asked to define a preferred orientation.
@@ -1175,6 +1202,7 @@ plot_morphogrid2d <- function(x = NULL,
 #'   \code{alpha.models} value is lower than \code{1}.
 #'
 #' @export
+#' @keywords internal
 #'
 #' @seealso \code{\link{morphogrid}}, \code{\link{adjust_models3d}}
 #'
@@ -1422,6 +1450,7 @@ plot_morphogrid3d <- function(x = NULL,
 #' @return A set of Fourier coefficients describing the rotated outline(s).
 #'
 #' @export
+#' @keywords internal
 #'
 #' @references
 #' Iwata, H., & Ukai, Y. (2002). \emph{SHAPE: a computer program package for
@@ -1460,6 +1489,52 @@ rotate_fcoef <- function(fcoef) {
 
 ################################################################################
 
+#' Rotate x,y coordinates
+#'
+#' @description Rotate x,y coordinates by an arbitrary amount of degrees
+#'
+#' @param xy (x,y) coordinates
+#' @param degrees Numeric; angle (in degrees) to rotate \code{(x,y)}
+#'
+#' @export
+#' @keywords internal
+#'
+#' @examples
+#' #load data
+#' data(wings)
+#'
+#' shapes <- wings$shapes
+#' links <- wings$links
+#'
+#' # rotate first shape from the data set
+#' rot_shape <- rotate_coords(shapes[,,1], 180)
+#'
+#' #plot and compare
+#' plot(shapes[,,1], pch = 1)
+#' Morpho::lineplot(shapes[,,1], links)
+#'
+#' points(rot_shape, pch = 16, col = "red")
+#' Morpho::lineplot(rot_shape, links, col = "red")
+rotate_coords <- function(xy, degrees) {
+
+  radians <- degrees * pi / 180
+
+  x <- xy[,1]
+  y <- xy[,2]
+
+  cos_angle <- cos(radians)
+  sin_angle <- sin(radians)
+
+  rotated_x <- x * cos_angle - y * sin_angle
+  rotated_y <- x * sin_angle + y * cos_angle
+
+  rotated_coordinates <- cbind(x = rotated_x, y = rotated_y)
+  return(rotated_coordinates)
+}
+
+
+################################################################################
+
 #' Plot phenogram
 #'
 #' @description Plot phenogram using phylogenetic and morphometric information.
@@ -1474,6 +1549,9 @@ rotate_fcoef <- function(fcoef) {
 #' @param phylo_scores A matrix containing the scores from tips and nodes of
 #'   the phylogeny provided in \code{tree}.
 #' @param axis Numeric; the axis to be plotted.
+#' @param labels.tips Either logical, indicating whether to include tip labels,
+#'   or a character string with the exact names of the tips whose labels
+#'   should be included.
 #' @param pch.tips Symbol of the scatterpoints representing the tips of the
 #'   phylogeny.
 #' @param col.tips Color of the scatterpoints representing the tips of the
@@ -1482,6 +1560,10 @@ rotate_fcoef <- function(fcoef) {
 #'   tips of the phylogeny.
 #' @param cex.tips Numeric; size of the scatterpoints representing the tips
 #'   of the phylogeny.
+#' @param labels.nodes Either logical, indicating whether to include node
+#'   labels, or a character string with the exact names of the nodes whose
+#'   labels should be included (with the form of "node_n", e.g., "node_14"
+#'   corresponds to the root of a tree with 13 tips).
 #' @param pch.nodes Symbol of the scatterpoints representing the nodes of the
 #'   phylogeny.
 #' @param col.nodes Color of the scatterpoints representing the nodes of the
@@ -1499,6 +1581,7 @@ rotate_fcoef <- function(fcoef) {
 #' @param points Logical; whether to plot the scatter points.
 #'
 #' @export
+#' @keywords internal
 #'
 #' @examples
 #' #load and extract relevant data, packages and information
@@ -1576,7 +1659,7 @@ plot_phenogram <- function(x = NULL,
   #     label.text <- rownames(phyloxy[tree$tip.label,])
   #   }
   # }
-  # graphics::text(label.scores, label.text, pos = 1)
+  # graphics::text(label.scores, label.text, pos = 1) #!
 }
 
 
@@ -1599,6 +1682,7 @@ plot_phenogram <- function(x = NULL,
 #' @seealso \code{\link{ellipses_by_group_2D}}, \code{\link{hulls_by_group_3D}}
 #'
 #' @export
+#' @keywords internal
 #'
 #' @examples
 #' #load landmark data and necessary packages
@@ -1662,6 +1746,7 @@ hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 #' @seealso \code{\link{hulls_by_group_2D}}, \code{\link[car]{ellipse}}
 #'
 #' @export
+#' @keywords internal
 #'
 #' @examples
 #' #load landmark data and necessary packages
@@ -1726,6 +1811,7 @@ ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 #'   for each group.
 #'
 #' @export
+#' @keywords internal
 #'
 #' @examples
 #' #load Fourier data and necessary packages
@@ -1779,37 +1865,6 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1, plot
 
 ################################################################################
 
-#' Express colors as hexadecimal coding
-#'
-#' @description Little function intended for internal use; will transform colors
-#'   (expressed either as numerical or characters) into hexadecimal code.
-#'
-#' @param col Either numeric or character; color(s) to be transformed.
-#'
-#' @return The color(s) used as input, but expressed as hexadecimal code(s).
-#'
-#' @export
-#'
-#' @examples
-#' plot(rnorm(n = 100), pch = 16, col = "red")
-#' plot(rnorm(n = 100), pch = 16, col = col2hex("red"))
-#'
-#' plot(rnorm(n = 100), pch = 16, col = 2)
-#' plot(rnorm(n = 100), pch = 16, col = col2hex(2))
-col2hex <- function(col) {
-
-  rgbcols <- grDevices::col2rgb(col)
-  hexcols <- NULL
-  for(i in seq_len(ncol(rgbcols))) {
-    hexcols[i] <- grDevices::rgb(rgbcols[1,i], rgbcols[2,i], rgbcols[3,i],
-                                 maxColorValue = 255)
-  }
-  return(hexcols)
-}
-
-
-################################################################################
-
 #' Plot scatterpoints into univariate morphospace
 #'
 #' @description An \code{ad hoc} wrapper for [stats::density()] +
@@ -1824,6 +1879,7 @@ col2hex <- function(col) {
 #' @param cex Numeric; size of the scatterpoints.
 #' @param ... Further arguments passed to [graphics::points()].
 #'
+#' @export
 #' @keywords internal
 plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
@@ -1859,6 +1915,7 @@ plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1
 #' @param cex Numeric; size of the scatterpoints.
 #' @param ... Further arguments passed to [graphics::points()].
 #'
+#' @export
 #' @keywords internal
 plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
@@ -1885,6 +1942,7 @@ plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 #' @param col Colors used to represent the landscape curve.
 #' @param lwd Integer; width of the lines depicting the landscape curve.
 #'
+#' @export
 #' @keywords internal
 plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
   if(drawlabels) {
@@ -1931,6 +1989,7 @@ plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
 #'   surface contour be plotted?
 #' @param alpha Transparency factor for filled contours.
 #'
+#' @export
 #' @keywords internal
 plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, drawlabels, alpha) {
   if(display == "contour") {
@@ -1964,6 +2023,7 @@ plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, 
 #'   points in the scatter plot (taken from row names), or character string
 #'   containing specific names to be added.
 #'
+#' @export
 #' @keywords internal
 add_labels <- function(xy, labels = NULL) {
   if(!is.null(labels)) {
@@ -1978,6 +2038,5 @@ add_labels <- function(xy, labels = NULL) {
         graphics::text(rbind(label.scores), label.text, pos = 1)
       }
     }
-
   }
 }

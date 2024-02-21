@@ -70,9 +70,10 @@ for(i in 1:length(models)) {
               adj$model_frames[[i]][2,2])
 }
 
-#kind of. Anyway, use plot_morphogrid3d that do the full process.
+#kind of. Anyway, use plot_morphogrid3d that go thru the full process.
 }
 }
 \seealso{
 \code{\link{morphogrid}}, \code{\link{plot_morphogrid3d}}
 }
+\keyword{internal}

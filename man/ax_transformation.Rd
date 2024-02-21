@@ -7,10 +7,17 @@
 ax_transformation(obj, axis = 1, mag = 1)
 }
 \arguments{
-\item{obj}{An object containing either a multivariate ordination of class
-\code{"prcomp", "bg_prcomp", "phy_prcomp", "pls_shapes"} or
-\code{"phy_pls_shapes"} or a \code{"mlm"} object fitted using
-\code{\link[stats:lm]{stats::lm()}}.}
+\item{obj}{An object of class \code{\link[stats]{"mlm"}},
+\code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
+\code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
+containing a linear model fit to shape data, or an object of class
+\code{\link[stats]{"prcomp"}}, \code{\link{"bg_prcomp"}},
+\code{\link{"pls_shapes"}}, \code{\link{"phy_pls_shapes"}},
+\code{\link{"burnaby"}}, \code{\link{"phy_burnaby"}},
+\code{\link[geomorph]{"gm.prcomp"}}, \code{\link[Morpho]{"bgPCA"}},
+\code{\link[Morpho]{"pls2B"}}, \code{\link[phytools]{"phyl.pca"}} or
+\code{\link[mvMORPH]{"mvgls.pca"}} with the results of multivariate
+ordination of shape data.}
 
 \item{axis}{An optional integer value specifying the axis of the multivariate
 ordination which is to be represented.}
@@ -19,13 +26,13 @@ ordination which is to be represented.}
 }
 \value{
 A 2-margins matrix, of dimensions \code{2 x (k x p)} for the case of
-landmark data and \code{2 x (4 x nb.h)} for the case of Fourer data (where
+landmark data and \code{2 x (4 x nb.h)} for the case of Fourier data (where
 \code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
 }
 \description{
 This function computes the theoretical shapes corresponding to
 the extremes of a morphometric axis, which can be supplied as an object
-containing a linear model or a multivariate ordination analysis.
+containing a linear model or a multivariate ordination.
 }
 \details{
 If an object of class \code{"mlm"} fitting shape to a factor (only

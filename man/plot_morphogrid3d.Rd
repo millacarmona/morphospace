@@ -18,7 +18,7 @@ plot_morphogrid3d(
   ylim = NULL,
   xlab = NULL,
   ylab = NULL,
-  adj_frame = 1,
+  adj_frame = c(1, 1),
   cex.ldm,
   col.ldm,
   col.models,
@@ -52,8 +52,9 @@ TPS interpolation to produce the set of background shell models.}
 wireframe (following the format used in \code{Morpho}).}
 
 \item{ordtype}{Character; method used for multivariate ordination
-(\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
-\code{"pls_shapes"} or \code{"phy_pls_shapes"}).}
+(\code{"prcomp"}, \code{"gm.prcomp"}, \code{"mvgls.pca"},
+\code{"phyl.pca"}, \code{"bg_prcomp"}, \code{"bgPCA"}, code{"pls_shapes"}
+/ \code{"phy_pls_shapes"}, or \code{"pls2B"}).}
 
 \item{axes}{Numeric of length 2, indicating the axes to be plotted.}
 
@@ -143,3 +144,4 @@ plot_morphogrid3d(morphogrid = shapes_grid, template = meanmesh,
 \seealso{
 \code{\link{morphogrid}}, \code{\link{adjust_models3d}}
 }
+\keyword{internal}

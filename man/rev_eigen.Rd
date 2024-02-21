@@ -56,3 +56,4 @@ lineplot(extshapes_arr[,,2], tails$links) ; title("positive")
 \seealso{
 \code{\link{proj_eigen}}
 }
+\keyword{internal}

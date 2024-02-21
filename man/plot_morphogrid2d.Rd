@@ -48,8 +48,9 @@ wireframe (following the format used in \code{Morpho}).}
 \code{"fcoef"}).}
 
 \item{ordtype}{Character; method used for multivariate ordination
-(\code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
-\code{"pls_shapes"} or \code{"phy_pls_shapes"}).}
+(\code{"prcomp"}, \code{"gm.prcomp"}, \code{"mvgls.pca"},
+\code{"phyl.pca"}, \code{"bg_prcomp"}, \code{"bgPCA"}, code{"pls_shapes"}
+/ \code{"phy_pls_shapes"}, or \code{"pls2B"}).}
 
 \item{axes}{Numeric of length 2, indicating the axes to be plotted.}
 
@@ -109,3 +110,4 @@ points(shapes_grid$models_arr[,,4], pch=16, col = 4)
 \seealso{
 \code{\link{morphogrid}}, \code{\link{adjust_models2d}}
 }
+\keyword{internal}

@@ -4,15 +4,20 @@
 \alias{svd_block}
 \title{Singular value decomposition for 2 blocks of variables}
 \usage{
-svd_block(x, y, tree = NULL)
+svd_block(x, y, tree = NULL, evmodel)
 }
 \arguments{
-\item{x}{First block of variables}
+\item{x}{First block of variables.}
 
-\item{y}{Second block of variables}
+\item{y}{Second block of variables.}
 
 \item{tree}{An optional \code{"phylo"} object containing a phylogenetic
 tree whose tip.labels match rownames of \code{x} and \code{y}.}
+
+\item{evmodel}{Character, specifying an evolutionary model to perform
+ancestral character reconstruction; options are "BM" (Brownian motion),
+"EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
+\code{\link[mVMORPH]{?mvgls}} for more details).}
 }
 \value{
 Mimics the \code{\link[=svd]{svd()}} output.
@@ -20,7 +25,8 @@ Mimics the \code{\link[=svd]{svd()}} output.
 \description{
 Just a wrapper for \code{\link[=svd]{svd()}} that returns an adequate output
 when used on blocks of variables. Can deal with phylogenetic data too
-using \code{ape} and \code{phytools} functions. Used internally.
+using \code{ape}, \code{phytools} and \code{mvMORPH} functions.
+Used internally.
 }
 \examples{
 #laod data and packages
@@ -40,3 +46,4 @@ svd_block(x = sizes, y = two.d.array(shapes))
 #perform partial svd on phylogenetic structure
 svd_block(x = sp_sizes, y = two.d.array(sp_shapes), tree = tree)
 }
+\keyword{internal}

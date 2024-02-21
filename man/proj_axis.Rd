@@ -9,9 +9,17 @@ proj_axis(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...)
 \arguments{
 \item{mspace}{An \code{"mspace"} object.}
 
-\item{obj}{An object containing either a multivariate ordination of class
-\code{"prcomp", "bg_prcomp", "phy_prcomp"} or \code{"pls_shape"}, or a
-\code{"mlm"} object fitted using \code{\link[stats:lm]{stats::lm()}}.}
+\item{obj}{An object of class \code{\link[stats]{"mlm"}},
+\code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
+\code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
+containing a linear model fit to shape data, or an object of class
+\code{\link[stats]{"prcomp"}}, \code{\link{"bg_prcomp"}},
+\code{\link{"pls_shapes"}}, \code{\link{"phy_pls_shapes"}},
+\code{\link{"burnaby"}}, \code{\link{"phy_burnaby"}},
+\code{\link[geomorph]{"gm.prcomp"}}, \code{\link[Morpho]{"bgPCA"}},
+\code{\link[Morpho]{"pls2B"}}, \code{\link[phytools]{"phyl.pca"}} or
+\code{\link[mvMORPH]{"mvgls.pca"}} with the results of multivariate
+ordination of shape data.}
 
 \item{axis}{Optional; which axis from \code{obj} should to be projected?}
 
@@ -49,14 +57,14 @@ same thing in a more flexible and straightforward way.
 Axes computed by fitting linear models to shape data can differ in
 extension from axes obtained through supervised ordination using the same
 supervising variable (i.e., shape transformations will be either stretched
-or truncated) due to the former assuming that the explanatory variable has
-been measured without error. Also, the former will not be necessarily
-centered.
+or truncated). This is because the former assumes that the explanatory
+variable has been measured without error. Also, the former will not be
+necessarily centered.
 
 For statistical analysis of axes (e.g., trajectory analysis) their vector
-coefficients can be extracted directly from slope coefficients stored in
-\code{"mlm"} objects or eigenvector coefficients stored in the
-\code{$rotation} slot returned by multivariate ordination methods.
+coefficients can be extracted directly from slope or eigenvector
+coefficients stored in the objects returned by linear model fitting and
+multivariate ordination methods.
 }
 \examples{
 #load and extract relevant data, packages and information
@@ -75,7 +83,7 @@ links <- tails$links
 #first perform the different variants of PCA on tail shape data
 pca <- prcomp(two.d.array(shapes))
 bgpca <- bg_prcomp(two.d.array(shapes), groups = species)
-phypca <- phy_prcomp(two.d.array(sp_shapes), tree = tree)
+phypca <- phytools::phyl.pca(two.d.array(sp_shapes), tree = tree)
 
 #then project the first 2 axes from each into morphospace
 mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%

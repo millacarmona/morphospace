@@ -39,3 +39,4 @@ dat2 <- shapes_mat(tails$shapes)
 head(dat2$data2d)
 dat2$datype
 }
+\keyword{internal}

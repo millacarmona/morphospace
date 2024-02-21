@@ -63,9 +63,9 @@ ordination axes. This method is preferred here to LDA/CVA as a way to
 produce ordinations maximizing separation between groups because it avoids
 spherization of shape variation carried out for the former methods.
 
-Recently, it has been pointed out that bgPCA produces spurious separation
-between groups when the number of variables exceeds the number of
-observations (which is a common situation in geometric morphometrics
+Recently, it has been pointed out that the scores of bgPC axes show
+spurious separation between groups when the number of variables exceeds the
+number of observations (a common situation in geometric morphometrics
 analyses). This problem can be alleviated by carrying out a
 leave-one-out cross-validation (LOOCV; i.e., each observation is
 excluded from the calculation of bgPCA prior to its projection in the

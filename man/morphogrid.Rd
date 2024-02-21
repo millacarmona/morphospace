@@ -26,8 +26,8 @@ morphogrid(
 )
 }
 \arguments{
-\item{ordination}{An ordination (i.e., a \code{"prcomp"}, \code{"bg_prcomp"},
-\code{"phy_prcomp"} or \code{"pls_shape"} object).}
+\item{ordination}{An object containing and ordination, formatted in the style
+of the \code{"prcomp"} class}
 
 \item{axes}{Numeric of length 1 or 2, indicating the morphometric axes to be
 plotted. If values for either \code{x} or \code{y} are provided, only the
@@ -87,25 +87,25 @@ Calculate and arrange background shape models for morphospaces.
 Used internally.
 }
 \examples{
- #load data and packages
- library(geomorph)
- data("tails")
+#load data and packages
+library(geomorph)
+data("tails")
 
- #perform pca on tails shapes
- pca <- prcomp(two.d.array(tails$shapes))
+#perform pca on tails shapes
+pca <- prcomp(two.d.array(tails$shapes))
 
- #generate grid of shape models sampling the range of variation
- #at 4 locations (the 4 corners of the scatterplot)
- shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
-                           k = ncol(tails$shapes), p = nrow(tails$shapes),
-                           nh = 2, nv = 2)
+#generate grid of shape models sampling the range of variation
+#at 4 locations (the 4 corners of the scatterplot)
+shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
+                          k = ncol(tails$shapes), p = nrow(tails$shapes),
+                          nh = 2, nv = 2)
 
- #plot grid from $models_mat and project each shape in models_arr
- plot(shapes_grid$models_mat)
- points(shapes_grid$models_arr[,,1], pch=16, col = 1)
- points(shapes_grid$models_arr[,,2], pch=16, col = 2)
- points(shapes_grid$models_arr[,,3], pch=16, col = 3)
- points(shapes_grid$models_arr[,,4], pch=16, col = 4)
+#plot grid from $models_mat and project each shape in models_arr
+plot(shapes_grid$models_mat)
+points(shapes_grid$models_arr[,,1], pch=16, col = 1)
+points(shapes_grid$models_arr[,,2], pch=16, col = 2)
+points(shapes_grid$models_arr[,,3], pch=16, col = 3)
+points(shapes_grid$models_arr[,,4], pch=16, col = 4)
 }
 \references{
 MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological Association
@@ -114,3 +114,4 @@ Newsletter, 72(620), 14-27.
 \seealso{
 \code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}}
 }
+\keyword{internal}

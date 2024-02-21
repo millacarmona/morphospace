@@ -32,8 +32,8 @@
 #' \dontrun{
 #' #pile shapes
 #' pile_shapes(shapes, mshape = FALSE) #bare
-#' pile_shapes(shapes, mshape = FALSE, links = list(1:10)) #with false links (just as an example)
-#' pile_shapes(shapes, mshape = TRUE, links = list(1:10)) #with false links and mean shape
+#' pile_shapes(shapes, mshape = FALSE, links = list(1:10)) #with false links
+#' pile_shapes(shapes, mshape = TRUE, links = list(1:10)) #false links + mshape
 #' }
 #'
 #'
@@ -202,6 +202,7 @@ build_template2d <- function(image, nlands, ncurves) {
 #'   \code{specular}, \code{alpha}).
 #'
 #' @export
+#' @keywords internal
 #'
 #' @examples
 #' #load landmark data and necessary packages
@@ -234,6 +235,39 @@ hulls_by_group_3D <- function(xyz, fac, col = seq_len(nlevels(fac)), ...) {
 
 ################################################################################
 
+#' Express colors as hexadecimal coding
+#'
+#' @description Little function intended for internal use; will transform colors
+#'   (expressed either as numerical or characters) into hexadecimal code.
+#'
+#' @param col Either numeric or character, specifying the color(s) to be
+#'    transformed.
+#'
+#' @return The color(s) used as input, but expressed as hexadecimal code(s).
+#'
+#' @export
+#' @keywords internal
+#'
+#' @examples
+#' plot(rnorm(n = 100), pch = 16, col = "red")
+#' plot(rnorm(n = 100), pch = 16, col = col2hex("red"))
+#'
+#' plot(rnorm(n = 100), pch = 16, col = 2)
+#' plot(rnorm(n = 100), pch = 16, col = col2hex(2))
+col2hex <- function(col) {
+
+  rgbcols <- grDevices::col2rgb(col)
+  hexcols <- NULL
+  for(i in seq_len(ncol(rgbcols))) {
+    hexcols[i] <- grDevices::rgb(rgbcols[1,i], rgbcols[2,i], rgbcols[3,i],
+                                 maxColorValue = 255)
+  }
+  return(hexcols)
+}
+
+
+################################################################################
+
 # Compute lift-to-drag ratio for shapes from the 'tails' data set
 #
 # @description Compute lift-to-drag ratio (a proxy for aerodynamic performance
@@ -243,7 +277,6 @@ hulls_by_group_3D <- function(xyz, fac, col = seq_len(nlevels(fac)), ...) {
 # @param shapes landmark shape data from the "tails" data set.
 # @param MSC Logical; whether to use the maximum continuous span of the tail
 #   as a proxy for the amount of lift produced, instead of the lifting area.
-
 computeLD <- function(model, MCS = FALSE) {
 
   tail <- matrix(model, ncol = 2, byrow = TRUE)

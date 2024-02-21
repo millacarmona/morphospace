@@ -58,6 +58,7 @@ plot_mspace(
   col.phylo = 1,
   lwd.phylo = 1,
   lty.phylo = 1,
+  labels.nodes,
   col.nodes,
   pch.nodes,
   bg.nodes,
@@ -65,6 +66,7 @@ plot_mspace(
   col.tips,
   pch.tips,
   bg.tips,
+  labels.tips,
   cex.tips,
   type.axis,
   lwd.axis = 1,
@@ -92,8 +94,9 @@ wireframe (following the format used in \code{Morpho}).}
 template curves coordinates (for 2D shape data) or a \code{"mesh3d"}
 object representing the mean shape of the sample (for 3D shape data).}
 
-\item{x, y}{Optional vector with a non-morphometric variable to be plotted in
-the x or y axis. Alternatively, a \code{"phylo"} object can be provided.}
+\item{x, y}{Optional vector with a non-morphometric variable (numerical or
+categorical) to be plotted in the x or y axis against an ordination axis.
+Alternatively, a \code{"phylo"} object can be provided.}
 
 \item{nh, nv}{Positive integers; the number of shape models along the x
 (\code{nh}) and the y (\code{nv}) axes.}
@@ -209,6 +212,11 @@ branches.}
 \item{lty.phylo}{Integer; type of the lines depicting phylogenetic
 branches.}
 
+\item{labels.nodes}{Either logical, indicating whether to include node
+labels, or a character string with the exact names of the nodes whose
+labels should be included (with the form of "node_n", e.g., "node_14"
+corresponds to the root of a tree with 13 tips).}
+
 \item{col.nodes}{Color of the scatterpoints representing the nodes of the
 phylogeny.}
 
@@ -229,6 +237,10 @@ phylogeny.}
 
 \item{bg.tips}{Background color of the scatterpoints representing the
 tips of the phylogeny.}
+
+\item{labels.tips}{Either logical, indicating whether to include tip labels,
+or a character string with the exact names of the tips whose labels
+should be included.}
 
 \item{cex.tips}{Numeric; size of the scatterpoints representing the tips
 of the phylogeny.}
@@ -277,23 +289,21 @@ This function allows to regenerate/tweak morphospaces contained in
 regenerates the morphospace with all its projected elements, preserving
 graphical parameters used originally during the \code{\link{mspace}} +
 \code{proj_*} pipeline (and stored in \code{mspace$plotinfo}). However,
-all the graphical parameters can be modified to customize graphical
-representations. Also, \link{plot_mspace} can be used to add a legend and/or a
-scalebar to aid identification of groups and interpretation of landscapes,
-respectively.
+all the graphical parameters can be modified to customize  representation.
+Also, \link{plot_mspace} can be used to add a legend and/or a scalebar to aid
+identification of groups and interpretation of landscapes, respectively.
 
 In addition, this function expands the range of graphical options available
-beyond 'pure' morphospaces. If a numeric non-shape variable (assumed to be
-measured for the same specimens in \code{mspace$projected$scores}) is fed
-to one of \code{x} or \code{y}, a 'hybrid' morphospace is produced (i.e.
-the bivariate plot will be constructed from the combination of \code{x} or
-\code{y} and a morphometric axis; background shape models will represent
-variation only for the latter). If instead a \code{"phylo"} object (assumed
-to describe the phylogenetic relationships among tips scores stored in
-\code{mspace$projected$phylo_scores}) is provided for either \code{x} or
-\code{y}, a vertical or horizontal phenogram will be deployed (the x/y axis
-range will correspond to branch lengths, so caution should be exercised
-when interpreting the output).
+beyond 'pure' morphospaces. If a non-shape variable (assumed to be measured
+for the same specimens in \code{mspace$projected$scores}) is fed to one of
+the \code{x} or \code{y} arguments, a 'hybrid' morphospace is produced
+(i.e. the bivariate plot will be constructed from the combination of
+\code{x} or \code{y} and a morphometric axis; background shape models
+will represent variation only for the latter)If a \code{"phylo"} object
+(assumed to describe the phylogenetic relationships among tips scores
+stored in \code{mspace$projected$phylo_scores}) is provided instead for
+either \code{x} or \code{y}, a vertical or horizontal phenogram will be
+deployed (the function assumes the phylogenetic tree is time-calibrated).
 
 \emph{Note}: when regenerating landscapes, it's important to keep in mind
 that this surface has been calculated for a specific set of shapes and

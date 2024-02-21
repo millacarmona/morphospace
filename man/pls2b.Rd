@@ -4,7 +4,7 @@
 \alias{pls2b}
 \title{Two-blocks Partial Least Squares}
 \usage{
-pls2b(x, y, tree = NULL, LOOCV = FALSE, recompute = FALSE)
+pls2b(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = FALSE)
 }
 \arguments{
 \item{x}{A matrix with one or more variables as columns and observations as
@@ -15,6 +15,11 @@ rows, representing the second block.}
 
 \item{tree}{A \code{"phylo"} object containing a phylogenetic tree. Tip
 labels should match the row number and names from \code{x} and \code{y}.}
+
+\item{evmodel}{Character, specifying an evolutionary model to perform
+ancestral character reconstruction; options are "BM" (Brownian motion),
+"EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
+?mvMORPH::mvgls for more details).}
 
 \item{LOOCV}{Logical; whether to apply leave-one-out cross-validation.}
 
@@ -50,7 +55,7 @@ square roots of the eigenvalues of the covariance/correlation matrix).}
 }
 \description{
 Performs 2B Partial Least Squares allowing for leave-one-out
-cross-validation and removal of phylogenetic covariation (experimental).
+cross-validation and removal of phylogenetic covariation.
 }
 \details{
 Starting with two blocks of variables measured for the same
@@ -59,20 +64,20 @@ block maximizing covariation with the variables on the other. In the
 context of \code{morphospace}, one or both of these blocks will usually
 be a series of shapes arranged as a 2-margins matrix.
 
-It has been reported that PLS (as an algebraic equivalent of bgPCA)
-produces spurious covariation between blocks when the number of variables
-exceeds the number of observations (which is a common situation in
-geometric morphometrics analyses). This problem can be alleviated by
-carrying out a leave-one-out cross-validation (LOOCV; i.e., each
-observation is excluded from the calculation of PLS axes before its
-projection in the resulting ordination as a way to calculate its score).
+It has been reported that PLS scores from the different blocks can show
+spurious covariation when the number of variables exceeds the number of
+observations (a common situation in geometric morphometrics analyses). This
+problem can be alleviated by carrying out a leave-one-out cross-validation
+(LOOCV; i.e., each observation is excluded from the calculation of PLS axes
+before its projection in the resulting ordination as a way to calculate its
+score).
 
 If \code{tree} is supplied, rows of \code{x} and \code{y} are assumed to
 be linked by those phylogenetic relationships. In this case, the resulting
 axes maximize the residual covariation among blocks left after removing
-covariation among blocks accounted by phylogenetic history (assuming a
-Brownian model of evolution and 100\% phylogenetic signal, which is
-equivalent to setting \code{method = "BM"} in \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}}).
+covariation among blocks accounted by phylogenetic history (estimated under
+different possible evolutionary models using \link[mvMORPH:mvgls]{mvMORPH::mvgls}; Clavel et
+al. 2015).
 
 The phylogenetic version of \code{\link[=pls2b]{pls2b()}} displays the same variational
 properties than phylogenetic PCA (i.e., centering on the phylogenetic mean;
@@ -152,6 +157,10 @@ of Mammalogy, 24(1), 25-32.
 Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
 components analysis in geometric morphometrics}. Evolutionary Biology,
 46(4), 271-302.
+
+Clavel, J., Escarguel, G., & Merceron, G. (2015). \emph{mvMORPH: an R package
+for fitting multivariate evolutionary models to morphometric data}.
+Methods in Ecology and Evolution, 6(11), 1311-1319.
 }
 \seealso{
 \code{\link{pls_shapes}}, \code{\link{phy_prcomp}},

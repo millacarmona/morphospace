@@ -8,7 +8,9 @@ proj_phylogeny(
   mspace,
   shapes = NULL,
   tree,
-  pipe = TRUE,
+  evmodel = "BM",
+  labels.tips = FALSE,
+  labels.nodes = FALSE,
   pch.nodes = 16,
   col.nodes = "gray",
   bg.nodes = 1,
@@ -17,6 +19,7 @@ proj_phylogeny(
   bg.tips = 1,
   col.tips = 1,
   cex.tips = 1,
+  pipe = TRUE,
   ...
 )
 }
@@ -28,7 +31,19 @@ from \code{tree}.}
 
 \item{tree}{A \code{"phylo"} object containing a phylogenetic tree.}
 
-\item{pipe}{Logical; is the function being included in a pipe?}
+\item{evmodel}{Character, specifying an evolutionary model to perform
+ancestral character reconstruction; options are "BM" (Brownian motion),
+"EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
+\code{\link[mVMORPH]{?mvgls}} for more details).}
+
+\item{labels.tips}{Either logical, indicating whether to include tip labels,
+or a character string with the exact names of the tips whose labels
+should be included.}
+
+\item{labels.nodes}{Either logical, indicating whether to include node
+labels, or a character string with the exact names of the nodes whose
+labels should be included (with the form of "node_n", e.g., "node_14"
+corresponds to the root of a tree with 13 tips).}
 
 \item{pch.nodes}{Symbol of the scatter points corresponding to the
 nodes of the phylogeny.}
@@ -54,6 +69,8 @@ corresponding to the tips of the phylogeny.}
 \item{cex.tips}{Numeric; size of the scatter points corresponding to the
 tips of the phylogeny.}
 
+\item{pipe}{Logical; is the function being included in a pipe?}
+
 \item{...}{Further arguments passed to \code{\link[graphics:lines]{graphics::lines()}} (commonly,
 \code{pch}, \code{col}/\code{bg} and \code{cex}.}
 }
@@ -63,9 +80,9 @@ tips and nodes of the phylogenetic tree, as well as the lines connecting
 them, are projected into morphospace. If \code{pipe = FALSE} scores for
 nodes and tips of the phylogeny are returned invisibly.
 If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified
-by appending a \code{$phylo_Scores} and a \code{$phylo} slots to
-\code{$projected}, as well as by adding some graphical parameters (stored
-into the \code{$plotinfo} slot), and returned invisibly.
+by appending \code{$phylo_scores}, \code{$phylo_evmodel}, \code{$phylo}
+slots to \code{$projected}, as well as by adding some graphical parameters
+(stored into the \code{$plotinfo} slot), and returned invisibly.
 }
 \description{
 Project phylogenetic relationships among a set of shapes
@@ -80,8 +97,9 @@ provided; \code{dim(shapes)[3]} must match \code{tree$tip.labels}. Second,
 this function can be used to retrieve the scores corresponding to nodes of
 the phylogenetic tree (\code{$projected$phylo_scores}, which can then be
 used to compute the node shapes using \code{\link{extract_shapes}}. The
-position of these shapes in morphospace is estimated using the
-squared-changes parsimony algorithm as performed by \code{\link[phytools:fastAnc]{phytools::fastAnc()}}.
+position of these shapes in morphospace is estimated using
+\code{\link[mvMORPH:mvgls]{mvMORPH::mvgls()}} which allows specification of different phenotypic
+evolutionary models, passed through the \code{evmodel} argument.
 }
 \examples{
 #load and extract relevant data, packages and information
@@ -99,4 +117,9 @@ mspace(shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0) \%>\%
   proj_shapes(shapes = shapes, col = c(1:13)[species], pch = 1,
               cex = 0.7) \%>\%
   proj_phylogeny(shapes = sp_shapes, tree = tree)
+}
+\references{
+Clavel, J., Escarguel, G., & Merceron, G. (2015). \emph{mvMORPH: an R package
+for fitting multivariate evolutionary models to morphometric data}.
+Methods in Ecology and Evolution, 6(11), 1311-1319.
 }

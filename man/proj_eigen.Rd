@@ -52,3 +52,4 @@ points(meanscores, pch = 21, bg = "red", cex = 1.5)
 \seealso{
 \code{\link{rev_eigen}}
 }
+\keyword{internal}
