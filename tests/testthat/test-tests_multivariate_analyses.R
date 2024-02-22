@@ -174,7 +174,8 @@ test_that(desc = "testing burnaby, general behavior", code = {
 
 
   axmat <- lm(Y ~ X)$coef[2,]
-  burn2 <- burnaby(x = Y, axmat = axmat)
+  cent <- colMeans(lm(Y ~ X)$fitted)
+  burn2 <- burnaby(x = Y, axmat = axmat, center = cent)
 
   result8 <- nrow(burn2$x) == nrow(Y)
   result9 <- round(sum(apply(Y,2,var)),10) >= round(sum(burn2$sdev^2),10)
@@ -200,7 +201,7 @@ test_that(desc = "testing (phylogenetic) burnaby, general behavior", code = {
   data(tails)
 
   Y <- geomorph::two.d.array(expected_shapes(tails$shapes, tails$data$species))
-  X <- tapply(tails$sizes, tails$data$species, mean)
+  X <- cbind(tapply(tails$sizes, tails$data$species, mean))
   tree <- tails$tree
   pburn1 <- burnaby(x = Y, vars = X, tree = tree)
 
@@ -218,14 +219,17 @@ test_that(desc = "testing (phylogenetic) burnaby, general behavior", code = {
   result6 <- round(Morpho::angle.calc(pburn1$rotation[,1], lm(allo_shapes ~ X)$coef[2,])*57.2958, 3) == 90
 
 
-  allo_shapes <- expected_shapes(shapes = geomorph::arrayspecs(Y, k =2, p = 9), x = cbind(X), tree = tree, returnarray = FALSE)
-  axmat <- lm(allo_shapes ~ X)$coef[2,]
-  pburn2 <- suppressWarnings(burnaby(x = Y, axmat = axmat, tree = tree))
+  allo_shapes <- expected_shapes(shapes = geomorph::arrayspecs(Y, k =2, p = 9), x = cbind(X),
+                                 tree = tree, returnarray = FALSE)
+  axmat <- adapt_model(geomorph::procD.pgls(allo_shapes ~ X, phy = tree))$coef[2,]
+  cent <- colMeans(adapt_model(geomorph::procD.pgls(allo_shapes ~ X, phy = tree))$fitted)
+  pburn2 <- suppressWarnings(burnaby(x = Y, axmat = axmat, center = cent))
 
   result7 <- nrow(pburn2$x) == nrow(Y)
   result8 <- round(sum(apply(Y,2,var)),10) >= round(sum(pburn2$sdev^2),10)
 
-  result9 <- all(round(pburn2$center,10) == round(apply(Y, 2, phytools::fastAnc, tree = tree)[1,],10))
+
+  result9 <- all(round(pburn2$center,10) == round(colMeans(mvMORPH::mvgls(allo_shapes ~ X, tree = tree, model = "BM")$fitted),10))
   result10 <- ncol(pburn2$x) == min(ncol(Y) - 1, nrow(Y))
 
   effdims <- 1:(((ncol(Y)-4)/2)-1)

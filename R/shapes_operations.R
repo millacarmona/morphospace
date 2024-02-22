@@ -522,6 +522,13 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'  title("P. esbelta morphospace, refined using \n allometric variation from P. koeneni")
 detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata = NULL,
                            tree = NULL, evmodel = NULL) {
+#
+#   model = mod1
+#   method = "orthogonal"
+#   xvalue = max(sizes[index2])
+#   newdata = mod2
+#   tree = NULL
+#   evmodel = NULL
 
   #data preparation
   if(!any(method == "residuals", method == "orthogonal")) stop("method should be one of 'residuals' or 'orthogonal'")
@@ -609,7 +616,7 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
         namesy <- rownames(newy)
 
         #newortho_space <- burnaby(x = newy, vars = newx) #!
-        newortho_space <- burnaby(x = newy, axmat = newadmod$coefs,
+        newortho_space <- burnaby(x = newy, axmat = newadmod$coefs[2,],
                                   center = newadmod$grandmean)
         ax <- min(sum(newortho_space$sdev^2 > 1e-15), ax)
         ortho_scores <- newortho_space$x

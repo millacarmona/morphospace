@@ -173,9 +173,10 @@ test_that(desc = "testing mspace, burnaby", code = {
 
 
   sizeax <- lm(geomorph::two.d.array(shapes) ~ sizes)$coef[2,]
-  burn2 <- burnaby(x = geomorph::two.d.array(shapes), axmat = sizeax)
+  cent <- colMeans(lm(geomorph::two.d.array(shapes) ~ sizes)$fitted)
+  burn2 <- burnaby(x = geomorph::two.d.array(shapes), axmat = sizeax, center = cent)
 
-  msp2 <- mspace(shapes, FUN = burnaby, axmat = sizeax,
+  msp2 <- mspace(shapes, FUN = burnaby, axmat = sizeax, center = cent,
                  mag = 0.7, axes = c(1,2), plot = FALSE)
   result5 <- msp2$ordination$ordtype == "burnaby"
   result6 <- all(msp2$ordination$x == burn2$x)
@@ -204,11 +205,12 @@ test_that(desc = "testing mspace, phylogenetic burnaby", code = {
   result4 <- all(msp1$ordination$center == phyburn$center)
 
   sp_sizeax <- lm(geomorph::two.d.array(expected_shapes(shapes, species)) ~ sp_sizes)$coef[2,]
+  sp_cent <- colMeans(lm(geomorph::two.d.array(expected_shapes(shapes, species)) ~ sp_sizes)$fitted)
   burn2 <- suppressWarnings(burnaby(x = geomorph::two.d.array(expected_shapes(shapes, species)),
-                   axmat = sp_sizeax, tree = tree))
+                   axmat = sp_sizeax, center = cent, tree = tree))
 
   msp2 <- suppressWarnings(mspace(expected_shapes(shapes, species), FUN = burnaby, axmat = sp_sizeax,
-                                  tree = tree, mag = 0.7, axes = c(1,2), plot = FALSE))
+                                  center = cent, tree = tree, mag = 0.7, axes = c(1,2), plot = FALSE))
   result5 <- msp2$ordination$ordtype == "phy_burnaby"
   result6 <- all(msp2$ordination$x == burn2$x)
   result7 <- all(msp2$ordination$rotation == burn2$rotation)

@@ -79,34 +79,34 @@
 #'   studying the evolution of biological shape}. Hystrix, the Italian Journal
 #'   of Mammalogy, 24(1), 25-32.
 #'
-#' @examples
-#' #load data and packages
-#' library(geomorph)
-#' data("tails")
-#'
-#' #compute mean shapes for all species and extract the phylogenetic tree
-#' sp_shapes <- expected_shapes(shapes = tails$shapes, x = tails$data$species)
-#' tree <- tails$tree
-#'
-#' #perform phylogenetic PCA
-#' ppca <- phy_prcomp(x = two.d.array(sp_shapes), tree = tree)
-#'
-#' #inspect results
-#' names(ppca) #the contents of the resulting object
-#' #exp_var(ppca) ##interpretation of eigenvalues is complex! not yet implemented
-#' plot(ppca$x) #ordination
-#'
-#'
-#' #compare shape variation as summarized by different methods
-#'
-#' #build morphospace using phylogenetic PCA
-#' mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, FUN = phy_prcomp,
-#'        tree = tree) %>%
-#'   proj_phylogeny(sp_shapes, tree = tree)
-#'
-#' #compare against morphospace built with ordinary PCA
-#' mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, invax = c(1,2)) %>%
-#'   proj_phylogeny(sp_shapes, tree = tree)
+# @examples
+# #load data and packages
+# library(geomorph)
+# data("tails")
+#
+# #compute mean shapes for all species and extract the phylogenetic tree
+# sp_shapes <- expected_shapes(shapes = tails$shapes, x = tails$data$species)
+# tree <- tails$tree
+#
+# #perform phylogenetic PCA
+# ppca <- phy_prcomp(x = two.d.array(sp_shapes), tree = tree)
+#
+# #inspect results
+# names(ppca) #the contents of the resulting object
+# #exp_var(ppca) ##interpretation of eigenvalues is complex! not yet implemented
+# plot(ppca$x) #ordination
+#
+#
+# #compare shape variation as summarized by different methods
+#
+# #build morphospace using phylogenetic PCA
+# mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, FUN = phy_prcomp,
+#        tree = tree) %>%
+#   proj_phylogeny(sp_shapes, tree = tree)
+#
+# #compare against morphospace built with ordinary PCA
+# mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, invax = c(1,2)) %>%
+#   proj_phylogeny(sp_shapes, tree = tree)
 phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 
   mode <- if(!corr) "cov" else "corr"
@@ -191,37 +191,37 @@ phy_prcomp <- function(x, tree, corr = FALSE, ...) {
 #' Collyer, M. L., & Adams, D. (2021). \emph{Phylogenetically aligned component
 #' analysis}. Methods in Ecology and Evolution, 12(2), 359-372.
 #'
-#' @examples
-#' #load packaes and data: shapes, species, links and tree
-#' library(geomorph)
-#' data("tails")
-#' shapes <- tails$shapes
-#' species <- tails$data$species
-#' links <- tails$links
-#' tree <- tails$tree
-#'
-#' #extract species shapes
-#' sp_shapes <- expected_shapes(shapes, species)
-#'
-#' #perform phylogenetically aligned component analysis
-#' paca <- phyalign_comp(x = two.d.array(sp_shapes), tree = tree)
-#'
-#' #inspect results
-#' names(paca) #the contents of the resulting object
-#' #exp_var(paca) #interpretation of eigenvalues is complex! not yet implemented
-#' plot(paca$x) #ordination
-#'
-#'
-#' #compare shape variation as summarized by different methods
-#'
-#' #build morphospace using phylogenetically aligned components analysis
-#' mspace(sp_shapes, links = links, nh = 8, nv = 6, FUN = phyalign_comp,
-#'        tree = tree) %>%
-#'   proj_phylogeny(sp_shapes, tree = tree)
-#'
-#' #compare against morphospace built with ordinary PCA
-#' mspace(sp_shapes, links = links, nh = 8, nv = 6) %>%
-#'   proj_phylogeny(sp_shapes, tree = tree)
+# @examples
+# #load packaes and data: shapes, species, links and tree
+# library(geomorph)
+# data("tails")
+# shapes <- tails$shapes
+# species <- tails$data$species
+# links <- tails$links
+# tree <- tails$tree
+#
+# #extract species shapes
+# sp_shapes <- expected_shapes(shapes, species)
+#
+# #perform phylogenetically aligned component analysis
+# paca <- phyalign_comp(x = two.d.array(sp_shapes), tree = tree)
+#
+# #inspect results
+# names(paca) #the contents of the resulting object
+# #exp_var(paca) #interpretation of eigenvalues is complex! not yet implemented
+# plot(paca$x) #ordination
+#
+#
+# #compare shape variation as summarized by different methods
+#
+# #build morphospace using phylogenetically aligned components analysis
+# mspace(sp_shapes, links = links, nh = 8, nv = 6, FUN = phyalign_comp,
+#        tree = tree) %>%
+#   proj_phylogeny(sp_shapes, tree = tree)
+#
+# #compare against morphospace built with ordinary PCA
+# mspace(sp_shapes, links = links, nh = 8, nv = 6) %>%
+#   proj_phylogeny(sp_shapes, tree = tree)
 phyalign_comp <- function(x, tree, corr = FALSE) {
 
   #totvar <- sum(prcomp(x)$sdev^2)

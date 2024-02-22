@@ -491,6 +491,7 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, for nume
 
   detshapes2using1 <- detrend_shapes(mod1, method = "orthogonal", xvalue = max(sizes[index2]),
                                      newdata = mod2)
+  traceback()
 
   ax <- c(1:30)
   na_shapes2minus1 <- rev_eigen(scores = burn2$x[,ax],
@@ -794,8 +795,8 @@ test_that(desc = "testing detrend_shapes, method = orthogonal,
   sp_shapes <- geomorph::two.d.array(expected_shapes(shapes, species))
   sp_logsizes <- c(tapply(logsizes,species,mean))
 
-  model1 <- lm(sp_shapes ~ sp_logsizes) #### models need to be created ith procD.pgls or mvgls
-  detr_shapes1 <- detrend_shapes(model1, tree = tree, method = "orthogonal")
+  model1 <- geomorph::procD.pgls(sp_shapes ~ sp_logsizes, phy = tree) #### models need to be created ith procD.pgls or mvgls
+  detr_shapes1 <- detrend_shapes(model1, method = "orthogonal")
   result1 <- all(dim(sp_shapes) == dim(detr_shapes1))
 
   totvar_raw <- sum(apply(sp_shapes, 2, stats::var))
@@ -815,8 +816,8 @@ test_that(desc = "testing detrend_shapes, method = orthogonal,
 
   sp_type <- rep("NDF", 13) ; sp_type[c(7,10)] <- "DF"
   sp_type <- factor(sp_type) ; sp_type <- setNames(sp_type, levels(species))
-  model2 <- lm(sp_shapes ~ sp_type) #### models need to be created ith procD.pgls or mvgls
-  detr_shapes2 <- detrend_shapes(model2, tree = tree, method = "orthogonal")
+  model2 <- geomorph::procD.pgls(sp_shapes ~ sp_type, phy = tree) #### models need to be created ith procD.pgls or mvgls
+  detr_shapes2 <- detrend_shapes(model2, method = "orthogonal")
   result5 <- all(dim(sp_shapes) == dim(detr_shapes2))
 
   totvar_raw <- sum(apply(shapes, 2, stats::var))

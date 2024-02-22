@@ -74,35 +74,6 @@ number of original variables (unless this is higher than the number of
 observations, in which case the number of resulting pPC will be equal
 to the latter).
 }
-\examples{
-#load data and packages
-library(geomorph)
-data("tails")
-
-#compute mean shapes for all species and extract the phylogenetic tree
-sp_shapes <- expected_shapes(shapes = tails$shapes, x = tails$data$species)
-tree <- tails$tree
-
-#perform phylogenetic PCA
-ppca <- phy_prcomp(x = two.d.array(sp_shapes), tree = tree)
-
-#inspect results
-names(ppca) #the contents of the resulting object
-#exp_var(ppca) ##interpretation of eigenvalues is complex! not yet implemented
-plot(ppca$x) #ordination
-
-
-#compare shape variation as summarized by different methods
-
-#build morphospace using phylogenetic PCA
-mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, FUN = phy_prcomp,
-       tree = tree) \%>\%
-  proj_phylogeny(sp_shapes, tree = tree)
-
-#compare against morphospace built with ordinary PCA
-mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, invax = c(1,2)) \%>\%
-  proj_phylogeny(sp_shapes, tree = tree)
-}
 \references{
 Revell, L. J. (2009). \emph{Size-correction and principal components for
 interspecific comparative studies}. Evolution, 63, 3258-3268.

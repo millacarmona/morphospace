@@ -61,38 +61,6 @@ between phylogenetic structure and trait variation accounted by each axis,
 with a scale that is related to branch lengths' units, and thus cannot be
 directly interpreted as proportion of the original variance.
 }
-\examples{
-#load packaes and data: shapes, species, links and tree
-library(geomorph)
-data("tails")
-shapes <- tails$shapes
-species <- tails$data$species
-links <- tails$links
-tree <- tails$tree
-
-#extract species shapes
-sp_shapes <- expected_shapes(shapes, species)
-
-#perform phylogenetically aligned component analysis
-paca <- phyalign_comp(x = two.d.array(sp_shapes), tree = tree)
-
-#inspect results
-names(paca) #the contents of the resulting object
-#exp_var(paca) #interpretation of eigenvalues is complex! not yet implemented
-plot(paca$x) #ordination
-
-
-#compare shape variation as summarized by different methods
-
-#build morphospace using phylogenetically aligned components analysis
-mspace(sp_shapes, links = links, nh = 8, nv = 6, FUN = phyalign_comp,
-       tree = tree) \%>\%
-  proj_phylogeny(sp_shapes, tree = tree)
-
-#compare against morphospace built with ordinary PCA
-mspace(sp_shapes, links = links, nh = 8, nv = 6) \%>\%
-  proj_phylogeny(sp_shapes, tree = tree)
-}
 \references{
 Collyer, M. L., & Adams, D. (2021). \emph{Phylogenetically aligned component
 analysis}. Methods in Ecology and Evolution, 12(2), 359-372.

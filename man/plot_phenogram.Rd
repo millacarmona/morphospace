@@ -119,6 +119,6 @@ plot_phenogram(tree = tree, x = node_heights,
                phylo_scores = msp$projected$phylo_scores, axis = 1, lwd.phylo = 1,
                lty.phylo = 1, col.phylo = 1, cex.tips = 1, col.tips = 1,
                pch.tips = 1, cex.nodes = 1, col.nodes = 1, pch.nodes = 1,
-               points = TRUE)
+               points = TRUE, labels.tips = NULL, labels.nodes = NULL)
 }
 \keyword{internal}

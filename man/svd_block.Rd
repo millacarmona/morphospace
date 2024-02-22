@@ -41,9 +41,10 @@ sp_shapes <- expected_shapes(shapes, species)[,,tree$tip.label]
 sp_sizes <- cbind(tapply(sizes, species, mean))[tree$tip.label,]
 
 #perform partial svd
-svd_block(x = sizes, y = two.d.array(shapes))
+svd_block(x = sizes, y = two.d.array(shapes), evmodel = "BM")
 
 #perform partial svd on phylogenetic structure
-svd_block(x = sp_sizes, y = two.d.array(sp_shapes), tree = tree)
+svd_block(x = sp_sizes, y = two.d.array(sp_shapes),
+          tree = tree, evmodel = "BM")
 }
 \keyword{internal}

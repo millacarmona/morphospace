@@ -166,7 +166,7 @@
 #'
 #' #phylogenetically-aligned component analysis via geomorph::gm.prcomp
 #' library(geomorph)
-#' paca <- gm.prcomp(A = two.d.array(sp_shapes), phy = phy,
+#' paca <- gm.prcomp(A = two.d.array(sp_shapes), phy = tree,
 #'                   align.to.phy = TRUE)
 #' mspace(ord = paca, datype = "landm", p = 9, k = 2, links = links,
 #'        points = TRUE)
@@ -179,7 +179,7 @@
 #'
 #' #between-groups PCA via Morpho::groupPCA
 #' library(Morpho)
-#' bgpca <- groupPCA(two.d.array(sp_shapes), groups = species)
+#' bgpca <- groupPCA(two.d.array(shapes), groups = species)
 #' mspace(ord = bgpca, datype = "landm", p = 9, k = 2, links = links,
 #'        points = TRUE)
 #'
@@ -189,7 +189,7 @@
 #' library(mvMORPH)
 #' phypca2 <- mvgls.pca(object = mvgls(two.d.array(sp_shapes) ~ 1, tree = tree,
 #'                      model = "BM"), plot = FALSE)
-#' phypca2$center <- apply(tips_scores, 2, phytools::fastAnc, tree = tree)
+#' phypca2$center <- apply(two.d.array(sp_shapes), 2, phytools::fastAnc, tree = tree)[1,]
 #' mspace(ord = phypca2, datype = "landm", p = 9, k = 2, links = links,
 #'        points = TRUE)
 #'
@@ -1767,6 +1767,9 @@ plot_mspace <- function(mspace,
   merged_args <- utils::modifyList(inh_args, new_args)
   args <- merged_args
 
+  args$xname <- if(!is.null(x)) deparse(substitute(x)) else NULL
+  args$yname <- if(!is.null(y)) deparse(substitute(y)) else NULL
+
   #1 - prepare data ##############################################################
 
   #invert orientation of variables and vectors
@@ -2462,7 +2465,8 @@ plot_mspace <- function(mspace,
 
           xy <- cbind(x,y)
           xy_anc <- matrix(NA, nrow = tree$Nnode, ncol = 1)
-          colnames(xy_anc) <- if(!is.null(x)) deparse(substitute(x)) else deparse(substitute(y))
+          colnames(xy_anc) <- if(!is.null(args$xname)) args$xname else args$yname
+
           xy.int <- as.integer(xy[,1])
           if(inherits(xy[,1], "factor") | all(xy.int == xy[,1])) {
             anc. <- ape::ace(xy[,1], tree, model = "ER", type = "discrete")$lik.anc

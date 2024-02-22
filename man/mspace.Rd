@@ -223,7 +223,7 @@ names(morphosp) #slots
 
 #phylogenetically-aligned component analysis via geomorph::gm.prcomp
 library(geomorph)
-paca <- gm.prcomp(A = two.d.array(sp_shapes), phy = phy,
+paca <- gm.prcomp(A = two.d.array(sp_shapes), phy = tree,
                   align.to.phy = TRUE)
 mspace(ord = paca, datype = "landm", p = 9, k = 2, links = links,
        points = TRUE)
@@ -236,7 +236,7 @@ mspace(ord = phypca, datype = "landm", p = 9, k = 2, links = links,
 
 #between-groups PCA via Morpho::groupPCA
 library(Morpho)
-bgpca <- groupPCA(two.d.array(sp_shapes), groups = species)
+bgpca <- groupPCA(two.d.array(shapes), groups = species)
 mspace(ord = bgpca, datype = "landm", p = 9, k = 2, links = links,
        points = TRUE)
 
@@ -246,7 +246,7 @@ mspace(ord = bgpca, datype = "landm", p = 9, k = 2, links = links,
 library(mvMORPH)
 phypca2 <- mvgls.pca(object = mvgls(two.d.array(sp_shapes) ~ 1, tree = tree,
                      model = "BM"), plot = FALSE)
-phypca2$center <- apply(tips_scores, 2, phytools::fastAnc, tree = tree)
+phypca2$center <- apply(two.d.array(sp_shapes), 2, phytools::fastAnc, tree = tree)[1,]
 mspace(ord = phypca2, datype = "landm", p = 9, k = 2, links = links,
        points = TRUE)
 

@@ -136,10 +136,11 @@ proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors
 #' sp_sizes <- cbind(tapply(sizes, species, mean))[tree$tip.label,]
 #'
 #' #perform partial svd
-#' svd_block(x = sizes, y = two.d.array(shapes))
+#' svd_block(x = sizes, y = two.d.array(shapes), evmodel = "BM")
 #'
 #' #perform partial svd on phylogenetic structure
-#' svd_block(x = sp_sizes, y = two.d.array(sp_shapes), tree = tree)
+#' svd_block(x = sp_sizes, y = two.d.array(sp_shapes),
+#'           tree = tree, evmodel = "BM")
 svd_block <- function(x, y, tree = NULL, evmodel) {
 
   x <- cbind(x)
@@ -1645,7 +1646,7 @@ rotate_coords <- function(xy, degrees) {
 #'                phylo_scores = msp$projected$phylo_scores, axis = 1, lwd.phylo = 1,
 #'                lty.phylo = 1, col.phylo = 1, cex.tips = 1, col.tips = 1,
 #'                pch.tips = 1, cex.nodes = 1, col.nodes = 1, pch.nodes = 1,
-#'                points = TRUE)
+#'                points = TRUE, labels.tips = NULL, labels.nodes = NULL)
 plot_phenogram <- function(x = NULL,
                            y = NULL,
                            tree,
