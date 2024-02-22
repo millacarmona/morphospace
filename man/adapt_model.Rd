@@ -7,20 +7,20 @@
 adapt_model(model)
 }
 \arguments{
-\item{model}{An object of class \code{\link[stats]{"mlm"}},
-\code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
-\code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}}.}
+\item{model}{An object of class \code{"mlm"}, \code{"procD.lm"},
+\code{"lm.rrpp"}, \code{"mvgls"} or \code{"mvols"}.}
 }
 \value{
 A list containing the response and explanatory variables,
 coefficients, original centroid of response variables (or phylogenetic
-mean in the case of phylogenetic linear models), and method used for
-linear model fitting.
+mean in the case of phylogenetic linear models), fitted values, and method
+used for linear model fitting.
 }
 \description{
-Extract and format results from \code{\link[stats:lm]{stats::lm()}},
-\code{\link[geomorph:procD.lm]{geomorph::procD.lm()}}, \code{\link[geomorph:procD.pgls]{geomorph::procD.pgls()}}, \code{\link[RRPP:lm.rrpp]{RRPP::lm.rrpp()}},
-\code{\link[mvMORPH:mvgls]{mvMORPH::mvgls()}} and \code{\link[mvMORPH:mvols]{mvMORPH::mvols()}} for their use in the mspace
-workflow and shape operations. Used internally.
+Extract and format results from \code{\link[stats]{lm}},
+\code{\link[geomorph]{procD.lm}}, \code{\link[geomorph]{procD.pgls}},
+\code{\link[RRPP]{lm.rrpp}}, \code{\link[mvMORPH]{mvols}} and
+\code{\link[mvMORPH]{mvgls}} for their use in the mspace workflow and shape
+operations. Used internally.
 }
 \keyword{internal}

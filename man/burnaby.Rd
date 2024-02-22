@@ -4,7 +4,14 @@
 \alias{burnaby}
 \title{Burnaby's orthogonal subspace computation}
 \usage{
-burnaby(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL)
+burnaby(
+  x,
+  vars = NULL,
+  tree = NULL,
+  evmodel = "BM",
+  axmat = NULL,
+  center = NULL
+)
 }
 \arguments{
 \item{x}{A matrix with one or more variables as columns and observations as
@@ -21,11 +28,15 @@ labels should match the row names from \code{x} and \code{vars}.}
 \item{evmodel}{Character, specifying an evolutionary model to perform
 ancestral character reconstruction; options are "BM" (Brownian motion),
 "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-\code{\link[mVMORPH]{?mvgls}} for more details).}
+\code{\link[mvMORPH]{mvgls}} for more details).}
 
 \item{axmat}{An optional matrix of axes coefficients to render \code{x}
 orthogonal to. If provided, is used instead of \code{vars} to orthogonalize
 \code{x}.}
+
+\item{center}{An optional numeric string containing the center of the
+data, to be used to re-center the data if \code{axmat} has been provided.
+Ignored if \code{vars} has been specified.}
 }
 \value{
 A \code{"burnaby"} or \code{"phy_burnaby"} object, containing:
@@ -75,7 +86,7 @@ attempted after removing (at least) these null axes.
 
 The phylogenetic version of this method (i.e., the correction of
 non-phylogenetic independence from the relationship between \code{x} and
-\code{vars}) is achieved through \code{\link[mvMORPH:mvgls]{mvMORPH::mvgls()}}.
+\code{vars}) is achieved through \code{\link[mvMORPH]{mvgls}}.
 }
 \examples{
 #load packages

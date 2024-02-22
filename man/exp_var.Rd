@@ -8,9 +8,8 @@ exp_var(ordination, nax = 10, digits = 5)
 }
 \arguments{
 \item{ordination}{An object with the results from an ordination method (i.e.,
-a \code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
-\code{"pls_shapes"}, \code{"phy_pls_shapes"}, \code{"burnaby"} or
-\code{"phy_burnaby"} object).}
+a \code{"prcomp"}, \code{"bg_prcomp"}, \code{"pls_shapes"},
+\code{"phy_pls_shapes"}, \code{"burnaby"} or \code{"phy_burnaby"}).}
 
 \item{nax}{Integer; information about how many axes the user wishes to be
 returned.}
@@ -48,5 +47,5 @@ exp_var(pls)
 }
 \seealso{
 \code{\link[stats]{prcomp}}, \code{\link{bg_prcomp}},
-\code{\link{phy_prcomp}}, \code{\link{pls_shapes}}, \code{\link{burnaby}}.
+\code{\link{pls_shapes}}, \code{\link{burnaby}}.
 }

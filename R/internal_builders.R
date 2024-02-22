@@ -116,12 +116,12 @@ proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors
 #' @param evmodel Character, specifying an evolutionary model to perform
 #'   ancestral character reconstruction; options are "BM" (Brownian motion),
 #'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-#'   \code{\link[mVMORPH]{?mvgls}} for more details).
+#'   \code{\link[mvMORPH]{mvgls}} for more details).
 #'
 #' @export
 #' @keywords internal
 #'
-#' @return Mimics the [svd()] output.
+#' @return Mimics the \code{\link{svd}} output.
 #'
 #' @examples
 #' #laod data and packages
@@ -528,14 +528,13 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 
 #' Adapt format of foreign multivariate analyses
 #'
-#' @description Reorganize results from [geomorph::gm.prcomp()],
-#'   [Morpho::groupPCA()], [Morpho::pls2B()], [phytools::phyl.pca()] and
-#'   [mvMORPH::mvgls.pca()] for their use in the mspace workflow. Used
-#'   internally.
+#' @description Reorganize results from \code{\link[geomorph]{gm.prcomp}},
+#'   \code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
+#'   \code{\link[phytools]{phyl.pca}} and \code{\link[mvMORPH]{mvgls.pca}} for
+#'   their use in the mspace workflow. Used internally.
 #'
-#' @param ordination An object of class \code{\link[geomorph]{gm.prcomp}},
-#'    \code{\link[Morpho]{bgPCA}}, \code{\link[Morpho]{pls2B}},
-#'    \code{\link[phytools]{phyl.pca}} or \code{\link[mvMORPH]{mvgls.pca}}.
+#' @param ordination An object of class \code{"gm.prcomp"}, \code{"bgPCA"},
+#'    \code{"pls2B"}, \code{"phyl.pca"} or \code{"mvgls.pca"}.
 #'
 #' @return An object of equivalent class with scores, eigenvectors, eigenvalues/
 #'    standard deviations, and original centroid arranged so they can be used
@@ -605,19 +604,19 @@ adapt_ordination <- function(ordination) {
 
 #' Adapt format of different linear model functions
 #'
-#' @description Extract and format results from [stats::lm()],
-#'   [geomorph::procD.lm()], [geomorph::procD.pgls()], [RRPP::lm.rrpp()],
-#'   [mvMORPH::mvgls()] and [mvMORPH::mvols()] for their use in the mspace
-#'   workflow and shape operations. Used internally.
+#' @description Extract and format results from \code{\link[stats]{lm}},
+#'   \code{\link[geomorph]{procD.lm}}, \code{\link[geomorph]{procD.pgls}},
+#'   \code{\link[RRPP]{lm.rrpp}}, \code{\link[mvMORPH]{mvols}} and
+#'   \code{\link[mvMORPH]{mvgls}} for their use in the mspace workflow and shape
+#'   operations. Used internally.
 #'
-#' @param model An object of class \code{\link[stats]{"mlm"}},
-#'    \code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
-#'    \code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}}.
+#' @param model An object of class \code{"mlm"}, \code{"procD.lm"},
+#'    \code{"lm.rrpp"}, \code{"mvgls"} or \code{"mvols"}.
 #'
 #' @return A list containing the response and explanatory variables,
 #'    coefficients, original centroid of response variables (or phylogenetic
-#'    mean in the case of phylogenetic linear models), and method used for
-#'    linear model fitting.
+#'    mean in the case of phylogenetic linear models), fitted values, and method
+#'    used for linear model fitting.
 #'
 #' @export
 #' @keywords internal
@@ -626,8 +625,9 @@ adapt_model <- function(model) {
   if(class(model)[1] == "mlm") {
     coefs <- model$coefficients
     y <- model$model[[1]]
-    x <- cbind(model$model[-1][[1]])
+    x <- cbind(model$model[-1])
     grandmean <- colMeans(y)
+    fitted <- model$fitted.values
     modtype <- "ols"
   }
 
@@ -635,14 +635,16 @@ adapt_model <- function(model) {
     # y <- model$data[[1]]
     # x <- cbind(setNames(model$data[[2]], rownames(y))) #!
     y <- model$Y
-    x <- cbind(model$X[,-1])
+    x <- model$data[-1]
     if("pgls.coefficients" %in% names(model)) {
       coefs <- model$pgls.coefficients
       grandmean <- model$pgls.mean
+      fitted <- model$pgls.fitted
       modtype <- "pgls"
     } else {
       coefs <- model$coefficients
       grandmean <- colMeans(y)
+      fitted <- model$fitted
       modtype <- "ols"
     }
   }
@@ -681,18 +683,47 @@ adapt_model <- function(model) {
   if(any(class(model)[1] == c("mvgls", "mvols"))) {
     coefs <- model$coefficients
     y <- model$variables$Y
-    x <- cbind(model$variables$X[,-1])
 
-    tree <- model$variables$tree
-    evmodel <- model$model
-    mvmod <- mvMORPH::mvgls(y ~ 1, tree = tree, model = evmodel)
+    resptype <- attr(model$terms, "dataClasses")[-1]
+    x <- data.frame(matrix(NA, nrow = nrow(model$variables$Y), ncol = length(resptype)))
+    colnames(x) <- names(resptype) ; rownames(x) <- rownames(model$variables$X)
+    for(i in seq_len(length(resptype))) {
+      if(resptype[i] == "factor") {
+
+
+        respindex <- which(grepl(x = colnames(model$variables$X)[-1], names(resptype)[i]))
+        subX <- cbind(model$variables$X[,-1][,respindex])
+        colnames(subX) <- colnames(model$variables$X)[-1][i]
+
+        response <- matrix("Intercept", ncol = 1, nrow = nrow(model$variables$Y))
+        for(j in seq_len(ncol(subX))) {
+          respiname_raw <- colnames(subX)[j]
+          responsei <- cbind(subX[,j])
+          levi <- gsub(x = respiname_raw, pattern = names(resptype)[i], replacement = "")
+          response[which(responsei == 1)] <- levi
+
+        }
+        x[,i] <- factor(response)
+      } else x[,i] <- model$variables$X[,colnames(model$variables$X) == names(resptype)[i]]
+    }
+
+    fitted <- model$fitted
+    # tree <- model$variables$tree
+    # evmodel <- model$model
+    # mvmod <- mvMORPH::mvgls(y ~ 1, tree = tree, model = evmodel)
     #grandmean <- colMeans(mvmod$fitted) #!
     grandmean <- colMeans(model$fitted)
 
     modtype <- if(class(model)[1] == "mvgls") "pgls" else "ols"
     if(modtype == "pgls") {
       y <- y[rownames(stats::model.matrix(model)), ]
+      x_ <- x
       x <- x[rownames(stats::model.matrix(model)), ]
+      if(is.null(dim(x))) {
+        x <- data.frame(x)
+        colnames(x) <- colnames(x_)
+        rownames(x) <- rownames(x_)
+      }
     }
   }
 
@@ -701,6 +732,7 @@ adapt_model <- function(model) {
     if(model$LM$ols) {
       coefs <- model$LM$coefficients
       grandmean <- model$LM$mean
+      fitted <- model$LM$fitted
       modtype <- "ols"
     }
     if(model$LM$gls) {
@@ -711,10 +743,10 @@ adapt_model <- function(model) {
     # y <- model$LM$data[[1]]
     # x <- cbind(setNames(model$LM$data[[2]], rownames(y))) #!
     y <- model$LM$Y
-    x <- cbind(model$LM$X[,-1])
+    x <- model$LM$data[-1]
   }
 
-  adapted <- list(coefs = coefs, grandmean = grandmean,
+  adapted <- list(coefs = coefs, grandmean = grandmean, fitted = fitted,
                   y = y, x = x, modtype = modtype)
   return(adapted)
 }

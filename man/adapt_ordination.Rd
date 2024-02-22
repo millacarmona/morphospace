@@ -7,9 +7,8 @@
 adapt_ordination(ordination)
 }
 \arguments{
-\item{ordination}{An object of class \code{\link[geomorph]{gm.prcomp}},
-\code{\link[Morpho]{bgPCA}}, \code{\link[Morpho]{pls2B}},
-\code{\link[phytools]{phyl.pca}} or \code{\link[mvMORPH]{mvgls.pca}}.}
+\item{ordination}{An object of class \code{"gm.prcomp"}, \code{"bgPCA"},
+\code{"pls2B"}, \code{"phyl.pca"} or \code{"mvgls.pca"}.}
 }
 \value{
 An object of equivalent class with scores, eigenvectors, eigenvalues/
@@ -17,9 +16,9 @@ standard deviations, and original centroid arranged so they can be used
 in downstream \code{morphospace} operations.
 }
 \description{
-Reorganize results from \code{\link[geomorph:gm.prcomp]{geomorph::gm.prcomp()}},
-\code{\link[Morpho:groupPCA]{Morpho::groupPCA()}}, \code{\link[Morpho:pls2B]{Morpho::pls2B()}}, \code{\link[phytools:phyl.pca]{phytools::phyl.pca()}} and
-\code{\link[mvMORPH:mvgls.pca]{mvMORPH::mvgls.pca()}} for their use in the mspace workflow. Used
-internally.
+Reorganize results from \code{\link[geomorph]{gm.prcomp}},
+\code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
+\code{\link[phytools]{phyl.pca}} and \code{\link[mvMORPH]{mvgls.pca}} for
+their use in the mspace workflow. Used internally.
 }
 \keyword{internal}

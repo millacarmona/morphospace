@@ -453,7 +453,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE, LOOCV = FALSE,
 #' @param evmodel Character, specifying an evolutionary model to perform
 #'   ancestral character reconstruction; options are "BM" (Brownian motion),
 #'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-#'   ?mvMORPH::mvgls for more details).
+#'   \code{\link[mvMORPH]{mvgls}} for more details).
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
 #'   scores resulting from LOOCV.
@@ -476,10 +476,10 @@ bg_prcomp <- function(x, groups, gweights = TRUE, LOOCV = FALSE,
 #'   be linked by those phylogenetic relationships. In this case, the resulting
 #'   axes maximize the residual covariation among blocks left after removing
 #'   covariation among blocks accounted by phylogenetic history (estimated under
-#'   different possible evolutionary models using [mvMORPH::mvgls]; Clavel et
-#'   al. 2015).
+#'   different possible evolutionary models using \code{\link[mvMORPH]{mvgls}};
+#'   Clavel et al. 2015).
 #'
-#'   The phylogenetic version of [pls2b()] displays the same variational
+#'   The phylogenetic version of \code{pls2b} displays the same variational
 #'   properties than phylogenetic PCA (i.e., centering on the phylogenetic mean;
 #'   orientation of scores reflect non-phylogenetic covariation but their
 #'   variance is not scaled and thus contain phylogenetic information; for the
@@ -517,8 +517,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE, LOOCV = FALSE,
 #'     square roots of the eigenvalues of the covariance/correlation matrix).}
 #'   }
 #'
-#' @seealso \code{\link{pls_shapes}}, \code{\link{phy_prcomp}},
-#'   \code{\link{exp_var}}
+#' @seealso \code{\link{pls_shapes}}, \code{\link{exp_var}}
 #'
 #' @export
 #'
@@ -654,7 +653,7 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
       x.int <- as.integer(x[,i])
 
       if(inherits(x[,i], "factor") | all(x.int == x[,i])) {
-        anc. <- ape::ace(x[,i], phy, model = "ER", type = "discrete")$lik.anc
+        anc. <- ape::ace(x[,i], tree, model = "ER", type = "discrete")$lik.anc
         for(j in seq_len(nrow(anc.))) x_anc[j,i] <- as.numeric(colnames(anc.)[which.max(anc.[j,])])
         cat(paste0("\nReconstruction for discrete character '",
                    colnames(x)[i], "' was performed assuming an equal-rates model using ape::ace"))
@@ -714,7 +713,8 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
         subtree <- NULL
       }
 
-      subsvd <- svd_block(subx, suby, subtree)
+      #subsvd <- svd_block(subx, suby, subtree)
+      subsvd <- svd_block(subx, suby, subtree, evmodel)
 
       suby_rotation <- subsvd$v
       subx_rotation <- subsvd$u
@@ -787,7 +787,7 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
 #' @param evmodel Character, specifying an evolutionary model to perform
 #'   ancestral character reconstruction; options are "BM" (Brownian motion),
 #'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-#'   \code{\link[mVMORPH]{?mvgls}} for more details).
+#'   \code{\link[mvMORPH]{mvgls}} for more details).
 #' @param LOOCV Logical; whether to apply leave-one-out cross-validation.
 #' @param recompute Logical; whether to re-compute rotation matrix using the
 #'   scores resulting from LOOCV.
@@ -938,10 +938,13 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
 #' @param evmodel Character, specifying an evolutionary model to perform
 #'   ancestral character reconstruction; options are "BM" (Brownian motion),
 #'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-#'   \code{\link[mVMORPH]{?mvgls}} for more details).
+#'   \code{\link[mvMORPH]{mvgls}} for more details).
 #' @param axmat An optional matrix of axes coefficients to render \code{x}
 #'   orthogonal to. If provided, is used instead of \code{vars} to orthogonalize
 #'   \code{x}.
+#' @param center An optional numeric string containing the center of the
+#'   data, to be used to re-center the data if \code{axmat} has been provided.
+#'   Ignored if \code{vars} has been specified.
 #'
 #' @details Originally devised by Burnaby (1966) to eliminate allometric
 #'   variation from morphometric data sets by computing a subspace that is
@@ -972,7 +975,7 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
 #'
 #'   The phylogenetic version of this method (i.e., the correction of
 #'   non-phylogenetic independence from the relationship between \code{x} and
-#'   \code{vars}) is achieved through [mvMORPH::mvgls()].
+#'   \code{vars}) is achieved through \code{\link[mvMORPH]{mvgls}}.
 #'
 #' @return A \code{"burnaby"} or \code{"phy_burnaby"} object, containing:
 #' \itemize{
@@ -1066,19 +1069,21 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
 #'   proj_axis(reg, lwd = 2) %>%
 #'   proj_groups(grid_shapes, alpha = 0.2, col = "red")
 #' }
-burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL) {
+burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL, center = NULL) {
 
   totvar <- sum(apply(x, 2, stats::var))
 
   if(is.null(vars) & is.null(axmat)) stop("one of vars or axmat must be provided")
+  if(!is.null(axmat) & is.null(center)) stop("center argument needs to be provided")
 
   if(!is.null(axmat)) {
     axmat <- cbind(axmat)
     #!
     # center <- if(is.null(tree)) colMeans(x) else apply(x, 2, phytools::fastAnc, tree = tree)[1,]
     # if(!is.null(tree)) warning("\naxmat has been provided directly, it will be assumed its orientation is already phylogenetically corrected; tree will be only used to center x")
-    center <- if(is.null(tree)) colMeans(x) else colMeans(mvMORPH::mvgls(x ~ 1, tree = tree, model = evmodel)$fitted)
-    if(!is.null(tree)) warning("\naxmat has been provided directly: it will be assumed its orientation is already phylogenetically corrected; tree will be only used to center x at the raw phylogenetic mean (i.e., x ~ 1)")
+
+    # center <- if(is.null(tree)) colMeans(x) else colMeans(mvMORPH::mvgls(x ~ 1, tree = tree, model = evmodel)$fitted)
+    # if(!is.null(tree)) warning("\naxmat has been provided directly: it will be assumed its orientation is already phylogenetically corrected; tree will be only used to center x at the raw phylogenetic mean (i.e., x ~ 1)")
   } else {
     vars <- as.data.frame(vars)
 
@@ -1140,7 +1145,7 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL) {
     } else {
       center <- colMeans(x)
       # coefs <- solve(t(designmat) %*% designmat) %*% t(designmat) %*% x #!
-      coefs <- lm(x ~ as.matrix(vars))$coef
+      coefs <- stats::lm(x ~ as.matrix(vars))$coef
     }
 
     axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))
@@ -1177,9 +1182,8 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL) {
 #'   by axes generated by different multivariate ordination methods.
 #'
 #' @param ordination An object with the results from an ordination method (i.e.,
-#'   a \code{"prcomp"}, \code{"bg_prcomp"}, \code{"phy_prcomp"},
-#'   \code{"pls_shapes"}, \code{"phy_pls_shapes"}, \code{"burnaby"} or
-#'   \code{"phy_burnaby"} object).
+#'   a \code{"prcomp"}, \code{"bg_prcomp"}, \code{"pls_shapes"},
+#'   \code{"phy_pls_shapes"}, \code{"burnaby"} or \code{"phy_burnaby"}).
 #' @param nax Integer; information about how many axes the user wishes to be
 #'   returned.
 #' @param digits Integer; amount of decimal numbers to be returned.
@@ -1190,7 +1194,7 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL) {
 #' @export
 #'
 #' @seealso \code{\link[stats]{prcomp}}, \code{\link{bg_prcomp}},
-#' \code{\link{phy_prcomp}}, \code{\link{pls_shapes}}, \code{\link{burnaby}}.
+#'   \code{\link{pls_shapes}}, \code{\link{burnaby}}.
 #'
 #' @examples
 #' #load data

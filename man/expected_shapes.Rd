@@ -30,7 +30,7 @@ labels should match names in \code{x} and \code{shapes}.}
 \item{evmodel}{Character, specifying an evolutionary model to perform
 ancestral character reconstruction; options are "BM" (Brownian motion),
 "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-\code{\link[mVMORPH]{?mvgls}} for more details).}
+\code{\link[mvMORPH]{mvgls}} for more details).}
 
 \item{returnarray}{Logical, indicating whether shapes should be returned
 in "3D" array format (landmark shapes only). Mostly intended for internal
@@ -53,7 +53,7 @@ external explanatory variable as fitted by a linear model.
 If a phylogenetic tree is supplied for interspecific shape data, the
 procedure is performed using the phylogenetically-corrected regression
 coefficients (see Revell, 2009) under different possible evolutionary
-models using \code{\link{mVMORPH::mvgls}}.
+models using \code{\link[mvMORPH]{mvgls}}.
 }
 \examples{
 #load tails data and packages

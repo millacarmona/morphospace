@@ -14,8 +14,8 @@ the wireframe (following the format used in \code{Morpho}).}
 
 \item{mshape}{Logical; whether to plot the mean configuration.}
 
-\item{...}{Additional arguments passed to \code{\link[graphics:lines]{graphics::lines()}} or
-\code{\link[rgl:primitives]{rgl::lines3d()}}.}
+\item{...}{Additional arguments passed to \code{\link[graphics]{lines}} or
+\code{\link[rgl]{lines3d}}.}
 }
 \description{
 Superimpose all the shapes in the sample.

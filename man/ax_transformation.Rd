@@ -7,17 +7,14 @@
 ax_transformation(obj, axis = 1, mag = 1)
 }
 \arguments{
-\item{obj}{An object of class \code{\link[stats]{"mlm"}},
-\code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
-\code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
-containing a linear model fit to shape data, or an object of class
-\code{\link[stats]{"prcomp"}}, \code{\link{"bg_prcomp"}},
-\code{\link{"pls_shapes"}}, \code{\link{"phy_pls_shapes"}},
-\code{\link{"burnaby"}}, \code{\link{"phy_burnaby"}},
-\code{\link[geomorph]{"gm.prcomp"}}, \code{\link[Morpho]{"bgPCA"}},
-\code{\link[Morpho]{"pls2B"}}, \code{\link[phytools]{"phyl.pca"}} or
-\code{\link[mvMORPH]{"mvgls.pca"}} with the results of multivariate
-ordination of shape data.}
+\item{obj}{An object of class \code{"mlm"}, \code{"procD.lm"},
+\code{"lm.rrpp"}, \code{"mvgls"} or \code{"mvols"}, containing a linear
+model fitting a single explanatory variable to shape data, or an object of
+class \code{"prcomp"}, \code{"bg_prcomp"}, \code{"pls_shapes"},
+\code{"phy_pls_shapes"}, \code{"burnaby"}, \code{"phy_burnaby"},
+\code{"gm.prcomp"}, \code{"bgPCA"}, \code{"pls2B"}, \code{"phyl.pca"} or
+\code{"mvgls.pca"} with the results of multivariate ordination of shape
+data.}
 
 \item{axis}{An optional integer value specifying the axis of the multivariate
 ordination which is to be represented.}
@@ -87,5 +84,11 @@ MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological Association
 Newsletter, 72(620), 14-27.
 }
 \seealso{
-\code{\link{expected_shapes}}, \code{\link{rev_eigen}}
+\code{\link{expected_shapes}}, \code{\link{rev_eigen}},
+\code{\link[stats]{lm}}, \code{\link[geomorph]{procD.lm}},
+\code{\link[geomorph]{procD.pgls}}, \code{\link[RRPP]{lm.rrpp}},
+\code{\link[mvMORPH]{mvols}}, \code{\link[mvMORPH]{mvgls}},
+\code{\link[geomorph]{gm.prcomp}}, \code{\link[Morpho]{groupPCA}},
+\code{\link[Morpho]{pls2B}}, \code{\link[phytools]{phyl.pca}},
+\code{\link[mvMORPH]{mvgls.pca}}
 }

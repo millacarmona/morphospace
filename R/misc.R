@@ -8,8 +8,8 @@
 #' @param links An optional list with the indices of the coordinates defining
 #'   the wireframe (following the format used in \code{Morpho}).
 #' @param mshape Logical; whether to plot the mean configuration.
-#' @param ... Additional arguments passed to [graphics::lines()] or
-#'   [rgl::lines3d()].
+#' @param ... Additional arguments passed to \code{\link[graphics]{lines}} or
+#'   \code{\link[rgl]{lines3d}}.
 #'
 #' @export
 #'

@@ -4,13 +4,19 @@
 \alias{detrend_shapes}
 \title{Remove shape variation associated to external variables}
 \usage{
-detrend_shapes(model, method = "residuals", xvalue = NULL, newdata = NULL)
+detrend_shapes(
+  model,
+  method = "residuals",
+  xvalue = NULL,
+  newdata = NULL,
+  tree = NULL,
+  evmodel = NULL
+)
 }
 \arguments{
-\item{model}{An object of class \code{\link[stats]{"mlm"}},
-\code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
-\code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
-containing a linear model fit to shape data.}
+\item{model}{An object of class \code{"mlm"}, \code{"procD.lm"},
+\code{"lm.rrpp"}, \code{"mvgls"} or \code{"mvols"}, containing a linear
+model fit to shape data.}
 
 \item{method}{Method used for detrending; options are \code{"orthogonal"}
 (the default) and \code{"residuals"} (see details).}
@@ -23,6 +29,10 @@ sample is used (only available if there is a single explanatory variable).}
 a linear model object fitting the same variables used in \code{model}
 measured in a new sample, or a 2-margin matrix of shape descriptors (only
 for \code{method = "orthogonal"}). See details.}
+
+\item{tree, evmodel}{Further arguments needed only for orthogonal detrending
+with phylogenetic correction for a specific \code{xvalue}. Ignored
+otherwise.}
 }
 \value{
 A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
@@ -65,9 +75,10 @@ the explanatory variable in \code{model} to center shapes at can be
 provided. This shift can only be applied for one explanatory variable.
 
 If a phylogenetic linear model is supplied to \code{model} (e.g., a linear
-model fitted using \code{\link[geomorph:procD.pgls]{geomorph::procD.pgls()}} or \code{\link[mvMORPH:mvgls]{mvMORPH::mvgls()}}, the
-procedure will use phylogenetically-corrected coefficients and phylogenetic
-mean (see Revell, 2009) as calculated by the source function.
+model fitted using \code{\link[geomorph]{procD.pgls}} or
+\code{\link[mvMORPH]{mvgls}}, the procedure will use
+phylogenetically-corrected coefficients and phylogenetic mean (see Revell,
+2009) as calculated by the source function.
 }
 \examples{
  #### Landmark data
@@ -317,5 +328,8 @@ in geometric morphometrics}. Development Genes and Evolution, 226(3),
 }
 \seealso{
 \code{\link[stats]{lm}}, \code{\link{burnaby}},
-\code{\link{expected_shapes}}
+\code{\link{expected_shapes}}, \code{\link[stats]{lm}},
+\code{\link[geomorph]{procD.lm}}, \code{\link[geomorph]{procD.pgls}},
+\code{\link[RRPP]{lm.rrpp}}, \code{\link[mvMORPH]{mvols}} and
+\code{\link[mvMORPH]{mvgls}}
 }

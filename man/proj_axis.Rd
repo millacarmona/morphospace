@@ -9,17 +9,13 @@ proj_axis(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...)
 \arguments{
 \item{mspace}{An \code{"mspace"} object.}
 
-\item{obj}{An object of class \code{\link[stats]{"mlm"}},
-\code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
-\code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
-containing a linear model fit to shape data, or an object of class
-\code{\link[stats]{"prcomp"}}, \code{\link{"bg_prcomp"}},
-\code{\link{"pls_shapes"}}, \code{\link{"phy_pls_shapes"}},
-\code{\link{"burnaby"}}, \code{\link{"phy_burnaby"}},
-\code{\link[geomorph]{"gm.prcomp"}}, \code{\link[Morpho]{"bgPCA"}},
-\code{\link[Morpho]{"pls2B"}}, \code{\link[phytools]{"phyl.pca"}} or
-\code{\link[mvMORPH]{"mvgls.pca"}} with the results of multivariate
-ordination of shape data.}
+\item{obj}{An object of class \code{"mlm"}, \code{"procD.lm"},
+\code{"lm.rrpp"}, \code{"mvgls"} or \code{"mvols"}, containing a linear
+model fit to shape data, or an object of class \code{"prcomp"},
+\code{"bg_prcomp"}, \code{"pls_shapes"}, \code{"phy_pls_shapes"},
+\code{"burnaby"}, \code{"phy_burnaby"}, \code{"gm.prcomp"}, \code{"bgPCA"},
+\code{"pls2B"}, \code{"phyl.pca"} or \code{"mvgls.pca"} with the results of
+multivariate ordination of shape data.}
 
 \item{axis}{Optional; which axis from \code{obj} should to be projected?}
 
@@ -31,7 +27,7 @@ ordination of shape data.}
 towards the maximum; \code{2} = pointing towards the maximum, \code{3} =
 pointing in both directions).}
 
-\item{...}{Further arguments passed to \code{\link[graphics:arrows]{graphics::arrows()}}.}
+\item{...}{Further arguments passed to \code{\link[graphics]{arrows}}.}
 }
 \value{
 If a plot device with a morphospace is open, a straight line marking
@@ -51,7 +47,7 @@ This function is primarily aimed at graphically representing
 morphometric axes (estimated using either linear models or multivariate
 ordination methods) into an existing morphospace for heuristic exploration
 of patterns in the data. It can also be used to extract theoretical shapes
-at the extremes of those axes, although \code{\link[=ax_transformation]{ax_transformation()}} does the
+at the extremes of those axes, although \code{\link{ax_transformation}} does the
 same thing in a more flexible and straightforward way.
 
 Axes computed by fitting linear models to shape data can differ in
@@ -123,5 +119,10 @@ mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
   proj_axis(obj = intersp_allo_pls, col = "blue", lwd = 2, type = 2)
 }
 \seealso{
-\code{\link{ax_transformation}}
+\code{\link{ax_transformation}}, \code{\link[stats]{lm}},
+\code{\link[geomorph]{procD.lm}}, \code{\link[geomorph]{procD.pgls}},
+\code{\link[RRPP]{lm.rrpp}}, \code{\link[mvMORPH]{mvols}},
+\code{\link[mvMORPH]{mvgls}}, \code{\link[geomorph]{gm.prcomp}},
+\code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
+\code{\link[phytools]{phyl.pca}}, \code{\link[mvMORPH]{mvgls.pca}}
 }

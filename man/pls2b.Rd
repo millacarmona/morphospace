@@ -19,7 +19,7 @@ labels should match the row number and names from \code{x} and \code{y}.}
 \item{evmodel}{Character, specifying an evolutionary model to perform
 ancestral character reconstruction; options are "BM" (Brownian motion),
 "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-?mvMORPH::mvgls for more details).}
+\code{\link[mvMORPH]{mvgls}} for more details).}
 
 \item{LOOCV}{Logical; whether to apply leave-one-out cross-validation.}
 
@@ -76,10 +76,10 @@ If \code{tree} is supplied, rows of \code{x} and \code{y} are assumed to
 be linked by those phylogenetic relationships. In this case, the resulting
 axes maximize the residual covariation among blocks left after removing
 covariation among blocks accounted by phylogenetic history (estimated under
-different possible evolutionary models using \link[mvMORPH:mvgls]{mvMORPH::mvgls}; Clavel et
-al. 2015).
+different possible evolutionary models using \code{\link[mvMORPH]{mvgls}};
+Clavel et al. 2015).
 
-The phylogenetic version of \code{\link[=pls2b]{pls2b()}} displays the same variational
+The phylogenetic version of \code{pls2b} displays the same variational
 properties than phylogenetic PCA (i.e., centering on the phylogenetic mean;
 orientation of scores reflect non-phylogenetic covariation but their
 variance is not scaled and thus contain phylogenetic information; for the
@@ -163,6 +163,5 @@ for fitting multivariate evolutionary models to morphometric data}.
 Methods in Ecology and Evolution, 6(11), 1311-1319.
 }
 \seealso{
-\code{\link{pls_shapes}}, \code{\link{phy_prcomp}},
-\code{\link{exp_var}}
+\code{\link{pls_shapes}}, \code{\link{exp_var}}
 }

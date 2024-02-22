@@ -34,7 +34,7 @@ from \code{tree}.}
 \item{evmodel}{Character, specifying an evolutionary model to perform
 ancestral character reconstruction; options are "BM" (Brownian motion),
 "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-\code{\link[mVMORPH]{?mvgls}} for more details).}
+\code{\link[mvMORPH]{mvgls}} for more details).}
 
 \item{labels.tips}{Either logical, indicating whether to include tip labels,
 or a character string with the exact names of the tips whose labels
@@ -71,8 +71,8 @@ tips of the phylogeny.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
-\item{...}{Further arguments passed to \code{\link[graphics:lines]{graphics::lines()}} (commonly,
-\code{pch}, \code{col}/\code{bg} and \code{cex}.}
+\item{...}{Further arguments passed to \code{\link[graphics]{lines}}
+(commonly, \code{pch}, \code{col}/\code{bg} and \code{cex}.}
 }
 \value{
 If a plot device with a morphospace is open, shapes representing the
@@ -98,8 +98,8 @@ this function can be used to retrieve the scores corresponding to nodes of
 the phylogenetic tree (\code{$projected$phylo_scores}, which can then be
 used to compute the node shapes using \code{\link{extract_shapes}}. The
 position of these shapes in morphospace is estimated using
-\code{\link[mvMORPH:mvgls]{mvMORPH::mvgls()}} which allows specification of different phenotypic
-evolutionary models, passed through the \code{evmodel} argument.
+\code{\link[mvMORPH]{mvgls}} which allows specification of different
+phenotypic evolutionary models, passed through the \code{evmodel} argument.
 }
 \examples{
 #load and extract relevant data, packages and information
@@ -122,4 +122,7 @@ mspace(shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0) \%>\%
 Clavel, J., Escarguel, G., & Merceron, G. (2015). \emph{mvMORPH: an R package
 for fitting multivariate evolutionary models to morphometric data}.
 Methods in Ecology and Evolution, 6(11), 1311-1319.
+}
+\seealso{
+\code{\link[mvMORPH]{mvgls}}
 }

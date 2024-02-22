@@ -17,10 +17,10 @@ tree whose tip.labels match rownames of \code{x} and \code{y}.}
 \item{evmodel}{Character, specifying an evolutionary model to perform
 ancestral character reconstruction; options are "BM" (Brownian motion),
 "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-\code{\link[mVMORPH]{?mvgls}} for more details).}
+\code{\link[mvMORPH]{mvgls}} for more details).}
 }
 \value{
-Mimics the \code{\link[=svd]{svd()}} output.
+Mimics the \code{\link{svd}} output.
 }
 \description{
 Just a wrapper for \code{\link[=svd]{svd()}} that returns an adequate output

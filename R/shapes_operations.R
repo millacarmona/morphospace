@@ -18,7 +18,7 @@
 #' @param evmodel Character, specifying an evolutionary model to perform
 #'   ancestral character reconstruction; options are "BM" (Brownian motion),
 #'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-#'   \code{\link[mVMORPH]{?mvgls}} for more details).
+#'   \code{\link[mvMORPH]{mvgls}} for more details).
 #' @param returnarray Logical, indicating whether shapes should be returned
 #'   in "3D" array format (landmark shapes only). Mostly intended for internal
 #'   use.
@@ -26,7 +26,7 @@
 #' @details If a phylogenetic tree is supplied for interspecific shape data, the
 #'   procedure is performed using the phylogenetically-corrected regression
 #'   coefficients (see Revell, 2009) under different possible evolutionary
-#'   models using \code{\link{mVMORPH::mvgls}}.
+#'   models using \code{\link[mvMORPH]{mvgls}}.
 #'
 #' @return For landmark data, either a \code{p x k} matrix defining a single
 #'   mean shape or a \code{p x k x n} array containing \code{n} mean shapes,
@@ -152,7 +152,7 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
       mvMORPH::mvgls(data2d ~ 1, tree = tree, model = evmodel) else
         mvMORPH::mvgls(data2d ~ x, tree = tree, model = evmodel)
 
-    designmat <- cbind(model.matrix(mvmod)[tree$tip.label,])
+    designmat <- cbind(stats::model.matrix(mvmod)[tree$tip.label,])
     data2d <- cbind(data2d[tree$tip.label,])
     C <- ape::vcv.phylo(mvmod$corrSt$phy)[rownames(designmat), rownames(designmat)]
     coefs <- solve(t(designmat) %*% solve(C) %*% designmat) %*%
@@ -212,10 +212,9 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'   data and some external explanatory variable(s) (works for both factors and
 #'   numerics).
 #'
-#' @param model An object of class \code{\link[stats]{"mlm"}},
-#'   \code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
-#'   \code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
-#'   containing a linear model fit to shape data.
+#' @param model An object of class \code{"mlm"}, \code{"procD.lm"},
+#'   \code{"lm.rrpp"}, \code{"mvgls"} or \code{"mvols"}, containing a linear
+#'   model fit to shape data.
 #' @param xvalue A value (numeric) or level (character) at which shape data is
 #'   to be standardized (i.e., centered); If NULL, the mean of the complete
 #'   sample is used (only available if there is a single explanatory variable).
@@ -225,6 +224,9 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'   a linear model object fitting the same variables used in \code{model}
 #'   measured in a new sample, or a 2-margin matrix of shape descriptors (only
 #'   for \code{method = "orthogonal"}). See details.
+#' @param tree,evmodel Further arguments needed only for orthogonal detrending
+#'   with phylogenetic correction for a specific \code{xvalue}. Ignored
+#'   otherwise.
 #'
 #' @details This function detrends (or standardizes, or corrects) shapes from
 #'   variation associated with non-shape variables, using either the residuals
@@ -256,16 +258,20 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'   provided. This shift can only be applied for one explanatory variable.
 #'
 #'   If a phylogenetic linear model is supplied to \code{model} (e.g., a linear
-#'   model fitted using [geomorph::procD.pgls()] or [mvMORPH::mvgls()], the
-#'   procedure will use phylogenetically-corrected coefficients and phylogenetic
-#'   mean (see Revell, 2009) as calculated by the source function.
+#'   model fitted using \code{\link[geomorph]{procD.pgls}} or
+#'   \code{\link[mvMORPH]{mvgls}}, the procedure will use
+#'   phylogenetically-corrected coefficients and phylogenetic mean (see Revell,
+#'   2009) as calculated by the source function.
 #'
 #' @return A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
 #'   landmark data and \code{n x (4 x nb.h)} for the case of Fourier data (where
 #'   \code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
 #'
 #' @seealso \code{\link[stats]{lm}}, \code{\link{burnaby}},
-#'   \code{\link{expected_shapes}}
+#'   \code{\link{expected_shapes}}, \code{\link[stats]{lm}},
+#'   \code{\link[geomorph]{procD.lm}}, \code{\link[geomorph]{procD.pgls}},
+#'   \code{\link[RRPP]{lm.rrpp}}, \code{\link[mvMORPH]{mvols}} and
+#'   \code{\link[mvMORPH]{mvgls}}
 #'
 #' @export
 #'
@@ -514,7 +520,8 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'  title("raw P. esbelta morphospace")
 #'  msp_nosize4 <- mspace(detr_shapes_nosize3, mag = 0.5, points = TRUE)
 #'  title("P. esbelta morphospace, refined using \n allometric variation from P. koeneni")
-detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata = NULL) {
+detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata = NULL,
+                           tree = NULL, evmodel = NULL) {
 
   #data preparation
   if(!any(method == "residuals", method == "orthogonal")) stop("method should be one of 'residuals' or 'orthogonal'")
@@ -527,6 +534,7 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
   admod <- adapt_model(model)
   coefs <- admod$coefs
   grandmean <- admod$grandmean
+  fitted <- admod$fitted
   y <- admod$y
   x <- admod$x
   modtype <- admod$modtype
@@ -560,19 +568,24 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
   #detrending
   if(method == "orthogonal") {
 
-    if(modtype == "pgls" & !is.null(tree))
-      stop("method = 'orthogonal', together with a phylogenetic linear model, requires the phylogenetic tree to be provided")
+    # if(modtype == "pgls" & !is.null(tree))
+    #   stop("method = 'orthogonal', together with a phylogenetic linear model, requires the phylogenetic tree to be provided")
 
     axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))
+    center <- colMeans(fitted)
 
-    #ortho_space <- suppressWarnings(burnaby(x = y, axmat = axmat, tree = tree))
-    ortho_space <- suppressWarnings(burnaby(x = y, axmat = axmat,
-                                            tree = tree, evmodel = evmodel))
+    #ortho_space <- suppressWarnings(burnaby(x = y, axmat = axmat, tree = tree)) #!
+    ortho_space <- burnaby(x = y, axmat = axmat, center = center)
     ortho_scores <- ortho_space$x
     ortho_rotation <- ortho_space$rotation
     ax <- sum(ortho_space$sdev^2 > 1e-15)
 
     if(!is.null(xvalue)) {
+      if(is.factor(x[[1]]) & !xvalue %in% levels(x[[1]]) & inherits(model, "mvgls")) {
+        xvalue <- "Intercept"
+        warning("Be sure that the level indicated in 'xvalue' has been spelled correctly; it is assumed it was, and that it corresponds to the Intercept of the mvgls model")
+      }
+
       # ortho_center <- c(expected_shapes(shapes = y, x = x[[1]], xvalue = xvalue,
       #                                   tree = tree, returnarray = FALSE)) #!
       ortho_center <- c(expected_shapes(shapes = y, x = x[[1]], xvalue = xvalue,
@@ -583,13 +596,21 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
 
     if(!is.null(newdata)) {
 
-      if(inherits(newdata, "mlm")) {
-        newx <- newdata$model[-1]
-        newy <- newdata$model[[1]]
+      #if(inherits(newdata, "mlm")) { #!
+      if(any(class(newdata)[1] %in% c("mlm", "procD.lm", "lm.rrpp", "mvgls", "mvols"))) {
+
+        # newx <- newdata$model[-1]
+        # newy <- newdata$model[[1]] #!
+        newadmod <- adapt_model(newdata)
+        newx <- newadmod$x
+        newy <- newadmod$y
+
         if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
         namesy <- rownames(newy)
 
-        newortho_space <- burnaby(x = newy, vars = newx)
+        #newortho_space <- burnaby(x = newy, vars = newx) #!
+        newortho_space <- burnaby(x = newy, axmat = newadmod$coefs,
+                                  center = newadmod$grandmean)
         ax <- min(sum(newortho_space$sdev^2 > 1e-15), ax)
         ortho_scores <- newortho_space$x
         ortho_rotation <- newortho_space$rotation[,seq_len(ax)] -
@@ -597,6 +618,11 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
 
 
         if(!is.null(xvalue)) {
+
+          if(is.factor(x[[1]]) & !xvalue %in% levels(x[[1]]) & inherits(model, "mvgls")) {
+            xvalue <- "Intercept"
+            warning("Be sure that the level indicated in 'xvalue' has been spelled correctly; it is assumed it was, and that it corresponds to the Intercept of the mvgls model")
+          }
           # ortho_center <- c(expected_shapes(shapes = newy, x = newx[[1]],
           #                                   xvalue = xvalue, returnarray = FALSE)) #!
           ortho_center <- c(expected_shapes(shapes = newy, x = newx[[1]], evmodel = evmodel,
@@ -623,14 +649,18 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
     resids <- y - designmat[,!which_na] %*% coefs[!which_na,]
 
     if(!is.null(newdata)) {
-      newx <- newdata$model[-1]
-      newy <- newdata$model[[1]]
+      # newx <- newdata$model[-1]
+      # newy <- newdata$model[[1]] #!
+      newadmod <- adapt_model(newdata)
+      newx <- newadmod$x
+      newy <- newadmod$y
+
       if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
       namesy <- rownames(newy)
 
-      formula <- stats::as.formula(paste0("~ ", strsplit(as.character(newdata$call[2]),
-                                                         split = "~")[[1]][2]))
-      newdesignmat <- stats::model.matrix(formula, data = newx)
+      # formula <- stats::as.formula(paste0("~ ", strsplit(as.character(newdata$call[2]),
+      #                                                    split = "~")[[1]][2])) #!
+      newdesignmat <- stats::model.matrix(newdata)
 
       which_na <- is.na(apply(coefs,1,sum))
       resids <- newy - newdesignmat[,!which_na] %*% coefs[!which_na,]
@@ -645,6 +675,11 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
       predicted_mat <- resids + grandmean_vec
 
     } else {
+
+      if(is.factor(x[[1]]) & !xvalue %in% levels(x[[1]]) & inherits(model, "mvgls")) {
+        xvalue <- "Intercept"
+        warning("Be sure that the level indicated in 'xvalue' has been spelled correctly; it is assumed it was, and that it corresponds to the Intercept of the mvgls model")
+      }
 
       if(is.numeric(x[[1]]) == TRUE) {
         designmat <- cbind(1, xvalue)
@@ -768,17 +803,14 @@ correct_efourier<-function(ef, index = NULL) {
 #'   the extremes of a morphometric axis, which can be supplied as an object
 #'   containing a linear model or a multivariate ordination.
 #'
-#' @param obj An object of class \code{\link[stats]{"mlm"}},
-#'   \code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
-#'   \code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
-#'   containing a linear model fit to shape data, or an object of class
-#'   \code{\link[stats]{"prcomp"}}, \code{\link{"bg_prcomp"}},
-#'   \code{\link{"pls_shapes"}}, \code{\link{"phy_pls_shapes"}},
-#'   \code{\link{"burnaby"}}, \code{\link{"phy_burnaby"}},
-#'   \code{\link[geomorph]{"gm.prcomp"}}, \code{\link[Morpho]{"bgPCA"}},
-#'   \code{\link[Morpho]{"pls2B"}}, \code{\link[phytools]{"phyl.pca"}} or
-#'   \code{\link[mvMORPH]{"mvgls.pca"}} with the results of multivariate
-#'   ordination of shape data.
+#' @param obj An object of class \code{"mlm"}, \code{"procD.lm"},
+#'   \code{"lm.rrpp"}, \code{"mvgls"} or \code{"mvols"}, containing a linear
+#'   model fitting a single explanatory variable to shape data, or an object of
+#'   class \code{"prcomp"}, \code{"bg_prcomp"}, \code{"pls_shapes"},
+#'   \code{"phy_pls_shapes"}, \code{"burnaby"}, \code{"phy_burnaby"},
+#'   \code{"gm.prcomp"}, \code{"bgPCA"}, \code{"pls2B"}, \code{"phyl.pca"} or
+#'   \code{"mvgls.pca"} with the results of multivariate ordination of shape
+#'   data.
 #' @param axis An optional integer value specifying the axis of the multivariate
 #'   ordination which is to be represented.
 #' @param mag Numeric; magnifying factor for representing shape transformation.
@@ -793,7 +825,13 @@ correct_efourier<-function(ef, index = NULL) {
 #'
 #' @export
 #'
-#' @seealso \code{\link{expected_shapes}}, \code{\link{rev_eigen}}
+#' @seealso \code{\link{expected_shapes}}, \code{\link{rev_eigen}},
+#'   \code{\link[stats]{lm}}, \code{\link[geomorph]{procD.lm}},
+#'   \code{\link[geomorph]{procD.pgls}}, \code{\link[RRPP]{lm.rrpp}},
+#'   \code{\link[mvMORPH]{mvols}}, \code{\link[mvMORPH]{mvgls}},
+#'   \code{\link[geomorph]{gm.prcomp}}, \code{\link[Morpho]{groupPCA}},
+#'   \code{\link[Morpho]{pls2B}}, \code{\link[phytools]{phyl.pca}},
+#'   \code{\link[mvMORPH]{mvgls.pca}}
 #'
 #' @references
 #' MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological Association
@@ -861,7 +899,7 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 
     # x <- obj$model[,ncol(obj$model)]  #!
     obj <- adapt_model(obj)
-    x <- obj$x
+    x <- obj$x[,1]
 
     if(is.numeric(x)) {
       cent <- mean(range(x))
@@ -877,7 +915,7 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 
     if(is.factor(x)) {
 
-      if(nlevels(x) > 2) stop("Only two levels are allowed for extracting axes from mlm objects; try with a bg_prcomp object")
+      if(nlevels(x) > 2) stop("Only two levels are allowed for extracting axes from mlm objects; try providing a bg_prcomp object")
 
       # Y <- obj$model[,1]  #!
       Y <- obj$y

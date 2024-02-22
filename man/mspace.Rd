@@ -43,11 +43,10 @@ mspace(
 \arguments{
 \item{shapes}{Shape data.}
 
-\item{ord}{Optional object of class \code{\link[geomorph]{"gm.prcomp"}},
-\code{\link[Morpho]{"bgPCA"}}, \code{\link[Morpho]{"pls2B"}},
-\code{\link[phytools]{"phyl.pca"}} or \code{\link[mvMORPH]{"mvgls.pca"}},
-containing the results of multivariate ordination of shape data. To be used
-instead of the \code{shapes} argument.}
+\item{ord}{Optional object of class \code{"gm.prcomp"}, \code{"bgPCA"},
+\code{"pls2B"}, \code{"phyl.pca"} or \code{"mvgls.pca"}, containing the
+results of multivariate ordination of shape data. To be used instead of
+the \code{shapes} argument.}
 
 \item{axes}{Numeric of length 1 (univariate morphospace) or 2 (bivariate
 morphospace), indicating the axes to be plotted.}
@@ -64,7 +63,7 @@ data). See details below.}
 variation. Supported alternatives include \code{\link[stats]{prcomp}},
 \code{\link{bg_prcomp}}, \code{\link{pls_shapes}},
 \code{\link[geomorph]{gm.prcomp}}, \code{\link[geomorph]{procD.lm}},
-\code{\link[geomorph]{procD.pgls}}, \code{\link[Morpho]{bgPCA}},
+\code{\link[geomorph]{procD.pgls}}, \code{\link[Morpho]{groupPCA}},
 \code{\link[Morpho]{pls2B}} and \code{\link[phytools]{phyl.pca}}. Ignored
 if \code{ord} is provided.}
 
@@ -178,10 +177,11 @@ background shape models. For 2D landmark data, templates must be provided
 as a 2-column matrix containing the actual landmarks/semilandmarks,
 followed by the coordinates defining a curve or set of curves, separated
 from the former and from each other by a row of \code{NA}s (see
-\code{\link{?build_template2d}}). For 3D landmark data, the template
+\code{\link{build_template2d}}). For 3D landmark data, the template
 must be a \code{"mesh3d"} object corresponding to the \strong{actual mean
 shape of the sample} (which can be obtained using
-\code{\link{expected_shapes}} + \code{\link[Morpho:tps3d]{Morpho::tps3d()}}; see examples below).
+\code{\link{expected_shapes}} + \code{\link[Morpho]{tps3d}}; see examples
+below).
 }
 \examples{
 ##2D Landmark data
@@ -240,10 +240,13 @@ bgpca <- groupPCA(two.d.array(sp_shapes), groups = species)
 mspace(ord = bgpca, datype = "landm", p = 9, k = 2, links = links,
        points = TRUE)
 
-#phylogenetic PCA via mvMORPH::mvgls.pca
+#phylogenetic PCA via mvMORPH::mvgls.pca **NOTICE a $center slot containing
+#the center of the original variables need to be appended to the mvgls.pca
+#object; in this case, this is the phylogenetic mean
 library(mvMORPH)
 phypca2 <- mvgls.pca(object = mvgls(two.d.array(sp_shapes) ~ 1, tree = tree,
                      model = "BM"), plot = FALSE)
+phypca2$center <- apply(tips_scores, 2, phytools::fastAnc, tree = tree)
 mspace(ord = phypca2, datype = "landm", p = 9, k = 2, links = links,
        points = TRUE)
 
@@ -327,5 +330,7 @@ morphosp_F
 \code{\link{prcomp}}, \code{\link{bg_prcomp}}, \code{\link{pls_shapes}},
 \code{\link[geomorph]{gm.prcomp}}, \code{\link[Morpho]{groupPCA}},
 \code{\link[Morpho]{pls2B}}, \code{\link[phytools]{phyl.pca}},
-\code{\link[mvMORPH]{mvgls.pca}}
+\code{\link[mvMORPH]{mvgls.pca}}, \code{\link[geomorph]{gm.prcomp}},
+\code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
+\code{\link[phytools]{phyl.pca}}, \code{\link[mvMORPH]{mvgls.pca}}
 }

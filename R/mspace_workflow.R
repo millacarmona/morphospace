@@ -6,11 +6,10 @@
 #'    and depict shape variation represented by the resulting ordination axes.
 #'
 #' @param shapes Shape data.
-#' @param ord Optional object of class \code{\link[geomorph]{"gm.prcomp"}},
-#'   \code{\link[Morpho]{"bgPCA"}}, \code{\link[Morpho]{"pls2B"}},
-#'   \code{\link[phytools]{"phyl.pca"}} or \code{\link[mvMORPH]{"mvgls.pca"}},
-#'   containing the results of multivariate ordination of shape data. To be used
-#'   instead of the \code{shapes} argument.
+#' @param ord Optional object of class \code{"gm.prcomp"}, \code{"bgPCA"},
+#'    \code{"pls2B"}, \code{"phyl.pca"} or \code{"mvgls.pca"}, containing the
+#'    results of multivariate ordination of shape data. To be used instead of
+#'    the \code{shapes} argument.
 #' @param axes Numeric of length 1 (univariate morphospace) or 2 (bivariate
 #'    morphospace), indicating the axes to be plotted.
 #' @param links A list with the indices of the coordinates defining the
@@ -23,7 +22,7 @@
 #'    variation. Supported alternatives include \code{\link[stats]{prcomp}},
 #'    \code{\link{bg_prcomp}}, \code{\link{pls_shapes}},
 #'    \code{\link[geomorph]{gm.prcomp}}, \code{\link[geomorph]{procD.lm}},
-#'    \code{\link[geomorph]{procD.pgls}}, \code{\link[Morpho]{bgPCA}},
+#'    \code{\link[geomorph]{procD.pgls}}, \code{\link[Morpho]{groupPCA}},
 #'    \code{\link[Morpho]{pls2B}} and \code{\link[phytools]{phyl.pca}}. Ignored
 #'    if \code{ord} is provided.
 #' @param datype Character; the type of shape data used (either \code{"fcoef"}
@@ -91,10 +90,11 @@
 #'    as a 2-column matrix containing the actual landmarks/semilandmarks,
 #'    followed by the coordinates defining a curve or set of curves, separated
 #'    from the former and from each other by a row of \code{NA}s (see
-#'    \code{\link{?build_template2d}}). For 3D landmark data, the template
+#'    \code{\link{build_template2d}}). For 3D landmark data, the template
 #'    must be a \code{"mesh3d"} object corresponding to the \strong{actual mean
 #'    shape of the sample} (which can be obtained using
-#'    \code{\link{expected_shapes}} + [Morpho::tps3d()]; see examples below).
+#'    \code{\link{expected_shapes}} + \code{\link[Morpho]{tps3d}}; see examples
+#'    below).
 #'
 #'
 #' @return An object of class \code{"mspace"}, which is a list containing:
@@ -120,7 +120,9 @@
 #'   \code{\link{prcomp}}, \code{\link{bg_prcomp}}, \code{\link{pls_shapes}},
 #'   \code{\link[geomorph]{gm.prcomp}}, \code{\link[Morpho]{groupPCA}},
 #'   \code{\link[Morpho]{pls2B}}, \code{\link[phytools]{phyl.pca}},
-#'   \code{\link[mvMORPH]{mvgls.pca}}
+#'   \code{\link[mvMORPH]{mvgls.pca}}, \code{\link[geomorph]{gm.prcomp}},
+#'   \code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
+#'   \code{\link[phytools]{phyl.pca}}, \code{\link[mvMORPH]{mvgls.pca}}
 #'
 #' @export
 #'
@@ -181,10 +183,13 @@
 #' mspace(ord = bgpca, datype = "landm", p = 9, k = 2, links = links,
 #'        points = TRUE)
 #'
-#' #phylogenetic PCA via mvMORPH::mvgls.pca
+#' #phylogenetic PCA via mvMORPH::mvgls.pca **NOTICE a $center slot containing
+#' #the center of the original variables need to be appended to the mvgls.pca
+#' #object; in this case, this is the phylogenetic mean
 #' library(mvMORPH)
 #' phypca2 <- mvgls.pca(object = mvgls(two.d.array(sp_shapes) ~ 1, tree = tree,
 #'                      model = "BM"), plot = FALSE)
+#' phypca2$center <- apply(tips_scores, 2, phytools::fastAnc, tree = tree)
 #' mspace(ord = phypca2, datype = "landm", p = 9, k = 2, links = links,
 #'        points = TRUE)
 #'
@@ -706,30 +711,26 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
 #'   of shape variables) as vectors into an existing bivariate morphospace.
 #'
 #' @param mspace An \code{"mspace"} object.
-#' @param obj An object of class \code{\link[stats]{"mlm"}},
-#'   \code{\link[geomorph]{"procD.lm"}}, \code{\link[RRPP]{"lm.rrpp"}},
-#'   \code{\link[mvMORPH]{"mvgls"}} or \code{\link[mvMORPH]{"mvols"}},
-#'   containing a linear model fit to shape data, or an object of class
-#'   \code{\link[stats]{"prcomp"}}, \code{\link{"bg_prcomp"}},
-#'   \code{\link{"pls_shapes"}}, \code{\link{"phy_pls_shapes"}},
-#'   \code{\link{"burnaby"}}, \code{\link{"phy_burnaby"}},
-#'   \code{\link[geomorph]{"gm.prcomp"}}, \code{\link[Morpho]{"bgPCA"}},
-#'   \code{\link[Morpho]{"pls2B"}}, \code{\link[phytools]{"phyl.pca"}} or
-#'   \code{\link[mvMORPH]{"mvgls.pca"}} with the results of multivariate
-#'   ordination of shape data.
+#' @param obj An object of class \code{"mlm"}, \code{"procD.lm"},
+#'   \code{"lm.rrpp"}, \code{"mvgls"} or \code{"mvols"}, containing a linear
+#'   model fit to shape data, or an object of class \code{"prcomp"},
+#'   \code{"bg_prcomp"}, \code{"pls_shapes"}, \code{"phy_pls_shapes"},
+#'   \code{"burnaby"}, \code{"phy_burnaby"}, \code{"gm.prcomp"}, \code{"bgPCA"},
+#'   \code{"pls2B"}, \code{"phyl.pca"} or \code{"mvgls.pca"} with the results of
+#'   multivariate ordination of shape data.
 #' @param axis Optional; which axis from \code{obj} should to be projected?
 #' @param mag Numeric; magnifying factor for representing shape transformation.
 #' @param type Integer; type of arrows (\code{0} = no arrow; \code{1} = pointing
 #'   towards the maximum; \code{2} = pointing towards the maximum, \code{3} =
 #'   pointing in both directions).
 #' @param pipe Logical; is the function being included in a pipe?
-#' @param ... Further arguments passed to [graphics::arrows()].
+#' @param ... Further arguments passed to \code{\link[graphics]{arrows}}.
 #'
 #' @details This function is primarily aimed at graphically representing
 #'   morphometric axes (estimated using either linear models or multivariate
 #'   ordination methods) into an existing morphospace for heuristic exploration
 #'   of patterns in the data. It can also be used to extract theoretical shapes
-#'   at the extremes of those axes, although [ax_transformation()] does the
+#'   at the extremes of those axes, although \code{\link{ax_transformation}} does the
 #'   same thing in a more flexible and straightforward way.
 #'
 #'   Axes computed by fitting linear models to shape data can differ in
@@ -754,7 +755,12 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
 #'
 #' @export
 #'
-#' @seealso \code{\link{ax_transformation}}
+#' @seealso \code{\link{ax_transformation}}, \code{\link[stats]{lm}},
+#'   \code{\link[geomorph]{procD.lm}}, \code{\link[geomorph]{procD.pgls}},
+#'   \code{\link[RRPP]{lm.rrpp}}, \code{\link[mvMORPH]{mvols}},
+#'   \code{\link[mvMORPH]{mvgls}}, \code{\link[geomorph]{gm.prcomp}},
+#'   \code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
+#'   \code{\link[phytools]{phyl.pca}}, \code{\link[mvMORPH]{mvgls.pca}}
 #'
 #' @examples
 #' #load and extract relevant data, packages and information
@@ -860,7 +866,7 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
 #' @param evmodel Character, specifying an evolutionary model to perform
 #'   ancestral character reconstruction; options are "BM" (Brownian motion),
 #'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-#'   \code{\link[mVMORPH]{?mvgls}} for more details).
+#'   \code{\link[mvMORPH]{mvgls}} for more details).
 #' @param labels.tips Either logical, indicating whether to include tip labels,
 #'   or a character string with the exact names of the tips whose labels
 #'   should be included.
@@ -885,8 +891,8 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
 #' @param cex.nodes Numeric; size of the scatter points corresponding to the
 #'   nodes of the phylogeny.
 #' @param pipe Logical; is the function being included in a pipe?
-#' @param ... Further arguments passed to [graphics::lines()] (commonly,
-#'   \code{pch}, \code{col}/\code{bg} and \code{cex}.
+#' @param ... Further arguments passed to \code{\link[graphics]{lines}}
+#'   (commonly, \code{pch}, \code{col}/\code{bg} and \code{cex}.
 #'
 #' @details The purpose of this function is twofold. First, it is meant to
 #'   transform a morphospace into a phylomorphospace by projecting node shapes
@@ -896,8 +902,8 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
 #'   the phylogenetic tree (\code{$projected$phylo_scores}, which can then be
 #'   used to compute the node shapes using \code{\link{extract_shapes}}. The
 #'   position of these shapes in morphospace is estimated using
-#'   [mvMORPH::mvgls()] which allows specification of different phenotypic
-#'   evolutionary models, passed through the \code{evmodel} argument.
+#'   \code{\link[mvMORPH]{mvgls}} which allows specification of different
+#'   phenotypic evolutionary models, passed through the \code{evmodel} argument.
 #'
 #' @return If a plot device with a morphospace is open, shapes representing the
 #'   tips and nodes of the phylogenetic tree, as well as the lines connecting
@@ -907,6 +913,8 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
 #'   by appending \code{$phylo_scores}, \code{$phylo_evmodel}, \code{$phylo}
 #'   slots to \code{$projected}, as well as by adding some graphical parameters
 #'   (stored into the \code{$plotinfo} slot), and returned invisibly.
+#'
+#' @seealso \code{\link[mvMORPH]{mvgls}}
 #'
 #' @export
 #'
@@ -2457,7 +2465,7 @@ plot_mspace <- function(mspace,
           colnames(xy_anc) <- if(!is.null(x)) deparse(substitute(x)) else deparse(substitute(y))
           xy.int <- as.integer(xy[,1])
           if(inherits(xy[,1], "factor") | all(xy.int == xy[,1])) {
-            anc. <- ape::ace(xy[,1], phy, model = "ER", type = "discrete")$lik.anc
+            anc. <- ape::ace(xy[,1], tree, model = "ER", type = "discrete")$lik.anc
             for(j in seq_len(nrow(anc.))) xy_anc[j,1] <- as.numeric(colnames(anc.)[which.max(anc.[j,])])
             cat(paste0("\nReconstruction for discrete character '",
                        colnames(xy_anc)[1], "' was performed assuming an equal-rates model using ape::ace"))
