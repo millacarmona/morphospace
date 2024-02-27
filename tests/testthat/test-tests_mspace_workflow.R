@@ -599,7 +599,7 @@ test_that(desc = "testing mspace, ord + datype, Morpho::pls2B", code = {
   msp1 <- mspace(ord = pls, datype = "landm", k = 2, p = 9,
                  mag = 0.7, axes = c(1,2), plot = FALSE)
   result1 <- msp1$ordination$ordtype == "pls2B"
-  result2 <- all(msp1$ordination$x == pls$Xscores)
+  result2 <- all(msp1$ordination$x == pls$Yscores)
   result3 <- all(msp1$ordination$rotation == pls$svd$v)
   result4 <- all(msp1$ordination$center == pls$ycenter)
 
@@ -678,8 +678,8 @@ test_that(desc = "testing mspace, shapes + FUN, phylogenetic mvMORPH::mvgls.pca
   msp1 <- mspace(ord = ppca, datype = "landm", k = 2, p = 9,
                  mag = 0.7, axes = c(1,2), plot = FALSE)
   result1 <- msp1$ordination$ordtype == "mvgls.pca"
-  result2 <- all(msp1$ordination$x == pca$scores)
-  result3 <- all(msp1$ordination$rotation == pca$vectors)
+  result2 <- all(msp1$ordination$x == ppca$scores)
+  result3 <- all(msp1$ordination$rotation == ppca$vectors)
 
   expect_true(all(result1,result2,result3))
 
@@ -709,7 +709,7 @@ test_that(desc = "testing proj_shapes, general behavior", code = {
                  inherits(plotinfo1$bg.points, "character"))
 
   msp2 <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
-    proj_shapes(shapes = shapes, col = "red", col = 2, bg = "transparent", pch = 16)
+    proj_shapes(shapes = shapes, col = "red", bg = "transparent", pch = 16)
   plotinfo2 <- msp2$plotinfo
   result5 <- all(length(plotinfo2$col.points) == dim(shapes)[3],
                  length(plotinfo2$pch.points) == dim(shapes)[3],

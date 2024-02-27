@@ -2267,14 +2267,6 @@ test_that(desc = "testing detrend_shapes, method = residuals, newdata, xvalue,
 
 #####################################################################################
 
-## CONTINUE FROM HERE. the behaviour of phylogenetic detrend_shape for factors is odd...
-## why does the phylogenetic mean is the same as the mean of the expected shapes under
-## the explanatoryvariable as a dummy variable?? check inside shape_operations (expected_shapes?)
-
-## it has somethig to do with the phylogenetic transformation; its not a problem when procD.lm is used.
-## its also a problem for method = residuals
-devtools::load_all()
-## the problem is expected_shapes: is not using the phylogenetic mean to center, which is what it should do
 
 test_that(desc = "testing detrend_shapes with phylogeny, method = orthogonal + default settings,
           for factors and numerics, geomorph::procD.pgls", code = {
