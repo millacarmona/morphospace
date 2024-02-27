@@ -1071,7 +1071,12 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
 #' }
 burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL, center = NULL) {
 
+  # x <- sp_shapes
+  # vars <- sp_logsizes
+  # tree = NULL; evmodel = "BM"; axmat = NULL; center = NULL
+
   totvar <- sum(apply(x, 2, stats::var))
+  namesx <- NULL
 
   if(is.null(vars) & is.null(axmat)) stop("one of vars or axmat must be provided")
   if(!is.null(axmat) & is.null(center)) stop("center argument needs to be provided")
@@ -1155,19 +1160,24 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL, c
   I <- diag(1, ncol(x))
   orthobasis <- I - axmat %*% MASS::ginv(t(axmat) %*% axmat) %*% t(axmat)
 
-  ndims <- min(ncol(x) - ncol(axmat), nrow(x))
+  #ndims <- min(ncol(x) - ncol(axmat), nrow(x))
+  ndims <- ncol(x) - ncol(axmat)
 
   z <- t(t(rbind(x)) - center)
   covmat <- stats::cov(z %*% orthobasis)
-  values <- eigen(covmat)$values[seq_len(ndims)]
-  vectors <- eigen(covmat)$vectors[,seq_len(ndims)]
+  values <- eigen(covmat)$values#[seq_len(ndims)]
+  vectors <- eigen(covmat)$vectors#[,seq_len(ndims)] #!
 
   scores <- z %*% vectors
   sdev <- suppressWarnings(sqrt(values))
   sdev[is.nan(sdev)] <- 0
 
+  if(!is.null(namesx)) scores <- scores[namesx, ]
+
   results <- list(x = scores, rotation = vectors, center = center,
                   sdev = sdev, totvar = totvar)
+  # results <- list(x = scores[,seq_len(ndims)], rotation = vectors[,seq_len(ndims)], center = center,
+  #                 sdev = sdev[seq_len(ndims)], totvar = totvar)
   class(results) <- if(!is.null(tree)) "phy_burnaby" else "burnaby"
   return(results)
 

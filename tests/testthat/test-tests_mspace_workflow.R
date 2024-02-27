@@ -1,4 +1,5 @@
-###########################################################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing mspace, general behavior for landmark data", code = {
   data("tails")
@@ -48,13 +49,14 @@ test_that(desc = "testing mspace, general behavior for Fourier data", code = {
   dev.off()
 })
 
+################################################################################
 
-test_that(desc = "testing mspace, prcomp", code = {
+test_that(desc = "testing mspace, shapes + FUN, stats::prcomp", code = {
   data("tails")
   shapes <- tails$shapes
   pca <- prcomp(geomorph::two.d.array(shapes))
 
-  msp1 <- mspace(shapes, mag = 0.7, axes = c(1,2), plot = FALSE)
+  msp1 <- mspace(shapes, FUN = prcomp, mag = 0.7, axes = c(1,2), plot = FALSE)
   result1 <- msp1$ordination$ordtype == "prcomp"
   result2 <- all(msp1$ordination$x == pca$x)
   result3 <- all(msp1$ordination$rotation == pca$rotation)
@@ -64,8 +66,24 @@ test_that(desc = "testing mspace, prcomp", code = {
 
 })
 
+# this won't work because of the format of Coe objects and shapes_mat requirements
+# test_that(desc = "testing mspace, shapes + FUN, Momocs::PCA", code = {
+#   data("shells")
+#   shapes <- shells$shapes
+#   pca <- Momocs::PCA(shapes)
+#
+#   msp1 <- mspace(shapes, FUN = PCA, mag = 0.7, axes = c(1,2), plot = FALSE)
+#   result1 <- msp1$ordination$ordtype == "prcomp"
+#   result2 <- all(msp1$ordination$x == pca$x)
+#   result3 <- all(msp1$ordination$rotation == pca$rotation)
+#   result4 <- all(msp1$ordination$center == pca$center)
+#
+#   expect_true(all(result1,result2,result3,result4))
+#
+# })
 
-test_that(desc = "testing mspace, bg_prcomp", code = {
+
+test_that(desc = "testing mspace, shapes + FUN, bg_prcomp", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
@@ -82,44 +100,7 @@ test_that(desc = "testing mspace, bg_prcomp", code = {
 })
 
 
-test_that(desc = "testing mspace, phy_prcomp", code = {
-  data("tails")
-  shapes <- tails$shapes
-  species <- tails$data$species
-  tree <- tails$tree
-  phypca <- phy_prcomp(geomorph::two.d.array(expected_shapes(shapes, species)), tree)
-
-  msp1 <- mspace(expected_shapes(shapes, species), FUN = phy_prcomp, tree = tree, mag = 0.7, axes = c(1,2), plot = FALSE)
-  result1 <- msp1$ordination$ordtype == "phy_prcomp"
-  result2 <- all(msp1$ordination$x == phypca$x)
-  result3 <- all(msp1$ordination$rotation == phypca$rotation)
-  result4 <- all(msp1$ordination$center == phypca$center)
-
-  expect_true(all(result1,result2,result3,result4))
-
-})
-
-
-test_that(desc = "testing mspace, phyalign_comp", code = {
-  data("tails")
-  shapes <- tails$shapes
-  species <- tails$data$species
-  tree <- tails$tree
-  paca <- phyalign_comp(geomorph::two.d.array(expected_shapes(shapes, species)), tree)
-
-  msp1 <- mspace(expected_shapes(shapes, species), FUN = phyalign_comp, tree = tree,
-                 mag = 0.7, axes = c(1,2), plot = FALSE)
-  result1 <- msp1$ordination$ordtype == "phyalign_comp"
-  result2 <- all(msp1$ordination$x == paca$x)
-  result3 <- all(msp1$ordination$rotation == paca$rotation)
-  result4 <- all(msp1$ordination$center == paca$center)
-
-  expect_true(all(result1,result2,result3,result4))
-
-})
-
-
-test_that(desc = "testing mspace, pls_shapes", code = {
+test_that(desc = "testing mspace, shapes + FUN, pls_shapes", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
@@ -137,7 +118,7 @@ test_that(desc = "testing mspace, pls_shapes", code = {
 })
 
 
-test_that(desc = "testing mspace, phylogenetic pls_shapes", code = {
+test_that(desc = "testing mspace, shapes + FUN, phylogenetic pls_shapes", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
@@ -158,7 +139,7 @@ test_that(desc = "testing mspace, phylogenetic pls_shapes", code = {
 })
 
 
-test_that(desc = "testing mspace, burnaby", code = {
+test_that(desc = "testing mspace, shapes + FUN, burnaby", code = {
   data("tails")
   shapes <- tails$shapes
   sizes <- log(tails$sizes)
@@ -188,14 +169,14 @@ test_that(desc = "testing mspace, burnaby", code = {
 })
 
 
-test_that(desc = "testing mspace, phylogenetic burnaby", code = {
+test_that(desc = "testing mspace, shapes + FUN, phylogenetic burnaby", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
   tree <- tails$tree
   sp_sizes <- cbind(tapply(tails$sizes,species,mean))
   phyburn <- burnaby(x = geomorph::two.d.array(expected_shapes(shapes, species)),
-                       vars = sp_sizes, tree = tree)
+                     vars = sp_sizes, tree = tree)
 
   msp1 <- mspace(expected_shapes(shapes,species), FUN = burnaby, vars = sp_sizes, tree = tree,
                  mag = 0.7, axes = 1, plot = FALSE)
@@ -207,10 +188,10 @@ test_that(desc = "testing mspace, phylogenetic burnaby", code = {
   sp_sizeax <- lm(geomorph::two.d.array(expected_shapes(shapes, species)) ~ sp_sizes)$coef[2,]
   sp_cent <- colMeans(lm(geomorph::two.d.array(expected_shapes(shapes, species)) ~ sp_sizes)$fitted)
   burn2 <- suppressWarnings(burnaby(x = geomorph::two.d.array(expected_shapes(shapes, species)),
-                   axmat = sp_sizeax, center = cent, tree = tree))
+                                    axmat = sp_sizeax, center = sp_cent, tree = tree))
 
   msp2 <- suppressWarnings(mspace(expected_shapes(shapes, species), FUN = burnaby, axmat = sp_sizeax,
-                                  center = cent, tree = tree, mag = 0.7, axes = c(1,2), plot = FALSE))
+                                  center = sp_cent, tree = tree, mag = 0.7, axes = c(1,2), plot = FALSE))
   result5 <- msp2$ordination$ordtype == "phy_burnaby"
   result6 <- all(msp2$ordination$x == burn2$x)
   result7 <- all(msp2$ordination$rotation == burn2$rotation)
@@ -220,7 +201,493 @@ test_that(desc = "testing mspace, phylogenetic burnaby", code = {
                   result8))
 })
 
-###########################################################
+
+
+test_that(desc = "testing mspace, shapes + FUN, geomorph::gm.prcomp", code = {
+  data("tails")
+  shapes <- tails$shapes
+  pca <- geomorph::gm.prcomp(geomorph::two.d.array(shapes))
+
+  msp1 <- mspace(shapes, FUN = geomorph::gm.prcomp, mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "gm.prcomp"
+  result2 <- all(msp1$ordination$x == pca$x)
+  result3 <- all(msp1$ordination$rotation == pca$rotation)
+  result4 <- all(msp1$ordination$center == pca$center)
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+test_that(desc = "testing mspace, shapes + FUN, phylogenetic geomorph::gm.prcomp
+          (phylogenetic PCA)", code = {
+            data("tails")
+            shapes <- expected_shapes(tails$shapes, tails$data$species)
+            tree <- tails$tree
+            ppca <- geomorph::gm.prcomp(geomorph::two.d.array(shapes), phy = tree, GLS = TRUE)
+
+            msp1 <- mspace(shapes, FUN = geomorph::gm.prcomp, phy = tree,
+                           GLS = TRUE, mag = 0.7, axes = c(1,2), plot = FALSE)
+            result1 <- msp1$ordination$ordtype == "gm.prcomp"
+            result2 <- all(msp1$ordination$x == ppca$x)
+            result3 <- all(msp1$ordination$rotation == ppca$rotation)
+            result4 <- all(msp1$ordination$center == ppca$center)
+
+            expect_true(all(result1,result2,result3,result4))
+
+          })
+
+test_that(desc = "testing mspace, shapes + FUN, phylogenetic geomorph::gm.prcomp
+          (phylogenetically aligned CA)", code = {
+            data("tails")
+            shapes <- expected_shapes(tails$shapes, tails$data$species)
+            tree <- tails$tree
+            paca <- geomorph::gm.prcomp(geomorph::two.d.array(shapes),
+                                        phy = tree, align.to.phy = TRUE, GLS = FALSE)
+
+            msp1 <- mspace(shapes, FUN = geomorph::gm.prcomp, phy = tree,
+                           align.to.phy = TRUE, GLS = FALSE,
+                           mag = 0.7, axes = c(1,2), plot = FALSE)
+            result1 <- msp1$ordination$ordtype == "gm.prcomp"
+            result2 <- all(msp1$ordination$x == paca$x)
+            result3 <- all(msp1$ordination$rotation == paca$rotation)
+            result4 <- all(msp1$ordination$center == paca$center)
+
+            expect_true(all(result1,result2,result3,result4))
+
+          })
+
+test_that(desc = "testing mspace, shapes + FUN, phytools::phyl.pca", code = {
+  data("tails")
+  shapes <- expected_shapes(tails$shapes, tails$data$species)
+  tree <- tails$tree
+  ppca <- phytools::phyl.pca(Y = geomorph::two.d.array(shapes),
+                             tree = tree)
+
+  msp1 <- mspace(shapes, FUN = phytools::phyl.pca, tree = tree,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "phyl.pca"
+  result2 <- all(msp1$ordination$x == ppca$S)
+  result3 <- all(msp1$ordination$rotation == ppca$Evec)
+  result4 <- all(msp1$ordination$center == ppca$a)
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+#this wont work because of the arguments names
+# test_that(desc = "testing mspace, shapes + FUN, Morpho::pls2B", code = {
+#   data("tails")
+#   shapes <- tails$shapes
+#   size <- tails$size
+#   pls <- Morpho::pls2B(y = geomorph::two.d.array(shapes), x = size,
+#                             tree = tree)
+#
+#   msp1 <- mspace(shapes, FUN = Morpho::pls2B, x = size,
+#                  mag = 0.7, axes = c(1,2), plot = FALSE)
+#   result1 <- msp1$ordination$ordtype == "phyl.pca"
+#   result2 <- all(msp1$ordination$x == pls$Xscores)
+#   result3 <- all(msp1$ordination$rotation == pls$svd$v)
+#   result4 <- all(msp1$ordination$center == pls$ycenter)
+#
+#   expect_true(all(result1,result2,result3,result4))
+#
+# })
+
+test_that(desc = "testing mspace, shapes + FUN, geomorph::two.b.pls", code = {
+  data("tails")
+  shapes <- tails$shapes
+  size <- tails$size
+  pls <- geomorph::two.b.pls(A2 = geomorph::two.d.array(shapes), A1 = size)
+
+  msp1 <- mspace(shapes, FUN = geomorph::two.b.pls, A1 = size,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "pls"
+  result2 <- all(msp1$ordination$x == pls$YScores)
+  result3 <- all(msp1$ordination$rotation == pls$right.pls.vectors)
+  result4 <- all(msp1$ordination$center == colMeans(pls$A2.matrix))
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+test_that(desc = "testing mspace, shapes + FUN, Morpho::groupPCA", code = {
+  data("tails")
+  shapes <- tails$shapes
+  species <- tails$data$species
+  bgpca <- Morpho::groupPCA(dataarray = geomorph::two.d.array(shapes), groups = species)
+
+  msp1 <- mspace(shapes, FUN = Morpho::groupPCA,  groups = species,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "bgPCA"
+  result2 <- all(msp1$ordination$x == bgpca$Scores)
+  result3 <- all(msp1$ordination$rotation == bgpca$groupPCs)
+  result4 <- all(msp1$ordination$center == bgpca$Grandmean)
+  result5 <- all(msp1$ordination$grcenters == bgpca$groupmeans)
+
+  expect_true(all(result1,result2,result3,result4,result5))
+
+})
+
+#this wont work because of the arguments names
+# test_that(desc = "testing mspace, shapes + FUN, mvMORPH::mvgls.pca", code = {
+#   data("tails")
+#   shapes <- tails$shapes
+#   mvmod <- suppressWarnings(
+#     mvMORPH::mvols(geomorph::two.d.array(shapes) ~ 1)
+#   )
+#   pca <- mvMORPH::mvgls.pca(mvmod)
+#
+#   msp1 <- mspace(shapes, FUN = mvMORPH::mvgls.pca,  object = mvmod,
+#                  mag = 0.7, axes = c(1,2), plot = FALSE)
+#   result1 <- msp1$ordination$ordtype == "mvgls.pca"
+#   result2 <- all(msp1$ordination$x == pca$scores)
+#   result3 <- all(msp1$ordination$rotation == pca$vectors)
+#
+#   expect_true(all(result1,result2,result3))
+#
+# })
+
+#this wont work because of the arguments names
+# test_that(desc = "testing mspace, shapes + FUN, phylogenetic mvMORPH::mvgls.pca
+#           (phylogenetic PCA)", code = {
+#   data("tails")
+#   shapes <- expected_shapes(tails$shapes, tails$data$species)
+#   tree <- tails$tree
+#   mvmod <- suppressWarnings(
+#     mvMORPH::mvgls(geomorph::two.d.array(shapes) ~ 1, tree = tree, model = "BM")
+#   )
+#   pca <- mvMORPH::mvgls.pca(mvmod)
+#
+#   msp1 <- mspace(shapes, FUN = mvMORPH::mvgls.pca, object = mvmod, tree = tree, model = "BM",
+#                  mag = 0.7, axes = c(1,2), plot = FALSE)
+#   result1 <- msp1$ordination$ordtype == "mvgls.pca"
+#   result2 <- all(msp1$ordination$x == pca$scores)
+#   result3 <- all(msp1$ordination$rotation == pca$vectors)
+#
+#   expect_true(all(result1,result2,result3))
+#
+# })
+
+################################################################################
+
+test_that(desc = "testing mspace, ord + datype, stats::prcomp", code = {
+  data("tails")
+  shapes <- tails$shapes
+  pca <- prcomp(geomorph::two.d.array(shapes))
+
+  msp1 <- mspace(ord = pca, datype = "landm", k = 2, p = 9, mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "prcomp"
+  result2 <- all(msp1$ordination$x == pca$x)
+  result3 <- all(msp1$ordination$rotation == pca$rotation)
+  result4 <- all(msp1$ordination$center == pca$center)
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+test_that(desc = "testing mspace, ord + datype, Momocs::PCA", code = {
+  data("shells")
+  shapes <- shells$shapes
+  pca <- Momocs::PCA(shapes)
+
+  msp1 <- mspace(ord = pca, datype = "fcoef", mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "PCA"
+  result2 <- all(msp1$ordination$x == pca$x)
+  result3 <- all(msp1$ordination$rotation == pca$rotation)
+  result4 <- all(msp1$ordination$center == pca$center)
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+test_that(desc = "testing mspace, ord + datype, bg_prcomp", code = {
+  data("tails")
+  shapes <- tails$shapes
+  species <- tails$data$species
+  bgpca <- bg_prcomp(geomorph::two.d.array(shapes), species)
+
+  msp1 <- mspace(ord = bgpca, datype = "landm", k = 2, p = 9, mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "bg_prcomp"
+  result2 <- all(msp1$ordination$x == bgpca$x)
+  result3 <- all(msp1$ordination$rotation == bgpca$rotation)
+  result4 <- all(msp1$ordination$center == bgpca$center)
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+
+test_that(desc = "testing mspace, ord + datype, pls_shapes", code = {
+  data("tails")
+  shapes <- tails$shapes
+  species <- tails$data$species
+  pls <- pls_shapes(shapes = geomorph::two.d.array(shapes), X = model.matrix(~ species)[,-1])
+
+  msp1 <- mspace(ord = pls, datype = "landm", k = 2, p = 9, mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "pls_shapes"
+  result2 <- all(msp1$ordination$x == pls$x)
+  result3 <- all(msp1$ordination$rotation == pls$rotation)
+  result4 <- all(msp1$ordination$center == pls$center)
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+
+test_that(desc = "testing mspace, ord + datype, phylogenetic pls_shapes", code = {
+  data("tails")
+  shapes <- tails$shapes
+  species <- tails$data$species
+  tree <- tails$tree
+  sp_sizes <- cbind(tapply(tails$sizes,species,mean))
+  phypls <- pls_shapes(shapes = geomorph::two.d.array(expected_shapes(shapes, species)),
+                       X = sp_sizes, tree = tree)
+
+  msp1 <- mspace(ord = phypls, datype = "landm", k = 2, p = 9,
+                 mag = 0.7, axes = 1, plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "phy_pls_shapes"
+  result2 <- all(msp1$ordination$x == phypls$x)
+  result3 <- all(msp1$ordination$rotation == phypls$rotation)
+  result4 <- all(msp1$ordination$center == phypls$center)
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+
+test_that(desc = "testing mspace, ord + datype, burnaby", code = {
+  data("tails")
+  shapes <- tails$shapes
+  sizes <- log(tails$sizes)
+  burn <- burnaby(x = geomorph::two.d.array(shapes), vars = sizes)
+
+  msp1 <- mspace(ord = burn, datype = "landm", k = 2, p = 9,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "burnaby"
+  result2 <- all(msp1$ordination$x == burn$x)
+  result3 <- all(msp1$ordination$rotation == burn$rotation)
+  result4 <- all(msp1$ordination$center == burn$center)
+
+
+  sizeax <- lm(geomorph::two.d.array(shapes) ~ sizes)$coef[2,]
+  cent <- colMeans(lm(geomorph::two.d.array(shapes) ~ sizes)$fitted)
+  burn2 <- burnaby(x = geomorph::two.d.array(shapes), axmat = sizeax, center = cent)
+
+  msp2 <- mspace(ord = burn2, datype = "landm", k = 2, p = 9,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result5 <- msp2$ordination$ordtype == "burnaby"
+  result6 <- all(msp2$ordination$x == burn2$x)
+  result7 <- all(msp2$ordination$rotation == burn2$rotation)
+  result8 <- all(msp2$ordination$center == burn2$center)
+
+  expect_true(all(result1,result2,result3,result4,result5,result6,result7,
+                  result8))
+})
+
+
+test_that(desc = "testing mspace, ord + datype, phylogenetic burnaby", code = {
+  data("tails")
+  shapes <- tails$shapes
+  species <- tails$data$species
+  tree <- tails$tree
+  sp_sizes <- cbind(tapply(tails$sizes,species,mean))
+  phyburn <- burnaby(x = geomorph::two.d.array(expected_shapes(shapes, species)),
+                     vars = sp_sizes, tree = tree)
+
+  msp1 <- mspace(ord = phyburn, datype = "landm", k = 2, p = 9,
+                 mag = 0.7, axes = 1, plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "phy_burnaby"
+  result2 <- all(msp1$ordination$x == phyburn$x)
+  result3 <- all(msp1$ordination$rotation == phyburn$rotation)
+  result4 <- all(msp1$ordination$center == phyburn$center)
+
+  sp_sizeax <- lm(geomorph::two.d.array(expected_shapes(shapes, species)) ~ sp_sizes)$coef[2,]
+  sp_cent <- colMeans(lm(geomorph::two.d.array(expected_shapes(shapes, species)) ~ sp_sizes)$fitted)
+  burn2 <- suppressWarnings(burnaby(x = geomorph::two.d.array(expected_shapes(shapes, species)),
+                                    axmat = sp_sizeax, center = sp_cent, tree = tree))
+
+  msp2 <- suppressWarnings(mspace(ord = burn2, datype = "landm", k = 2, p = 9,
+                                  center = sp_cent, tree = tree, mag = 0.7, axes = c(1,2), plot = FALSE))
+  result5 <- msp2$ordination$ordtype == "phy_burnaby"
+  result6 <- all(msp2$ordination$x == burn2$x)
+  result7 <- all(msp2$ordination$rotation == burn2$rotation)
+  result8 <- all(msp2$ordination$center == burn2$center)
+
+  expect_true(all(result1,result2,result3,result4,result5,result6,result7,
+                  result8))
+})
+
+
+test_that(desc = "testing mspace, ord + datype, geomorph::gm.prcomp", code = {
+  data("tails")
+  shapes <- tails$shapes
+  pca <- geomorph::gm.prcomp(geomorph::two.d.array(shapes))
+
+  msp1 <- mspace(ord = pca, datype = "landm", k = 2, p = 9, mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "gm.prcomp"
+  result2 <- all(msp1$ordination$x == pca$x)
+  result3 <- all(msp1$ordination$rotation == pca$rotation)
+  result4 <- all(msp1$ordination$center == pca$center)
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+test_that(desc = "testing mspace, ord + datype, phylogenetic geomorph::gm.prcomp
+          (phylogenetic PCA)", code = {
+            data("tails")
+            shapes <- expected_shapes(tails$shapes, tails$data$species)
+            tree <- tails$tree
+            ppca <- geomorph::gm.prcomp(geomorph::two.d.array(shapes), phy = tree, GLS = TRUE)
+
+            msp1 <- mspace(ord = ppca, datype = "landm", k = 2, p = 9,
+                           GLS = TRUE, mag = 0.7, axes = c(1,2), plot = FALSE)
+            result1 <- msp1$ordination$ordtype == "gm.prcomp"
+            result2 <- all(msp1$ordination$x == ppca$x)
+            result3 <- all(msp1$ordination$rotation == ppca$rotation)
+            result4 <- all(msp1$ordination$center == ppca$center)
+
+            expect_true(all(result1,result2,result3,result4))
+
+          })
+
+test_that(desc = "testing mspace, ord + datype, phylogenetic geomorph::gm.prcomp
+          (phylogenetically aligned CA)", code = {
+            data("tails")
+            shapes <- expected_shapes(tails$shapes, tails$data$species)
+            tree <- tails$tree
+            paca <- geomorph::gm.prcomp(geomorph::two.d.array(shapes),
+                                        phy = tree, align.to.phy = TRUE, GLS = FALSE)
+
+            msp1 <- mspace(ord = paca, datype = "landm", k = 2, p = 9,
+                           align.to.phy = TRUE, GLS = FALSE,
+                           mag = 0.7, axes = c(1,2), plot = FALSE)
+            result1 <- msp1$ordination$ordtype == "gm.prcomp"
+            result2 <- all(msp1$ordination$x == paca$x)
+            result3 <- all(msp1$ordination$rotation == paca$rotation)
+            result4 <- all(msp1$ordination$center == paca$center)
+
+            expect_true(all(result1,result2,result3,result4))
+
+          })
+
+test_that(desc = "testing mspace, ord + datype, phytools::phyl.pca", code = {
+  data("tails")
+  shapes <- expected_shapes(tails$shapes, tails$data$species)
+  tree <- tails$tree
+  ppca <- phytools::phyl.pca(Y = geomorph::two.d.array(shapes),
+                             tree = tree)
+
+  msp1 <- mspace(ord = ppca, datype = "landm", k = 2, p = 9,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "phyl.pca"
+  result2 <- all(msp1$ordination$x == ppca$S)
+  result3 <- all(msp1$ordination$rotation == ppca$Evec)
+  result4 <- all(msp1$ordination$center == ppca$a)
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+test_that(desc = "testing mspace, ord + datype, Morpho::pls2B", code = {
+  data("tails")
+  shapes <- tails$shapes
+  size <- tails$size
+  pls <- Morpho::pls2B(y = geomorph::two.d.array(shapes), x = size,
+                            tree = tree)
+
+  msp1 <- mspace(ord = pls, datype = "landm", k = 2, p = 9,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "pls2B"
+  result2 <- all(msp1$ordination$x == pls$Xscores)
+  result3 <- all(msp1$ordination$rotation == pls$svd$v)
+  result4 <- all(msp1$ordination$center == pls$ycenter)
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+test_that(desc = "testing mspace, ord + datype, geomorph::two.b.pls", code = {
+  data("tails")
+  shapes <- tails$shapes
+  size <- tails$size
+  pls <- geomorph::two.b.pls(A2 = geomorph::two.d.array(shapes), A1 = size)
+
+  msp1 <- mspace(ord = pls, datype = "landm", k = 2, p = 9,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "pls"
+  result2 <- all(msp1$ordination$x == pls$YScores)
+  result3 <- all(msp1$ordination$rotation == pls$right.pls.vectors)
+  result4 <- all(msp1$ordination$center == colMeans(pls$A2.matrix))
+
+  expect_true(all(result1,result2,result3,result4))
+
+})
+
+
+test_that(desc = "testing mspace, shapes + FUN, Morpho::groupPCA", code = {
+  data("tails")
+  shapes <- tails$shapes
+  species <- tails$data$species
+  bgpca <- Morpho::groupPCA(dataarray = geomorph::two.d.array(shapes), groups = species)
+
+  msp1 <- mspace(shapes, FUN = Morpho::groupPCA,  groups = species,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "bgPCA"
+  result2 <- all(msp1$ordination$x == bgpca$Scores)
+  result3 <- all(msp1$ordination$rotation == bgpca$groupPCs)
+  result4 <- all(msp1$ordination$center == bgpca$Grandmean)
+  result5 <- all(msp1$ordination$grcenters == bgpca$groupmeans)
+
+  expect_true(all(result1,result2,result3,result4,result5))
+
+})
+
+
+test_that(desc = "testing mspace, ord + datype, mvMORPH::mvgls.pca", code = {
+  data("tails")
+  shapes <- tails$shapes
+  mvmod <- suppressWarnings(
+    mvMORPH::mvols(geomorph::two.d.array(shapes) ~ 1)
+  )
+  pca <- mvMORPH::mvgls.pca(mvmod)
+  pca$center <- colMeans(geomorph::two.d.array(shapes))
+
+  msp1 <- mspace(ord = pca, datype = "landm", k = 2, p = 9,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "mvgls.pca"
+  result2 <- all(msp1$ordination$x == pca$scores)
+  result3 <- all(msp1$ordination$rotation == pca$vectors)
+
+  expect_true(all(result1,result2,result3))
+
+})
+
+
+test_that(desc = "testing mspace, shapes + FUN, phylogenetic mvMORPH::mvgls.pca
+          (phylogenetic PCA)", code = {
+  data("tails")
+  shapes <- expected_shapes(tails$shapes, tails$data$species)
+  tree <- tails$tree
+  mvmod <- suppressWarnings(
+    mvMORPH::mvgls(geomorph::two.d.array(shapes) ~ 1, tree = tree, model = "BM")
+  )
+  ppca <- mvMORPH::mvgls.pca(mvmod)
+  ppca$center <- colMeans(mvmod$fitted)
+
+  msp1 <- mspace(ord = ppca, datype = "landm", k = 2, p = 9,
+                 mag = 0.7, axes = c(1,2), plot = FALSE)
+  result1 <- msp1$ordination$ordtype == "mvgls.pca"
+  result2 <- all(msp1$ordination$x == pca$scores)
+  result3 <- all(msp1$ordination$rotation == pca$vectors)
+
+  expect_true(all(result1,result2,result3))
+
+})
+
+
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing proj_shapes, general behavior", code = {
   data("tails")
@@ -292,7 +759,8 @@ test_that(desc = "testing proj_shapes, stacking behavior", code = {
   expect_true(all(result1,result2,result3,result4,result5,result6))
 })
 
-###########################################################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing proj_groups, general behavior", code = {
   data("tails")
@@ -410,7 +878,8 @@ test_that(desc = "testing proj_groups, stacking behavior", code = {
                   result7,result8,result9,result10))
 })
 
-###########################################################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing proj_phylogeny, general behavior", code = {
   data("tails")
@@ -449,7 +918,8 @@ test_that(desc = "testing proj_phylogeny, general behavior", code = {
 })
 
 
-###########################################################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing proj_axis, general behavior", code = {
   data("tails")
@@ -488,7 +958,8 @@ test_that(desc = "testing proj_axis, stacking behavior", code = {
   expect_true(all(result1,result2))
 })
 
-###########################################################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing proj_landscape, general behavior", code = {
   data("tails")

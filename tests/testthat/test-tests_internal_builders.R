@@ -1,4 +1,5 @@
-#################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing rev_eigen, entire empiric data set", code = {
   data(tails)
@@ -11,7 +12,6 @@ test_that(desc = "testing rev_eigen, entire empiric data set", code = {
   result <- all(round(tails$shapes, 10) == round(backshapes_arr, 10))
   expect_true(result)
 })
-
 
 test_that(desc = "testing rev_eigen, single empiric case", code = {
   data(tails)
@@ -52,9 +52,8 @@ test_that(desc = "testing rev_eigen (and expected_shapes!), single vector", code
   expect_true(result)
 })
 
-
-
-#################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing proj_eigen, entire empiric data set", code = {
   data(tails)
@@ -103,7 +102,8 @@ test_that(desc = "testing proj_eigen (and expected_shapes!), single vector", cod
 })
 
 
-#######################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing inv_efourier, dimensions", code = {
   data(shells)
@@ -119,7 +119,8 @@ test_that(desc = "testing inv_efourier, dimensions", code = {
 })
 
 
-######################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing shapes_mat, fourier data", code = {
   data("shells")
@@ -162,7 +163,8 @@ test_that(desc = "testing shapes_mat, landmark data", code = {
 })
 
 
-#################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing morphogrid, dimensions", code = {
   data("tails")

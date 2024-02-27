@@ -48,8 +48,13 @@
 #' lineplot(extshapes_arr[,,1], tails$links) ; title("negative")
 #' plot(extshapes_arr[,,2])
 #' lineplot(extshapes_arr[,,2], tails$links) ; title("positive")
-rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + center) }
-
+rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + center) } #!
+# rev_eigen <- function(scores, vectors, center) {
+#   x0 <- scale(scores %*% t(vectors), scale = FALSE, center = rbind(center))
+#   x <- matrix(as.numeric(x0), nrow = nrow(scores), ncol = ncol(vectors), byrow = FALSE)
+#   rownames(x) <- rownames(scores)
+#   return(x)
+# }
 
 ################################################################################
 
@@ -545,6 +550,20 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #' @keywords internal
 adapt_ordination <- function(ordination) {
 
+  if(class(ordination)[1] == "PCA") {
+    ordination_ <- list()
+
+    ordination_$x <- ordination$x
+    ordination_$rotation <- ordination$rotation
+    ordination_$sdev <- ordination$sdev
+    ordination_$center <- ordination$center
+    ordination_$raw_pca <- ordination
+
+    ordination <- ordination_
+    class(ordination) <- "PCA"
+  }
+
+
   if(class(ordination)[1] == "gm.prcomp") {
     if(ordination$GLS) ordination$center <- c(ordination$center)
     class(ordination) <- "gm.prcomp"
@@ -579,23 +598,68 @@ adapt_ordination <- function(ordination) {
     names(ordination)[which(names(ordination) == "values")] <- "sdev"
   }
 
-  if(class(ordination)[1] == "pls2B") {
-    ordination$xrotation <- ordination$svd$u
-    ordination$yrotation <- ordination$svd$v
+  # if(class(ordination)[1] == "pls2B") {
+  #   ordination$xrotation <- ordination$svd$u
+  #   ordination$yrotation <- ordination$svd$v
+  #   ordination$sdev <- sqrt(ordination$svd$d)
+  #   ordination$svd <- NULL
+  #
+  #   names(ordination)[which(names(ordination) == "Xscores")] <- "xscores"
+  #   names(ordination)[which(names(ordination) == "Yscores")] <- "yscores"
+  #
+  #   ordination <- list(sdev = apply(ordination$yscores, 2, stats::sd),
+  #                      rotation = ordination$yrotation,
+  #                      x = ordination$yscores,
+  #                      x2 = ordination$xscores,
+  #                      center = ordination$ycenter,
+  #                      totvar = ordination$ytotvar,
+  #                      raw_pls = ordination)
+  # } #!
+
+
+  if(any(class(ordination)[1] == c("pls2B", "pls"))) {
+    # ordination$xrotation <- ordination$svd$u
+    # ordination$yrotation <- if(class(ordination)[1] == "pls2B")
+    #   ordination$svd$v else t(ordination$svd$vt)
+    if(class(ordination)[1] == "pls2B") {
+      ordination$xrotation <- ordination$svd$u
+      ordination$yrotation <- ordination$svd$v
+    } else {
+      ordination$xrotation <- ordination$left.pls.vectors
+      ordination$yrotation <- ordination$right.pls.vectors
+    }
     ordination$sdev <- sqrt(ordination$svd$d)
     ordination$svd <- NULL
 
-    names(ordination)[which(names(ordination) == "Xscores")] <- "xscores"
-    names(ordination)[which(names(ordination) == "Yscores")] <- "yscores"
+    class <- if(class(ordination)[1] == "pls2B") "pls2B" else "pls"
+
+    if(class(ordination)[1] == "pls2B") {
+      names(ordination)[which(names(ordination) == "Xscores")] <- "xscores"
+      names(ordination)[which(names(ordination) == "Yscores")] <- "yscores"
+    } else {
+      names(ordination)[which(names(ordination) == "XScores")] <- "xscores"
+      names(ordination)[which(names(ordination) == "YScores")] <- "yscores"
+    }
+
+    if(class(ordination)[1] == "pls2B") {
+      ycenter <- ordination$ycenter
+    } else {
+      ycenter <- colMeans(ordination$A2.matrix)
+    }
+
 
     ordination <- list(sdev = apply(ordination$yscores, 2, stats::sd),
                        rotation = ordination$yrotation,
                        x = ordination$yscores,
                        x2 = ordination$xscores,
-                       center = ordination$ycenter,
+                       center = ycenter,
                        totvar = ordination$ytotvar,
                        raw_pls = ordination)
+
+    class(ordination) <- class
   }
+
+
 
   return(ordination)
 }
@@ -681,7 +745,9 @@ adapt_model <- function(model) {
   #   modtype <- if(class(model)[1] == "mvgls") "pgls" else "ols"
   # }
 
+
   if(any(class(model)[1] == c("mvgls", "mvols"))) {
+    rnames <- rownames(stats::model.matrix(model))
     coefs <- model$coefficients
     y <- model$variables$Y
 
@@ -693,8 +759,8 @@ adapt_model <- function(model) {
 
 
         respindex <- which(grepl(x = colnames(model$variables$X)[-1], names(resptype)[i]))
-        subX <- cbind(model$variables$X[,-1][,respindex])
-        colnames(subX) <- colnames(model$variables$X)[-1][i]
+        subX <- cbind(cbind(model$variables$X[,-1])[,respindex])
+        if(is.null(colnames(subX))) colnames(subX) <- colnames(model$variables$X)[-1][i]
 
         response <- matrix("Intercept", ncol = 1, nrow = nrow(model$variables$Y))
         for(j in seq_len(ncol(subX))) {
@@ -716,14 +782,23 @@ adapt_model <- function(model) {
     grandmean <- colMeans(model$fitted)
 
     modtype <- if(class(model)[1] == "mvgls") "pgls" else "ols"
+
+    # y <- y[rownames(stats::model.matrix(model)), ]
+    # x_ <- x
+    # x <- x[rownames(stats::model.matrix(model)), ]
+    # if(is.null(dim(x))) {
+    #   x <- data.frame(x)
+    #   colnames(x) <- colnames(x_)
+    #   rownames(x) <- rownames(x_)
+    # } #!
     if(modtype == "pgls") {
-      y <- y[rownames(stats::model.matrix(model)), ]
-      x_ <- x
-      x <- x[rownames(stats::model.matrix(model)), ]
+      fitted <- fitted[rnames,]
+      y <- y[rnames,]
+      x <- x[rnames,]
       if(is.null(dim(x))) {
         x <- data.frame(x)
-        colnames(x) <- colnames(x_)
-        rownames(x) <- rownames(x_)
+        colnames(x) <- names(resptype)
+        rownames(x) <- rnames
       }
     }
   }
@@ -1076,7 +1151,8 @@ plot_morphogrid2d <- function(x = NULL,
     if(!is.null(x)) {
       xlab <- "x"
     } else {
-      if(ordtype == "prcomp") {
+      if(any(c("prcomp", "PCA") %in% ordtype)) {
+      #if(ordtype == "prcomp") {
         xlab <- paste0("PC", axes[1])
       }
       if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
@@ -1088,7 +1164,8 @@ plot_morphogrid2d <- function(x = NULL,
       if(ordtype == "phyalign_comp") {
         xlab <- paste0("PAC", axes[1])
       }
-      if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
+      if(any(c("pls_shapes", "pls2B", "pls") %in% ordtype)) {
+      #if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         xlab <- paste0("PLS-", axes[1])
       }
       if(ordtype == "phy_pls_shapes") {
@@ -1103,7 +1180,8 @@ plot_morphogrid2d <- function(x = NULL,
     if(!is.null(y)) {
       ylab <- "y"
     } else {
-      if(ordtype == "prcomp") {
+      if(any(c("prcomp", "PCA") %in% ordtype)) {
+      #if(ordtype == "prcomp") {
         ylab <- paste0("PC", axes[2])
       }
       if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
@@ -1115,7 +1193,8 @@ plot_morphogrid2d <- function(x = NULL,
       if(ordtype == "phyalign_comp") {
         ylab <- paste0("PAC", axes[2])
       }
-      if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
+      if(any(c("pls_shapes", "pls2B", "pls") %in% ordtype)) {
+      #if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         ylab <- paste0("PLS-", axes[2])
       }
       if(ordtype == "phy_pls_shapes") {
@@ -1314,7 +1393,8 @@ plot_morphogrid3d <- function(x = NULL,
     if(!is.null(x)) {
       xlab <- "x"
     } else {
-      if(ordtype == "prcomp") {
+      if(any(c("prcomp", "PCA") %in% ordtype)) {
+      #if(ordtype == "prcomp") {
         xlab <- paste0("PC", axes[1])
       }
       if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
@@ -1326,7 +1406,8 @@ plot_morphogrid3d <- function(x = NULL,
       if(ordtype == "phyalign_comp") {
         xlab <- paste0("PAC", axes[1])
       }
-      if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
+      if(any(c("pls_shapes", "pls2B", "pls") %in% ordtype)) {
+      #if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         xlab <- paste0("PLS-", axes[1])
       }
       if(ordtype == "phy_pls_shapes") {
@@ -1341,7 +1422,8 @@ plot_morphogrid3d <- function(x = NULL,
     if(!is.null(y)) {
       ylab <- "y"
     } else {
-      if(ordtype == "prcomp") {
+      if(any(c("prcomp", "PCA") %in% ordtype)) {
+      #if(ordtype == "prcomp") {
         ylab <- paste0("PC", axes[2])
       }
       if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
@@ -1353,7 +1435,8 @@ plot_morphogrid3d <- function(x = NULL,
       if(ordtype == "phyalign_comp") {
         ylab <- paste0("PAC", axes[2])
       }
-      if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
+      if(any(c("pls_shapes", "pls2B", "pls") %in% ordtype)) {
+      #if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         ylab <- paste0("PLS-", axes[2])
       }
       if(ordtype == "phy_pls_shapes") {

@@ -1,4 +1,5 @@
-##################################################################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing phy_prcomp, general behavior", code = {
   data(tails)
@@ -21,7 +22,8 @@ test_that(desc = "testing phy_prcomp, general behavior", code = {
   expect_true(all(result1,result2,result3,result4,result5))
 })
 
-##################################################################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing phyalign_comp, general behavior", code = {
   data(tails)
@@ -41,7 +43,8 @@ test_that(desc = "testing phyalign_comp, general behavior", code = {
   expect_true(all(result1,result2,result3,result4,result5))
 })
 
-##################################################################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing bg_prcomp, general behavior", code = {
   data(tails)
@@ -84,7 +87,8 @@ test_that(desc = "testing bg_prcomp, general behavior (with loocv)", code = {
   expect_true(all(result1,result2,result3,result4,result5,result6))
 })
 
-##################################################################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing pls2b, general behavior", code = {
   data(tails)
@@ -148,7 +152,8 @@ test_that(desc = "testing (phylogenetic) pls2b, general behavior (with loocv)", 
 })
 
 
-##################################################################
+######################################################################################
+######################################################################################
 
 test_that(desc = "testing burnaby, general behavior", code = {
   data(tails)
@@ -163,7 +168,7 @@ test_that(desc = "testing burnaby, general behavior", code = {
   result3 <- all(round(burn1$center,10) == round(colMeans(Y),10))
   result4 <- all(round(colMeans(burn1$x),10) == 0)
 
-  result5 <- ncol(burn1$x) == min(ncol(Y) - 1, nrow(Y))
+  #result5 <- ncol(burn1$x) == min(ncol(Y) - 1, nrow(Y)) #since MEE version, burnaby returns all the dimensions
 
   effdims <- 1:(((ncol(Y)-4)/2)-1)
   allo_shapes <- expected_shapes(shapes = geomorph::arrayspecs(Y, k =2, p = 9), x = cbind(X), returnarray = FALSE)
@@ -183,7 +188,7 @@ test_that(desc = "testing burnaby, general behavior", code = {
   result10 <- all(round(burn2$center,10) == round(colMeans(Y),10))
   result11 <- all(round(colMeans(burn2$x),10) == 0)
 
-  result12 <- ncol(burn2$x) == min(ncol(Y) - 1, nrow(Y))
+  #result12 <- ncol(burn2$x) == min(ncol(Y) - 1, nrow(Y)) #since MEE version, burnaby returns all the dimensions
 
   effdims <- 1:(((ncol(Y)-4)/2)-1)
   allo_shapes <- expected_shapes(shapes = geomorph::arrayspecs(Y, k =2, p = 9), x = cbind(X), returnarray = FALSE)
@@ -192,8 +197,8 @@ test_that(desc = "testing burnaby, general behavior", code = {
   result13 <- all(round(apply(nallo_scores, 2, var),10) == 0)
   result14 <- round(Morpho::angle.calc(burn2$rotation[,1], lm(allo_shapes ~ X)$coef[2,])*57.2958, 3) == 90
 
-  expect_true(all(result1,result2,result3,result4,result5,result6,result7,
-                  result8,result9,result10,result11,result12,result13,result14))
+  expect_true(all(result1,result2,result3,result4,result6,result7,
+                  result8,result9,result10,result11,result13,result14))
 })
 
 
@@ -209,7 +214,7 @@ test_that(desc = "testing (phylogenetic) burnaby, general behavior", code = {
   result2 <- round(sum(apply(Y,2,var)),10) >= round(sum(pburn1$sdev^2),10)
 
   result3 <- all(round(pburn1$center,10) == round(apply(Y, 2, phytools::fastAnc, tree = tree)[1,],10))
-  result4 <- ncol(pburn1$x) == min(ncol(Y) - 1, nrow(Y))
+  #result4 <- ncol(pburn1$x) == min(ncol(Y) - 1, nrow(Y)) #since MEE version, burnaby returns all the dimensions
 
   effdims <- 1:(((ncol(Y)-4)/2)-1)
   allo_shapes <- expected_shapes(shapes = geomorph::arrayspecs(Y, k =2, p = 9), x = cbind(X), tree = tree, returnarray = FALSE)
@@ -221,8 +226,9 @@ test_that(desc = "testing (phylogenetic) burnaby, general behavior", code = {
 
   allo_shapes <- expected_shapes(shapes = geomorph::arrayspecs(Y, k =2, p = 9), x = cbind(X),
                                  tree = tree, returnarray = FALSE)
-  axmat <- adapt_model(geomorph::procD.pgls(allo_shapes ~ X, phy = tree))$coef[2,]
-  cent <- colMeans(adapt_model(geomorph::procD.pgls(allo_shapes ~ X, phy = tree))$fitted)
+  gdf <- geomorph::geomorph.data.frame(allo_shapes = allo_shapes, X = X, phy = tree)
+  axmat <- adapt_model(geomorph::procD.pgls(allo_shapes ~ X, phy = phy, data = gdf))$coef[2,]
+  cent <- colMeans(adapt_model(geomorph::procD.pgls(allo_shapes ~ X, phy = phy, data = gdf))$fitted)
   pburn2 <- suppressWarnings(burnaby(x = Y, axmat = axmat, center = cent))
 
   result7 <- nrow(pburn2$x) == nrow(Y)
@@ -230,7 +236,7 @@ test_that(desc = "testing (phylogenetic) burnaby, general behavior", code = {
 
 
   result9 <- all(round(pburn2$center,10) == round(colMeans(mvMORPH::mvgls(allo_shapes ~ X, tree = tree, model = "BM")$fitted),10))
-  result10 <- ncol(pburn2$x) == min(ncol(Y) - 1, nrow(Y))
+  #result10 <- ncol(pburn2$x) == min(ncol(Y) - 1, nrow(Y)) #since MEE version, burnaby returns all the dimensions
 
   effdims <- 1:(((ncol(Y)-4)/2)-1)
   nallo_scores <- proj_eigen(x = allo_shapes, vectors = pburn2$rotation, center = pburn2$center)[,effdims]
@@ -238,7 +244,7 @@ test_that(desc = "testing (phylogenetic) burnaby, general behavior", code = {
   result11 <- all(round(apply(nallo_scores, 2, var),10) == 0)
   result12 <- round(Morpho::angle.calc(pburn2$rotation[,1], lm(allo_shapes ~ X)$coef[2,])*57.2958, 3) == 90
 
-  expect_true(all(result1,result2,result3,result4,result5,result6,result7,result8,result9,result10,
+  expect_true(all(result1,result2,result3,result5,result6,result7,result8,result9,
                   result11,result12))
 })
 

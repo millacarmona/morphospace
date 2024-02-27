@@ -351,6 +351,8 @@ mspace <- function(shapes = NULL,
     data2d <- rev_eigen(ordination$x,
                         ordination$rotation,
                         ordination$center)
+    shapes <- if(datype == "landm") geomorph::arrayspecs(data2d, k = k, p = p) else data2d
+
   }
 
   if(datype == "landm") {
