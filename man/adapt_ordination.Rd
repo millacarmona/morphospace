@@ -8,7 +8,7 @@ adapt_ordination(ordination)
 }
 \arguments{
 \item{ordination}{An object of class \code{"gm.prcomp"}, \code{"bgPCA"},
-\code{"pls2B"}, \code{"phyl.pca"} or \code{"mvgls.pca"}.}
+\code{"PCA"}, \code{"pls2B"}, \code{"pls"}, \code{"phyl.pca"} or \code{"mvgls.pca"}.}
 }
 \value{
 An object of equivalent class with scores, eigenvectors, eigenvalues/

@@ -47,10 +47,11 @@ wireframe (following the format used in \code{Morpho}).}
 \item{datype}{Character; type of shape data used (\code{"landm"} or
 \code{"fcoef"}).}
 
-\item{ordtype}{Character; method used for multivariate ordination
-(\code{"prcomp"}, \code{"gm.prcomp"}, \code{"mvgls.pca"},
-\code{"phyl.pca"}, \code{"bg_prcomp"}, \code{"bgPCA"}, code{"pls_shapes"}
-/ \code{"phy_pls_shapes"}, or \code{"pls2B"}).}
+\item{ordtype}{Character; method used for multivariate ordination (options
+available are \code{"prcomp"}, \code{"gm.prcomp"}, \code{"PCA"},
+\code{"mvgls.pca"}, \code{"phyl.pca"}, \code{"bg_prcomp"}, \code{"bgPCA"},
+\code{"pls_shapes"}, \code{"phy_pls_shapes"}, \code{"pls2B"} and
+\code{"pls"}).}
 
 \item{axes}{Numeric of length 2, indicating the axes to be plotted.}
 

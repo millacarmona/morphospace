@@ -25,13 +25,15 @@ model fit to shape data.}
 to be standardized (i.e., centered); If NULL, the mean of the complete
 sample is used (only available if there is a single explanatory variable).}
 
-\item{newdata}{New data to be standardized. It should be provided as either
-a linear model object fitting the same variables used in \code{model}
-measured in a new sample, or a 2-margin matrix of shape descriptors (only
-for \code{method = "orthogonal"}). See details.}
+\item{newdata}{New data to be standardized using the relationship between
+explanatory and response variable provided in \code{model}. It should be
+provided as either a linear model object fitting the same variables used in
+\code{model} but measured in a new sample of shapes, or a 2-margin matrix
+of shape descriptors (the latter option is only available for
+\code{method = "orthogonal"}). See details.}
 
-\item{tree, evmodel}{Further arguments needed only for orthogonal detrending
-with phylogenetic correction for a specific \code{xvalue}. Ignored
+\item{tree, evmodel}{Further arguments needed when detrending with
+phylogenetic correction for a specific \code{xvalue}. Ignored
 otherwise.}
 }
 \value{
@@ -54,31 +56,24 @@ using the Burnaby approach (\code{method = "orthogonal"}).
 
 If \code{newdata} is provided as an object containing a linear model fit,
 shapes from \code{newdata} are detrended by "correcting" their relationship
-with the explanatory variables using the relationship estimated for the
-data provided in \code{model} ("partial detrending"). Specifically, if
+to the explanatory variables using the one estimated for the data provided
+in \code{model} ("partial detrending"). Specifically, if
 \code{method = "residuals"}, shape residuals will be computed by
 subtracting values fitted to the coefficients from \code{model} to the
 shapes provided in \code{newdata}; whereas if \code{method = "orthogonal"},
-shapes are projected into the subspace resulting from the subtraction of
-the orthogonal subspaces computed for \code{newdata} and \code{model}.
-
-If \code{method = "orthogonal"} and \code{newdata} is provided as a
-2-margin matrix of shape descriptors, the function will instead return the
-new set of shapes, detrended using the relationship estimated for the data
-provided in \code{model} (i.e., the shapes provided in \code{newdata} are
-projected directly into the orthogonal subspace computed for the data
-provided in \code{model}).
+shapes are projected into the shape subspace that is orthogonal to the
+explanatory variables used in \code{model}.
 
 The grand mean of the sample of shapes is used by default to center shape
 variation, although an \code{xvalue} specifying a level or numeric value of
-the explanatory variable in \code{model} to center shapes at can be
-provided. This shift can only be applied for one explanatory variable.
+the explanatory variable from \code{model} to center shapes at can be
+provided. This can only be applied for one explanatory variable.
 
 If a phylogenetic linear model is supplied to \code{model} (e.g., a linear
 model fitted using \code{\link[geomorph]{procD.pgls}} or
 \code{\link[mvMORPH]{mvgls}}, the procedure will use
 phylogenetically-corrected coefficients and phylogenetic mean (see Revell,
-2009) as calculated by the source function.
+2009), as calculated by the source function.
 }
 \examples{
  #### Landmark data

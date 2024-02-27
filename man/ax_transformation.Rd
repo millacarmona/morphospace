@@ -12,9 +12,9 @@ ax_transformation(obj, axis = 1, mag = 1)
 model fitting a single explanatory variable to shape data, or an object of
 class \code{"prcomp"}, \code{"bg_prcomp"}, \code{"pls_shapes"},
 \code{"phy_pls_shapes"}, \code{"burnaby"}, \code{"phy_burnaby"},
-\code{"gm.prcomp"}, \code{"bgPCA"}, \code{"pls2B"}, \code{"phyl.pca"} or
-\code{"mvgls.pca"} with the results of multivariate ordination of shape
-data.}
+\code{"gm.prcomp"}, \code{"pls"}, \code{"bgPCA"}, \code{"pls2B"},
+\code{"phyl.pca"}, \code{"mvgls.pca"} or \code{"PCA"} with the results of
+multivariate ordination of shape data.}
 
 \item{axis}{An optional integer value specifying the axis of the multivariate
 ordination which is to be represented.}
@@ -88,7 +88,8 @@ Newsletter, 72(620), 14-27.
 \code{\link[stats]{lm}}, \code{\link[geomorph]{procD.lm}},
 \code{\link[geomorph]{procD.pgls}}, \code{\link[RRPP]{lm.rrpp}},
 \code{\link[mvMORPH]{mvols}}, \code{\link[mvMORPH]{mvgls}},
-\code{\link[geomorph]{gm.prcomp}}, \code{\link[Morpho]{groupPCA}},
-\code{\link[Morpho]{pls2B}}, \code{\link[phytools]{phyl.pca}},
-\code{\link[mvMORPH]{mvgls.pca}}
+\code{\link[geomorph]{gm.prcomp}}, \code{\link[geomorph]{two.b.pls}},
+\code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
+\code{\link[phytools]{phyl.pca}}, \code{\link[mvMORPH]{mvgls.pca}},
+\code{\link[Momocs]{PCA}}
 }

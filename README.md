@@ -269,10 +269,10 @@ as a couple of new features:
 
 - The internal behavior of the `mspace` workflow has been modified so
   objects containing multivariate ordinations produced by `geomorph`,
-  `Morpho`, `mvMORPH` and `phytools` can be now used as input.
+  `Morpho`, `mvMORPH`, `Momocs` and `phytools` can be now used as input.
 
-- `mspace` can now be fed with an object containing a multivariate
-  ordination directly. This is implemented through an alternative
+- `mspace` can now be fed with objects containing multivariate
+  ordinations directly. This is implemented through an alternative
   combination of arguments for the `mspace` function (`ord` + `datype`
   as an alternative to `shapes` + `FUN` + `...`).
 
@@ -280,12 +280,13 @@ as a couple of new features:
   `detrend_shapes` can now be fed with objects containing a linear model
   fitted using functions from `geomorph`, `RRPP` and `mvMORPH`. Internal
   phylogenetic correction of linear coefficients in `detrend_shapes` has
-  been abandoned (and so has the `tree` argument), relying now on the
-  (phylogenetic) linear model provided.
+  been abandoned, relying now on the results of the (phylogenetic)
+  linear model provided by the user.
 
 - `phy_prcomp` and the experimental `phyalign_comp` have been removed
-  (users interested in these methods should use `phytools::phyl.pca`,
-  `geomorph::gm.prcomp` and/or `mvMORPH::mvgls.pca`).
+  (users interested in these methods should refer to
+  `phytools::phyl.pca`, `geomorph::gm.prcomp` and/or
+  `mvMORPH::mvgls.pca`).
 
 - Estimation of ancestral shapes (performed internally by
   `expected_shapes`, `detrend_shapes`, `proj_phylogeny`, `pls2b`,
@@ -301,7 +302,7 @@ as a couple of new features:
   categorical variables via `plot_mspace`.
 
 - Tip and node labels can now be included in phylomorphospaces,
-  phenogram and hybrid phylomorphospaces.
+  phenograms and hybrid phylomorphospaces.
 
 If you find any bugs please send me an email at `pablomillac@gmail.com`.
 Thanks!!

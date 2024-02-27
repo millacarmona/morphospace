@@ -13,9 +13,9 @@ proj_axis(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...)
 \code{"lm.rrpp"}, \code{"mvgls"} or \code{"mvols"}, containing a linear
 model fit to shape data, or an object of class \code{"prcomp"},
 \code{"bg_prcomp"}, \code{"pls_shapes"}, \code{"phy_pls_shapes"},
-\code{"burnaby"}, \code{"phy_burnaby"}, \code{"gm.prcomp"}, \code{"bgPCA"},
-\code{"pls2B"}, \code{"phyl.pca"} or \code{"mvgls.pca"} with the results of
-multivariate ordination of shape data.}
+\code{"burnaby"}, \code{"phy_burnaby"}, \code{"gm.prcomp"}, \code{"pls"},
+\code{"bgPCA"}, \code{"pls2B"}, \code{"phyl.pca"}, \code{"mvgls.pca"} or
+\code{"PCA"} with the results of multivariate ordination of shape data.}
 
 \item{axis}{Optional; which axis from \code{obj} should to be projected?}
 
@@ -123,6 +123,7 @@ mspace(shapes, links = links, mag = 0.7, axes = c(1,2)) \%>\%
 \code{\link[geomorph]{procD.lm}}, \code{\link[geomorph]{procD.pgls}},
 \code{\link[RRPP]{lm.rrpp}}, \code{\link[mvMORPH]{mvols}},
 \code{\link[mvMORPH]{mvgls}}, \code{\link[geomorph]{gm.prcomp}},
-\code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
-\code{\link[phytools]{phyl.pca}}, \code{\link[mvMORPH]{mvgls.pca}}
+\code{\link[geomorph]{two.b.pls}}, \code{\link[Morpho]{groupPCA}},
+\code{\link[Morpho]{pls2B}}, \code{\link[phytools]{phyl.pca}},
+\code{\link[mvMORPH]{mvgls.pca}}, \code{\link[Momocs]{PCA}}
 }

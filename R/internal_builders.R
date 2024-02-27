@@ -540,7 +540,7 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #'   their use in the mspace workflow. Used internally.
 #'
 #' @param ordination An object of class \code{"gm.prcomp"}, \code{"bgPCA"},
-#'    \code{"pls2B"}, \code{"phyl.pca"} or \code{"mvgls.pca"}.
+#'    \code{"PCA"}, \code{"pls2B"}, \code{"pls"}, \code{"phyl.pca"} or \code{"mvgls.pca"}.
 #'
 #' @return An object of equivalent class with scores, eigenvectors, eigenvalues/
 #'    standard deviations, and original centroid arranged so they can be used
@@ -1072,10 +1072,11 @@ morphogrid <- function(ordination,
 #'   \code{\link{build_template2d}}).
 #' @param datype Character; type of shape data used (\code{"landm"} or
 #'   \code{"fcoef"}).
-#' @param ordtype Character; method used for multivariate ordination
-#'   (\code{"prcomp"}, \code{"gm.prcomp"}, \code{"mvgls.pca"},
-#'   \code{"phyl.pca"}, \code{"bg_prcomp"}, \code{"bgPCA"}, code{"pls_shapes"}
-#'   / \code{"phy_pls_shapes"}, or \code{"pls2B"}).
+#' @param ordtype Character; method used for multivariate ordination (options
+#'   available are \code{"prcomp"}, \code{"gm.prcomp"}, \code{"PCA"},
+#'   \code{"mvgls.pca"}, \code{"phyl.pca"}, \code{"bg_prcomp"}, \code{"bgPCA"},
+#'   \code{"pls_shapes"}, \code{"phy_pls_shapes"}, \code{"pls2B"} and
+#'   \code{"pls"}).
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
 #' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
 #'   factors for the width and height of the frame, respectively.
@@ -1282,10 +1283,11 @@ plot_morphogrid2d <- function(x = NULL,
 #'   TPS interpolation to produce the set of background shell models.
 #' @param refshape reference shape (i.e., the mean landmark configuration)
 #'   corresponding to the mesh provided in \code{template}.
-#' @param ordtype Character; method used for multivariate ordination
-#'   (\code{"prcomp"}, \code{"gm.prcomp"}, \code{"mvgls.pca"},
-#'   \code{"phyl.pca"}, \code{"bg_prcomp"}, \code{"bgPCA"}, code{"pls_shapes"}
-#'   / \code{"phy_pls_shapes"}, or \code{"pls2B"}).
+#' @param ordtype Character; method used for multivariate ordination (options
+#'   available are \code{"prcomp"}, \code{"gm.prcomp"}, \code{"PCA"},
+#'   \code{"mvgls.pca"}, \code{"phyl.pca"}, \code{"bg_prcomp"}, \code{"bgPCA"},
+#'   \code{"pls_shapes"}, \code{"phy_pls_shapes"}, \code{"pls2B"} and
+#'   \code{"pls"}).
 #' @param axes Numeric of length 2, indicating the axes to be plotted.
 #' @param rotmat Optional rotation matrix for background shape models. If
 #'   \code{NULL}, the user will be asked to define a preferred orientation.

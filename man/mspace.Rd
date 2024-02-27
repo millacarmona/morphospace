@@ -43,10 +43,12 @@ mspace(
 \arguments{
 \item{shapes}{Shape data.}
 
-\item{ord}{Optional object of class \code{"gm.prcomp"}, \code{"bgPCA"},
-\code{"pls2B"}, \code{"phyl.pca"} or \code{"mvgls.pca"}, containing the
-results of multivariate ordination of shape data. To be used instead of
-the \code{shapes} argument.}
+\item{ord}{Optional object of class \code{"prcomp"}, \code{"bg_prcomp"},
+\code{"pls_shapes"}, \code{"phy_pls_shapes"}, \code{"burnaby"},
+\code{"phy_burnaby"}, \code{"gm.prcomp"}, \code{"pls"}, \code{"bgPCA"},
+\code{"pls2B"}, \code{"phyl.pca"}, \code{"mvgls.pca"} or \code{"PCA"},
+containing the results of multivariate ordination of shape data. To be
+used instead of the \code{shapes} argument.}
 
 \item{axes}{Numeric of length 1 (univariate morphospace) or 2 (bivariate
 morphospace), indicating the axes to be plotted.}
@@ -61,11 +63,10 @@ data). See details below.}
 
 \item{FUN}{The function (method) to be used for ordination of shape
 variation. Supported alternatives include \code{\link[stats]{prcomp}},
-\code{\link{bg_prcomp}}, \code{\link{pls_shapes}},
-\code{\link[geomorph]{gm.prcomp}}, \code{\link[geomorph]{procD.lm}},
-\code{\link[geomorph]{procD.pgls}}, \code{\link[Morpho]{groupPCA}},
-\code{\link[Morpho]{pls2B}} and \code{\link[phytools]{phyl.pca}}. Ignored
-if \code{ord} is provided.}
+\code{\link{bg_prcomp}}, \code{\link{pls_shapes}}, \code{\link{burnaby}},
+\code{\link[geomorph]{gm.prcomp}}, \code{\link[geomorph]{two.b.pls}},
+\code{\link[Morpho]{groupPCA}}, \code{\link[phytools]{phyl.pca}} and
+\code{\link[Momocs]{PCA}}. Ignored if \code{ord} is provided.}
 
 \item{datype}{Character; the type of shape data used (either \code{"fcoef"}
 or \code{"landm"}). Only required if \code{ord} is provided instead of
@@ -151,17 +152,27 @@ and depict shape variation represented by the resulting ordination axes.
 This function is the heart of the \code{morphospace} workflow. It
 computes a new ordination space from a sample of normalized shapes using
 a variety of eigenanalysis-based multivariate methods. Alternatively,
-the results of multivariate ordination achieved using functions from
-\code{geomorph}, \code{Morpho}, \code{phytools} or \code{mvMORPH} can be
-provided directly using the \code{ord} argument. Overall, the user can use
-a range of ordination methods to capture the signal of interest that
-include PCA, Between-groups PCA, Phylogenetic PCA,
-Phylogenetically-aligned component analysis, 2-blocks PLS, Phylogenetic
-2-block PLS, and the Burnaby approach for orthogonalization against
-external variables (also including a phylogenetic variant).
+the results of multivariate ordinations achieved using functions from
+\code{geomorph}, \code{Morpho}, \code{Momocs}, \code{phytools} or
+\code{mvMORPH} can be provided directly using the \code{ord} argument
+(this requires specification of the \code{datype} argument, and also
+of \code{p} and \code{k} for landmark data).
 
-\code{mspace} will also generate a series of shape models depicting the
-range of variation. The resulting \code{"mspace"} object stores all the
+In total, the user can choose from a range of ordination methods to
+capture the signal of interest including PCA, Between-groups PCA,
+Phylogenetic PCA, 2-blocks PLS, Phylogenetically corrected 2-block PLS,
+Phylogenetically-aligned component analysis, and the Burnaby approach for
+orthogonalization against nuisance variables (also including a
+phylogenetically corrected variant).
+
+Have in mind that when using the \code{geomorph::two.b.pls} or
+\code{Morpho::pls2B} in the context of \code{mspace}, it is assumed that
+the shape variables the user wants to use to generate the morphospace are
+provided in the second (aka response) block (i.e., arguments \code{A1} and
+\code{X}, respectively).
+
+\code{mspace} will generate a series of shape models depicting the range
+of variation. The resulting \code{"mspace"} object stores all the
 information necessary to project and/or retrieve new shapes into the
 ordination space. The latter can be populated using the \code{proj_*}
 family of functions and the \code{\%>\%} operator from \code{magrittr}.
@@ -328,9 +339,10 @@ morphosp_F
 \code{\link{proj_phylogeny}}, \code{\link{proj_axis}},
 \code{\link{proj_landscape}}, \code{\link{extract_shapes}},
 \code{\link{prcomp}}, \code{\link{bg_prcomp}}, \code{\link{pls_shapes}},
+\code{\link[geomorph]{gm.prcomp}}, \code{\link[geomorph]{two.b.pls}},
+\code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
+\code{\link[phytools]{phyl.pca}}, \code{\link[mvMORPH]{mvgls.pca}},
 \code{\link[geomorph]{gm.prcomp}}, \code{\link[Morpho]{groupPCA}},
 \code{\link[Morpho]{pls2B}}, \code{\link[phytools]{phyl.pca}},
-\code{\link[mvMORPH]{mvgls.pca}}, \code{\link[geomorph]{gm.prcomp}},
-\code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
-\code{\link[phytools]{phyl.pca}}, \code{\link[mvMORPH]{mvgls.pca}}
+\code{\link[mvMORPH]{mvgls.pca}}, \code{\link[Momocs]{PCA}}
 }

@@ -278,12 +278,14 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'   sample is used (only available if there is a single explanatory variable).
 #' @param method Method used for detrending; options are \code{"orthogonal"}
 #'   (the default) and \code{"residuals"} (see details).
-#' @param newdata New data to be standardized. It should be provided as either
-#'   a linear model object fitting the same variables used in \code{model}
-#'   measured in a new sample, or a 2-margin matrix of shape descriptors (only
-#'   for \code{method = "orthogonal"}). See details.
-#' @param tree,evmodel Further arguments needed only for orthogonal detrending
-#'   with phylogenetic correction for a specific \code{xvalue}. Ignored
+#' @param newdata New data to be standardized using the relationship between
+#'   explanatory and response variable provided in \code{model}. It should be
+#'   provided as either a linear model object fitting the same variables used in
+#'   \code{model} but measured in a new sample of shapes, or a 2-margin matrix
+#'   of shape descriptors (the latter option is only available for
+#'   \code{method = "orthogonal"}). See details.
+#' @param tree,evmodel Further arguments needed when detrending with
+#'   phylogenetic correction for a specific \code{xvalue}. Ignored
 #'   otherwise.
 #'
 #' @details This function detrends (or standardizes, or corrects) shapes from
@@ -300,26 +302,19 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'   \code{method = "residuals"}, shape residuals will be computed by
 #'   subtracting values fitted to the coefficients from \code{model} to the
 #'   shapes provided in \code{newdata}; whereas if \code{method = "orthogonal"},
-#'   shapes are projected into the subspace resulting from the subtraction of
-#'   the orthogonal subspaces computed for \code{newdata} and \code{model}.
-#'
-#'   If \code{method = "orthogonal"} and \code{newdata} is provided as a
-#'   2-margin matrix of shape descriptors, the function will instead return the
-#'   new set of shapes, detrended using the relationship estimated for the data
-#'   provided in \code{model} (i.e., the shapes provided in \code{newdata} are
-#'   projected directly into the orthogonal subspace computed for the data
-#'   provided in \code{model}).
+#'   shapes are projected into the shape subspace that is orthogonal to the
+#'   explanatory variables used in \code{model}.
 #'
 #'   The grand mean of the sample of shapes is used by default to center shape
 #'   variation, although an \code{xvalue} specifying a level or numeric value of
-#'   the explanatory variable in \code{model} to center shapes at can be
-#'   provided. This shift can only be applied for one explanatory variable.
+#'   the explanatory variable from \code{model} to center shapes at can be
+#'   provided. This can only be applied for one explanatory variable.
 #'
 #'   If a phylogenetic linear model is supplied to \code{model} (e.g., a linear
 #'   model fitted using \code{\link[geomorph]{procD.pgls}} or
 #'   \code{\link[mvMORPH]{mvgls}}, the procedure will use
 #'   phylogenetically-corrected coefficients and phylogenetic mean (see Revell,
-#'   2009) as calculated by the source function.
+#'   2009), as calculated by the source function.
 #'
 #' @return A 2-margins matrix, of dimensions \code{n x (k x p)} for the case of
 #'   landmark data and \code{n x (4 x nb.h)} for the case of Fourier data (where
@@ -935,9 +930,9 @@ correct_efourier<-function(ef, index = NULL) {
 #'   model fitting a single explanatory variable to shape data, or an object of
 #'   class \code{"prcomp"}, \code{"bg_prcomp"}, \code{"pls_shapes"},
 #'   \code{"phy_pls_shapes"}, \code{"burnaby"}, \code{"phy_burnaby"},
-#'   \code{"gm.prcomp"}, \code{"bgPCA"}, \code{"pls2B"}, \code{"phyl.pca"} or
-#'   \code{"mvgls.pca"} with the results of multivariate ordination of shape
-#'   data.
+#'   \code{"gm.prcomp"}, \code{"pls"}, \code{"bgPCA"}, \code{"pls2B"},
+#'   \code{"phyl.pca"}, \code{"mvgls.pca"} or \code{"PCA"} with the results of
+#'   multivariate ordination of shape data.
 #' @param axis An optional integer value specifying the axis of the multivariate
 #'   ordination which is to be represented.
 #' @param mag Numeric; magnifying factor for representing shape transformation.
@@ -956,9 +951,10 @@ correct_efourier<-function(ef, index = NULL) {
 #'   \code{\link[stats]{lm}}, \code{\link[geomorph]{procD.lm}},
 #'   \code{\link[geomorph]{procD.pgls}}, \code{\link[RRPP]{lm.rrpp}},
 #'   \code{\link[mvMORPH]{mvols}}, \code{\link[mvMORPH]{mvgls}},
-#'   \code{\link[geomorph]{gm.prcomp}}, \code{\link[Morpho]{groupPCA}},
-#'   \code{\link[Morpho]{pls2B}}, \code{\link[phytools]{phyl.pca}},
-#'   \code{\link[mvMORPH]{mvgls.pca}}
+#'   \code{\link[geomorph]{gm.prcomp}}, \code{\link[geomorph]{two.b.pls}},
+#'   \code{\link[Morpho]{groupPCA}}, \code{\link[Morpho]{pls2B}},
+#'   \code{\link[phytools]{phyl.pca}}, \code{\link[mvMORPH]{mvgls.pca}},
+#'   \code{\link[Momocs]{PCA}}
 #'
 #' @references
 #' MacLeod, N. (2009). \emph{Form & shape models}. Palaeontological Association
