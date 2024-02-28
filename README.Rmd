@@ -87,17 +87,20 @@ msp <- mspace(shapes = shapes, links = wf, cex.ldm = 5) %>%
 ```
 
 
-Once the `"mspace"` object has been created, the `plot_mspace` function can be used to either regenerate/modify the plot, add a legend, or to combine morphometric axes with other non-shape variables to produce 'hybrid' morphospaces. For example, PC1 can be plotted against size to explore allometric patterns, or against taxonomic classification to assess patterns of intra- and/or interspecific variation.
+Once the `"mspace"` object has been created, the `plot_mspace` function can be used to either regenerate/modify the plot, add a legend, or to combine morphometric axes with other non-shape variables to produce 'hybrid' morphospaces. For example, PC1 can be plotted against size to explore allometric patterns.
 
 
 ```{r}
-layout(rbind(c(1,2)))
-
 # Plot PC1 against log-size, add legend
 plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
             phylo = FALSE, xlab = "Log-size", legend = TRUE)
+```
 
+Rr against taxonomic classification to assess patterns of intra- and/or interspecific variation.
+
+
+```{r}
 # Plot PC1 against species classification
 plot_mspace(msp, x = spp, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
@@ -106,7 +109,7 @@ plot_mspace(msp, x = spp, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
 ```
 
 
-Or ordination axes could be combined with a phylogenetic tree to create a phenogram:
+Alternatively, ordination axes can be combined with a phylogenetic tree to create a phenogram:
 
 
 ```{r}

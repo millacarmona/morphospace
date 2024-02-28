@@ -104,12 +104,9 @@ Once the `"mspace"` object has been created, the `plot_mspace` function
 can be used to either regenerate/modify the plot, add a legend, or to
 combine morphometric axes with other non-shape variables to produce
 ‘hybrid’ morphospaces. For example, PC1 can be plotted against size to
-explore allometric patterns, or against taxonomic classification to
-assess patterns of intra- and/or interspecific variation.
+explore allometric patterns.
 
 ``` r
-layout(rbind(c(1,2)))
-
 # Plot PC1 against log-size, add legend
 plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
@@ -118,18 +115,20 @@ plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
-``` r
+Rr against taxonomic classification to assess patterns of intra- and/or
+interspecific variation.
 
+``` r
 # Plot PC1 against species classification
 plot_mspace(msp, x = spp, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
             alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
             phylo = FALSE, xlab = "Log-size", legend = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
-Or ordination axes could be combined with a phylogenetic tree to create
-a phenogram:
+Alternatively, ordination axes can be combined with a phylogenetic tree
+to create a phenogram:
 
 ``` r
 # Plot vertical phenogram using PC1, add a legend
@@ -137,7 +136,7 @@ plot_mspace(msp, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
             col.groups = 1:nlevels(spp), ylab = "Time", legend = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
 
 `morphospace` can also handle closed outlines (in the form of elliptic
 Fourier coefficients) and 3D landmark data, as shown below briefly using
@@ -156,7 +155,7 @@ mspace(shapes, mag = 1, nh = 5, nv = 4, bg.model = "light gray") %>%
   proj_groups(shapes = shapes, groups = spp, alpha = 0.5, ellipse = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
 ``` r
 # Load data
@@ -183,7 +182,7 @@ mspace(shapes, mag = 1, bg.model = "gray", cex.ldm = 0, template = meanmesh,
 #> DONE.
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
 Aside from working with these types of morphometric data, `morphospace`
 provides functions to perform some useful shape operations, use TPS
