@@ -49,12 +49,7 @@
 #' plot(extshapes_arr[,,2])
 #' lineplot(extshapes_arr[,,2], tails$links) ; title("positive")
 rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + center) } #!
-# rev_eigen <- function(scores, vectors, center) {
-#   x0 <- scale(scores %*% t(vectors), scale = FALSE, center = rbind(center))
-#   x <- matrix(as.numeric(x0), nrow = nrow(scores), ncol = ncol(vectors), byrow = FALSE)
-#   rownames(x) <- rownames(scores)
-#   return(x)
-# }
+
 
 ################################################################################
 
@@ -152,7 +147,6 @@ svd_block <- function(x, y, tree = NULL, evmodel) {
   y <- cbind(y)
 
   if(!is.null(tree)) {
-    #C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)] #!
     adj_tree <- mvMORPH::mvgls(y ~ x, tree = tree, model = evmodel)$corrSt$phy
     C <- ape::vcv.phylo(adj_tree)[rownames(x), rownames(x)]
     xy <- cbind(x,y)
@@ -598,29 +592,8 @@ adapt_ordination <- function(ordination) {
     names(ordination)[which(names(ordination) == "values")] <- "sdev"
   }
 
-  # if(class(ordination)[1] == "pls2B") {
-  #   ordination$xrotation <- ordination$svd$u
-  #   ordination$yrotation <- ordination$svd$v
-  #   ordination$sdev <- sqrt(ordination$svd$d)
-  #   ordination$svd <- NULL
-  #
-  #   names(ordination)[which(names(ordination) == "Xscores")] <- "xscores"
-  #   names(ordination)[which(names(ordination) == "Yscores")] <- "yscores"
-  #
-  #   ordination <- list(sdev = apply(ordination$yscores, 2, stats::sd),
-  #                      rotation = ordination$yrotation,
-  #                      x = ordination$yscores,
-  #                      x2 = ordination$xscores,
-  #                      center = ordination$ycenter,
-  #                      totvar = ordination$ytotvar,
-  #                      raw_pls = ordination)
-  # } #!
-
 
   if(any(class(ordination)[1] == c("pls2B", "pls"))) {
-    # ordination$xrotation <- ordination$svd$u
-    # ordination$yrotation <- if(class(ordination)[1] == "pls2B")
-    #   ordination$svd$v else t(ordination$svd$vt)
     if(class(ordination)[1] == "pls2B") {
       ordination$xrotation <- ordination$svd$u
       ordination$yrotation <- ordination$svd$v
@@ -658,9 +631,6 @@ adapt_ordination <- function(ordination) {
 
     class(ordination) <- class
   }
-
-
-
   return(ordination)
 }
 
@@ -714,38 +684,6 @@ adapt_model <- function(model) {
     }
   }
 
-  #!
-  # if(any(class(model)[1] == c("mvgls", "mvols"))) {
-  #   coefs <- model$coefficients
-  #   y <- model$variables$Y
-  #   # x <- cbind(model$variables$X)
-  #   x <- cbind(model$variables$X[,-1])
-  #   grandmean <- colMeans(model$fitted)
-  #   modtype <- if(class(model)[1] == "mvgls") "pgls" else "ols"
-  # }
-
-
-  # if(any(class(model)[1] == c("mvgls", "mvols"))) {
-  #   coefs <- model$coefficients
-  #   y <- model$variables$Y
-  #   x <- cbind(model$variables$X[,-1])
-  #
-  #   if(ncol(x) > 0) {
-  #     tree <- model$variables$tree
-  #     evmodel <- model$model
-  #
-  #     xname <- colnames(model$variables$X)[-1]
-  #     x_ <- if(ncol(x) == 1) cbind(x,x) else x
-  #     uvmod <- mvMORPH::mvgls(x_ ~ 1, tree = tree, model = evmodel)
-  #     ancx <- data.frame(mvMORPH::ancestral(uvmod)[,ncol(x)])
-  #     colnames(ancx) <- xname
-  #     grandmean <- mvMORPH::ancestral(object = model, newdata = ancx)[1,]
-  #   } else grandmean <- colMeans(model$fitted)
-  #
-  #   modtype <- if(class(model)[1] == "mvgls") "pgls" else "ols"
-  # }
-
-
   if(any(class(model)[1] == c("mvgls", "mvols"))) {
     rnames <- rownames(stats::model.matrix(model))
     coefs <- model$coefficients
@@ -775,22 +713,9 @@ adapt_model <- function(model) {
     }
 
     fitted <- model$fitted
-    # tree <- model$variables$tree
-    # evmodel <- model$model
-    # mvmod <- mvMORPH::mvgls(y ~ 1, tree = tree, model = evmodel)
-    #grandmean <- colMeans(mvmod$fitted) #!
     grandmean <- colMeans(model$fitted)
 
     modtype <- if(class(model)[1] == "mvgls") "pgls" else "ols"
-
-    # y <- y[rownames(stats::model.matrix(model)), ]
-    # x_ <- x
-    # x <- x[rownames(stats::model.matrix(model)), ]
-    # if(is.null(dim(x))) {
-    #   x <- data.frame(x)
-    #   colnames(x) <- colnames(x_)
-    #   rownames(x) <- rownames(x_)
-    # } #!
     if(modtype == "pgls") {
       fitted <- fitted[rnames,]
       y <- y[rnames,]
@@ -816,8 +741,6 @@ adapt_model <- function(model) {
       grandmean <- model$LM$gls.mean
       modtype <- "gls"
     }
-    # y <- model$LM$data[[1]]
-    # x <- cbind(setNames(model$LM$data[[2]], rownames(y))) #!
     y <- model$LM$Y
     x <- model$LM$data[-1]
   }
@@ -942,7 +865,6 @@ morphogrid <- function(ordination,
 
     if(!is.null(x)) {
       if(is.null(xlim)) {
-        # plotframe_x <- range(x) #!
         plotframe_x <- range(as.numeric(x))
       } else {
         plotframe_x <- sort(xlim)
@@ -957,7 +879,6 @@ morphogrid <- function(ordination,
 
     if(!is.null(y)) {
       if(is.null(ylim)){
-        # plotframe_y <- range(y) #!
         plotframe_y <- range(as.numeric(y))
       } else {
         plotframe_y <- sort(ylim)
@@ -1153,7 +1074,6 @@ plot_morphogrid2d <- function(x = NULL,
       xlab <- "x"
     } else {
       if(any(c("prcomp", "PCA") %in% ordtype)) {
-      #if(ordtype == "prcomp") {
         xlab <- paste0("PC", axes[1])
       }
       if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
@@ -1166,7 +1086,6 @@ plot_morphogrid2d <- function(x = NULL,
         xlab <- paste0("PAC", axes[1])
       }
       if(any(c("pls_shapes", "pls2B", "pls") %in% ordtype)) {
-      #if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         xlab <- paste0("PLS-", axes[1])
       }
       if(ordtype == "phy_pls_shapes") {
@@ -1182,7 +1101,6 @@ plot_morphogrid2d <- function(x = NULL,
       ylab <- "y"
     } else {
       if(any(c("prcomp", "PCA") %in% ordtype)) {
-      #if(ordtype == "prcomp") {
         ylab <- paste0("PC", axes[2])
       }
       if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
@@ -1195,7 +1113,6 @@ plot_morphogrid2d <- function(x = NULL,
         ylab <- paste0("PAC", axes[2])
       }
       if(any(c("pls_shapes", "pls2B", "pls") %in% ordtype)) {
-      #if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         ylab <- paste0("PLS-", axes[2])
       }
       if(ordtype == "phy_pls_shapes") {
@@ -1214,9 +1131,6 @@ plot_morphogrid2d <- function(x = NULL,
     ylim <- c(ylim[1] + (diff(ylim) * (1 - adj_frame[2]) / 2),
               ylim[2] - (diff(ylim) * (1 - adj_frame[2]) / 2))
 
-    # graphics::plot(morphogrid$models_mat, type = "n", xlim = xlim, ylim = ylim ,
-    #                xlab = xlab, ylab = ylab)
-    ###!
     graphics::plot(morphogrid$models_mat, type = "n", xlim = xlim, ylim = ylim ,
                    xlab = "", ylab = "", axes = FALSE)
     graphics::box()
@@ -1235,8 +1149,6 @@ plot_morphogrid2d <- function(x = NULL,
       graphics::axis(side = 2)
       graphics::mtext(side = 2, line = 3, text = ylab)
     }
-
-    ####!
 
     if(models) {
 
@@ -1367,7 +1279,7 @@ plot_morphogrid3d <- function(x = NULL,
                               links = NULL,
                               ordtype,
                               axes,
-                              rotmat = NULL, ####
+                              rotmat = NULL,
                               xlim = NULL,
                               ylim = NULL,
                               xlab = NULL,
@@ -1396,7 +1308,6 @@ plot_morphogrid3d <- function(x = NULL,
       xlab <- "x"
     } else {
       if(any(c("prcomp", "PCA") %in% ordtype)) {
-      #if(ordtype == "prcomp") {
         xlab <- paste0("PC", axes[1])
       }
       if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
@@ -1409,7 +1320,6 @@ plot_morphogrid3d <- function(x = NULL,
         xlab <- paste0("PAC", axes[1])
       }
       if(any(c("pls_shapes", "pls2B", "pls") %in% ordtype)) {
-      #if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         xlab <- paste0("PLS-", axes[1])
       }
       if(ordtype == "phy_pls_shapes") {
@@ -1425,7 +1335,6 @@ plot_morphogrid3d <- function(x = NULL,
       ylab <- "y"
     } else {
       if(any(c("prcomp", "PCA") %in% ordtype)) {
-      #if(ordtype == "prcomp") {
         ylab <- paste0("PC", axes[2])
       }
       if(any(c("bg_prcomp", "bgPCA") %in% ordtype)) {
@@ -1438,7 +1347,6 @@ plot_morphogrid3d <- function(x = NULL,
         ylab <- paste0("PAC", axes[2])
       }
       if(any(c("pls_shapes", "pls2B", "pls") %in% ordtype)) {
-      #if(any(c("pls_shapes", "pls2B") %in% ordtype)) {
         ylab <- paste0("PLS-", axes[2])
       }
       if(ordtype == "phy_pls_shapes") {
@@ -1521,8 +1429,6 @@ plot_morphogrid3d <- function(x = NULL,
 
 
   if(plot) {
-    #graphics::plot(0, type = "n", xlim = new_xlim, ylim = new_ylim, xlab = xlab, ylab = ylab)
-    ###!
     graphics::plot(0, type = "n", xlim = new_xlim, ylim = new_ylim,
                    xlab = "", ylab = "", axes = FALSE)
     graphics::box()
@@ -1541,7 +1447,6 @@ plot_morphogrid3d <- function(x = NULL,
       graphics::axis(side = 2)
       graphics::mtext(side = 2, line = 3, text = ylab)
     }
-    ####!
     if(plot.models) {
 
       for(i in seq_len((length(models) - 1))) {
@@ -1768,16 +1673,6 @@ plot_phenogram <- function(x = NULL,
   }
   add_labels(phyloxy[tree$tip.label,], labels.tips)
   add_labels(phyloxy[-seq_len(ntips),], labels.nodes)
-  # if(is.character(labels.tips)) {
-  #   label.scores <- phyloxy[tree$tip.label,][labels.tips,]
-  #   label.text <- labels.tips
-  # } else {
-  #   if(labels.tips) {
-  #     label.scores <- phyloxy[tree$tip.label,]
-  #     label.text <- rownames(phyloxy[tree$tip.label,])
-  #   }
-  # }
-  # graphics::text(label.scores, label.text, pos = 1) #!
 }
 
 
@@ -1963,12 +1858,6 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1, plot
   })
   ymax <- max(unlist(lapply(dens, function(x) {x$y})))
 
-
-  # for(i in seq_len(nlevels(fac))) {
-  #   graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
-  #                     lty = lty[i], col = grDevices::adjustcolor(col[i], alpha.f = alpha))
-  # }
-  ###!
   if(plot) {
     for(i in seq_len(nlevels(fac))) {
       graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
@@ -1977,7 +1866,6 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1, plot
   } else {
     return(list(ymax = ymax, dens = dens))
   }
-  ###!
 }
 
 

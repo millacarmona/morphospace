@@ -3844,12 +3844,6 @@ test_that(desc = "testing ax_transformations, accuracy of shapes (extended)", co
   pls2 <- Morpho::pls2B(y = geomorph::two.d.array(shapes), x = sizes)
   pls3 <- geomorph::two.b.pls(A2 = geomorph::two.d.array(shapes), A1 = sizes)
 
-  paca1 <- geomorph::gm.prcomp(A = geomorph::two.d.array(expected_shapes(shapes, species)),
-                               phy = tree, align.to.phy = TRUE, GLS = FALSE)
-  paca2 <- morphospace:::phyalign_comp(x = geomorph::two.d.array(expected_shapes(shapes, species)),
-                                       tree = tree)
-  paca2$center <- paca1$center
-
 
   ext_lm <- ax_transformation(obj = model1)
   ext_procD.lm <- ax_transformation(obj = model2)
@@ -3874,10 +3868,6 @@ test_that(desc = "testing ax_transformations, accuracy of shapes (extended)", co
   ext_pls2B <- ax_transformation(obj = pls2)
   ext_two.b.pls <- ax_transformation(obj = pls3)
 
-  ext_gm.prcomp3 <- ax_transformation(obj = paca1)
-  ext_phyalign_comp <- ax_transformation(obj = paca2)
-
-
 
   result1 <- all(round(arrayspecs(ext_lm, k = 2, p = 9)[,,1],5) == round(arrayspecs(ext_procD.lm, k = 2, p = 9)[,,1],5))
   result2 <- all(round(arrayspecs(ext_lm, k = 2, p = 9)[,,1],5) == round(arrayspecs(ext_mvols, k = 2, p = 9)[,,1],5))
@@ -3895,9 +3885,6 @@ test_that(desc = "testing ax_transformations, accuracy of shapes (extended)", co
 
   result10 <- all(round(arrayspecs(ext_pls2b, k = 2, p = 9)[,,1],5) == round(arrayspecs(ext_pls2b, k = 2, p = 9)[,,1],5))
   result11 <- all(round(arrayspecs(ext_pls2b, k = 2, p = 9)[,,1],5) == round(arrayspecs(ext_two.b.pls, k = 2, p = 9)[,,1],5))
-
-  #not working atm
-  #result12 <- all(round(arrayspecs(ext_gm.prcomp3, k = 2, p = 9)[,,1],5) == round(arrayspecs(ext_phyalign_comp, k = 2, p = 9)[,,1],5))
 
   expect_true(all(result1,result2,result3,result4,result5,result6,result7,result8,result9,result10,result11))
 
@@ -3919,9 +3906,6 @@ test_that(desc = "testing ax_transformations, accuracy of shapes (extended)", co
 
   result10 <- all(round(arrayspecs(ext_pls2b, k = 2, p = 9)[,,2],5) == round(arrayspecs(ext_pls2b, k = 2, p = 9)[,,2],5))
   result11 <- all(round(arrayspecs(ext_pls2b, k = 2, p = 9)[,,2],5) == round(arrayspecs(ext_two.b.pls, k = 2, p = 9)[,,2],5))
-
-  #not working atm
-  #result11 <- all(round(arrayspecs(ext_gm.prcomp3, k = 2, p = 9)[,,1],5) == round(arrayspecs(ext_phyalign_comp, k = 2, p = 9)[,,1],5))
 
   expect_true(all(result1,result2,result3,result4,result5,result6,result7,result8,result9,result10,result11))
 

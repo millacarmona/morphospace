@@ -1,250 +1,5 @@
 ################################################################################
 
-#' Phylogenetic Principal Component Analysis
-#'
-#' @description A wrapper for [phytools::phyl.pca()].
-#'
-#' @param x A matrix with one or more variables as columns and observations as
-#'   rows. Row must be named and match tip labels from the phylogenetic
-#'   \code{tree}.
-#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
-#'   labels should match the row names from \code{x}.
-#' @param corr Logical; whether to use correlation instead of covariance matrix
-#'   as input.
-#' @param ... Further arguments passed to [phytools::phyl.pca()].
-#'
-#' @details Phylogenetic PCA finds the linear combination of variables (in
-#'   the context of \code{morphospace} will generally be a series of shapes
-#'   arranged as 2-margin matrix) maximizing the residual variation left after
-#'   removing covariation explained by phylogenetic history (i.e., they reflect
-#'   the covariance that would correspond to a star phylogeny), assuming a
-#'   Brownian model of evolution.
-#'
-#'   Phylogenetic PCA has some important differences relative to regular PCA.
-#'   First, the resulting ordination is centered around the phylogenetic mean
-#'   (i.e., the values estimated for the root of the tree) instead of the
-#'   overall centroid of the original variables. More importantly, both
-#'   phylogenetic PCA's eigenvectors and eigenvalues have been constructed using
-#'   covariation that is independent of phylogenetic structure. However, only
-#'   the orientation of the scores on those axes, and not their variances,
-#'   reflect this adjustment. In other words, orientation of the phylogenetic
-#'   PC axes are devoid of phylogenetic structure, but magnitudes measured in
-#'   the resulting morphospace (e.g. distances, variances) still retain
-#'   phylogenetic information.
-#'
-#'   Because of these properties, eigenvalues and variances computed from
-#'   phylogenetic PC scores will differ. The former represents the amount of
-#'   variation among the taxa after removing covariance accounted by phylogeny
-#'   -- although their magnitude depends on the units used to measure
-#'   branch length, and thus cannot be simply interpreted as a proportion of the
-#'   original variance. Also, variance computed from pPC scores do not
-#'   necessarily decrease for lower axes, and are not uncorrelated, meaning they
-#'   can contain redundant information. For more details on the difference
-#'   between phylogenetic and regular PCA, see Polly et al. 2013.
-#'
-#'   Like PCA, phylogenetic PCA does not change the dimensionality of the shape
-#'   data set -- the number of resulting pPC axes will be be equal to the
-#'   number of original variables (unless this is higher than the number of
-#'   observations, in which case the number of resulting pPC will be equal
-#'   to the latter).
-#'
-#'
-#' @return A \code{"phy_prcomp"} object formatted following the \code{"prcomp"}
-#' class:
-#' \itemize{
-#'   \item \code{$x:} {a matrix with the scores of observations in the new
-#'     ordination axes.}
-#'   \item \code{$values:} {singular values from the SVD of the phylogenetic
-#'     rate matrix.}
-#'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
-#'   \item \code{$center:} {the phylogenetic mean (i.e., the shape estimated
-#'     for the root of the tree).}
-#'   \item \code{$totvar:} {the sum of the variances of the original data.}
-#'   \item \code{$lambda, $logL:} {fitted value of lambda and log-likelihood
-#'     of the model; see \code{\link[phytools]{phyl.pca}}.}
-#'   }
-#'
-#' @seealso \code{\link[phytools]{phyl.pca}}, \code{\link[stats]{prcomp}},
-#'   \code{\link{exp_var}}
-#'
-#' @references
-#' Revell, L. J. (2009). \emph{Size-correction and principal components for
-#'   interspecific comparative studies}. Evolution, 63, 3258-3268.
-#'
-#' Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
-#'   \emph{Phylogenetic principal components analysis and geometric
-#'   morphometrics}. Hystrix, 24(1), 33-41.
-#'
-#' Monteiro, L. R. (2013). \emph{Morphometrics and the comparative method:
-#'   studying the evolution of biological shape}. Hystrix, the Italian Journal
-#'   of Mammalogy, 24(1), 25-32.
-#'
-# @examples
-# #load data and packages
-# library(geomorph)
-# data("tails")
-#
-# #compute mean shapes for all species and extract the phylogenetic tree
-# sp_shapes <- expected_shapes(shapes = tails$shapes, x = tails$data$species)
-# tree <- tails$tree
-#
-# #perform phylogenetic PCA
-# ppca <- phy_prcomp(x = two.d.array(sp_shapes), tree = tree)
-#
-# #inspect results
-# names(ppca) #the contents of the resulting object
-# #exp_var(ppca) ##interpretation of eigenvalues is complex! not yet implemented
-# plot(ppca$x) #ordination
-#
-#
-# #compare shape variation as summarized by different methods
-#
-# #build morphospace using phylogenetic PCA
-# mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, FUN = phy_prcomp,
-#        tree = tree) %>%
-#   proj_phylogeny(sp_shapes, tree = tree)
-#
-# #compare against morphospace built with ordinary PCA
-# mspace(sp_shapes, links = tails$links, nh = 8, nv = 6, invax = c(1,2)) %>%
-#   proj_phylogeny(sp_shapes, tree = tree)
-phy_prcomp <- function(x, tree, corr = FALSE, ...) {
-
-  mode <- if(!corr) "cov" else "corr"
-  center <- colMeans(x)
-  # totvar <- sum(prcomp(x)$sdev^2)
-
-  phypca <- suppressWarnings(phytools::phyl.pca(Y = x, tree = tree, mode = mode, ...))
-
-  lambda <- if(is.null(phypca$lambda)) 1 else phypca$lambda
-  C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
-  anc <- c(phytools::phyl.vcv(x, C, lambda)$alpha)
-
-  # sdev <- suppressWarnings(sqrt(diag(phypca$Eval)))
-
-  results <- list(values = diag(phypca$Eval), rotation = phypca$Evec, x = phypca$S,
-                  center = anc)
-  if(!is.null(phypca$lambda)) results$lambda <- phypca$lambda
-  if(!is.null(phypca$logL)) results$logL <- phypca$logL
-
-
-  class(results) <- "phy_prcomp"
-  return(results)
-
-}
-
-################################################################################
-
-#' Phylogenetically Aligned Component Analysis
-#'
-#' @description Performs Phylogenetically Aligned Component Analysis (PACA).
-#'   Experimental.
-#'
-#' @param x A matrix with one or more variables as columns and observations as
-#'   rows. Rows must be named and match tip labels from the phylogenetic
-#'   \code{tree}.
-#' @param tree A \code{"phylo"} object containing a phylogenetic tree. Tip
-#'   labels should match the row names from \code{x}.
-#' @param corr Logical; whether to use correlation instead of covariance matrix
-#'   as input.
-#'
-#' @details Phylogenetically aligned component analysis (PACA) finds a new set
-#'   of axes as linear combinations of the original trait variables that are
-#'   maximally aligned with the phylogenetic signal (i.e., covariation between
-#'   trait variation and phylogenetic structure) present in the data.
-#'
-#'   PACA shares some important properties with phylogenetic PCA that are worth
-#'   having in mind. Most importantly, the transformation achieved by PACA to
-#'   maximize alignment to phylogenetic signal only concerns the orientation of
-#'   the new axes (PACs), and not their overall dispersion (i.e., Euclidean
-#'   distances among observations are preserved when measured across the entire
-#'   set of PACs). Like phylogenetic PCA, scores projected into the different
-#'   PACs can be correlated (even though singular vectors are orthogonal), and
-#'   their dispersion does not necessarily decrease for lower axes (even though
-#'   singular values do progressively decay). Also, A phylogenetic covariance
-#'   matrix is computed assuming a Brownian model of trait evolution, and the
-#'   ordination is centered around the phylogenetic mean (i.e., the root of the
-#'   phylogenetic tree).
-#'
-#'   This analysis produces the same number of axes than the number of original
-#'   variables. Again similar to phylogenetic PCA, interpretation of ordination
-#'   axes' singular values is complex: they represent the amount of covariation
-#'   between phylogenetic structure and trait variation accounted by each axis,
-#'   with a scale that is related to branch lengths' units, and thus cannot be
-#'   directly interpreted as proportion of the original variance.
-#'
-#' @return A \code{"phyalign_comp"} object formatted following the
-#'   \code{"prcomp"} class:
-#' \itemize{
-#'   \item \code{$x:} {a matrix with the scores of observations in the new
-#'     ordination axes.}
-#'   \item \code{$values:} {squared, sample size-corrected singular values from
-#'     the SVD of the cross product of the phylogenetic covariance matrix and
-#'     trait data.}
-#'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
-#'   \item \code{$center:} {the phylogenetic mean (i.e., the shape estimated
-#'     for the root of the tree).}
-#'   }
-#'
-#' @seealso \code{\link[geomorph]{gm.prcomp}}, \code{\link{phy_prcomp}}
-#'
-#' @references
-#' Collyer, M. L., & Adams, D. (2021). \emph{Phylogenetically aligned component
-#' analysis}. Methods in Ecology and Evolution, 12(2), 359-372.
-#'
-# @examples
-# #load packaes and data: shapes, species, links and tree
-# library(geomorph)
-# data("tails")
-# shapes <- tails$shapes
-# species <- tails$data$species
-# links <- tails$links
-# tree <- tails$tree
-#
-# #extract species shapes
-# sp_shapes <- expected_shapes(shapes, species)
-#
-# #perform phylogenetically aligned component analysis
-# paca <- phyalign_comp(x = two.d.array(sp_shapes), tree = tree)
-#
-# #inspect results
-# names(paca) #the contents of the resulting object
-# #exp_var(paca) #interpretation of eigenvalues is complex! not yet implemented
-# plot(paca$x) #ordination
-#
-#
-# #compare shape variation as summarized by different methods
-#
-# #build morphospace using phylogenetically aligned components analysis
-# mspace(sp_shapes, links = links, nh = 8, nv = 6, FUN = phyalign_comp,
-#        tree = tree) %>%
-#   proj_phylogeny(sp_shapes, tree = tree)
-#
-# #compare against morphospace built with ordinary PCA
-# mspace(sp_shapes, links = links, nh = 8, nv = 6) %>%
-#   proj_phylogeny(sp_shapes, tree = tree)
-phyalign_comp <- function(x, tree, corr = FALSE) {
-
-  #totvar <- sum(prcomp(x)$sdev^2)
-
-  C <- ape::vcv.phylo(tree)[rownames(x), rownames(x)]
-  anc <- c(phytools::phyl.vcv(x, C, 1)$alpha)
-  z <- scale(x = x, center = anc, scale = corr)
-
-  decomp <- svd(t(C) %*% z)
-  vectors <- decomp$v
-  scores <- z %*% vectors
-  values <-decomp$d^2 / (nrow(x) - 1)
-
-  results <- list(values = values, rotation = vectors, x = scores, center = anc)
-
-  class(results) <- "phyalign_comp"
-  return(results)
-
-}
-
-
-################################################################################
-
 #' Between-groups Principal Component Analysis
 #'
 #' @description Performs between group PCA allowing for leave-one-out
@@ -615,37 +370,6 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
       y <- cbind(y[tree$tip.label,])
     }
 
-    #!
-    #anc <- apply(cbind(x, y), 2, phytools::fastAnc, tree = tree)[1,]
-    # x_center <- anc[seq_len(ncol(x))]
-    # y_center <- anc[(ncol(x) + 1):(ncol(x) + ncol(y))]
-
-    # mvmod <- mvMORPH::mvgls(y ~ cbind(x), tree = tree, model = evmodel)
-    # x_ <- if(ncol(x) == 1) cbind(x = x,x) else x
-    # uvmod <- mvMORPH::mvgls(x_ ~ 1, tree = tree, model = evmodel)
-    #
-    # ancx <- cbind(x = mvMORPH::ancestral(uvmod)[,ncol(x)])
-    # y_center <- mvMORPH::ancestral(object = mvmod, newdata = data.frame(ancx))[1,]
-    # x_center <- ancx[1,]
-
-    # mvmod <- mvMORPH::mvgls(y ~ cbind(x), tree = tree, model = evmodel)
-    #
-    # xname <- colnames(mvmod$variables$X)[-1]
-    # x_ <- if(ncol(x) == 1) cbind(x,x) else x
-    # uvmod <- mvMORPH::mvgls(x_ ~ 1, tree = tree, model = evmodel)
-    #
-    # ancx <- data.frame(mvMORPH::ancestral(uvmod)[,ncol(x)])
-    # colnames(ancx) <- xname
-    # y_center <- mvMORPH::ancestral(object = mvmod, newdata = ancx)[1,]
-    # x_center <- ancx[1,]
-
-    # mvmod <- mvMORPH::mvgls(y ~ cbind(x), tree = tree, model = evmodel)
-    # x_ <- if(ncol(x) == 1) cbind(x = x,x) else x
-    # xmod <- mvMORPH::mvgls(x_ ~ 1, tree = tree, model = evmodel)
-    #
-    # y_center <- colMeans(mvmod$fitted)
-    # x_center <- ancx[1,]
-
     mvmod <- mvMORPH::mvgls(y ~ 1, tree = tree, model = evmodel)
     x_anc <- matrix(NA, nrow = tree$Nnode, ncol = ncol(x))
     for(i in seq_len(ncol(x))) {
@@ -679,7 +403,6 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
   totvar_x <- sum(apply(x, 2, stats::var))
   totvar_y <- sum(apply(y, 2, stats::var))
 
-  #svd <- svd_block(x, y, tree) #!
   svd <- svd_block(x, y, tree, evmodel)
 
   ndims <- length(svd$d)
@@ -713,7 +436,6 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
         subtree <- NULL
       }
 
-      #subsvd <- svd_block(subx, suby, subtree)
       subsvd <- svd_block(subx, suby, subtree, evmodel)
 
       suby_rotation <- subsvd$v
@@ -898,7 +620,6 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
   y <- shapes_mat(shapes)$data2d
   x <- cbind(X)
 
-  # pls <- pls2b(y = y, x = x, tree = tree, LOOCV = LOOCV, recompute = recompute) #!
   pls <- pls2b(y = y, x = x, tree = tree, evmodel = evmodel,
                LOOCV = LOOCV, recompute = recompute)
 
@@ -1071,10 +792,6 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
 #' }
 burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL, center = NULL) {
 
-  # x <- sp_shapes
-  # vars <- sp_logsizes
-  # tree = NULL; evmodel = "BM"; axmat = NULL; center = NULL
-
   totvar <- sum(apply(x, 2, stats::var))
   namesx <- NULL
 
@@ -1083,12 +800,6 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL, c
 
   if(!is.null(axmat)) {
     axmat <- cbind(axmat)
-    #!
-    # center <- if(is.null(tree)) colMeans(x) else apply(x, 2, phytools::fastAnc, tree = tree)[1,]
-    # if(!is.null(tree)) warning("\naxmat has been provided directly, it will be assumed its orientation is already phylogenetically corrected; tree will be only used to center x")
-
-    # center <- if(is.null(tree)) colMeans(x) else colMeans(mvMORPH::mvgls(x ~ 1, tree = tree, model = evmodel)$fitted)
-    # if(!is.null(tree)) warning("\naxmat has been provided directly: it will be assumed its orientation is already phylogenetically corrected; tree will be only used to center x at the raw phylogenetic mean (i.e., x ~ 1)")
   } else {
     vars <- as.data.frame(vars)
 
@@ -1096,10 +807,6 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL, c
     if(is.null(rownames(x))) rownames(x) <- seq_len(nrow(x))
     namesvars <- rownames(vars)
     namesx <- rownames(x)
-
-    #!
-    # formula <- stats::as.formula(paste("~", paste(colnames(vars), collapse = " + ")))
-    # designmat <- stats::model.matrix(formula, data = vars)
 
     if(!is.null(tree)) {
 
@@ -1112,36 +819,7 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL, c
         vars <- cbind(vars[tree$tip.label,])
         if(is.null(rownames(vars))) rownames(vars) <- tree$tip.label
         x <- cbind(x[tree$tip.label,])
-        # designmat <- cbind(designmat[tree$tip.label,]) #!
       }
-
-      #!
-      # center <- apply(x, 2, phytools::fastAnc, tree = tree)[1,]
-      # C <- ape::vcv.phylo(tree)
-      # coefs <- solve(t(designmat) %*% solve(C) %*% designmat) %*%
-      #   t(designmat) %*% solve(C) %*% x
-
-      # mvmod <- mvMORPH::mvgls(x ~ vars, tree = tree, model = evmodel)
-      # coefs <- mvmod$coefficients
-      # center <- colMeans(mvmod$fitted)
-
-      # mvmod <- mvMORPH::mvgls(x ~ cbind(vars), tree = tree, model = evmodel)
-      # coefs <- mvmod$coefficients
-      #
-      # vars_ <- if(ncol(vars) == 1) cbind(vars = vars,vars) else vars
-      # uvmod <- mvMORPH::mvgls(vars_ ~ 1, tree = tree, model = evmodel)
-      # ancvars <- cbind(vars = mvMORPH::ancestral(uvmod)[,ncol(vars)])
-      # center <- mvMORPH::ancestral(object = mvmod, newdata = data.frame(ancvars))[1,]
-
-      # mvmod <- mvMORPH::mvgls(x ~ cbind(vars), tree = tree, model = evmodel)
-      # coefs <- mvmod$coefficients
-      #
-      # varsname <- colnames(mvmod$variables$X)[-1]
-      # vars_ <- if(ncol(vars) == 1) cbind(vars,vars) else vars
-      # uvmod <- mvMORPH::mvgls(vars_ ~ 1, tree = tree, model = evmodel)
-      # ancvars <- data.frame(mvMORPH::ancestral(uvmod)[,ncol(vars)])
-      # colnames(ancvars) <- varsname
-      # center <- mvMORPH::ancestral(object = mvmod, newdata = ancvars)[1,]
 
       mvmod <- mvMORPH::mvgls(x ~ cbind(vars), tree = tree, model = evmodel)
       coefs <- mvmod$coefficients
@@ -1149,7 +827,6 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL, c
 
     } else {
       center <- colMeans(x)
-      # coefs <- solve(t(designmat) %*% designmat) %*% t(designmat) %*% x #!
       coefs <- stats::lm(x ~ as.matrix(vars))$coef
     }
 
@@ -1160,13 +837,12 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL, c
   I <- diag(1, ncol(x))
   orthobasis <- I - axmat %*% MASS::ginv(t(axmat) %*% axmat) %*% t(axmat)
 
-  #ndims <- min(ncol(x) - ncol(axmat), nrow(x))
   ndims <- ncol(x) - ncol(axmat)
 
   z <- t(t(rbind(x)) - center)
   covmat <- stats::cov(z %*% orthobasis)
-  values <- eigen(covmat)$values#[seq_len(ndims)]
-  vectors <- eigen(covmat)$vectors#[,seq_len(ndims)] #!
+  values <- eigen(covmat)$values
+  vectors <- eigen(covmat)$vectors
 
   scores <- z %*% vectors
   sdev <- suppressWarnings(sqrt(values))
@@ -1176,8 +852,6 @@ burnaby <- function(x, vars = NULL, tree = NULL, evmodel = "BM", axmat = NULL, c
 
   results <- list(x = scores, rotation = vectors, center = center,
                   sdev = sdev, totvar = totvar)
-  # results <- list(x = scores[,seq_len(ndims)], rotation = vectors[,seq_len(ndims)], center = center,
-  #                 sdev = sdev[seq_len(ndims)], totvar = totvar)
   class(results) <- if(!is.null(tree)) "phy_burnaby" else "burnaby"
   return(results)
 

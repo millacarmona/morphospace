@@ -124,27 +124,15 @@
 expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
                             tree = NULL, evmodel = "BM", returnarray = TRUE) {
 
-
-  # shapes = shapes
-  # x =logsizes#species
-  # xvalue = NULL
-  # tree = NULL
-  # evmodel = "BM"
-  # returnarray = TRUE
-
-
-
   dat <- shapes_mat(shapes)
   data2d <- dat$data2d
   datype <- dat$datype
 
   if(length(dim(x)) == 1) x <- cbind(x)
-  #if(length(dim(x)) == 1 | is.null(dim(x))) x <- cbind(x) #!
 
   if(is.null(rownames(data2d))) rownames(data2d) <- seq_len(nrow(data2d))
   nams <- rownames(data2d)
 
-  ################ old ########################
   if(is.null(x)) {
     designmat <- stats::model.matrix(~ 1, data = data.frame(data2d))
   } else {
@@ -155,12 +143,6 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
   if(is.null(tree)) {
     coefs <- solve(t(designmat) %*% designmat) %*% t(designmat) %*% data2d
   } else {
-    #!
-    # designmat <- cbind(designmat[tree$tip.label,])
-    # data2d <- cbind(data2d[tree$tip.label,])
-    # C <- ape::vcv.phylo(tree)
-    # coefs <- solve(t(designmat) %*% solve(C) %*% designmat) %*%
-    #   t(designmat) %*% solve(C) %*% data2d
     if(is.null(x)) mvmod <- mvMORPH::mvgls(data2d ~ 1, tree = tree, model = evmodel) else {
       if(!is.null(dim(x))) if(ncol(x) > 1) stop("Multiple explanatory variables are not allowed")
       mvmod <- mvMORPH::mvgls(data2d ~ x, tree = tree, model = evmodel)
@@ -203,51 +185,6 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
       }
     }
   }
-
-  # ################# new #################
-  # if(is.null(x))  mvmod <- stats::lm(data2d ~ 1) else {
-  #   if(!is.null(dim(x))) if(ncol(x) > 1) stop("Multiple explanatory variables are not allowed")
-  #   mvmod <- stats::lm(data2d ~ x)
-  #   designmat <- stats::model.matrix(mvmod)
-  #   coefs <- mvmod$coefficients
-  # }
-  #
-  # if(!is.null(tree)) {
-  #   if(is.null(x)) mvmod <- mvMORPH::mvgls(data2d ~ 1, tree = tree, model = evmodel) else {
-  #     if(!is.null(dim(x))) if(ncol(x) > 1) stop("Multiple explanatory variables are not allowed")
-  #     mvmod <- mvMORPH::mvgls(data2d ~ x, tree = tree, model = evmodel)
-  #   }
-  #
-  #   designmat <- cbind(stats::model.matrix(mvmod)[tree$tip.label,])
-  #   data2d <- cbind(data2d[tree$tip.label,])
-  #   C <- ape::vcv.phylo(mvmod$corrSt$phy)[rownames(designmat), rownames(designmat)]
-  #   coefs <- solve(t(designmat) %*% solve(C) %*% designmat) %*%
-  #     t(designmat) %*% solve(C) %*% data2d
-  #
-  # }
-  # predicted_mat <- mvmod$fitted
-  #
-  # if(!is.null(x) & !is.null(xvalue)) {
-  #   if(is.numeric(x) == TRUE) {
-  #     designmat <- cbind(1, xvalue)
-  #   }
-  #   if(is.factor(x) == TRUE) {
-  #     designmat <- matrix(rep(0, nlevels(x) * length(xvalue)),
-  #                         nrow = length(xvalue), byrow = TRUE)
-  #     for(i in seq_len(length(xvalue))) designmat[i, which(levels(x) == xvalue[i])] <- 1
-  #     designmat[,1] <- 1
-  #     rownames(designmat) <- xvalue
-  #   }
-  #
-  #   predicted_mat <- designmat %*% coefs
-  # }
-  # if(!is.null(tree) & is.null(xvalue)) predicted_mat <- predicted_mat[nams,]
-  #
-  # predicted_mat <- if(is.null(x)) colMeans(predicted_mat) else {
-  #   if(is.factor(x)) apply(predicted_mat,2,tapply,INDEX=x,mean) else predicted_mat
-  # }
-  # ##########################################
-
 
   if(datype == "landm" & returnarray) {
     if(length(dim(shapes)) == 3) {
@@ -576,32 +513,9 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata = NULL,
                            tree = NULL, evmodel = NULL) {
 
-  # # # load_all()
-  # # #
-  # model = model2
-  # model$call
-  #model = mvMORPH::mvols(sp_shapes ~ sp_logsizes)
-
-  # model <- mvMORPH::mvgls(sp_shapes ~ sp_type, tree = tree, model = "BM")
-  #
-
-  # model <- geomorph::procD.pgls(sp_shapes ~ sp_type, phy = phy, data = gdf)
-  # #model <- geomorph::procD.lm(sp_shapes ~ sp_type, data = gdf)
-  # model$call
-  # method = "orthogonal"
-  # newdata = NULL
-  # tree = NULL
-  # xvalue = NULL
-  # evmodel = NULL
-  # # # # #############################
-
-
   #data preparation
   if(!any(method == "residuals", method == "orthogonal")) stop("method should be one of 'residuals' or 'orthogonal'")
 
-  #!
-  # x <- model$model[-1]
-  # y <- model$model[[1]]
   designmat <- stats::model.matrix(model)
 
   admod <- adapt_model(model)
@@ -612,7 +526,6 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
   x <- admod$x
   modtype <- admod$modtype
 
-
   if(ncol(x) > 1 & !is.null(xvalue)) stop("xvalue can only be specified for a single explanatory variable")
 
   if(is.null(rownames(x))) rownames(x) <- seq_len(nrow(x))
@@ -620,34 +533,13 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
   namesx <- rownames(x)
   namesy <- rownames(y)
 
-  #!
-  # designmat <- stats::model.matrix(stats::as.formula(paste0("~ ",
-  #                                                           strsplit(as.character(
-  #                                                             model$call[2]), split = "~")[[1]][2])), data = x)
-
-  # if(!is.null(tree)) {
-  #   if(!all(length(tree$tip.label) == nrow(x), length(tree$tip.label) == nrow(y))) {
-  #     stop("\nNumber of tips in the tree does not match the number of observations in x and/or y data sets")
-  #   }
-  #   if(!all(tree$tip.label %in% namesy, tree$tip.label %in% namesx)) {
-  #     stop("\nNames in phylogenetic tree does not match names in x and/or y data sets")
-  #   } else {
-  #     x <- cbind(x[tree$tip.label,])
-  #     y <- cbind(y[tree$tip.label,])
-  #     designmat <- cbind(designmat[tree$tip.label,])
-  #   }
-  # }
 
   #detrending
   if(method == "orthogonal") {
 
-    # if(modtype == "pgls" & !is.null(tree))
-    #   stop("method = 'orthogonal', together with a phylogenetic linear model, requires the phylogenetic tree to be provided")
-
     axmat <- if(nrow(coefs) < 3) cbind(coefs[-1,]) else cbind(t(coefs[-1,]))
     center <- colMeans(fitted)
 
-    #ortho_space <- suppressWarnings(burnaby(x = y, axmat = axmat, tree = tree)) #!
     ortho_space <- burnaby(x = y, axmat = axmat, center = center)
     ortho_scores <- ortho_space$x
     ortho_rotation <- ortho_space$rotation
@@ -658,9 +550,6 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
         xvalue <- "Intercept"
         warning("Be sure that the level indicated in 'xvalue' has been spelled correctly; it is assumed it was, and that it corresponds to the Intercept of the mvgls model")
       }
-
-      # ortho_center <- c(expected_shapes(shapes = y, x = x[[1]], xvalue = xvalue,
-      #                                   tree = tree, returnarray = FALSE)) #!
 
       if(modtype == "pgls" & any(is.null(tree), is.null(evmodel)))
         stop("Please feed the tree and evmodel arguments")
@@ -673,13 +562,9 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
 
     if(!is.null(newdata)) {
 
-      #if(inherits(newdata, "mlm")) { #!
       if(any(class(newdata)[1] %in% c("mlm", "procD.lm", "lm.rrpp", "mvgls", "mvols"))) {
 
-        # newx <- newdata$model[-1]
-        # newy <- newdata$model[[1]] #!
         newadmod <- adapt_model(newdata)
-        #newx <- newadmod$x #!
         newy <- newadmod$y
 
         if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
@@ -688,43 +573,12 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
         ortho_scores <- proj_eigen(x = newy, vectors = ortho_space$rotation,
                                    center = ortho_space$center)
 
-        # #newortho_space <- burnaby(x = newy, vars = newx) #!
-        # # newortho_space <- burnaby(x = newy, axmat = newadmod$coefs[2,],
-        # #                           center = newadmod$grandmean) #!
-        # # newortho_space <- burnaby(x = newy, axmat = admod$coefs[2,],
-        # #                           center = admod$grandmean)
-        # newortho_space <- burnaby(x = newy, axmat = axmat, center = center)
-        # ax <- min(sum(newortho_space$sdev^2 > 1e-15), ax)
-        # ortho_scores <- newortho_space$x
-        # ortho_rotation <- newortho_space$rotation#[,seq_len(ax)]# - ortho_space$rotation[,seq_len(ax)] #!
-        #
-        #
-        # if(!is.null(xvalue)) {
-        #
-        #   if(is.factor(x[[1]]) & !xvalue %in% levels(x[[1]]) & inherits(model, "mvgls")) {
-        #     xvalue <- "Intercept"
-        #     warning("Be sure that the level indicated in 'xvalue' has been spelled correctly; it is assumed it was, and that it corresponds to the Intercept of the mvgls model")
-        #   }
-        #   # ortho_center <- c(expected_shapes(shapes = newy, x = newx[[1]],
-        #   #                                   xvalue = xvalue, returnarray = FALSE)) #!
-        #   # ortho_center <- c(expected_shapes(shapes = newy, x = newx[[1]], evmodel = evmodel,
-        #   #                                   xvalue = xvalue, returnarray = FALSE))
-        #   # ortho_center <- c(expected_shapes(shapes = y, x = x[[1]], xvalue = xvalue,
-        #   #                                   tree = tree, evmodel = evmodel, returnarray = FALSE))
-        #   ortho_center <- ortho_center
-        # } else {
-        #   ortho_center <- ortho_center#newortho_space$center
-        # }
-
       } else {
         ortho_scores <- proj_eigen(x = newdata, vectors = ortho_space$rotation,
                                    center = ortho_space$center)
       }
     }
 
-    # ortho_shapes2d <- rev_eigen(scores = ortho_scores[, seq_len(ax)],
-    #                             vectors = ortho_rotation[, seq_len(ax)],
-    #                             center = ortho_center) #!
     ortho_shapes2d00 <- rev_eigen(scores = ortho_scores[, seq_len(ax)],
                                 vectors = ortho_rotation[, seq_len(ax)],
                                 center = ortho_center)
@@ -739,29 +593,22 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
 
   if(method == "residuals") {
     which_na <- is.na(apply(coefs,1,sum))
-    # resids <- y - designmat[,!which_na] %*% coefs[!which_na,] #!
     resids <- y - fitted
 
     if(!is.null(newdata)) {
 
       if(any(class(newdata)[1] %in% c("mlm", "procD.lm", "lm.rrpp", "mvgls", "mvols"))) {
-        # newx <- newdata$model[-1]
-        # newy <- newdata$model[[1]] #!
         newadmod <- adapt_model(newdata)
         newx <- newadmod$x
         newy <- newadmod$y
-        #newfitted <- newadmod$fitted
 
         if(is.null(rownames(newy))) rownames(newy) <- seq_len(nrow(newy))
         namesy <- rownames(newy)
 
-        # formula <- stats::as.formula(paste0("~ ", strsplit(as.character(newdata$call[2]),
-        #                                                    split = "~")[[1]][2])) #!
         newdesignmat <- stats::model.matrix(newdata)
 
         which_na <- is.na(apply(coefs,1,sum))
         resids <- newy - newdesignmat[,!which_na] %*% coefs[!which_na,]
-        #resids <- y - newfitted
       } else stop("Only linear models can be supplied as newdata for method = 'residuals'")
     }
 
@@ -772,8 +619,6 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
       fitted_vec <- rep(1, n) %*% t(grandmean)
       predicted_mat00 <- resids + fitted_vec
       fitted_vec <- colMeans(fitted_vec)
-      # fitted_vec <- c(colMeans(admod$fitted))
-      # predicted_mat <- t(t(resids) + fitted_vec)
 
     } else {
 
@@ -785,32 +630,12 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
         }
       }
 
-      # if(is.numeric(x[[1]]) == TRUE) {
-      #   designmat <- cbind(1, xvalue)
-      # }
-      #
-      # if(is.factor(x[[1]]) == TRUE) {
-      #   designmat <- rep(0, nlevels(x[[1]]))
-      #   designmat[which(levels(x[[1]]) == xvalue)] <- 1
-      #
-      #   if(isFALSE(designmat[1] == 1)) designmat[1] <- 1
-      # }
-      #
-      # fitted <- as.numeric(designmat %*% coefs)
-      #
-      # fitted_vec <- rep(1, n) %*% t(fitted)
-      # predicted_mat <- resids + fitted_vec
-
       if(modtype == "pgls" & any(is.null(tree), is.null(evmodel)))
         stop("Please feed  the tree and evmodel arguments")
 
       fitted_vec <- c(expected_shapes(shapes = y, x = x[[1]], xvalue = xvalue,
                                     tree = tree, evmodel = evmodel, returnarray = FALSE))
-      # fitted <- if(is.null(newdata)) fitted[which(x == xvalue),] else newfitted[which(newx == xvalue),]
-      # fitted_vec <- if(is.null(dim(fitted))) fitted else colMeans(fitted)
       predicted_mat00 <- t(t(resids) + fitted_vec)
-      # fitted_vec <- rep(1, n) %*% t(fitted_vec)
-      # predicted_mat <- resids + fitted_vec
     }
 
     predicted_mat0 <- scale(predicted_mat00, scale = FALSE, center = TRUE)
@@ -1004,8 +829,6 @@ correct_efourier<-function(ef, index = NULL) {
 #' pile_shapes(extshapes, links = links, mshape = FALSE)
 ax_transformation <- function(obj, axis = 1, mag = 1) {
 
-  # if(any(class(obj) %in% c("prcomp", "bg_prcomp", "phy_prcomp", "phyalign_comp",
-  #                          "pls_shapes", "phy_pls_shapes", "burnaby", "phy_burnaby"))) { #!
   if(any(class(obj) == c("pls2b", "phy_pls2b"))) stop("pls2b objects are not allowed; use pls_shapes instead")
   if(any(class(obj)[1] %in% c("prcomp", "bg_prcomp", "phy_prcomp", "phyalign_comp",
                               "pls_shapes", "phy_pls_shapes", "burnaby", "phy_burnaby",
@@ -1017,10 +840,8 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
                                obj$center)
   }
 
-  #if(any(class(obj) %in% "mlm")) {  #!
   if(any(class(obj)[1] %in% c("mlm", "procD.lm", "lm.rrpp", "mvgls", "mvols"))) {
 
-    # x <- obj$model[,ncol(obj$model)]  #!
     obj <- adapt_model(obj)
     x <- obj$x[,1]
 
@@ -1030,7 +851,6 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
       newrange <- c(cent - (halfdif * mag),
                     cent + (halfdif * mag))
 
-      # coefs <- obj$coefficients  #!
       coefs <- obj$coefs
       designmat <- cbind(1, newrange)
       extshapes_mat <- rbind(designmat %*% coefs)
@@ -1040,7 +860,6 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 
       if(nlevels(x) > 2) stop("Only two levels are allowed for extracting axes from mlm objects; try providing a bg_prcomp object")
 
-      # Y <- obj$model[,1]  #!
       Y <- obj$y
       mshapes <- apply(X = Y, MARGIN = 2, FUN = tapply, x, mean)
       bgpca <- stats::prcomp(mshapes)

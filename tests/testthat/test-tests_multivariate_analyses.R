@@ -1,51 +1,6 @@
 ######################################################################################
 ######################################################################################
 
-test_that(desc = "testing phy_prcomp, general behavior", code = {
-  data(tails)
-
-  Y <- geomorph::two.d.array(expected_shapes(tails$shapes, tails$data$species))
-  tree <- tails$tree
-  ppca <- phy_prcomp(Y, tree)
-
-  result1 <- nrow(ppca$x) == nrow(Y)
-  result2 <- ncol(ppca$x) == min(ncol(Y), nrow(Y) - 1)
-
-  #note: phyl.pca gives as many vectors as min(ncol(Y), nrow(Y) - 1); however, if
-  #one make computations by hand, the amount is min(ncol(Y), nrow(Y)). Idk the reason.
-
-  result3 <- round(sum(apply(Y,2,var)),10) == round(sum(apply(ppca$x,2,var)),10)
-  result4 <- sum(apply(ppca$x,2,stats::sd)) > sum(ppca$sdev)
-
-  result5 <- all(round(ppca$center,10) == round(apply(Y, 2, phytools::fastAnc, tree = tree)[1,],10))
-
-  expect_true(all(result1,result2,result3,result4,result5))
-})
-
-######################################################################################
-######################################################################################
-
-test_that(desc = "testing phyalign_comp, general behavior", code = {
-  data(tails)
-
-  Y <- geomorph::two.d.array(expected_shapes(tails$shapes, tails$data$species))
-  tree <- tails$tree
-  paca <- phyalign_comp(Y, tree)
-
-  result1 <- nrow(paca$x) == nrow(Y)
-  result2 <- ncol(paca$x) == min(ncol(Y), nrow(Y))
-
-  result3 <- round(sum(apply(Y,2,var)),10) == round(sum(apply(paca$x,2,var)),10)
-  result4 <- sum(apply(paca$x,2,stats::sd)) > sum(paca$sdev)
-
-  result5 <- all(round(paca$center,10) == round(apply(Y, 2, phytools::fastAnc, tree = tree)[1,],10))
-
-  expect_true(all(result1,result2,result3,result4,result5))
-})
-
-######################################################################################
-######################################################################################
-
 test_that(desc = "testing bg_prcomp, general behavior", code = {
   data(tails)
 

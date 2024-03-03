@@ -311,29 +311,7 @@ mspace <- function(shapes = NULL,
                    models = TRUE,
                    ...) {
 
-  #!
-  # dat <- shapes_mat(shapes)
-  # data2d <- dat$data2d
-  # datype <- dat$datype
-  #
-  # if(datype == "landm") {
-  #   if(is.null(p) | is.null(k)) {
-  #     if(length(dim(shapes)) == 3){
-  #       p <- nrow(shapes)
-  #       k <- ncol(shapes)
-  #     } else {stop("Provide values for p and k, or provide shapes as an array")}
-  #   }
-  # } else {
-  #   links <- NULL
-  #   p <- 300
-  #   k <- 2
-  # }
-  #
-  # FUN <- match.fun(FUN)
-  # ordination <- FUN(data2d, ...)
-  # ordination <- adapt_ordination(ordination)
-  # ordination$ordtype <- class(ordination)[1]
-  # ordination$datype <- datype
+
   if(is.null(shapes) & is.null(ord)) stop("Either (1) shapes (and optionally FUN), or (2) ord and datype must be provided")
 
   if(!is.null(shapes)) {
@@ -985,7 +963,6 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
                             vectors = mspace$ordination$rotation,
                             center = mspace$ordination$center)
 
-  #nodes_scores <- apply(tips_scores, 2, phytools::fastAnc, tree = tree) #!
   mvmod <- mvMORPH::mvgls(tips_scores ~ 1, tree = tree, model = evmodel)
   nodes_scores <- mvMORPH::ancestral(mvmod)
   phylo_scores <- rbind(tips_scores, nodes_scores)
@@ -1008,17 +985,6 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
       if(all(labels.nodes %in% rownames(tips_scores)))
         labels.nodes <- paste0("node_", ape::getMRCA(phy = tree, tip = labels.nodes))
       add_labels(nodes_scores, labels.nodes)
-      ##!
-      # if(is.character(labels.tips)) {
-      #   label.scores <- tips_scores[labels.tips,]
-      #   label.text <- labels.tips
-      # } else {
-      #   if(labels.tips) {
-      #     label.scores <- tips_scores
-      #     label.text <- rownames(tips_scores)
-      #   }
-      # }
-      # graphics::text(label.scores, label.text = 1)
 
     } else {
       warning("phylogenetic relationships are not projected into univariate morphospaces")
@@ -2025,17 +1991,6 @@ plot_mspace <- function(mspace,
           args$labels.nodes <- paste0("node_", ape::getMRCA(phy = mspace$projected$phylo,
                                                             tip = args$labels.nodes))
         add_labels(mspace$projected$phylo_scores[-tips,], args$labels.nodes)
-        # if(is.character(labels.tips)) {
-        #   label.scores <- mspace$projected$phylo_scores[tree$tip.label,][labels.tips,]
-        #   label.text <- labels.tips
-        # } else {
-        #   if(labels.tips) {
-        #     label.scores <- mspace$projected$phylo_scores[tree$tip.label,]
-        #     label.text <- rownames(mspace$projected$phylo_scores[tree$tip.label,])
-        #   }
-        # }
-        # graphics::text(label.scores, label.text, pos = 1)
-
       } else {
         warning("phylogenetic relationships are not projected into univariate morphospaces")
       }
@@ -2195,36 +2150,6 @@ plot_mspace <- function(mspace,
         if(is.null(args$xlab)) args$xlab <- "Time"
       }
       if(is.null(args$xlab)) args$xlab <- deparse(substitute(x))
-      #############!
-      # #if x is a factor, get violin shapes
-      # if(is.factor(x)) {
-      #
-      #   violins <- vector(mode = "list", length = nlevels(x))
-      #   for(i in seq_len(nlevels(x))) {
-      #     d <- density_by_group_2D(xy = cbind(mspace$projected$scores[,args$axes[1]], 0),
-      #                              fac = x, ax = 1, plot = FALSE)
-      #
-      #     poly.i.half1 <- cbind(d$dens[[i]]$y / d$ymax, d$dens[[i]]$x)
-      #     poly.i.half2 <- cbind(poly.i.half1[nrow(poly.i.half1):1,1] * -1,
-      #                           poly.i.half1[nrow(poly.i.half1):1,2])
-      #
-      #     poly.i <- rbind(poly.i.half1, poly.i.half2)
-      #     poly.i <- cbind(poly.i[,1] + i, poly.i[,2])
-      #
-      #     violins[[i]] <- poly.i
-      #   }
-      #
-      #   dxvals <- NULL
-      #   dyvals <- NULL
-      #   for(i in 1:length(violins)) {
-      #     dxvals <- c(dxvals, violins[[i]][,1])
-      #     dyvals <- c(dyvals, violins[[i]][,2])
-      #   }
-      #
-      #   args$xlim <- range(dxvals)
-      #   args$ylim <- range(dyvals)
-      # }
-      # ###########!
 
     } else {
       if(any(class(y) == "phylo")) {
@@ -2365,24 +2290,6 @@ plot_mspace <- function(mspace,
                            pch = gr_pch.points[-index_sc_in_gr],
                            bg = gr_bg.points[-index_sc_in_gr],
                            cex = gr_cex.points[-index_sc_in_gr])
-          # ####!
-          # if(is.factor(x) | is.factor(y))  {
-          #   for(i in 1:length(violins)) {
-          #     graphics::polygon(violins[[i]], lwd = args$lwd.groups, border = i, lty = args$lty.groups,
-          #                       col = grDevices::adjustcolor(i, alpha.f = 0.2))
-          #
-          #     cents <- tapply(mspace$projected$scores[,args$axes[1]], INDEX = fac, FUN = mean)
-          #     graphics::points(if(is.factor(x)) cbind(i, cents[i]) else  cbind(cents[i], i),
-          #                      pch = 21, bg = i, cex = args$cex.points + .5)
-          #   }
-          #   if(phylo & !is.null(mspace$projected$phylo))
-          #     warning("phylogenetic relationships are not projected into violin plots")
-          #   if(shapeax & !is.null(mspace$projected$shape_axis))
-          #     warning("morphometric axes are not projected into violin plots")
-          #   if(landsc & !is.null(mspace$projected$landsc))
-          #     warning("landscape surfaces are not projected into violin plots")
-          # }
-          # #####!
         }
 
         if(!is.null(gr_class)) {
@@ -2409,7 +2316,7 @@ plot_mspace <- function(mspace,
             }
           }
         }
-        ####!
+
         if(is.factor(x) | is.factor(y))  {
           for(i in 1:length(violins)) {
             graphics::polygon(violins[[i]], lwd = args$lwd.groups, border = i, lty = args$lty.groups,
@@ -2428,7 +2335,6 @@ plot_mspace <- function(mspace,
 
           return(invisible(NULL))
         }
-        #####!
       }
 
       #3.3.2.2 - add phylogeny
@@ -2476,7 +2382,6 @@ plot_mspace <- function(mspace,
 
         if(nrow(cbind(x, y)) == nrow(cbind(phylo_scores[tree$tip.label, ]))) {
           xy.tips <- cbind(x, phylo_scores[tree$tip.label, mspace$plotinfo$axes[1]], y)[tree$tip.label,]
-          # xy.nodes <- apply(xy.tips[tree$tip.label,], 2, phytools::fastAnc, tree = tree)
 
           xy <- cbind(x,y)
           xy_anc <- matrix(NA, nrow = tree$Nnode, ncol = 1)
@@ -2521,16 +2426,6 @@ plot_mspace <- function(mspace,
           if(all(args$labels.nodes %in% rownames(xy.tips[tree$tip.label,])))
             args$labels.nodes <- paste0("node_", ape::getMRCA(phy = tree, tip = args$labels.nodes))
           add_labels(xy.nodes, args$labels.nodes)
-          # if(is.character(labels.tips)) {
-          #   label.scores <- phylo_scores[labels.tips,]
-          #   label.text <- labels.tips
-          # } else {
-          #   if(labels.tips) {
-          #     label.scores <- phylo_scores[tree$tip.label,]
-          #     label.text <- rownames(phylo_scores[tree$tip.label,])
-          #   }
-          # }
-          # graphics::text(label.scores, label.text, pos = 1)
         }
       }
     }
@@ -2548,7 +2443,6 @@ plot_mspace <- function(mspace,
         stop("Groups levels ($gr_class) are necessary to generate legend labels")
       } else {
 
-        #graphics::par(mar = c(5.1, 1, 4.1, 1))
         graphics::par(mar = c(5.1, 0, 4.1, 0))
         plot(0, type = "n", axes = FALSE, xlab = "", ylab = "",
              ylim = c(0,1), xlim = c(0,1), xaxs = "i", yaxs = "i")
