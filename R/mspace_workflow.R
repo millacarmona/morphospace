@@ -987,7 +987,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
       add_labels(nodes_scores, labels.nodes)
 
     } else {
-      warning("phylogenetic relationships are not projected into univariate morphospaces")
+      cat("\nphylogenetic relationships are not projected into univariate morphospaces")
     }
   }
 
@@ -1457,6 +1457,9 @@ print.mspace <- function(mspace, ...) {
 #' @param lty.groups Integer; type of the lines in groups' ellipses/hulls.
 #' @param alpha.groups Numeric; transparency factor for groups'
 #'      ellipses/hulls/density distributions.
+#' @param boxplot.groups Logical; whether to plot represent categorical data
+#'      using boxplots. If \code{FALSE}, violin plots are displayed instead.
+#'      Used only if \code{x} or \code{y} are provided.
 #' @param density.groups Logical; whether to add density distribution for
 #'      groups (univariate ordinations only).
 #' @param legend Logical; whether to show legend for groups.
@@ -1714,6 +1717,7 @@ plot_mspace <- function(mspace,
                         lwd.groups = 1,
                         lty.groups = 1,
                         alpha.groups = 0,
+                        boxplot.groups = FALSE,
                         density.groups = TRUE,
                         col.phylo = 1,
                         lwd.phylo = 1,
@@ -1855,7 +1859,7 @@ plot_mspace <- function(mspace,
 
       scores <- mspace$projected$scores
 
-      if(!is.null(mspace$projected$gr_class)){
+      if(!is.null(mspace$projected$gr_class)) {
         gr_class <- mspace$projected$gr_class
         gr_scores <- mspace$projected$gr_scores
 
@@ -1893,8 +1897,8 @@ plot_mspace <- function(mspace,
       } else gr_cex.points <- args$cex.points
 
 
-      if(ncol(mspace$ordination$x) > 1) {
-        if(length(args$axes) > 1) {
+      if(ncol(mspace$ordination$x) > 1) { #if there are more than 1 dimensions
+        if(length(args$axes) > 1) { #...and more than 1 dimension is specified
           if(!is.null(scores) & points) {
             plot_biv_scatter(scores = scores[-index_sc_in_gr,],
                              col = gr_col.points[-index_sc_in_gr],
@@ -1927,21 +1931,25 @@ plot_mspace <- function(mspace,
               }
             }
           }
-        } else {
-          if(!is.null(gr_class)) {
+        } else { #...but less than one dimension is specified
+          if(!is.null(gr_class)) { #...and there are groups
             if(args$density.groups) {
+              if(args$density.points) {
+                args$density.points <- FALSE
+                cat("\nboth density.points and density.groups are TRUE; only the latter will be displayed")
+              }
               density_by_group_2D(gr_scores, gr_class, ax = args$axes[1], alpha = args$alpha.groups,
                                   lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
             }
             if(points) {
-              plot_univ_scatter(scores = cbind(scores[index_sc_in_gr, args$axes[1]]), density = FALSE,
+              plot_univ_scatter(scores = cbind(scores[index_sc_in_gr, args$axes[1]]), density = args$density.points,
                                 col = gr_col.points[index_sc_in_gr], pch = gr_pch.points[index_sc_in_gr],
                                 cex = gr_cex.points[index_sc_in_gr], bg = gr_bg.points[index_sc_in_gr])
             }
           }
           if(points) {
             suppressWarnings(
-              plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr, args$axes[1]]), density = FALSE,
+              plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr, args$axes[1]]), density = args$density.points,
                                 col = gr_col.points[-index_sc_in_gr], pch = gr_pch.points[-index_sc_in_gr],
                                 cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
             )
@@ -1950,18 +1958,22 @@ plot_mspace <- function(mspace,
       } else {
         if(!is.null(gr_class)) {
           if(args$density.groups) {
+            if(args$density.points) {
+              args$density.points <- FALSE
+              cat("\nboth density.points and density.groups are TRUE; only the latter will be displayed")
+            }
             density_by_group_2D(gr_scores, gr_class, ax = 1, alpha = args$alpha.groups,
                                 lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
           }
           if(points) {
-            plot_univ_scatter(scores = cbind(scores[index_sc_in_gr,]), density = FALSE, col = gr_col.points[index_sc_in_gr],
-                              pch = gr_pch.points[index_sc_in_gr], cex = gr_cex.points[index_sc_in_gr],
-                              bg = gr_bg.points[index_sc_in_gr])
+            plot_univ_scatter(scores = cbind(scores[index_sc_in_gr,]), density = args$density.points,
+                              col = gr_col.points[index_sc_in_gr], pch = gr_pch.points[index_sc_in_gr],
+                              cex = gr_cex.points[index_sc_in_gr], bg = gr_bg.points[index_sc_in_gr])
           }
         }
         if(points) {
           suppressWarnings(
-            plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr,]), density = FALSE,
+            plot_univ_scatter(scores = cbind(scores[-index_sc_in_gr,]), density = args$density.points,
                               col = gr_col.points[-index_sc_in_gr], pch = gr_pch.points[-index_sc_in_gr],
                               cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
           )
@@ -1992,7 +2004,7 @@ plot_mspace <- function(mspace,
                                                             tip = args$labels.nodes))
         add_labels(mspace$projected$phylo_scores[-tips,], args$labels.nodes)
       } else {
-        warning("phylogenetic relationships are not projected into univariate morphospaces")
+        cat("\nPhylogenetic relationships are not projected into univariate morphospaces")
       }
     }
 
@@ -2023,7 +2035,7 @@ plot_mspace <- function(mspace,
                            lwd = args$lwd.axis[i], lty = args$lty.axis[i])
         }
       } else {
-        warning("morphometric axes are not projected into univariate morphospaces")
+        cat("\nmorphometric axes are not projected into univariate morphospaces")
       }
     }
 
@@ -2047,7 +2059,7 @@ plot_mspace <- function(mspace,
 
 
           } else { # ...but axes are NOT in the same order
-            warning("axes used to generate landscape are in the wrong order; won't be regenerated")
+            cat("\naxes used to generate landscape are in the wrong order; won't be regenerated")
           }
 
         } else { # if the number of specified axes is 1....
@@ -2073,7 +2085,7 @@ plot_mspace <- function(mspace,
                               lwd = args$lwd.landsc)
         }
       } else {
-        warning("landscape was originally generated for a different set of axes; won't be regenerated")
+        cat("\nlandscape was originally generated for a different set of axes; won't be regenerated")
       }
     }
 
@@ -2089,47 +2101,49 @@ plot_mspace <- function(mspace,
 
     #3.1 - prepare ground ----------------------------------------------------------------
 
-    #3.1.1 - if either x or y is a factor, prepare ground for violin plot
+    #3.1.1 - if either x or y is a factor, prepare ground for violin/box plot
+
     if(is.factor(x) | is.factor(y)) {
-      fac <- if(is.factor(x)) x else if(is.factor(y)) y
 
-      if(is.factor(fac)) {
+      fac <- if(is.factor(x)) x else if(is.factor(y)) y else NULL
 
-        violins <- vector(mode = "list", length = nlevels(fac))
-        for(i in seq_len(nlevels(fac))) {
-          d <- density_by_group_2D(xy = cbind(mspace$projected$scores[,args$axes[1]], 0),
-                                   fac = fac, ax = 1, plot = FALSE)
+      violins <- vector(mode = "list", length = nlevels(fac))
+      for(i in seq_len(nlevels(fac))) {
+        d <- density_by_group_2D(xy = cbind(mspace$projected$scores[,args$axes[1]], 0),
+                                 fac = fac, ax = 1, plot = FALSE)
+        d.width <- (nlevels(fac) + 1) / (nlevels(fac) * 4)
 
-          if(is.factor(x)) {
-            poly.i.half1 <- cbind(d$dens[[i]]$y / d$ymax, d$dens[[i]]$x)
-            poly.i.half2 <- cbind(poly.i.half1[nrow(poly.i.half1):1,1] * -1,
-                                  poly.i.half1[nrow(poly.i.half1):1,2])
+        if(is.factor(x)) {
+          poly.i.half1 <- cbind((d$dens[[i]]$y / d$ymax) * d.width, d$dens[[i]]$x)
+          poly.i.half2 <- cbind(poly.i.half1[nrow(poly.i.half1):1,1] * -1,
+                                poly.i.half1[nrow(poly.i.half1):1,2])
+          poly.i <- rbind(poly.i.half1, poly.i.half2)
+          poly.i <- cbind(poly.i[,1] + i, poly.i[,2])
+        } else {
+          if(is.factor(y)) {
+            poly.i.half1 <- cbind(d$dens[[i]]$x, (d$dens[[i]]$y / d$ymax) * d.width)
+            poly.i.half2 <- cbind(poly.i.half1[nrow(poly.i.half1):1,1],
+                                  poly.i.half1[nrow(poly.i.half1):1,2] * -1)
             poly.i <- rbind(poly.i.half1, poly.i.half2)
-            poly.i <- cbind(poly.i[,1] + i, poly.i[,2])
-          } else {
-            if(is.factor(y)) {
-              poly.i.half1 <- cbind(d$dens[[i]]$x, d$dens[[i]]$y / d$ymax)
-              poly.i.half2 <- cbind(poly.i.half1[nrow(poly.i.half1):1,1],
-                                    poly.i.half1[nrow(poly.i.half1):1,2] * -1)
-              poly.i <- rbind(poly.i.half1, poly.i.half2)
-              poly.i <- cbind(poly.i[,1], poly.i[,2] + i)
-            }
+            poly.i <- cbind(poly.i[,1], poly.i[,2] + i)
           }
-
-          violins[[i]] <- poly.i
         }
 
-        dxvals <- NULL
-        dyvals <- NULL
-        for(i in 1:length(violins)) {
-          dxvals <- c(dxvals, violins[[i]][,1])
-          dyvals <- c(dyvals, violins[[i]][,2])
-        }
-
-        args$xlim <- range(dxvals)
-        args$ylim <- range(dyvals)
+        violins[[i]] <- poly.i
       }
+
+      dxvals <- NULL
+      dyvals <- NULL
+      for(i in 1:length(violins)) {
+        dxvals <- c(dxvals, violins[[i]][,1])
+        dyvals <- c(dyvals, violins[[i]][,2])
+      }
+
+      args$xlim <- range(dxvals)
+      args$ylim <- range(dyvals)
     }
+
+
 
     #3.1.2 - if either x or y is a phy object, prepare the ground for phenogram
     if(any(any(class(x) == "phylo"), any(class(y) == "phylo"))) {
@@ -2285,21 +2299,25 @@ plot_mspace <- function(mspace,
 
 
         if(!is.null(scores) & points) {
-          plot_biv_scatter(scores = xy[-index_sc_in_gr,],
-                           col = gr_col.points[-index_sc_in_gr],
-                           pch = gr_pch.points[-index_sc_in_gr],
-                           bg = gr_bg.points[-index_sc_in_gr],
-                           cex = gr_cex.points[-index_sc_in_gr])
+          if((is.factor(x) | is.factor(y)) & boxplot.groups) {} else {
+            plot_biv_scatter(scores = xy[-index_sc_in_gr,],
+                             col = gr_col.points[-index_sc_in_gr],
+                             pch = gr_pch.points[-index_sc_in_gr],
+                             bg = gr_bg.points[-index_sc_in_gr],
+                             cex = gr_cex.points[-index_sc_in_gr])
+          }
         }
 
         if(!is.null(gr_class)) {
           for(i in seq_len(nlevels(gr_class))) {
             if(points) {
-              plot_biv_scatter(scores = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
-                               col = gr_col.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                               pch = gr_pch.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                               bg = gr_bg.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
-                               cex = gr_cex.points[index_sc_in_gr][gr_class == levels(gr_class)[i]])
+              if((is.factor(x) | is.factor(y)) & boxplot.groups) {} else {
+                plot_biv_scatter(scores = xy[index_sc_in_gr[gr_class == levels(gr_class)[i]], ],
+                                 col = gr_col.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                                 pch = gr_pch.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                                 bg = gr_bg.points[index_sc_in_gr][gr_class == levels(gr_class)[i]],
+                                 cex = gr_cex.points[index_sc_in_gr][gr_class == levels(gr_class)[i]])
+              }
             }
             if(groups) {
               if(!args$ellipse.groups) {
@@ -2318,20 +2336,32 @@ plot_mspace <- function(mspace,
         }
 
         if(is.factor(x) | is.factor(y))  {
-          for(i in 1:length(violins)) {
-            graphics::polygon(violins[[i]], lwd = args$lwd.groups, border = i, lty = args$lty.groups,
-                              col = grDevices::adjustcolor(i, alpha.f = 0.2))
 
-            cents <- tapply(mspace$projected$scores[,args$axes[1]], INDEX = fac, FUN = mean)
-            graphics::points(if(is.factor(x)) cbind(i, cents[i]) else  cbind(cents[i], i),
-                             pch = 21, bg = i, cex = args$cex.points + .5)
+          if(is.null(args$col.groups)) args$col.groups <- 1:nlevels(fac)
+
+          if(!boxplot.groups) {
+            for(i in 1:length(violins)) {
+              graphics::polygon(violins[[i]], lwd = args$lwd.groups,
+                                border = args$col.groups[i], lty = args$lty.groups,
+                                col = grDevices::adjustcolor(args$col.groups[i], alpha.f = 0.2))
+
+              cents <- tapply(mspace$projected$scores[,args$axes[1]], INDEX = fac, FUN = mean)
+              graphics::points(if(is.factor(x)) cbind(i, cents[i]) else  cbind(cents[i], i),
+                               pch = 21, bg = args$col.groups[i], cex = args$cex.points + .5)
+            }
+          } else {
+            if(is.null(x)) horizontal <- TRUE else if(is.null(y)) horizontal <- FALSE
+            graphics::boxplot(mspace$projected$scores[,args$axes[1]] ~ fac, axes = FALSE,
+                              add = TRUE, col = grDevices::adjustcolor(args$col.groups, alpha.f = .5),
+                              horizontal = horizontal)
           }
+
           if(phylo & !is.null(mspace$projected$phylo))
-            warning("phylogenetic relationships are not projected into violin plots")
+            cat("\nphylogenetic relationships are not projected into violin/box plots")
           if(shapeax & !is.null(mspace$projected$shape_axis))
-            warning("morphometric axes are not projected into violin plots")
+            cat("\nmorphometric axes are not projected into violin/box plots")
           if(landsc & !is.null(mspace$projected$landsc))
-            warning("landscape surfaces are not projected into violin plots")
+            cat("\nlandscape surfaces are not projected into violin/box plots")
 
           return(invisible(NULL))
         }

@@ -859,7 +859,7 @@ morphogrid <- function(ordination,
     }
   } else {
 
-    if(length(axes) > 1) warning(paste0(c("x","y")[which(c(!is.null(x), !is.null(y)))],
+    if(length(axes) > 1) cat(paste0("\n", c("x","y")[which(c(!is.null(x), !is.null(y)))],
                                         " has been specified, axes[2] will be ignored"))
     axes <- axes[1]
 
@@ -1135,16 +1135,20 @@ plot_morphogrid2d <- function(x = NULL,
                    xlab = "", ylab = "", axes = FALSE)
     graphics::box()
     if(is.factor(x)) {
+      nch <- sapply(levels(x), nchar)[which.max(sapply(levels(x), nchar))]
+      cex.axis <- if(nch > 10) 10/nch else 1
       graphics::axis(side = 1, x, at = seq_len(nlevels(x)),
-                     labels = levels(x), las = 2)
+                     labels = levels(x), las = 2, cex.axis = cex.axis)
     } else {
       graphics::axis(side = 1)
       graphics::mtext(side = 1, line = 3, text = xlab)
     }
 
     if(is.factor(y)) {
+      nch <- sapply(levels(y), nchar)[which.max(sapply(levels(y), nchar))]
+      cex.axis <- if(nch > 10) 10/nch else 1
       graphics::axis(side = 2, y, at = seq_len(nlevels(y)),
-                     labels = levels(y), las = 2)
+                     labels = levels(y), las = 2, cex.axis = cex.axis)
     } else {
       graphics::axis(side = 2)
       graphics::mtext(side = 2, line = 3, text = ylab)
@@ -1433,16 +1437,20 @@ plot_morphogrid3d <- function(x = NULL,
                    xlab = "", ylab = "", axes = FALSE)
     graphics::box()
     if(is.factor(x)) {
+      nch <- sapply(levels(x), nchar)[which.max(sapply(levels(x), nchar))]
+      cex.axis <- if(nch > 10) 10/nch else 1
       graphics::axis(side = 1, x, at = seq_len(nlevels(x)),
-                     labels = levels(x), las = 2)
+                     labels = levels(x), las = 2, cex.axis = cex.axis)
     } else {
       graphics::axis(side = 1)
       graphics::mtext(side = 1, line = 3, text = xlab)
     }
 
     if(is.factor(y)) {
+      nch <- sapply(levels(y), nchar)[which.max(sapply(levels(y), nchar))]
+      cex.axis <- if(nch > 10) 10/nch else 1
       graphics::axis(side = 2, y, at = seq_len(nlevels(y)),
-                     labels = levels(y), las = 2)
+                     labels = levels(y), las = 2, cex.axis = cex.axis)
     } else {
       graphics::axis(side = 2)
       graphics::mtext(side = 2, line = 3, text = ylab)

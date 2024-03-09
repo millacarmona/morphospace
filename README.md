@@ -56,7 +56,6 @@ belonging to 13 species of the genus *Tyrannus*.
 ``` r
 library(morphospace)
 library(geomorph)
-#> Warning: package 'Matrix' was built under R version 4.3.2
 library(Morpho)
 library(Momocs)
 library(magrittr)
@@ -120,7 +119,7 @@ interspecific variation.
 
 ``` r
 # Plot PC1 against species classification
-plot_mspace(msp, x = spp, axes = 1, nh = 6, nv = 6, cex.ldm = 4, 
+plot_mspace(msp, x = spp, axes = 1, nh = 6, nv = 6, cex.ldm = 4, boxplot.groups = TRUE,
             alpha.groups = 0.5, col.points = spp, col.groups = 1:nlevels(spp), 
             phylo = FALSE, xlab = "Log-size", legend = TRUE)
 ```
@@ -297,8 +296,8 @@ as a couple of new features:
   `pls_shapes`) and `plot_mspace` in certain situations) is performed
   under a simple Equal rates model via `ape::ace`.
 
-- Introduction of violin plots for combining shape ordination axes with
-  categorical variables via `plot_mspace`.
+- Introduction of box and violin plots for combining shape ordination
+  axes with categorical variables via `plot_mspace`.
 
 - Tip and node labels can now be included in phylomorphospaces,
   phenograms and hybrid phylomorphospaces.

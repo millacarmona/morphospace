@@ -54,6 +54,7 @@ plot_mspace(
   lwd.groups = 1,
   lty.groups = 1,
   alpha.groups = 0,
+  boxplot.groups = FALSE,
   density.groups = TRUE,
   col.phylo = 1,
   lwd.phylo = 1,
@@ -199,6 +200,10 @@ ellipse(s).}
 
 \item{alpha.groups}{Numeric; transparency factor for groups'
 ellipses/hulls/density distributions.}
+
+\item{boxplot.groups}{Logical; whether to plot represent categorical data
+using boxplots. If \code{FALSE}, violin plots are displayed instead.
+Used only if \code{x} or \code{y} are provided.}
 
 \item{density.groups}{Logical; whether to add density distribution for
 groups (univariate ordinations only).}
