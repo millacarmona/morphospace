@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 
-The goal of `morphospace` is to enhance representation and heuristic exploration of multivariate ordinations of shape data. This package can handle the most common types of shape data working in integration with other widely used R packages such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), `Momocs` (Bonhome et al. 2014) and `mvMORPH` (Clavel et al.2015), which cover other more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis, phylogenetic modelling).
+The goal of `morphospace` is to enhance representation and heuristic exploration of multivariate ordinations of shape data. This package can handle the most common types of shape data working in integration with other widely used R packages such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), `Momocs` (Bonhomme et al. 2014) and `mvMORPH` (Clavel et al.2015), which cover other more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis, phylogenetic modeling).
 
 Below there is broad-strokes account of the `morphospace` capacities; for more specific guidance, refer to [General usage](https://millacarmona.github.io/morphospace/articles/General-usage.html) and [Worked examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
 
@@ -29,11 +29,15 @@ Below there is broad-strokes account of the `morphospace` capacities; for more s
 ## Installation
 
 
-You can install the development version of `morphospace` from [GitHub](https://github.com/) with:
+You can install the development and CRAN versions of `morphospace` from [GitHub](https://github.com/) with:
 
 ``` r
+# Development version
 # install.packages("devtools")
 devtools::install_github("millacarmona/morphospace")
+
+# CRAN version
+install.packages("morphospace")
 ```
 
 ## Concept
@@ -97,7 +101,7 @@ plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
             phylo = FALSE, xlab = "Log-size", legend = TRUE)
 ```
 
-Rr against taxonomic classification to assess patterns of intra- and/or interspecific variation.
+Or against taxonomic classification to assess patterns of intra- and/or interspecific variation.
 
 
 ```{r}
@@ -219,7 +223,7 @@ Significant changes aimed at enhancing integration with other GM/MV R packages a
 
 - Estimation of ancestral shapes (performed internally by `expected_shapes`, `detrend_shapes`, `proj_phylogeny`, `pls2b`, `pls_shapes`, `burnaby` and `plot_mspace`) now relies on `mvMORPH::mvgls`, which has the advantage of allowing estimation under evolutionary models other than Brownian motion. In addition, ancestral character estimation of discrete non-shape variables (attempted internally by the phylogenetic version of `pls2b` (and by extension `pls_shapes`) and `plot_mspace` in certain situations) is performed under a simple Equal rates model via `ape::ace`.
 
-- Introduction of box and violin plots for combining shape ordination axes with categorical variables via `plot_mspace`.
+- Introduction of boxplots and violin plots for combining shape ordination axes with categorical variables via `plot_mspace`.
 
 - Tip and node labels can now be included in phylomorphospaces, phenograms and hybrid phylomorphospaces.
 
@@ -234,11 +238,11 @@ Adams D.C., Collyer M.L., Kaliontzopoulou A., & Baken E.K. (2021). *geomorph: So
 
 Bache S.F., & Wickham H. (2022). *magrittr: A Forward-Pipe Operator for R*. R package version 2.0.3. <https://CRAN.R-project.org/package=magrittr>.
 
-Bonhomme V., Picq S., Gaucherel C., & Claude J. (2014). *Momocs: Outline Analysis Using R*. Journal of Statistical Software, 56(13), 1-24. <http://www.jstatsoft.org/v56/i13/>.
+Bonhomme V., Picq S., Gaucherel C., & Claude J. (2014). *Momocs: Outline Analysis Using R*. Journal of Statistical Software, 56(13), 1-24. <https://www.jstatsoft.org/v56/i13/>.
 
-Clavel, J., Escarguel, G., & Merceron, G. (2015). *mvMORPH: an R package for fitting multivariate evolutionary models to morphometric data*. Methods in Ecology and Evolution, 6(11), 1311-1319. <https://doi.org/10.1111/2041-210X.12420>
+Clavel, J., Escarguel, G., & Merceron, G. (2015). *mvMORPH: an R package for fitting multivariate evolutionary models to morphometric data*. Methods in Ecology and Evolution, 6(11), 1311-1319. https://doi.org/10.1111/2041-210X.12420.
 
-Collyer, M. L., & Adams, D. (2021). *Phylogenetically aligned component analysis*. Methods in Ecology and Evolution, 12(2), 359-372. <https://doi.org/10.1111/2041-210X.13515>.
+Collyer, M. L., & Adams, D. (2021). *Phylogenetically aligned component analysis*. Methods in Ecology and Evolution, 12(2), 359-372. https://doi.org/10.1111/2041-210X.13515.
 
 Dryden, I.L. (2019). *shapes: statistical shape analysis*. R package version 1.2.5. <https://CRAN.R-project.org/package=shapes>.
 

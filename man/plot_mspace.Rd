@@ -284,6 +284,9 @@ landscapes.}
 \item{lwd.landsc}{Integer; width of the contour lines depicting
 landscapes.}
 }
+\value{
+\code{None}
+}
 \description{
 Flexible representation of morphospaces, including their
 combination with either other variables or a phylogeny.

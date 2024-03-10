@@ -417,7 +417,7 @@ expected_shapes <- function(shapes, x = NULL, xvalue = NULL,
 #'
 #'  ### Comparing residuals vs orthogonal methods
 #'
-#'  \dontrun{
+#'  if (interactive()) {
 #'  #load shells3D data, retain only specimens belonging to S. vacaensis
 #'  data("shells3D")
 #'  index <- species == levels(species)[7]
@@ -689,8 +689,7 @@ detrend_shapes <- function(model, method = "residuals", xvalue = NULL, newdata =
 #'
 #' #correct interactively (the process will remain open until
 #' #you click 'finish' or press the Esc key)
-#' \dontrun{
-#'
+#' if (interactive()) {
 #' ef_corr2 <- correct_efourier(ef_corr1)
 #' }
 correct_efourier<-function(ef, index = NULL) {
@@ -981,7 +980,7 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
 #'
 #' #1. Interactively
 #'
-#' \dontrun{
+#' if (interactive()) {
 #'
 #' #select 1 shape in the new window
 #' arbitrary_shape <- extract_shapes(phylomsp, nshapes = 1)

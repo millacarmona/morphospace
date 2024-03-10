@@ -216,7 +216,7 @@ phylogenetically-corrected coefficients and phylogenetic mean (see Revell,
 
  ### Comparing residuals vs orthogonal methods
 
- \dontrun{
+ if (interactive()) {
  #load shells3D data, retain only specimens belonging to S. vacaensis
  data("shells3D")
  index <- species == levels(species)[7]

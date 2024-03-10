@@ -118,7 +118,7 @@ plot(burn$x) #ordination
 
 #compare shape variation as summarized by different methods
 
-\dontrun{
+if (interactive()) {
 
 #build morphospace for S. vacaensis using Burnaby's approach (orthogonal
 #to size variation)

@@ -89,6 +89,9 @@ models.}
 
 \item{models}{Logical; whether to plot background shape models.}
 }
+\value{
+\code{None}
+}
 \description{
 Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 3-dimensional
 morphometric (landmark) data. Used internally.
@@ -97,7 +100,7 @@ morphometric (landmark) data. Used internally.
 This function allows the user to choose the orientation of the 3D
 models by interactively rotating a shape model. Do not close the \code{rgl}
 window, or minimize it actively (just bring back Rstudio to the front and
-let the device get minimized pasively). The process of morphospace
+let the device get minimized passively). The process of morphospace
 generation is rather slow, specially if a mesh is provided for
 \code{template}, a large number of shape models is asked, and/or
 \code{alpha.models} value is lower than \code{1}.
@@ -120,7 +123,7 @@ shapes_grid <- morphogrid(ordination = pca, axes = c(1,2), datype = "landm",
 #get meanshape
 meanshape <- expected_shapes(shapes)
 
-\dontrun{
+if (interactive()) {
 #plot grid (shape coordinates only)
 plot_morphogrid3d(morphogrid = shapes_grid, refshape = meanshape,
                   ordtype = "prcomp", axes = c(1,2), col.ldm = 1,

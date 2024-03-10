@@ -29,7 +29,7 @@ using \code{ape}, \code{phytools} and \code{mvMORPH} functions.
 Used internally.
 }
 \examples{
-#laod data and packages
+#load data and packages
 library(geomorph)
 
 data("tails")

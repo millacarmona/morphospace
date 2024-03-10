@@ -144,7 +144,7 @@ least-squares to study covariation in shape}. Systematic Biology, 49(4),
 740-753.
 
 Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012). \emph{Geometric
-morphometrics for biologists: A primer}. 2nd ed. Academic Press.
+morphometrics for biologists: A primer}. Second ed. Academic Press.
 
 Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
 \emph{Phylogenetic principal components analysis and geometric

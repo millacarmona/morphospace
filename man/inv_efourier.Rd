@@ -13,7 +13,7 @@ inv_efourier(coe, nb.pts = 120)
 outlines.}
 }
 \value{
-A \code{nb.pts x 2} matrix of (x,y) cartesian coordinates defining
+A \code{nb.pts x 2} matrix of (x,y) Cartesian coordinates defining
 single outline shape.
 }
 \description{

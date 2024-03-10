@@ -21,4 +21,18 @@ Reorganize results from \code{\link[geomorph]{gm.prcomp}},
 \code{\link[phytools]{phyl.pca}} and \code{\link[mvMORPH]{mvgls.pca}} for
 their use in the mspace workflow. Used internally.
 }
+\examples{
+#load data
+data("tails")
+
+#perform PLS
+pls <- Morpho::pls2B(x = tails$sizes, y = geomorph::two.d.array(tails$shapes))
+
+#adapt format
+pls_adapted <- adapt_ordination(pls)
+
+#compare contents
+names(pls)
+names(pls_adapted)
+}
 \keyword{internal}

@@ -17,6 +17,9 @@ for each group.}
 \item{...}{Further arguments passed to \code{\link[rgl:primitives]{rgl::triangles3d()}} (e.g.
 \code{specular}, \code{alpha}).}
 }
+\value{
+\code{None}
+}
 \description{
 Plot convex hulls for different groups in 3D scatterplots
 created using \code{rgl}. Used internally (mostly).
@@ -32,7 +35,7 @@ species <- tails$data$species
 pca <- prcomp(two.d.array(shapes))
 
 #plot and add convex hulls
-\dontrun{
+if (interactive()) {
 
 plot3d(pca$x)
 hulls_by_group_3D(pca$x, fac = species, col = "gray")

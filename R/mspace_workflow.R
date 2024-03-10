@@ -31,7 +31,7 @@
 #'    \code{shapes}.
 #' @param p Numeric, indicating the number of landmarks/semilandmarks used (only
 #'   for landmark data in 2-margin matrices format).
-#' @param k Numeric, indicating the number of cartesian dimensions of
+#' @param k Numeric, indicating the number of Cartesian dimensions of
 #'   landmarks/semilandmarks (only for landmark data in 2-margin matrices
 #'   format).
 #' @param nh Positive integer; number of shape models along the x axis.
@@ -222,7 +222,7 @@
 #'
 #' ##3D Landmark data
 #'
-#' \dontrun{
+#' if (interactive()) {
 #' #load data and packages and extract relevant data and information
 #' library(Morpho)
 #' library(geomorph)
@@ -1063,7 +1063,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #' @param ... Further arguments passed to \code{FUN}.
 #'
 #' @details The purpose of this function is to generate and depict a 2- (for
-#'   univariate morphospaces) or 3-dimensonal (for bivariate morphospaces)
+#'   univariate morphospaces) or 3-dimensional (for bivariate morphospaces)
 #'   surface (i.e., a landscape), interpolated from values assigned to the set
 #'   of shapes projected into an existing morphospace. These can be a sample of
 #'   shapes specified by the user, producing a surface for a specific region of
@@ -1311,8 +1311,9 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
 #' @param mspace An \code{"mspace"} object.
 #' @param ... Further arguments passed to or from other methods.
 #'
-#' @details Will return information about how the ordination was obtained
-#'   (method and data) as well as the elements projected into it.
+#' @return \code{None}
+#'
+#' @noRd
 print.mspace <- function(mspace, ...) {
 
   if(any(c("prcomp", "mvgls.pca", "PCA") %in% mspace$ordination$ordtype)) ordtype <- "Principal Component Analysis"
@@ -1566,6 +1567,8 @@ print.mspace <- function(mspace, ...) {
 #'   argument of \code{\link{plot_mspace}}). This will result in the collapse of
 #'   the 3D landscape projected into a bivariate morphospace into a 2D landscape
 #'   projected into a univariate one.
+#'
+#' @return \code{None}
 #'
 #' @export
 #'

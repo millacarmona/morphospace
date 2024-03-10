@@ -13,6 +13,8 @@
 #'
 #' @export
 #'
+#' @return \code{Node}
+#'
 #' @examples
 #' #load 2D landmark data
 #' data("tails")
@@ -29,12 +31,10 @@
 #' data("shells3D")
 #' shapes <- shells3D$shapes
 #'
-#' \dontrun{
 #' #pile shapes
 #' pile_shapes(shapes, mshape = FALSE) #bare
 #' pile_shapes(shapes, mshape = FALSE, links = list(1:10)) #with false links
 #' pile_shapes(shapes, mshape = TRUE, links = list(1:10)) #false links + mshape
-#' }
 #'
 #'
 #' #load outline data
@@ -110,7 +110,6 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
       graphics::lines(expected_shapes(shapes_coord), lwd = 4)
     }
   }
-
 }
 
 
@@ -146,7 +145,7 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 #'
 #' @examples
 #' #generate template interactively
-#' \dontrun{
+#' if (interactive()) {
 #' temp <- build_template2d(image = "extdata/sample_wing.jpg", nlands = 9,
 #'                          ncurves = 9)
 #'
@@ -201,6 +200,8 @@ build_template2d <- function(image, nlands, ncurves) {
 #' @param ... Further arguments passed to [rgl::triangles3d()] (e.g.
 #'   \code{specular}, \code{alpha}).
 #'
+#' @return \code{None}
+#'
 #' @export
 #' @keywords internal
 #'
@@ -215,7 +216,7 @@ build_template2d <- function(image, nlands, ncurves) {
 #' pca <- prcomp(two.d.array(shapes))
 #'
 #' #plot and add convex hulls
-#' \dontrun{
+#' if (interactive()) {
 #'
 #' plot3d(pca$x)
 #' hulls_by_group_3D(pca$x, fac = species, col = "gray")
@@ -268,15 +269,17 @@ col2hex <- function(col) {
 
 ################################################################################
 
-# Compute lift-to-drag ratio for shapes from the 'tails' data set
-#
-# @description Compute lift-to-drag ratio (a proxy for aerodynamic performance
-#   on shapes of tails of Tyrannus species (landmark data). To be used as a
-#   complement for the 'tails' data set in tests and examples.
-#
-# @param shapes landmark shape data from the "tails" data set.
-# @param MSC Logical; whether to use the maximum continuous span of the tail
-#   as a proxy for the amount of lift produced, instead of the lifting area.
+#' Compute lift-to-drag ratio for shapes from the 'tails' data set
+#'
+#' @description Compute lift-to-drag ratio (a proxy for aerodynamic performance
+#'   on shapes of tails of Tyrannus species (landmark data). To be used as a
+#'   complement for the 'tails' data set in tests and examples.
+#'
+#' @param model landmark shape data from the "tails" data set.
+#' @param MCS Logical; whether to use the maximum continuous span of the tail
+#'   as a proxy for the amount of lift produced, instead of the lifting area.
+#'
+#' @noRd
 computeLD <- function(model, MCS = FALSE) {
 
   tail <- matrix(model, ncol = 2, byrow = TRUE)

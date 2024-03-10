@@ -91,7 +91,7 @@ existing morphospace.
 }
 \details{
 The purpose of this function is to generate and depict a 2- (for
-univariate morphospaces) or 3-dimensonal (for bivariate morphospaces)
+univariate morphospaces) or 3-dimensional (for bivariate morphospaces)
 surface (i.e., a landscape), interpolated from values assigned to the set
 of shapes projected into an existing morphospace. These can be a sample of
 shapes specified by the user, producing a surface for a specific region of

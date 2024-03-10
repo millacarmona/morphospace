@@ -24,7 +24,7 @@ Project variables in their original scale into an existing
 ordination. Used internally.
 }
 \examples{
-#' #load data and packages
+#load data and packages
 library(geomorph)
 data("tails")
 

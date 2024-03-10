@@ -85,6 +85,9 @@ tips of the phylogeny.}
 
 \item{points}{Logical; whether to plot the scatter points.}
 }
+\value{
+\code{None}
+}
 \description{
 Plot phenogram using phylogenetic and morphometric information.
 Used internally.

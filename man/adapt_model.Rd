@@ -23,4 +23,21 @@ Extract and format results from \code{\link[stats]{lm}},
 \code{\link[mvMORPH]{mvgls}} for their use in the mspace workflow and shape
 operations. Used internally.
 }
+\examples{
+#load data
+data("tails")
+
+#perform PGLS
+gmdf <- geomorph::geomorph.data.frame(shapes = expected_shapes(tails$shapes, tails$data$species),
+                                      sizes = cbind(tapply(tails$sizes, tails$data$species, mean)),
+                                      phy = tails$tree)
+
+#adapt PGLS format
+mod <- geomorph::procD.pgls(shapes ~ sizes, phy = phy, data = gmdf)
+mod_adapted <- adapt_model(mod)
+
+#compare contents
+names(mod)
+names(mod_adapted)
+}
 \keyword{internal}

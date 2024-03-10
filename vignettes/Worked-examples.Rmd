@@ -86,7 +86,7 @@ title("Morphospace using template")
 ```
 
 
-Assume for a second we are interested in exploring whether we can identify morphological differences between species. The pattern we are seeing suggets that variation in wing morphology is very subtle, that wings of these two species are basically indistinguishable, and that cactus has a large effect on wing morphology. However, there is a lot of 'noise' (i.e. sexual dimorphism, allometric variation, genetic variation, even host cactus) we can get rid of using `detrend_shapes`. We do this species-wise, so that patterns of interspecific variation are not blurred.
+Assume for a second we are interested in exploring whether we can identify morphological differences between species. The pattern we are seeing suggests that variation in wing morphology is very subtle, that wings of these two species are basically indistinguishable, and that cactus has a large effect on wing morphology. However, there is a lot of 'noise' (i.e. sexual dimorphism, allometric variation, genetic variation, even host cactus) we can get rid of using `detrend_shapes`. We do this species-wise, so that patterns of interspecific variation are not blurred.
 
 ```{r}
 detr_shapes <- shapes * 0
@@ -151,7 +151,7 @@ So, after 'cleaning' the raw variation interspecific differences become apparent
 ### Closed outlines
 
 
-`morphospace` can also handle closed outline data in the form of Fourier coefficients resulting from an elliptic Fourier analysis. For the purposes of import, normalize and and analize this data we rely on the `Momocs` package, and use its `"OutCoe"` format for storing closed outlines as starting point. Below the `mspace %>% proj_*` workflow is applied to the `shells` data set taken from Milla Carmona et al. (2018). This include data from 137 specimens belonging to 4 species of the extinct bivalve genus *Ptychomya*, tracking their shape changes through a 5 million years interval from the Lower Cretaceous of Argentina. The data set includes the information about the shape (measured using 7 harmonics), centroid size, geochronologic age (both relative and absolute), geographic provenance, and taxonomic classification of each specimen.
+`morphospace` can also handle closed outline data in the form of Fourier coefficients resulting from an elliptic Fourier analysis. For the purposes of import, normalize and analize this data we rely on the `Momocs` package, and use its `"OutCoe"` format for storing closed outlines as starting point. Below the `mspace %>% proj_*` workflow is applied to the `shells` data set taken from Milla Carmona et al. (2018). This include data from 137 specimens belonging to 4 species of the extinct bivalve genus *Ptychomya*, tracking their shape changes through a 5 million years interval from the Lower Cretaceous of Argentina. The data set includes the information about the shape (measured using 7 harmonics), centroid size, geochronologic age (both relative and absolute), geographic provenance, and taxonomic classification of each specimen.
 
 
 ```{r, message=FALSE}
@@ -341,7 +341,7 @@ knitr::include_graphics("vignette-unnamed-chunk-24-1.png")
 ```
 
 
-We can now focus on ontogenetic shape variation, which was the purpose this data set was built for. Again we resort to `detrend shapes` to remove variation introduced by undesired sources (which in this case are biostratigraphic level, geographic provenance and, especialy, individual differences).
+We can now focus on ontogenetic shape variation, which was the purpose this data set was built for. Again we resort to `detrend shapes` to remove variation introduced by undesired sources (which in this case are biostratigraphic level, geographic provenance and, especially, individual differences).
 
 
 ```{r eval = FALSE}

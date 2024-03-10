@@ -75,7 +75,7 @@ or \code{"landm"}). Only required if \code{ord} is provided instead of
 \item{p}{Numeric, indicating the number of landmarks/semilandmarks used (only
 for landmark data in 2-margin matrices format).}
 
-\item{k}{Numeric, indicating the number of cartesian dimensions of
+\item{k}{Numeric, indicating the number of Cartesian dimensions of
 landmarks/semilandmarks (only for landmark data in 2-margin matrices
 format).}
 
@@ -278,7 +278,7 @@ mspace(shapes, template = template, mag = 3, axes = c(1,2), points = TRUE)
 
 ##3D Landmark data
 
-\dontrun{
+if (interactive()) {
 #load data and packages and extract relevant data and information
 library(Morpho)
 library(geomorph)

@@ -78,6 +78,9 @@ models.}
 
 \item{models}{Logical; whether to plot background shape models.}
 }
+\value{
+\code{None}
+}
 \description{
 Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 2-dimensional
 morphometric data. Used internally.

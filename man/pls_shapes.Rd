@@ -53,7 +53,7 @@ in the shape block.}
 }
 }
 \description{
-A wrapper for \code{\link[=pls2b]{pls2b()}} specifically aimed at summarising
+A wrapper for \code{\link[=pls2b]{pls2b()}} specifically aimed at summarizing
 covariation between shape data and other external, non-shape variable(s).
 }
 \details{
@@ -132,7 +132,7 @@ least-squares to study covariation in shape}. Systematic Biology, 49(4),
 740-753.
 
 Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012). \emph{Geometric
-morphometrics for biologists: A primer}. 2nd ed. Academic Press.
+morphometrics for biologists: A primer}. Second ed. Academic Press.
 
 Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
 components analysis in geometric morphometrics}. Evolutionary Biology,

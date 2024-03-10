@@ -20,7 +20,7 @@ options(rgl.useNULL=TRUE)
 ```
 
 
-`morphospace` has been built to work in intergration with other widely used R packages covering other more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis) such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014).
+`morphospace` has been built to work in integration with other widely used R packages covering other more essential steps in the geometric morphometrics pipeline (e.g. importation, normalization, statistical analysis) such as `Morpho` (Schlager 2017), `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), and `Momocs` (Bonhome et al. 2014).
 
 
 ```{r, message = FALSE}
@@ -147,7 +147,7 @@ plot_mspace(mspl, display.landsc = "filled.contour",
             palette.landsc = terrain.colors, scalebar = TRUE)
 ```
 
-(*Note: using the* `FUN` *argument is the easy way to do this, but it needs a function that can go through every shape as stored in a 2-margin matrix in which each row is a shape and each column is a shape descripor (e.g. the output from* `geomorph::two.d.array`*)*)
+(*Note: using the* `FUN` *argument is the easy way to do this, but it needs a function that can go through every shape as stored in a 2-margin matrix in which each row is a shape and each column is a shape descriptor (e.g. the output from* `geomorph::two.d.array`*)*)
 
 
 ### Ordination methods
@@ -304,7 +304,7 @@ Adams D.C., Collyer M.L., Kaliontzopoulou A., & Baken E.K. (2021). *geomorph: So
 
 Akima H., & Gebhardt A. (2022). *akima: Interpolation of Irregularly and Regularly Spaced Data*. R package version 0.6-3.4 <https://CRAN.R-project.org/package=akima>.
 
-Bache S.F., & Wickham H. (2022). m*agrittr: A Forward-Pipe Operator for R*. R package version 2.0.3. <https://CRAN.R-project.org/package=magrittr>.
+Bache S.F., & Wickham H. (2022). *magrittr: A Forward-Pipe Operator for R*. R package version 2.0.3. <https://CRAN.R-project.org/package=magrittr>.
 
 Bonhomme V., Picq S., Gaucherel C., & Claude J. (2014). *Momocs: Outline Analysis Using R*. Journal of Statistical Software, 56(13), 1-24.  <http://www.jstatsoft.org/v56/i13/>.
 

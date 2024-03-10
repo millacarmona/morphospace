@@ -31,6 +31,9 @@ ellipses.}
 
 \item{...}{Further arguments passed to \code{\link[graphics:polygon]{graphics::polygon()}}.}
 }
+\value{
+\code{None}
+}
 \description{
 Plot confidence ellipses for different groups in 2D scatterplots
 created using the generic \code{\link[graphics:plot.default]{graphics::plot()}} function. Used internally

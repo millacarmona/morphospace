@@ -118,7 +118,7 @@ points(PC2_scores, pch = 21, bg = "blue")
 
 #1. Interactively
 
-\dontrun{
+if (interactive()) {
 
 #select 1 shape in the new window
 arbitrary_shape <- extract_shapes(phylomsp, nshapes = 1)

@@ -8,3 +8,4 @@
 ^\.github$
 ^vignettes$
 ^figures$
+^cran-comments\.md$

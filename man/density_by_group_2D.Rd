@@ -33,6 +33,9 @@ distributions.}
 \item{col}{A vector (either character or numeric) indicating the colors used
 for each group.}
 }
+\value{
+\code{None}
+}
 \description{
 Plot density distribution for different groups in "univariate"
 scatterplots. Used internally.

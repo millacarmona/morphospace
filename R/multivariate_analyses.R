@@ -282,7 +282,7 @@ bg_prcomp <- function(x, groups, gweights = TRUE, LOOCV = FALSE,
 #'   740-753.
 #'
 #' Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012). \emph{Geometric
-#'   morphometrics for biologists: A primer}. 2nd ed. Academic Press.
+#'   morphometrics for biologists: A primer}. Second ed. Academic Press.
 #'
 #' Polly, P. D., Lawing, A. M., Fabre, A. C., & Goswami, A. (2013).
 #'   \emph{Phylogenetic principal components analysis and geometric
@@ -496,7 +496,7 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
 
 #' 2B Partial Least Squares for shape data
 #'
-#' @description A wrapper for [pls2b()] specifically aimed at summarising
+#' @description A wrapper for [pls2b()] specifically aimed at summarizing
 #'   covariation between shape data and other external, non-shape variable(s).
 #'
 #' @param X A matrix with variables as columns and observations as rows,
@@ -565,7 +565,7 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
 #'   740-753.
 #'
 #' Zelditch, M. L., Swiderski, D. L., & Sheets, H. D. (2012). \emph{Geometric
-#'   morphometrics for biologists: A primer}. 2nd ed. Academic Press.
+#'   morphometrics for biologists: A primer}. Second ed. Academic Press.
 #'
 #' Bookstein, F. L. (2019). \emph{Pathologies of between-groups principal
 #'   components analysis in geometric morphometrics}. Evolutionary Biology,
@@ -758,7 +758,7 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
 #'
 #' #compare shape variation as summarized by different methods
 #'
-#' \dontrun{
+#' if (interactive()) {
 #'
 #' #build morphospace for S. vacaensis using Burnaby's approach (orthogonal
 #' #to size variation)

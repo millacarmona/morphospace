@@ -11,6 +11,9 @@ rotate_coords(xy, degrees)
 
 \item{degrees}{Numeric; angle (in degrees) to rotate \code{(x,y)}}
 }
+\value{
+Matrix of rotated c(x,y) coordinates.
+}
 \description{
 Rotate x,y coordinates by an arbitrary amount of degrees
 }

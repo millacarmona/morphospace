@@ -16,7 +16,7 @@ other widely used R packages such as `Morpho` (Schlager 2017),
 (Bonhome et al. 2014) and `mvMORPH` (Clavel et al.2015), which cover
 other more essential steps in the geometric morphometrics pipeline
 (e.g. importation, normalization, statistical analysis, phylogenetic
-modelling).
+modeling).
 
 Below there is broad-strokes account of the `morphospace` capacities;
 for more specific guidance, refer to [General
@@ -26,12 +26,16 @@ examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.ht
 
 ## Installation
 
-You can install the development version of `morphospace` from
+You can install the development and CRAN versions of `morphospace` from
 [GitHub](https://github.com/) with:
 
 ``` r
+# Development version
 # install.packages("devtools")
 devtools::install_github("millacarmona/morphospace")
+
+# CRAN version
+install.packages("morphospace")
 ```
 
 ## Concept
@@ -40,7 +44,7 @@ The basic idea behind `morphospace` is to build empirical morphospaces
 using multivariate ordination methods, then use the resulting ordination
 as a reference frame in which elements representing different aspects of
 morphometric variation are projected. These elements are added to both
-graphic representations and objects as consecutive ‘layers’ and list
+graphic representations and objects as consecutive 'layers' and list
 slots, respectively, using the `%>%` pipe operator from `magrittr`
 (Bache & Wickham 2022).
 
@@ -102,7 +106,7 @@ msp <- mspace(shapes = shapes, links = wf, cex.ldm = 5) %>%
 Once the `"mspace"` object has been created, the `plot_mspace` function
 can be used to either regenerate/modify the plot, add a legend, or to
 combine morphometric axes with other non-shape variables to produce
-‘hybrid’ morphospaces. For example, PC1 can be plotted against size to
+'hybrid' morphospaces. For example, PC1 can be plotted against size to
 explore allometric patterns.
 
 ``` r
@@ -114,7 +118,7 @@ plot_mspace(msp, x = tails$sizes, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
-Rr against taxonomic classification to assess patterns of intra- and/or
+Or against taxonomic classification to assess patterns of intra- and/or
 interspecific variation.
 
 ``` r
@@ -243,7 +247,7 @@ examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.ht
   `"mspace"` objects (background shape models, shapes along ordination
   axes, or specific coordinates selected interactively).
 
-- New `burnaby` function, implementing Burnaby’s approach for
+- New `burnaby` function, implementing Burnaby's approach for
   standardization of morphometric data by computing a shape subspace
   orthogonal to an arbitrary vector or variable
 
@@ -296,8 +300,8 @@ as a couple of new features:
   `pls_shapes`) and `plot_mspace` in certain situations) is performed
   under a simple Equal rates model via `ape::ace`.
 
-- Introduction of box and violin plots for combining shape ordination
-  axes with categorical variables via `plot_mspace`.
+- Introduction of boxplots and violin plots for combining shape
+  ordination axes with categorical variables via `plot_mspace`.
 
 - Tip and node labels can now be included in phylomorphospaces,
   phenograms and hybrid phylomorphospaces.
@@ -317,16 +321,16 @@ R*. R package version 2.0.3.
 
 Bonhomme V., Picq S., Gaucherel C., & Claude J. (2014). *Momocs: Outline
 Analysis Using R*. Journal of Statistical Software, 56(13), 1-24.
-<http://www.jstatsoft.org/v56/i13/>.
+<https://www.jstatsoft.org/v56/i13/>.
 
 Clavel, J., Escarguel, G., & Merceron, G. (2015). *mvMORPH: an R package
 for fitting multivariate evolutionary models to morphometric data*.
 Methods in Ecology and Evolution, 6(11), 1311-1319.
-<https://doi.org/10.1111/2041-210X.12420>
+https://doi.org/10.1111/2041-210X.12420.
 
 Collyer, M. L., & Adams, D. (2021). *Phylogenetically aligned component
 analysis*. Methods in Ecology and Evolution, 12(2), 359-372.
-<https://doi.org/10.1111/2041-210X.13515>.
+https://doi.org/10.1111/2041-210X.13515.
 
 Dryden, I.L. (2019). *shapes: statistical shape analysis*. R package
 version 1.2.5. <https://CRAN.R-project.org/package=shapes>.

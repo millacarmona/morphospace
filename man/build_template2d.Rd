@@ -34,7 +34,7 @@ button in the top-right corner of the Plots pane).
 }
 \examples{
 #generate template interactively
-\dontrun{
+if (interactive()) {
 temp <- build_template2d(image = "extdata/sample_wing.jpg", nlands = 9,
                          ncurves = 9)
 

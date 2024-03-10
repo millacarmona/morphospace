@@ -33,7 +33,7 @@ library(png)
 data("shells3D")
 shapes <- shells3D$shapes
 
-\dontrun{
+if (interactive()) {
 #perform pca, extract ranges for PC1 and 2
 pca <- prcomp(two.d.array(shapes))
 xlim <- range(pca$x[,1])

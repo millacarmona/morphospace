@@ -37,8 +37,7 @@ pile_shapes(ef_corr1, mshape = FALSE)
 
 #correct interactively (the process will remain open until
 #you click 'finish' or press the Esc key)
-\dontrun{
-
+if (interactive()) {
 ef_corr2 <- correct_efourier(ef_corr1)
 }
 }

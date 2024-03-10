@@ -17,6 +17,9 @@ the wireframe (following the format used in \code{Morpho}).}
 \item{...}{Additional arguments passed to \code{\link[graphics]{lines}} or
 \code{\link[rgl]{lines3d}}.}
 }
+\value{
+\code{Node}
+}
 \description{
 Superimpose all the shapes in the sample.
 }
@@ -36,12 +39,10 @@ pile_shapes(shapes, mshape = TRUE, links = links) #with links and mean shape
 data("shells3D")
 shapes <- shells3D$shapes
 
-\dontrun{
 #pile shapes
 pile_shapes(shapes, mshape = FALSE) #bare
 pile_shapes(shapes, mshape = FALSE, links = list(1:10)) #with false links
 pile_shapes(shapes, mshape = TRUE, links = list(1:10)) #false links + mshape
-}
 
 
 #load outline data

@@ -1,15 +1,16 @@
 Package: morphospace
-Title: Build, Visualize and Explore Multivariate Ordinations of Shape Data
+Title: Build and Visualize Multivariate Ordinations of Shape Data
 Version: 0.0.2
 Authors@R: 
-    person(given = "Pablo", family = "Milla Carmona", email = "pablomillac@gmail.com", role = c("aut", "cre"),
+    person(given = "Pablo", family = "Milla Carmona", email = "pablomillac@gmail.com", role = c("aut", "cre", "cph"),
          comment = c(ORCID = "0000-0002-0396-6244"))
-Description: Tools for building, visualizing, and exploring multivariate ordinations of shape data 
+Description: Tools for building, visualizing, and exploring multivariate ordinations of shape 
+    data 
     resulting from geometric morphometrics analyses.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 URL: https://github.com/millacarmona/morphospace,
     https://millacarmona.github.io/morphospace/
 BugReports: https://github.com/millacarmona/morphospace/issues
@@ -22,6 +23,7 @@ Imports:
     geomorph,
     graphics,
     grDevices,
+    jpeg,
     magick,
     magrittr,
     MASS,
@@ -30,14 +32,15 @@ Imports:
     mvMORPH,
     phytools,
     png,
-    rgl
+    rgl,
+    RRPP
 Depends: 
     R (>= 2.10)
 LazyData: true
 Suggests: 
-    jpeg,
     testthat (>= 3.0.0),
     caper,
     rmarkdown,
-    RRPP
+    spelling
 Config/testthat/edition: 3
+Language: en-US

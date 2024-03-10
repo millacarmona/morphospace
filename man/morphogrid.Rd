@@ -54,7 +54,7 @@ the y axis.}
 \item{p}{Numeric, indicating the number of landmarks/semilandmarks used (for
 landmark data only).}
 
-\item{k}{Numeric, indicating the number of cartesian dimensions of
+\item{k}{Numeric, indicating the number of Cartesian dimensions of
 landmarks/semilandmarks (for landmark data only).}
 
 \item{nh}{Numeric; the number of shape models along the x axis.}

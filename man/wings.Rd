@@ -24,7 +24,7 @@ wing morphology, to be warped using TPS interpolation.}
 wings
 }
 \description{
-Sample of intra- and interspecific wing shapes, quntified
+Sample of intra- and interspecific wing shapes, quantified
 using 9 landmarks, from two species of cactophilic \emph{Drosophila}
 (Diptera: Drosophilidae).
 }

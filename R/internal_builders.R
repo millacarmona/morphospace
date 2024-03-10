@@ -48,7 +48,7 @@
 #' lineplot(extshapes_arr[,,1], tails$links) ; title("negative")
 #' plot(extshapes_arr[,,2])
 #' lineplot(extshapes_arr[,,2], tails$links) ; title("positive")
-rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + center) } #!
+rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + center) }
 
 
 ################################################################################
@@ -73,7 +73,7 @@ rev_eigen <- function(scores, vectors, center) { t(t(scores %*% t(vectors)) + ce
 #' @seealso \code{\link{rev_eigen}}
 #'
 #' @examples
-#' #' #load data and packages
+#' #load data and packages
 #' library(geomorph)
 #' data("tails")
 #'
@@ -124,7 +124,7 @@ proj_eigen <- function(x, vectors, center) { t(t(rbind(x)) - center) %*% vectors
 #' @return Mimics the \code{\link{svd}} output.
 #'
 #' @examples
-#' #laod data and packages
+#' #load data and packages
 #' library(geomorph)
 #'
 #' data("tails")
@@ -195,7 +195,7 @@ svd_block <- function(x, y, tree = NULL, evmodel) {
 #' @param nb.pts Numeric, specifying the number of coordinates for sampling the
 #'   outlines.
 #'
-#' @return A \code{nb.pts x 2} matrix of (x,y) cartesian coordinates defining
+#' @return A \code{nb.pts x 2} matrix of (x,y) Cartesian coordinates defining
 #'   single outline shape.
 #'
 #' @export
@@ -442,7 +442,7 @@ adjust_models2d <- function(models, frame, model_width, model_height) {
 #' data("shells3D")
 #' shapes <- shells3D$shapes
 #'
-#' \dontrun{
+#' if (interactive()) {
 #' #perform pca, extract ranges for PC1 and 2
 #' pca <- prcomp(two.d.array(shapes))
 #' xlim <- range(pca$x[,1])
@@ -542,6 +542,20 @@ adjust_models3d <- function(models, frame, size.models, asp.models) {
 #'
 #' @export
 #' @keywords internal
+#'
+#' @examples
+#' #load data
+#' data("tails")
+#'
+#' #perform PLS
+#' pls <- Morpho::pls2B(x = tails$sizes, y = geomorph::two.d.array(tails$shapes))
+#'
+#' #adapt format
+#' pls_adapted <- adapt_ordination(pls)
+#'
+#' #compare contents
+#' names(pls)
+#' names(pls_adapted)
 adapt_ordination <- function(ordination) {
 
   if(class(ordination)[1] == "PCA") {
@@ -655,6 +669,23 @@ adapt_ordination <- function(ordination) {
 #'
 #' @export
 #' @keywords internal
+#'
+#' @examples
+#' #load data
+#' data("tails")
+#'
+#' #perform PGLS
+#' gmdf <- geomorph::geomorph.data.frame(shapes = expected_shapes(tails$shapes, tails$data$species),
+#'                                       sizes = cbind(tapply(tails$sizes, tails$data$species, mean)),
+#'                                       phy = tails$tree)
+#'
+#' #adapt PGLS format
+#' mod <- geomorph::procD.pgls(shapes ~ sizes, phy = phy, data = gmdf)
+#' mod_adapted <- adapt_model(mod)
+#'
+#' #compare contents
+#' names(mod)
+#' names(mod_adapted)
 adapt_model <- function(model) {
 
   if(class(model)[1] == "mlm") {
@@ -667,8 +698,6 @@ adapt_model <- function(model) {
   }
 
   if(class(model)[1] == "procD.lm") {
-    # y <- model$data[[1]]
-    # x <- cbind(setNames(model$data[[2]], rownames(y))) #!
     y <- model$Y
     x <- model$data[-1]
     if("pgls.coefficients" %in% names(model)) {
@@ -778,7 +807,7 @@ adapt_model <- function(model) {
 #'   the y axis.
 #' @param p Numeric, indicating the number of landmarks/semilandmarks used (for
 #'   landmark data only).
-#' @param k Numeric, indicating the number of cartesian dimensions of
+#' @param k Numeric, indicating the number of Cartesian dimensions of
 #'   landmarks/semilandmarks (for landmark data only).
 #' @param nh Numeric; the number of shape models along the x axis.
 #' @param nv Numeric; the number of shape models along the y axis.
@@ -1016,6 +1045,8 @@ morphogrid <- function(ordination,
 #' @export
 #' @keywords internal
 #'
+#' @return \code{None}
+#'
 #' @seealso \code{\link{morphogrid}}, \code{\link{adjust_models2d}}
 #'
 #' @examples
@@ -1226,13 +1257,15 @@ plot_morphogrid2d <- function(x = NULL,
 #' @details This function allows the user to choose the orientation of the 3D
 #'   models by interactively rotating a shape model. Do not close the \code{rgl}
 #'   window, or minimize it actively (just bring back Rstudio to the front and
-#'   let the device get minimized pasively). The process of morphospace
+#'   let the device get minimized passively). The process of morphospace
 #'   generation is rather slow, specially if a mesh is provided for
 #'   \code{template}, a large number of shape models is asked, and/or
 #'   \code{alpha.models} value is lower than \code{1}.
 #'
 #' @export
 #' @keywords internal
+#'
+#' @return \code{None}
 #'
 #' @seealso \code{\link{morphogrid}}, \code{\link{adjust_models3d}}
 #'
@@ -1254,7 +1287,7 @@ plot_morphogrid2d <- function(x = NULL,
 #' #get meanshape
 #' meanshape <- expected_shapes(shapes)
 #'
-#' \dontrun{
+#' if (interactive()) {
 #' #plot grid (shape coordinates only)
 #' plot_morphogrid3d(morphogrid = shapes_grid, refshape = meanshape,
 #'                   ordtype = "prcomp", axes = c(1,2), col.ldm = 1,
@@ -1527,6 +1560,9 @@ rotate_fcoef <- function(fcoef) {
 #' @param xy (x,y) coordinates
 #' @param degrees Numeric; angle (in degrees) to rotate \code{(x,y)}
 #'
+#'
+#' @return Matrix of rotated c(x,y) coordinates.
+#'
 #' @export
 #' @keywords internal
 #'
@@ -1613,6 +1649,8 @@ rotate_coords <- function(xy, degrees) {
 #'
 #' @export
 #' @keywords internal
+#'
+#' @return \code{None}
 #'
 #' @examples
 #' #load and extract relevant data, packages and information
@@ -1705,6 +1743,8 @@ plot_phenogram <- function(x = NULL,
 #' @export
 #' @keywords internal
 #'
+#' @return \code{None}
+#'
 #' @examples
 #' #load landmark data and necessary packages
 #' library(geomorph)
@@ -1768,6 +1808,8 @@ hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 #'
 #' @export
 #' @keywords internal
+#'
+#' @return \code{None}
 #'
 #' @examples
 #' #load landmark data and necessary packages
@@ -1834,6 +1876,8 @@ ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 #' @export
 #' @keywords internal
 #'
+#' @return \code{None}
+#'
 #' @examples
 #' #load Fourier data and necessary packages
 #' library(geomorph)
@@ -1848,7 +1892,7 @@ ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 #' xy <- cbind(pca$x[,1], 0)
 #' plot(xy, ylim = c(0,1))
 #' density_by_group_2D(xy, fac = species, ax = 1)
-density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1, plot = TRUE,###!
+density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1, plot = TRUE,
                                 col = seq_len(nlevels(fac))) {
 
   if(length(col) == 1) col <- rep(col, nlevels(fac))
@@ -1893,8 +1937,7 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1, plot
 #' @param cex Numeric; size of the scatterpoints.
 #' @param ... Further arguments passed to [graphics::points()].
 #'
-#' @export
-#' @keywords internal
+#' @noRd
 plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
   if(is.null(dim(scores))) scores <- rbind(scores)
@@ -1929,8 +1972,7 @@ plot_univ_scatter <- function(scores, density, col = 1, bg = 1, pch = 1, cex = 1
 #' @param cex Numeric; size of the scatterpoints.
 #' @param ... Further arguments passed to [graphics::points()].
 #'
-#' @export
-#' @keywords internal
+#' @noRd
 plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 
   if(is.null(dim(scores))) scores <- rbind(scores)
@@ -1956,8 +1998,7 @@ plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 #' @param col Colors used to represent the landscape curve.
 #' @param lwd Integer; width of the lines depicting the landscape curve.
 #'
-#' @export
-#' @keywords internal
+#' @noRd
 plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
   if(drawlabels) {
     w.transp <-round(stats::quantile(x = 1:length(landscape$z), probs = c(0.25, 0.5, 0.75)))
@@ -2003,8 +2044,7 @@ plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
 #'   surface contour be plotted?
 #' @param alpha Transparency factor for filled contours.
 #'
-#' @export
-#' @keywords internal
+#' @noRd
 plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, drawlabels, alpha) {
   if(display == "contour") {
     graphics::contour(landscape$x, landscape$y, landscape$z, levels = levels,
@@ -2037,8 +2077,7 @@ plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, 
 #'   points in the scatter plot (taken from row names), or character string
 #'   containing specific names to be added.
 #'
-#' @export
-#' @keywords internal
+#' @noRd
 add_labels <- function(xy, labels = NULL) {
   if(!is.null(labels)) {
     if(is.character(labels)) {
