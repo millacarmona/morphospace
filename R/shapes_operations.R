@@ -761,13 +761,13 @@ correct_efourier<-function(ef, index = NULL) {
 #'   ordination which is to be represented.
 #' @param mag Numeric; magnifying factor for representing shape transformation.
 #'
-#' @return A 2-margins matrix, of dimensions \code{2 x (k x p)} for the case of
-#'   landmark data and \code{2 x (4 x nb.h)} for the case of Fourier data (where
-#'   \code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
-#'
 #' @details If an object of class \code{"mlm"} fitting shape to a factor (only
 #'   two levels allowed) is supplied in \code{obj}, magnification of the axis
 #'   range is attained through bgPCA.
+#'
+#' @return A 2-margins matrix, of dimensions \code{2 x (k x p)} for the case of
+#'   landmark data and \code{2 x (4 x nb.h)} for the case of Fourier data (where
+#'   \code{nb.h} is the number of harmonics used in elliptic Fourier analysis).
 #'
 #' @export
 #'

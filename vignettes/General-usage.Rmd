@@ -306,7 +306,7 @@ Akima H., & Gebhardt A. (2022). *akima: Interpolation of Irregularly and Regular
 
 Bache S.F., & Wickham H. (2022). *magrittr: A Forward-Pipe Operator for R*. R package version 2.0.3. <https://CRAN.R-project.org/package=magrittr>.
 
-Bonhomme V., Picq S., Gaucherel C., & Claude J. (2014). *Momocs: Outline Analysis Using R*. Journal of Statistical Software, 56(13), 1-24.  <http://www.jstatsoft.org/v56/i13/>.
+Bonhomme V., Picq S., Gaucherel C., & Claude J. (2014). *Momocs: Outline Analysis Using R*. Journal of Statistical Software, 56(13), 1-24.  <https://www.jstatsoft.org/v56/i13/>.
 
 Cardini A., O’Higgins P., & Rohlf F.J. (2019). *Seeing distinct groups where there are none: spurious patterns from between-group PCA*. Evolutionary Biology, 46(4), 303-316. <https://doi.org/10.1007/s11692-019-09487-5>.
 

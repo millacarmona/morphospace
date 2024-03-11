@@ -191,7 +191,8 @@
 #'
 #' #between-groups PCA via Morpho::groupPCA
 #' library(Morpho)
-#' bgpca <- groupPCA(two.d.array(shapes), groups = species)
+#' bgpca <- groupPCA(two.d.array(shapes), groups = species, mc.cores = 1,
+#'                   rounds = 0, cv = FALSE)
 #' mspace(ord = bgpca, datype = "landm", p = 9, k = 2, links = links,
 #'        points = TRUE)
 #'
@@ -1310,8 +1311,6 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
 #'
 #' @param mspace An \code{"mspace"} object.
 #' @param ... Further arguments passed to or from other methods.
-#'
-#' @return None
 #'
 #' @noRd
 print.mspace <- function(mspace, ...) {

@@ -3848,7 +3848,8 @@ test_that(desc = "testing ax_transformations, accuracy of shapes (extended)", co
 
   bgpca1 <- bg_prcomp(x = geomorph::two.d.array(shapes), groups = species)
   bgpca1$x <- bgpca1$x * -1 ; bgpca1$rotation <- bgpca1$rotation * -1
-  bgpca2 <- Morpho::groupPCA(dataarray = geomorph::two.d.array(shapes), groups = species)
+  bgpca2 <- Morpho::groupPCA(dataarray = geomorph::two.d.array(shapes), groups = species, mc.cores = 1,
+                             rounds = 0, cv = FALSE)
 
   phypca1 <- phytools::phyl.pca(geomorph::two.d.array(expected_shapes(shapes, species)), tree = tree)
   phypca2 <- geomorph::gm.prcomp(geomorph::two.d.array(expected_shapes(shapes, species)), phy = tree, GLS = TRUE)
