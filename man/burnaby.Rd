@@ -41,14 +41,14 @@ Ignored if \code{vars} has been specified.}
 \value{
 A \code{"burnaby"} or \code{"phy_burnaby"} object, containing:
 \itemize{
-\item \code{$x:} {a matrix with the scores of observations in the new
-ordination axes.}
-\item \code{$sdev:} {the standard deviations of the principal components
-(i.e., the square roots of the eigenvalues of the covariance matrix).}
-\item \code{$rotation:} {a matrix of eigenvector coefficients.}
-\item \code{$center:} {the mean values of the original variables (or their
-phylogenetic mean, if \code{tree} is provided).}
-\item \code{$totvar:} {the sum of the variances of the original data.}
+\item \code{$x:} a matrix with the scores of observations in the new
+ordination axes.
+\item \code{$sdev:} the standard deviations of the principal components
+(i.e., the square roots of the eigenvalues of the covariance matrix).
+\item \code{$rotation:} a matrix of eigenvector coefficients.
+\item \code{$center:} the mean values of the original variables (or their
+phylogenetic mean, if \code{tree} is provided).
+\item \code{$totvar:} the sum of the variances of the original data.
 }
 }
 \description{

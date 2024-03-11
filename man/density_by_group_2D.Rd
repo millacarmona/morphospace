@@ -34,7 +34,7 @@ distributions.}
 for each group.}
 }
 \value{
-\code{None}
+None
 }
 \description{
 Plot density distribution for different groups in "univariate"

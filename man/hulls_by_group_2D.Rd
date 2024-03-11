@@ -28,7 +28,7 @@ for each group.}
 \item{...}{Further arguments passed to \code{\link[graphics:polygon]{graphics::polygon()}}.}
 }
 \value{
-\code{None}
+None
 }
 \description{
 Plot convex hulls for different groups in 2D scatterplots

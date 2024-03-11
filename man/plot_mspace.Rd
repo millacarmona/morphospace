@@ -285,7 +285,7 @@ landscapes.}
 landscapes.}
 }
 \value{
-\code{None}
+None
 }
 \description{
 Flexible representation of morphospaces, including their

@@ -129,19 +129,19 @@ models.}
 \value{
 An object of class \code{"mspace"}, which is a list containing:
 \itemize{
-\item{$ordination:} { a list with the output from the ordination method
+\item \code{$ordination:} a list with the output from the ordination method
 used, styled in the \code{\link{prcomp}} format (typically containing at
 least an \code{$x}, \code{$rotation}, and \code{$center} slots. Also
 contains the type of data (\code{$datype}) and ordination method
-(\code{$ordtype}) used.}
-\item{$projected:} { a list containing the elements that have been
+(\code{$ordtype}) used.
+\item \code{$projected:} a list containing the elements that have been
 projected into the morphospace stored in the \code{"mspace"} object.
 Initially includes only the background shape models
 (\code{$shapemodels}), but more elements can be added using the
-\code{proj_*} family of functions.}
-\item{$plotinfo:} { a list containing the graphical parameters used to
+\code{proj_*} family of functions.
+\item \code{$plotinfo:} a list containing the graphical parameters used to
 create the plot. Passed to \code{\link{plot_mspace}} to regenerate
-morphospaces.}
+morphospaces.
 }
 }
 \description{

@@ -29,28 +29,28 @@ scores resulting from LOOCV.}
 \value{
 A \code{"pls2b"} or \code{"phy_pls2b"} object, containing:
 \itemize{
-\item \code{$values:} {vector of singular values accounting for the
-covariation among blocks explained by each par of axes.}
-\item \code{$xscores:} {a matrix with the scores of observations in the
-ordination axes of the first block.}
-\item \code{$yscores:} {a matrix with the scores of observations in the
-ordination axes of the Second block.}
-\item \code{$xrotation:} {matrix of vector coefficients for the first
-block.}
-\item \code{$yrotation:} {matrix of vector coefficients for the second
-block.}
-\item \code{$xcenter:} {the mean values of the original variables from
+\item \code{$values:} vector of singular values accounting for the
+covariation among blocks explained by each par of axes.
+\item \code{$xscores:} a matrix with the scores of observations in the
+ordination axes of the first block.
+\item \code{$yscores:} a matrix with the scores of observations in the
+ordination axes of the Second block.
+\item \code{$xrotation:} matrix of vector coefficients for the first
+block.
+\item \code{$yrotation:} matrix of vector coefficients for the second
+block.
+\item \code{$xcenter:} the mean values of the original variables from
 the first block (or their phylogenetic mean, if \code{tree} is
-provided).}
-\item \code{$ycenter:} {the mean values of the original variables from
+provided).
+\item \code{$ycenter:} the mean values of the original variables from
 the second block (or their phylogenetic mean, if \code{tree} is
-provided).}
-\item \code{$xtotvar:} {the sum of the variances of the variables from the
-second block.}
-\item \code{$ytotvar:} {the sum of the variances of the variables from the
-first block.}
-\item \code{$sdev:} {the standard deviations of the PLS-axes (i.e., the
-square roots of the eigenvalues of the covariance/correlation matrix).}
+provided).
+\item \code{$xtotvar:} the sum of the variances of the variables from the
+second block.
+\item \code{$ytotvar:} the sum of the variances of the variables from the
+first block.
+\item \code{$sdev:} the standard deviations of the PLS-axes (i.e., the
+square roots of the eigenvalues of the covariance/correlation matrix).
 }
 }
 \description{

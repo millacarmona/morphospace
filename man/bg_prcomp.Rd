@@ -34,18 +34,18 @@ as input.}
 A \code{"bg_prcomp"} object formatted following the \code{"prcomp"}
 class:
 \itemize{
-\item \code{$x:} {a matrix with the scores of observations in the new
-ordination axes.}
-\item \code{$sdev:} {the standard deviations of the principal components
+\item \code{$x:} a matrix with the scores of observations in the new
+ordination axes.
+\item \code{$sdev:} the standard deviations of the principal components
 (i.e., the square roots of the singular values of the covariance or
-correlation matrix).}
-\item \code{$rotation:} {a \code{n x (g - 1)} matrix of eigenvector
-coefficients (with \code{g} being the number of groups.}
-\item \code{$center:} {the mean values of the original variables for the
-entire sample (i.e., the grand mean).}
-\item \code{$grcenters:} {the mean values of the original variables for
-each group.}
-\item \code{$totvar:} {the sum of the variances of the original data.}
+correlation matrix).
+\item \code{$rotation:} a \code{n x (g - 1)} matrix of eigenvector
+coefficients (with \code{g} being the number of groups).
+\item \code{$center:} the mean values of the original variables for the
+entire sample (i.e., the grand mean).
+\item \code{$grcenters:} the mean values of the original variables for
+each group.
+\item \code{$totvar:} the sum of the variances of the original data.
 }
 }
 \description{

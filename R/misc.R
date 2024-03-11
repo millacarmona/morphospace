@@ -200,7 +200,7 @@ build_template2d <- function(image, nlands, ncurves) {
 #' @param ... Further arguments passed to [rgl::triangles3d()] (e.g.
 #'   \code{specular}, \code{alpha}).
 #'
-#' @return \code{None}
+#' @return None
 #'
 #' @export
 #' @keywords internal

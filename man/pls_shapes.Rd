@@ -38,18 +38,18 @@ scores resulting from LOOCV.}
 A \code{"pls_shapes"} or \code{"phy_pls_shapes"} object formatted
 following the \code{"prcomp"} class:
 \itemize{
-\item \code{$x:} {the scores from the shapes block.}
-\item \code{$x2:} {the scores from the supervising block (i.e., the
-\code{x} scores.}
-\item \code{$sdev:} {the standard deviations of the PLS axes (i.e., the
+\item \code{$x:} the scores from the shapes block.
+\item \code{$x2:} the scores from the supervising block (i.e., the
+\code{x} scores).
+\item \code{$sdev:} the standard deviations of the PLS axes (i.e., the
 standard deviations calculated from the scores of each axis in the
-shape block).}
-\item \code{$rotation:} {a matrix of vector coefficients for the shape
-block.}
-\item \code{$center:} {the mean values of the original variables from
-the shape block.}
-\item \code{$totvar:} {the sum of the variances of the original variables
-in the shape block.}
+shape block).
+\item \code{$rotation:} a matrix of vector coefficients for the shape
+block.
+\item \code{$center:} the mean values of the original variables from
+the shape block.
+\item \code{$totvar:} the sum of the variances of the original variables
+in the shape block.
 }
 }
 \description{

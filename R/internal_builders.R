@@ -245,9 +245,9 @@ inv_efourier <- function(coe, nb.pts = 120) {
 #'
 #' @return A list of length 2 containing:
 #' \itemize{
-#'   \item \code{$datype:} {the type of geometric morphometrics data.}
-#'   \item \code{$data2d:} {the shape descriptors arranged in 2-margins matrix
-#'   format.}
+#'   \item \code{$datype:} the type of geometric morphometrics data.
+#'   \item \code{$data2d:} the shape descriptors arranged in 2-margins matrix
+#'   format.
 #'  }
 #'
 #' @export
@@ -819,12 +819,12 @@ adapt_model <- function(model) {
 #'
 #' @return A list of length 3 containing:
 #' \itemize{
-#'   \item \code{$models_mat:} {a 2-column matrix with the (x,y) coordinates of
-#'   all the shape models in the background.}
-#'   \item \code{$models_arr:} {same as \code{models_mat} but in 3-margins array
-#'   format.}
-#'   \item \code{$grid:} {coordinates marking the centroid of each shape model.
-#'   Intended for internal use.}
+#'   \item \code{$models_mat:} a 2-column matrix with the (x,y) coordinates of
+#'   all the shape models in the background.
+#'   \item \code{$models_arr:} same as \code{models_mat} but in 3-margins array
+#'   format.
+#'   \item \code{$grid:} coordinates marking the centroid of each shape model.
+#'   Intended for internal use.
 #' }
 #'
 #' @export
@@ -1045,7 +1045,7 @@ morphogrid <- function(ordination,
 #' @export
 #' @keywords internal
 #'
-#' @return \code{None}
+#' @return None
 #'
 #' @seealso \code{\link{morphogrid}}, \code{\link{adjust_models2d}}
 #'
@@ -1265,7 +1265,7 @@ plot_morphogrid2d <- function(x = NULL,
 #' @export
 #' @keywords internal
 #'
-#' @return \code{None}
+#' @return None
 #'
 #' @seealso \code{\link{morphogrid}}, \code{\link{adjust_models3d}}
 #'
@@ -1650,7 +1650,7 @@ rotate_coords <- function(xy, degrees) {
 #' @export
 #' @keywords internal
 #'
-#' @return \code{None}
+#' @return None
 #'
 #' @examples
 #' #load and extract relevant data, packages and information
@@ -1743,7 +1743,7 @@ plot_phenogram <- function(x = NULL,
 #' @export
 #' @keywords internal
 #'
-#' @return \code{None}
+#' @return None
 #'
 #' @examples
 #' #load landmark data and necessary packages
@@ -1809,7 +1809,7 @@ hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 #' @export
 #' @keywords internal
 #'
-#' @return \code{None}
+#' @return None
 #'
 #' @examples
 #' #load landmark data and necessary packages
@@ -1876,7 +1876,7 @@ ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 #' @export
 #' @keywords internal
 #'
-#' @return \code{None}
+#' @return None
 #'
 #' @examples
 #' #load Fourier data and necessary packages

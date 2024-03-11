@@ -18,7 +18,7 @@ for each group.}
 \code{specular}, \code{alpha}).}
 }
 \value{
-\code{None}
+None
 }
 \description{
 Plot convex hulls for different groups in 3D scatterplots

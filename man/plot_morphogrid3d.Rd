@@ -90,7 +90,7 @@ models.}
 \item{models}{Logical; whether to plot background shape models.}
 }
 \value{
-\code{None}
+None
 }
 \description{
 Plot the output from \code{\link[=morphogrid]{morphogrid()}}, for 3-dimensional

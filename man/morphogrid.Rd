@@ -74,12 +74,12 @@ landmarks/semilandmarks (for landmark data only).}
 \value{
 A list of length 3 containing:
 \itemize{
-\item \code{$models_mat:} {a 2-column matrix with the (x,y) coordinates of
-all the shape models in the background.}
-\item \code{$models_arr:} {same as \code{models_mat} but in 3-margins array
-format.}
-\item \code{$grid:} {coordinates marking the centroid of each shape model.
-Intended for internal use.}
+\item \code{$models_mat:} a 2-column matrix with the (x,y) coordinates of
+all the shape models in the background.
+\item \code{$models_arr:} same as \code{models_mat} but in 3-margins array
+format.
+\item \code{$grid:} coordinates marking the centroid of each shape model.
+Intended for internal use.
 }
 }
 \description{

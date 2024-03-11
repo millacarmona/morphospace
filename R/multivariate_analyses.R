@@ -41,18 +41,18 @@
 #' @return A \code{"bg_prcomp"} object formatted following the \code{"prcomp"}
 #' class:
 #' \itemize{
-#'   \item \code{$x:} {a matrix with the scores of observations in the new
-#'     ordination axes.}
-#'   \item \code{$sdev:} {the standard deviations of the principal components
+#'   \item \code{$x:} a matrix with the scores of observations in the new
+#'     ordination axes.
+#'   \item \code{$sdev:} the standard deviations of the principal components
 #'     (i.e., the square roots of the singular values of the covariance or
-#'     correlation matrix).}
-#'   \item \code{$rotation:} {a \code{n x (g - 1)} matrix of eigenvector
-#'     coefficients (with \code{g} being the number of groups.}
-#'   \item \code{$center:} {the mean values of the original variables for the
-#'     entire sample (i.e., the grand mean).}
-#'   \item \code{$grcenters:} {the mean values of the original variables for
-#'     each group.}
-#'   \item \code{$totvar:} {the sum of the variances of the original data.}
+#'     correlation matrix).
+#'   \item \code{$rotation:} a \code{n x (g - 1)} matrix of eigenvector
+#'     coefficients (with \code{g} being the number of groups).
+#'   \item \code{$center:} the mean values of the original variables for the
+#'     entire sample (i.e., the grand mean).
+#'   \item \code{$grcenters:} the mean values of the original variables for
+#'     each group.
+#'   \item \code{$totvar:} the sum of the variances of the original data.
 #'   }
 #'
 #' @seealso \code{\link[stats]{prcomp}}, \code{\link{exp_var}}
@@ -248,28 +248,28 @@ bg_prcomp <- function(x, groups, gweights = TRUE, LOOCV = FALSE,
 #'
 #' @return A \code{"pls2b"} or \code{"phy_pls2b"} object, containing:
 #' \itemize{
-#'   \item \code{$values:} {vector of singular values accounting for the
-#'     covariation among blocks explained by each par of axes.}
-#'   \item \code{$xscores:} {a matrix with the scores of observations in the
-#'     ordination axes of the first block.}
-#'   \item \code{$yscores:} {a matrix with the scores of observations in the
-#'     ordination axes of the Second block.}
-#'   \item \code{$xrotation:} {matrix of vector coefficients for the first
-#'     block.}
-#'   \item \code{$yrotation:} {matrix of vector coefficients for the second
-#'     block.}
-#'   \item \code{$xcenter:} {the mean values of the original variables from
+#'   \item \code{$values:} vector of singular values accounting for the
+#'     covariation among blocks explained by each par of axes.
+#'   \item \code{$xscores:} a matrix with the scores of observations in the
+#'     ordination axes of the first block.
+#'   \item \code{$yscores:} a matrix with the scores of observations in the
+#'     ordination axes of the Second block.
+#'   \item \code{$xrotation:} matrix of vector coefficients for the first
+#'     block.
+#'   \item \code{$yrotation:} matrix of vector coefficients for the second
+#'     block.
+#'   \item \code{$xcenter:} the mean values of the original variables from
 #'     the first block (or their phylogenetic mean, if \code{tree} is
-#'     provided).}
-#'   \item \code{$ycenter:} {the mean values of the original variables from
+#'     provided).
+#'   \item \code{$ycenter:} the mean values of the original variables from
 #'     the second block (or their phylogenetic mean, if \code{tree} is
-#'     provided).}
-#'   \item \code{$xtotvar:} {the sum of the variances of the variables from the
-#'     second block.}
-#'   \item \code{$ytotvar:} {the sum of the variances of the variables from the
-#'     first block.}
-#'   \item \code{$sdev:} {the standard deviations of the PLS-axes (i.e., the
-#'     square roots of the eigenvalues of the covariance/correlation matrix).}
+#'     provided).
+#'   \item \code{$xtotvar:} the sum of the variances of the variables from the
+#'     second block.
+#'   \item \code{$ytotvar:} the sum of the variances of the variables from the
+#'     first block.
+#'   \item \code{$sdev:} the standard deviations of the PLS-axes (i.e., the
+#'     square roots of the eigenvalues of the covariance/correlation matrix).
 #'   }
 #'
 #' @seealso \code{\link{pls_shapes}}, \code{\link{exp_var}}
@@ -541,18 +541,18 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
 #' @return A \code{"pls_shapes"} or \code{"phy_pls_shapes"} object formatted
 #'   following the \code{"prcomp"} class:
 #' \itemize{
-#'   \item \code{$x:} {the scores from the shapes block.}
-#'   \item \code{$x2:} {the scores from the supervising block (i.e., the
-#'     \code{x} scores.}
-#'   \item \code{$sdev:} {the standard deviations of the PLS axes (i.e., the
+#'   \item \code{$x:} the scores from the shapes block.
+#'   \item \code{$x2:} the scores from the supervising block (i.e., the
+#'     \code{x} scores).
+#'   \item \code{$sdev:} the standard deviations of the PLS axes (i.e., the
 #'     standard deviations calculated from the scores of each axis in the
-#'     shape block).}
-#'   \item \code{$rotation:} {a matrix of vector coefficients for the shape
-#'     block.}
-#'   \item \code{$center:} {the mean values of the original variables from
-#'     the shape block.}
-#'   \item \code{$totvar:} {the sum of the variances of the original variables
-#'     in the shape block.}
+#'     shape block).
+#'   \item \code{$rotation:} a matrix of vector coefficients for the shape
+#'     block.
+#'   \item \code{$center:} the mean values of the original variables from
+#'     the shape block.
+#'   \item \code{$totvar:} the sum of the variances of the original variables
+#'     in the shape block.
 #'   }
 #'
 #' @seealso \code{\link{pls2b}}
@@ -700,14 +700,14 @@ pls_shapes <- function(X, shapes, tree = NULL, evmodel = "BM", LOOCV = FALSE, re
 #'
 #' @return A \code{"burnaby"} or \code{"phy_burnaby"} object, containing:
 #' \itemize{
-#'   \item \code{$x:} {a matrix with the scores of observations in the new
-#'     ordination axes.}
-#'   \item \code{$sdev:} {the standard deviations of the principal components
-#'     (i.e., the square roots of the eigenvalues of the covariance matrix).}
-#'   \item \code{$rotation:} {a matrix of eigenvector coefficients.}
-#'   \item \code{$center:} {the mean values of the original variables (or their
-#'     phylogenetic mean, if \code{tree} is provided).}
-#'   \item \code{$totvar:} {the sum of the variances of the original data.}
+#'   \item \code{$x:} a matrix with the scores of observations in the new
+#'     ordination axes.
+#'   \item \code{$sdev:} the standard deviations of the principal components
+#'     (i.e., the square roots of the eigenvalues of the covariance matrix).
+#'   \item \code{$rotation:} a matrix of eigenvector coefficients.
+#'   \item \code{$center:} the mean values of the original variables (or their
+#'     phylogenetic mean, if \code{tree} is provided).
+#'   \item \code{$totvar:} the sum of the variances of the original data.
 #'   }
 #'
 #' @export
