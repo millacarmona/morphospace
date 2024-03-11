@@ -82,6 +82,9 @@ test_that(desc = "testing expected_shapes, numerics, ndims & accuracy, for landm
 
 
 test_that(desc = "testing expected_shapes, factors, ndims & accuracy, for landmark data, with phylogeny", code = {
+  skip_if_not_installed("caper")
+
+
   data(tails)
   spp_shapes <- expected_shapes(tails$shape, tails$data$species)
   spp_type <- factor(c(tapply(as.character(tails$data$type), tails$data$species, unique)))
@@ -101,7 +104,6 @@ test_that(desc = "testing expected_shapes, factors, ndims & accuracy, for landma
 
 
   mshape_type <- expected_shapes(spp_shapes, spp_type, tree = tails$tree)
-
   ndims <- dim(mshape_type)
 
   result5 <- length(ndims) == 3
@@ -109,10 +111,20 @@ test_that(desc = "testing expected_shapes, factors, ndims & accuracy, for landma
   result7 <- ndims[2] == ncol(tails$shapes)
   result8 <- ndims[3] == nlevels(tails$data$type)
 
-  phymod <- mvMORPH::mvgls(geomorph::two.d.array(spp_shapes) ~ spp_type, tree = tails$tree, model = "BM")
-  testshapes2 <- phymod$fitted[c("T. savana", "T. tyrannus"),] %>% geomorph::arrayspecs(k=2,p=9)
 
-  result9 <- all(round(mshape_type,10) == round(testshapes2,10))
+  testshapes2 <- geomorph::arrayspecs(
+    unique(
+      do.call("cbind",
+              lapply(seq_len(ncol(geomorph::two.d.array(spp_shapes))), function(i) {
+                cd=caper::comparative.data(
+                  data = data.frame(shapes = geomorph::two.d.array(spp_shapes)[tails$tree$tip.label,i],
+                                    type = spp_type[tails$tree$tip.label],
+                                    n = tails$tree$tip.label),
+                  names.col = "n", phy = tails$tree)
+                pgls <- caper::pgls(shapes ~ type, data = cd)
+                pgls$fitted
+              }))), k = 2, p = 9)
+  result9 <- all(round(testshapes2,10) == round(mshape_type[,,2:1],10))
 
 
   mshape_ndf <- expected_shapes(spp_shapes, spp_type, "NDF", tree = tails$tree)
@@ -122,10 +134,16 @@ test_that(desc = "testing expected_shapes, factors, ndims & accuracy, for landma
   result11 <- ndims[1] == nrow(tails$shapes)
   result12 <- ndims[2] == ncol(tails$shapes)
 
-  phymod <- mvMORPH::mvgls(geomorph::two.d.array(spp_shapes) ~ spp_type, tree = tails$tree, model = "BM")
-  testshape3 <- phymod$fitted[c("T. tyrannus", "T. savana"),] %>% geomorph::arrayspecs(k=2,p=9)
-
-  result13 <- all(round(mshape_ndf,10) == round(testshape3[,,1],10))
+  testshape3 <- matrix(unlist(lapply(seq_len(ncol(geomorph::two.d.array(spp_shapes))), function(i) {
+    cd=caper::comparative.data(
+      data = data.frame(shapes = geomorph::two.d.array(spp_shapes)[tails$tree$tip.label,i],
+                        type = spp_type[tails$tree$tip.label],
+                        n = tails$tree$tip.label),
+      names.col = "n", phy = tails$tree)
+    pgls <- caper::pgls(shapes ~ type, data = cd)
+    sum(pgls[[1]]$coef)
+  })), ncol = 2, byrow = TRUE)
+  result13 <- all(round(testshape3,10) == round(mshape_ndf,10))
 
   expect_true(all(result1, result2, result3, result4, result5,
                   result6, result7, result8, result9, result10,
@@ -135,6 +153,8 @@ test_that(desc = "testing expected_shapes, factors, ndims & accuracy, for landma
 
 
 test_that(desc = "testing expected_shapes, numerics, ndims & accuracy, for landmark data, with phylogeny", code = {
+  skip_if_not_installed("caper")
+
   data(tails)
 
   spp_shapes <- expected_shapes(tails$shapes, tails$data$species)
@@ -147,9 +167,19 @@ test_that(desc = "testing expected_shapes, numerics, ndims & accuracy, for landm
   result3 <- ndims[2] == ncol(tails$shapes)
   result4 <- ndims[3] == length(spp_sizes)
 
-  phymod <- mvMORPH::mvgls(geomorph::two.d.array(spp_shapes) ~ cbind(spp_sizes), tree = tails$tree, model = "BM")
-  result5 <- all(round(scale(phymod$fitted[dimnames(predshapes)[[3]],], scale = FALSE, center = TRUE),10) ==
-    round(scale(geomorph::two.d.array(predshapes), scale = FALSE, center = TRUE),10))
+  testshapes1 <- geomorph::arrayspecs(
+    unique(
+      do.call("cbind",
+              lapply(seq_len(ncol(geomorph::two.d.array(spp_shapes))), function(i) {
+                cd=caper::comparative.data(
+                  data = data.frame(shapes = geomorph::two.d.array(spp_shapes)[tails$tree$tip.label,i],
+                                    sizes = spp_sizes[tails$tree$tip.label],
+                                    n = tails$tree$tip.label),
+                  names.col = "n", phy = tails$tree)
+                pgls <- caper::pgls(shapes ~ sizes, data = cd)
+                pgls$fitted
+              }))), k = 2, p = 9)
+  result5 <- all(round(testshapes1,10) == round(predshapes[,,tails$tree$tip.label],10))
 
 
   predshape_large <- expected_shapes(spp_shapes, x = spp_sizes,
@@ -160,8 +190,20 @@ test_that(desc = "testing expected_shapes, numerics, ndims & accuracy, for landm
   result7 <- ndims[1] == nrow(tails$shapes)
   result8 <- ndims[2] == ncol(tails$shapes)
 
-  result9 <- all(round(predshape_large,10) ==
-        round(matrix((phymod$fitted[dimnames(predshapes)[[3]],])[which.max(spp_sizes),], nrow = 9, ncol = 2, byrow = TRUE),10))
+  testshapes2 <- geomorph::arrayspecs(
+    unique(
+      do.call("cbind",
+              lapply(seq_len(ncol(geomorph::two.d.array(spp_shapes))), function(i) {
+                cd=caper::comparative.data(
+                  data = data.frame(shapes = geomorph::two.d.array(spp_shapes)[tails$tree$tip.label,i],
+                                    sizes = spp_sizes[tails$tree$tip.label],
+                                    n = tails$tree$tip.label),
+                  names.col = "n", phy = tails$tree)
+                pgls <- caper::pgls(shapes ~ sizes, data = cd)
+                pgls$fitted
+              }))), k = 2, p = 9)[,,which.max(spp_sizes[tails$tree$tip.label])]
+
+  result9 <- all(round(testshapes2,10) == round(predshape_large,10))
 
   expect_true(all(result1, result2, result3, result4, result5,
                   result6, result7, result8, result9))
@@ -345,6 +387,8 @@ test_that(desc = "testing detrend_shapes, method = orthogonal + default settings
 
 test_that(desc = "testing detrend_shapes, method = orthogonal + default settings,
           for factors and numerics, RRPP::lm.rrpp", code = {
+            skip_if_not_installed("RRPP")
+
             data(shells)
 
             shapes <- shells$shapes$coe
@@ -520,6 +564,8 @@ test_that(desc = "testing detrend_shapes, method = residuals + default settings,
 
 test_that(desc = "testing detrend_shapes, method = residuals + default settings,
           for factors and numerics, RRPP::lm.rrpp", code = {
+            skip_if_not_installed("RRPP")
+
             data(shells)
 
             shapes <- shells$shapes$coe
@@ -697,6 +743,8 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, xvalue,
 
 test_that(desc = "testing detrend_shapes, method = orthogonal, xvalue,
           for factors and numerics, RRPP::lm.rrpp", code = {
+            skip_if_not_installed("RRPP")
+
             data(shells)
 
             shapes <- shells$shapes$coe
@@ -879,6 +927,8 @@ test_that(desc = "testing detrend_shapes, method = residuals, xvalue,
 
 test_that(desc = "testing detrend_shapes, method = residuals, xvalue,
           for factors and numerics, RRPP::lm.rrpp", code = {
+            skip_if_not_installed("RRPP")
+
             data(shells)
 
             shapes <- shells$shapes$coe
@@ -1143,6 +1193,7 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata,
 
 test_that(desc = "testing detrend_shapes, method = orthogonal, newdata,
           for numerics and factors, RRPP::lm.rrpp", code = {
+            skip_if_not_installed("RRPP")
 
             data(shells3D)
             shapes <- shells3D$shapes
@@ -1483,6 +1534,7 @@ test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, xvalue,
 
 test_that(desc = "testing detrend_shapes, method = orthogonal, newdata, xvalue,
           for numerics and factors, RRPP::lm.rrpp", code = {
+            skip_if_not_installed("RRPP")
 
             data(shells3D)
             shapes <- shells3D$shapes
@@ -1800,6 +1852,8 @@ test_that(desc = "testing detrend_shapes, method = residuals, newdata,
 
 test_that(desc = "testing detrend_shapes, method = residuals, newdata,
           for numerics and factors, RRPP::lm.rrpp", code = {
+            skip_if_not_installed("RRPP")
+
             data(shells)
 
             index1 <- shells$data$species == "koeneni"
@@ -2083,6 +2137,8 @@ test_that(desc = "testing detrend_shapes, method = residuals, newdata, xvalue,
 
 test_that(desc = "testing detrend_shapes, method = residuals, newdata, xvalue,
           for numerics and factors, RRPP::lm.rrpp", code = {
+            skip_if_not_installed("RRPP")
+
             data(shells)
 
             index1 <- shells$data$species == "koeneni"

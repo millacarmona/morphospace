@@ -32,8 +32,7 @@ Imports:
     mvMORPH,
     phytools,
     png,
-    rgl,
-    RRPP
+    rgl
 Depends: 
     R (>= 2.10)
 LazyData: true
@@ -41,6 +40,7 @@ Suggests:
     testthat (>= 3.0.0),
     caper,
     rmarkdown,
+    RRPP,
     spelling
 Config/testthat/edition: 3
 Language: en-US
