@@ -988,7 +988,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
       add_labels(nodes_scores, labels.nodes)
 
     } else {
-      cat("\nphylogenetic relationships are not projected into univariate morphospaces")
+      cat("\nPhylogenetic relationships are not projected into univariate morphospaces")
     }
   }
 
@@ -1342,7 +1342,7 @@ print.mspace <- function(mspace, ...) {
 
   if(ncol(mspace$ordination$rotation) > 1) nax <- " axes" else nax <- " axis"
 
-  cat("an mspace object containing")
+  cat("An mspace object containing")
   cat(paste0("\n* an ordination space made out of ", ncol(mspace$ordination$rotation),
              nax, " built using:"))
   cat(paste0("\n   - ", ordtype))
@@ -1583,34 +1583,39 @@ print.mspace <- function(mspace, ...) {
 #' tree <- tails$tree
 #' links <- tails$links
 #'
-#' #generate basic morphospace, add sampled shapes, species classification, and
-#' #phylogenetic structure
+#' #generate basic morphospace, add sampled shapes, species classification,
+#' #phylogenetic structure and performance landscape
 #' msp <- mspace(shapes, axes = c(1,2), plot = FALSE) %>%
 #'  proj_shapes(shapes = shapes) %>%
 #'  proj_groups(groups = species) %>%
-#'  proj_phylogeny(shapes = sp_shapes, tree = tree)
+#'  proj_phylogeny(shapes = sp_shapes, tree = tree) %>%
+#'  proj_landscape(FUN = morphospace:::computeLD)
 #'
-#' ##Plotting 'pure' morphospaces:
+#'
+#' ##Regenerating/modifying 'pure' morphospaces:
 #'
 #' #plot mspace object as it is
 #' plot_mspace(msp)
 #'
+#' #remove landscape
+#' plot_mspace(msp, landsc = FALSE)
+#'
 #' #add colors for points, by species
-#' plot_mspace(msp, col.points = species,
+#' plot_mspace(msp, col.points = species, landsc = FALSE,
 #'             col.groups = 1:nlevels(species))
 #'
 #' #add links for landmark configurations
-#' plot_mspace(msp, links = links,
+#' plot_mspace(msp, links = links, landsc = FALSE,
 #'             col.points = species, col.groups = 1:nlevels(species))
 #'
 #' #change number and sizes of shape models in the background
 #' plot_mspace(msp, nh = 2, nv = 2, links = links,
-#'             size.models = 0.5,
+#'             size.models = 0.5, landsc = FALSE,
 #'             col.points = species, col.groups = 1:nlevels(species))
 #'
 #' #magnify deformation and highlight landmarks
 #' plot_mspace(msp, mag = 1.5, nh = 2, nv = 2, links = links,
-#'             size.models = 0.5, col.points = species,
+#'             size.models = 0.5, col.points = species, landsc = FALSE,
 #'             col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red")
 #'
 #' #change axes 1,2 for 1,3
@@ -1655,6 +1660,14 @@ print.mspace <- function(mspace, ...) {
 #' plot_mspace(msp, x = sizes,  axes = 1, links = links, col.points = species,
 #'             col.groups = 1:nlevels(species), pch.points = 16,
 #'             xlab = "Centroid size")
+#'
+#' #plot species agains first PC (violin plot, horizontal)
+#' plot_mspace(msp, y = species,  axes = 1, links = links, col.points = species,
+#'             col.groups = 1:nlevels(species), pch.points = 16)
+#'
+#' #plot species agains first PC (boxplot, vertical)
+#' plot_mspace(msp, x = species,  axes = 1, links = links, col.points = species,
+#'             col.groups = 1:nlevels(species), pch.points = 16)
 #'
 #'
 #' ##Plotting phenograms:
@@ -1920,12 +1933,12 @@ plot_mspace <- function(mspace,
               }
               if(groups) {
                 if(!args$ellipse.groups) {
-                  hulls_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i],],
+                  hulls_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i], args$axes],
                                     fac = gr_class[gr_class == levels(gr_class)[i]],
                                     col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
                                     alpha = args$alpha.groups)
                 } else {
-                  ellipses_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i],],
+                  ellipses_by_group_2D(xy = gr_scores[gr_class == levels(gr_class)[i], args$axes],
                                        fac = factor(gr_class[gr_class == levels(gr_class)[i]]),
                                        col = gr_col[i], lty = gr_lty[i], lwd = args$lwd.groups,
                                        alpha = args$alpha.groups, conflev = args$conflev.groups)
@@ -1938,7 +1951,7 @@ plot_mspace <- function(mspace,
             if(args$density.groups) {
               if(args$density.points) {
                 args$density.points <- FALSE
-                cat("\nboth density.points and density.groups are TRUE; only the latter will be displayed")
+                cat("\nBoth density.points and density.groups are TRUE; only the latter will be displayed")
               }
               density_by_group_2D(gr_scores, gr_class, ax = args$axes[1], alpha = args$alpha.groups,
                                   lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
@@ -1962,7 +1975,7 @@ plot_mspace <- function(mspace,
           if(args$density.groups) {
             if(args$density.points) {
               args$density.points <- FALSE
-              cat("\nboth density.points and density.groups are TRUE; only the latter will be displayed")
+              cat("\nBoth density.points and density.groups are TRUE; only the latter will be displayed")
             }
             density_by_group_2D(gr_scores, gr_class, ax = 1, alpha = args$alpha.groups,
                                 lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
@@ -2037,7 +2050,7 @@ plot_mspace <- function(mspace,
                            lwd = args$lwd.axis[i], lty = args$lty.axis[i])
         }
       } else {
-        cat("\nmorphometric axes are not projected into univariate morphospaces")
+        cat("\nMorphometric axes are not projected into univariate morphospaces")
       }
     }
 
@@ -2061,7 +2074,7 @@ plot_mspace <- function(mspace,
 
 
           } else { # ...but axes are NOT in the same order
-            cat("\naxes used to generate landscape are in the wrong order; won't be regenerated")
+            cat("\nAxes used to generate landscape are in the wrong order; won't be regenerated")
           }
 
         } else { # if the number of specified axes is 1....
@@ -2087,7 +2100,7 @@ plot_mspace <- function(mspace,
                               lwd = args$lwd.landsc)
         }
       } else {
-        cat("\nlandscape was originally generated for a different set of axes; won't be regenerated")
+        cat("\nLandscape was originally generated for a different set of axes; won't be regenerated")
       }
     }
 
@@ -2359,11 +2372,11 @@ plot_mspace <- function(mspace,
           }
 
           if(phylo & !is.null(mspace$projected$phylo))
-            cat("\nphylogenetic relationships are not projected into violin/box plots")
+            cat("\nPhylogenetic relationships are not projected into violin/box plots")
           if(shapeax & !is.null(mspace$projected$shape_axis))
-            cat("\nmorphometric axes are not projected into violin/box plots")
+            cat("\nMorphometric axes are not projected into violin/box plots")
           if(landsc & !is.null(mspace$projected$landsc))
-            cat("\nlandscape surfaces are not projected into violin/box plots")
+            cat("\nLandscape surfaces are not projected into violin/box plots")
 
           return(invisible(NULL))
         }

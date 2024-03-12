@@ -337,34 +337,39 @@ sp_sizes <- cbind(tapply(sizes, species, mean))
 tree <- tails$tree
 links <- tails$links
 
-#generate basic morphospace, add sampled shapes, species classification, and
-#phylogenetic structure
+#generate basic morphospace, add sampled shapes, species classification,
+#phylogenetic structure and performance landscape
 msp <- mspace(shapes, axes = c(1,2), plot = FALSE) \%>\%
  proj_shapes(shapes = shapes) \%>\%
  proj_groups(groups = species) \%>\%
- proj_phylogeny(shapes = sp_shapes, tree = tree)
+ proj_phylogeny(shapes = sp_shapes, tree = tree) \%>\%
+ proj_landscape(FUN = morphospace:::computeLD)
 
-##Plotting 'pure' morphospaces:
+
+##Regenerating/modifying 'pure' morphospaces:
 
 #plot mspace object as it is
 plot_mspace(msp)
 
+#remove landscape
+plot_mspace(msp, landsc = FALSE)
+
 #add colors for points, by species
-plot_mspace(msp, col.points = species,
+plot_mspace(msp, col.points = species, landsc = FALSE,
             col.groups = 1:nlevels(species))
 
 #add links for landmark configurations
-plot_mspace(msp, links = links,
+plot_mspace(msp, links = links, landsc = FALSE,
             col.points = species, col.groups = 1:nlevels(species))
 
 #change number and sizes of shape models in the background
 plot_mspace(msp, nh = 2, nv = 2, links = links,
-            size.models = 0.5,
+            size.models = 0.5, landsc = FALSE,
             col.points = species, col.groups = 1:nlevels(species))
 
 #magnify deformation and highlight landmarks
 plot_mspace(msp, mag = 1.5, nh = 2, nv = 2, links = links,
-            size.models = 0.5, col.points = species,
+            size.models = 0.5, col.points = species, landsc = FALSE,
             col.groups = 1:nlevels(species), cex.ldm = 5, col.ldm = "red")
 
 #change axes 1,2 for 1,3
@@ -409,6 +414,14 @@ plot_mspace(msp, axes = c(1,2), links = links,
 plot_mspace(msp, x = sizes,  axes = 1, links = links, col.points = species,
             col.groups = 1:nlevels(species), pch.points = 16,
             xlab = "Centroid size")
+
+#plot species agains first PC (violin plot, horizontal)
+plot_mspace(msp, y = species,  axes = 1, links = links, col.points = species,
+            col.groups = 1:nlevels(species), pch.points = 16)
+
+#plot species agains first PC (boxplot, vertical)
+plot_mspace(msp, x = species,  axes = 1, links = links, col.points = species,
+            col.groups = 1:nlevels(species), pch.points = 16)
 
 
 ##Plotting phenograms:

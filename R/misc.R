@@ -13,7 +13,7 @@
 #'
 #' @export
 #'
-#' @return \code{Node}
+#' @return None
 #'
 #' @examples
 #' #load 2D landmark data
@@ -31,11 +31,12 @@
 #' data("shells3D")
 #' shapes <- shells3D$shapes
 #'
+#' \dontrun{
 #' #pile shapes
 #' pile_shapes(shapes, mshape = FALSE) #bare
 #' pile_shapes(shapes, mshape = FALSE, links = list(1:10)) #with false links
 #' pile_shapes(shapes, mshape = TRUE, links = list(1:10)) #false links + mshape
-#'
+#' }
 #'
 #' #load outline data
 #' data("shells")
