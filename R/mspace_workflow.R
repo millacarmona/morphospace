@@ -1572,6 +1572,7 @@ print.mspace <- function(mspace, ...) {
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' #load and extract relevant data, packages and information
 #' library(magrittr)
 #' data("tails")
@@ -1683,6 +1684,7 @@ print.mspace <- function(mspace, ...) {
 #'             col.groups = 1:nlevels(species), pch.points = 16,
 #'             ylab = "Branch lengths", pch.tips = 21, bg.tips = "red",
 #'             pch.nodes = 21, bg.nodes = "blue")
+#' }
 plot_mspace <- function(mspace,
                         axes = NULL,
                         links = NULL,

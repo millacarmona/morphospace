@@ -3737,7 +3737,8 @@ test_that(desc = "testing ax_transformations, dimensions", code = {
   )
   pca3$center <- colMeans(geomorph::two.d.array(shapes))
   bgpca1 <- bg_prcomp(geomorph::two.d.array(shapes), groups = species)
-  bgpca2 <- Morpho::groupPCA(geomorph::two.d.array(shapes), groups = species)
+  bgpca2 <- Morpho::groupPCA(geomorph::two.d.array(shapes), groups = species,
+                             rounds = 0, cv = FALSE, mc.cores = 1)
   phypca1 <- phytools::phyl.pca(geomorph::two.d.array(expected_shapes(shapes, species)), tree = tree)
   phypca2 <- geomorph::gm.prcomp(geomorph::two.d.array(expected_shapes(shapes, species)), phy = tree)
   phypca3 <- mvMORPH::mvgls.pca(mvMORPH::mvgls(

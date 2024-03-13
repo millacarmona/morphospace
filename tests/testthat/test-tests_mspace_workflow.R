@@ -314,9 +314,11 @@ test_that(desc = "testing mspace, shapes + FUN, Morpho::groupPCA", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
-  bgpca <- Morpho::groupPCA(dataarray = geomorph::two.d.array(shapes), groups = species)
+  bgpca <- Morpho::groupPCA(dataarray = geomorph::two.d.array(shapes),
+                            groups = species, rounds = 0, cv = FALSE, mc.cores = 1)
 
-  msp1 <- mspace(shapes, FUN = Morpho::groupPCA,  groups = species,
+  msp1 <- mspace(shapes, FUN = Morpho::groupPCA, mc.cores = 1,
+                 rounds = 0, cv = FALSE,  groups = species,
                  mag = 0.7, axes = c(1,2), plot = FALSE)
   result1 <- msp1$ordination$ordtype == "bgPCA"
   result2 <- all(msp1$ordination$x == bgpca$Scores)
@@ -629,9 +631,12 @@ test_that(desc = "testing mspace, shapes + FUN, Morpho::groupPCA", code = {
   data("tails")
   shapes <- tails$shapes
   species <- tails$data$species
-  bgpca <- Morpho::groupPCA(dataarray = geomorph::two.d.array(shapes), groups = species)
+  bgpca <- Morpho::groupPCA(dataarray = geomorph::two.d.array(shapes),
+                            groups = species, mc.cores = 1,
+                            rounds = 0, cv = FALSE)
 
-  msp1 <- mspace(shapes, FUN = Morpho::groupPCA,  groups = species,
+  msp1 <- mspace(shapes, FUN = Morpho::groupPCA,  mc.cores = 1,
+                 rounds = 0, cv = FALSE, groups = species,
                  mag = 0.7, axes = c(1,2), plot = FALSE)
   result1 <- msp1$ordination$ordtype == "bgPCA"
   result2 <- all(msp1$ordination$x == bgpca$Scores)
