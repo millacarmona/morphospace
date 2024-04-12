@@ -1421,7 +1421,7 @@ plot_morphogrid3d <- function(x = NULL,
 
     rgl::rgl.snapshot(paste0(wd, "model", dim(morphogrid$models_arr)[3] + 1, ".png"))
 
-    cat("This can take a few seconds...")
+    cat("\nThis can take a few seconds...")
   }
 
   for(i in seq_len(dim(morphogrid$models_arr)[3])) {

@@ -1917,7 +1917,7 @@ plot_mspace <- function(mspace,
       if(ncol(mspace$ordination$x) > 1) { #if there are more than 1 dimensions
         if(length(args$axes) > 1) { #...and more than 1 dimension is specified
           if(!is.null(scores) & points) {
-            plot_biv_scatter(scores = scores[-index_sc_in_gr,],
+            plot_biv_scatter(scores = scores[-index_sc_in_gr, args$axes],
                              col = gr_col.points[-index_sc_in_gr],
                              pch = gr_pch.points[-index_sc_in_gr],
                              bg = gr_bg.points[-index_sc_in_gr],
