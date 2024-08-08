@@ -2428,7 +2428,7 @@ plot_mspace <- function(mspace,
         }
 
         if(nrow(cbind(x, y)) == nrow(cbind(phylo_scores[tree$tip.label, ]))) {
-          xy.tips <- cbind(x, phylo_scores[tree$tip.label, mspace$plotinfo$axes[1]], y)[tree$tip.label,]
+          xy.tips <- cbind(x, phylo_scores[tree$tip.label, args$axes[1]], y)[tree$tip.label,]
 
           xy <- cbind(x,y)
           xy_anc <- matrix(NA, nrow = tree$Nnode, ncol = 1)
@@ -2453,9 +2453,9 @@ plot_mspace <- function(mspace,
 
           if(!is.null(x)) xy.nodes <- cbind(xy_anc,
                                             phylo_scores[!rownames(phylo_scores) %in% tree$tip.label,
-                                                         mspace$plotinfo$axes[1]])
+                                                         args$axes[1]])
           if(!is.null(y)) xy.nodes <- cbind(phylo_scores[!rownames(phylo_scores) %in% tree$tip.label,
-                                                         mspace$plotinfo$axes[1]],
+                                                         args$axes[1]],
                                             xy_anc)
           phyloxy <- rbind(xy.tips, xy.nodes)
 
