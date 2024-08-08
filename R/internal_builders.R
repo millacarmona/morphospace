@@ -1777,11 +1777,13 @@ hulls_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
 
 
   for(i in seq_len(nlevels(fac))) {
-    x <- xy[fac == levels(fac)[i], 1]
-    y <- xy[fac == levels(fac)[i], 2]
-    hullp <- grDevices::chull(x = x, y = y)
-    graphics::polygon(x[hullp], y[hullp], border = col[i],
-                      col = grDevices::adjustcolor(col[i], alpha.f = alpha), lty = lty[i], ...)
+    if(sum(fac == levels(fac)[i]) > 1) {
+      x <- xy[fac == levels(fac)[i], 1]
+      y <- xy[fac == levels(fac)[i], 2]
+      hullp <- grDevices::chull(x = x, y = y)
+      graphics::polygon(x[hullp], y[hullp], border = col[i],
+                        col = grDevices::adjustcolor(col[i], alpha.f = alpha), lty = lty[i], ...)
+    }
   }
 }
 
