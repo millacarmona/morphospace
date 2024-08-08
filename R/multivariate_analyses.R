@@ -357,6 +357,8 @@ pls2b <- function(x, y, tree = NULL, evmodel = "BM", LOOCV = FALSE, recompute = 
   namesx <- rownames(x)
   namesy <- rownames(y)
 
+  if(all(namesx != namesy)) stop("Names in the first block does not match names in the second block")
+
   if(!is.null(tree)){
 
     if(!all(length(tree$tip.label) == nrow(x), length(tree$tip.label) == nrow(y))) {
