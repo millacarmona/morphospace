@@ -921,6 +921,12 @@ morphogrid <- function(ordination,
     }
   }
 
+  if(!is.na(asp)) {
+    adjframe <- adjust_asp(xlim = plotframe_x, ylim = plotframe_y, asp = asp)
+
+    plotframe_x <- adjframe$xlim
+    plotframe_y <- adjframe$ylim
+  }
 
   scores_x  <-  seq(from = plotframe_x[1],
                     to   = plotframe_x[2],
@@ -2094,4 +2100,75 @@ add_labels <- function(xy, labels = NULL) {
       }
     }
   }
+}
+
+
+################################################################################
+
+#' Adjust aspect ratio of morphospaces
+#'
+#' @description Adjusts xlim and ylim so they reflect the desired aspect ratio.
+#'
+#' @param xlim A vector of length 2 indicating the negative and positive
+#'   extremes of values along the x axis.
+#' @param ylim A vector of length 2 indicating the negative and positive
+#'   extremes of values along the y axis.
+#' @param asp Desired y/x proportions.
+#'
+#' @noRd
+adjust_asp <- function(xlim, ylim, asp) {
+
+  plotw <- par("pin")[1]
+  ploth <- par("pin")[2]
+
+  asp0 <- asp
+  asp <- if(plotw > ploth) asp else (1 / asp)
+
+  xperin <- diff(xlim) / plotw #x units per inch
+  yperin <- diff(ylim) / ploth #y units per inch
+
+  if(yperin > xperin) { #if more units per inch vertically, adjust xlim
+
+    aspfac <- asp * (yperin * plotw) / (xperin * plotw)
+    halfnewxlim <- (diff(xlim) * aspfac) / 2
+
+    newxlim <- c(mean(xlim) - halfnewxlim,
+                 mean(xlim) + halfnewxlim)
+    newylim <- ylim
+
+    #if correction misframes xlim, reset and adjust ylim instead
+    if(min(xlim) <= min(newxlim) | max(xlim) >= max(newxlim)) {
+      newxlim <- xlim
+
+      aspfac <- (1 / asp) * (xperin * ploth) / (yperin * ploth)
+      halfnewylim <- (diff(ylim) * aspfac) / 2
+
+      newylim <- c(mean(ylim) - halfnewylim,
+                   mean(ylim) + halfnewylim)
+    }
+  }
+
+  if(yperin < xperin) { #if more units per inch horizontally, adjust ylim
+
+    aspfac <- asp * (xperin * ploth) / (yperin * ploth)
+    halfnewylim <- (diff(ylim) * aspfac) / 2
+
+    newylim <- c(mean(ylim) - halfnewylim,
+                 mean(ylim) + halfnewylim)
+    newxlim <- xlim
+
+    #if correction misframes ylim, reset and adjust xlim instead
+    if(min(ylim) <= min(newylim) | max(ylim) >= max(newylim)) {
+      newylim <- ylim
+
+      aspfac <- (1 / asp) * (yperin * plotw) / (xperin * plotw)
+      halfnewxlim <- (diff(xlim) * aspfac) / 2
+
+      newxlim <- c(mean(xlim) - halfnewxlim,
+                   mean(xlim) + halfnewxlim)
+    }
+  }
+
+  return(list(xlim = newxlim, ylim = newylim))
+
 }

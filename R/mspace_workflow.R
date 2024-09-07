@@ -1034,13 +1034,25 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'   for the region of the morphospace encompassing that sample of shapes
 #'   ("empirical landscape"). If \code{NULL}, the landscape will be computed for
 #'   the set of background shape models ("theoretical landscape").
-#' @param FUN An optional \emph{ad hoc} function to be applied to a set of
-#'   shapes, stored in "two-dimensional" format, along its first margin (i.e.
-#'   rows), and returning a single numeric value from each.
-#' @param X An optional vector containing the values assigned to each shape
-#'   (vector length and order must match those from the shapes provided in
-#'   \code{shapes} or from the background shape models, depending on whether or
-#'   not \code{shapes} have been provided).
+#' @param FUN An optional \emph{ad hoc} function, or a list containing two or
+#'   more \emph{ad hoc} functions, to be applied to a set of shapes stored in
+#'   "two-dimensional" format. The function/s is/are applied along the first
+#'   margin (i.e. to each row) of the set of shapes, and must return a single
+#'   numeric value from each. If two or more \emph{ad hoc} functions are
+#'   provided, the individual landscapes are combined into an optimality
+#'   trade-off landscape (see \code{details}).
+#' @param X An optional vector or matrix containing the values assigned to each
+#'   shape (vector length / number of rows and their order must match those from
+#'   the shapes provided in \code{shapes} or from the background shape models,
+#'   depending on whether or not \code{shapes} have been provided). If a matrix
+#'   with two or more columns (representing functional metrics) is provided, the
+#'   individual landscapes are combined into an optimality trade-off landscape
+#'   (see \code{details}).
+#' @param optimality Logical vector of length \code{o} (where \code{o} is the
+#'   number of \emph{ad hoc} functions or variables provided in \code{FUN} or
+#'   \code{X}, respectively) indicating optimality direction of each performance
+#'   variable. Ignored unless projection of an optimality trade-off landscape is
+#'   attempted.
 #' @param linear Logical; whether to use linear interpolation (if \code{FALSE},
 #'   a cubic spline interpolation is used instead. See [akima::interp()].
 #' @param resolution Numeric; the resolution used for interpolation.
@@ -1070,12 +1082,11 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'   shapes specified by the user, producing a surface for a specific region of
 #'   the morphospace ("empirical landscapes"). Alternatively, the set of
 #'   background shape models can be used to generate a surface for the entire
-#'   observed morphospace ("theoretical morphospace"). Generally, the values
-#'   that are interpolated will represent a variable measuring functional
-#'   performance (although it can be any kind of continuous variable), and can
-#'   be either provided directly through the \code{X} argument or computed
-#'   automatically using an \emph{ad hoc} function through the \code{FUN}
-#'   argument.
+#'   morphospace ("theoretical morphospace"). Generally, the values that are
+#'   interpolated will represent a variable measuring functional performance
+#'   (although it can be any kind of continuous variable), and can be either
+#'   provided directly through the \code{X} argument or computed automatically
+#'   using an \emph{ad hoc} function through the \code{FUN} argument.
 #'
 #'   If the \code{FUN} argument is used, the function supplied must include a
 #'   \code{model} argument feeding the \emph{ad hoc} function with a single
@@ -1094,6 +1105,11 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'   models, they can be extracted using \code{\link{extract_shapes}}) prior to
 #'   exporting or feeding them to their preferred analytical protocol.
 #'
+#'   If more than one \emph{ad hoc} function or set of values are provided,
+#'   the multiple landscapes generated are combined into a single optimality
+#'   trade-off landscape by computing their Pareto rank ratio (Deakin et al.
+#'   2022).
+#'
 #' @return If a plot device with a morphospace is open, the landscape surface is
 #'   projected into it as a contour map using [akima::interp()]. If
 #'   \code{pipe = FALSE}, a list containing the x, y and z values used to plot
@@ -1105,7 +1121,14 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'
 #' @seealso \code{\link{morphogrid}}, \code{\link{mspace}},
 #'   \code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}},
-#'   \code{\link{extract_shapes}}
+#'   \code{\link{extract_shapes}}, \code{\link{pareto_rank_ratio}}
+#'
+#' @references
+#' Deakin, W. J., Anderson, P. S., den Boer, W., Smith, T. J., Hill, J. J.,
+#'   Rücklin, M., Donoghue, P. C. J.  & Rayfield, E. J. (2022). \emph{Increasing
+#'   morphological disparity and decreasing optimality for jaw speed and
+#'   strength during the radiation of jawed vertebrates}. Science Advances,
+#'   8(11), eabl3644.
 #'
 #' @export
 #'
@@ -1192,7 +1215,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear = FALSE,
                            resolution = 50, expand = 1, display = "contour", nlevels = 50,
                            palette = grDevices::heat.colors, alpha = 0.5, lwd = 1, lty = 1,
-                           drawlabels = FALSE, spar = 0.5, pipe = TRUE, ...) {
+                           drawlabels = FALSE, spar = 0.5, pipe = TRUE, optimality = NULL, ...) {
 
   args <- c(as.list(environment()), list(...))
 
@@ -1213,12 +1236,49 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
     if(mspace$ordination$datype != datype) stop("shapes and mspace types are not compatible")
   }
 
-  gridcoords <- proj_eigen(x = data2d, vectors = mspace$ordination$rotation[, mspace$plotinfo$axes],
+  gridcoords <- proj_eigen(x = data2d,
+                           vectors = mspace$ordination$rotation[, mspace$plotinfo$axes],
                            center = mspace$ordination$center)
 
-  if(is.null(X)) X <- apply(X = data2d, FUN = FUN, MARGIN = 1, ...)
 
-  if(type == "theoretical") {
+
+  if(is.null(X)) {
+
+    if(is.list(FUN) & length(FUN) > 1) {
+
+      XX <- vector(mode = "list", length = length(FUN))
+      for(i in seq_len(length(FUN)))
+        XX[[i]] <- apply(X = data2d, FUN = FUN[[i]], MARGIN = 1, ...)
+
+      XX <- abind::abind(XX, along = 2)
+
+      if(is.null(optimality)) stop("Provide values for the 'optimality' argument")
+      X <- c(pareto_rank_ratio(performance = XX, optimality = optimality))
+      cat("\nTwo or more functions have been provided; combining individual landscapes into an optimality trade-off landscape")
+
+      type <- c(type, "Pareto optimality")
+
+    } else X <- apply(X = data2d, FUN = FUN, MARGIN = 1, ...)
+  } else {
+
+    if(is.null(dim(X))) {
+      if(length(X) != nrow(data2d)) stop("The amount of values in X does not match the number of shapes")
+    } else {
+      if(nrow(X) != nrow(data2d)) stop("The number of rows of X does not match the number of shapes")
+
+      if(ncol(X) > 1) {
+        if(is.null(optimality)) stop("Provide values for the 'optimality' argument")
+        X <- c(pareto_rank_ratio(performance = X, optimality = optimality))
+        cat("\nTwo or more variables have been provided; combining individual landscapes into an optimality trade-off landscape")
+
+        type <- c(type, "Pareto optimality")
+      }
+    }
+  }
+
+
+
+  if("theoretical" %in% type) {
     frame <- list(xlim = graphics::par("usr")[1:2], ylim = graphics::par("usr")[3:4])
   } else {
     frame <- list(xlim = range(gridcoords[,1]))
@@ -1247,7 +1307,7 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
                                                xo = xo, yo = yo)})
 
 
-  if(type == "empirical" & length(mspace$plotinfo$axes) == 1) {
+  if("empirical" %in% type & length(mspace$plotinfo$axes) == 1) {
     spline <- stats::smooth.spline(x = landscape$x[!is.na(landscape$z)],
                                    y = landscape$z[!is.na(landscape$z)], spar = spar)
     smoothed_landsc <- Morpho::equidistantCurve(x = cbind(spline$x, spline$y), n = resolution)
@@ -1271,8 +1331,8 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
                   to = max(landscape$z, na.rm = TRUE),
                   length.out = nlevels)
 
-      plot_biv_landscape(landscape = landscape, display = display, levels = levs, col = cols,
-                         lwd = lwd, lty = lty, drawlabels = drawlabels, alpha = alpha, type = type)
+      morphospace:::plot_biv_landscape(landscape = landscape, display = display, levels = levs, col = cols,
+                                       lwd = lwd, lty = lty, drawlabels = drawlabels, alpha = alpha, type = type)
     } else {
 
       cols <- palette(n = length(landscape$z))[order(order(landscape$z))]
