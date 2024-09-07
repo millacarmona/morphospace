@@ -964,8 +964,12 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
                             vectors = mspace$ordination$rotation,
                             center = mspace$ordination$center)
 
-  mvmod <- mvMORPH::mvgls(tips_scores ~ 1, tree = tree, model = evmodel)
-  nodes_scores <- mvMORPH::ancestral(mvmod)
+  if(evmodel == "BM") {
+    nodes_scores <- apply(tips_scores, 2, phytools::fastAnc, tree = tree)
+  } else {
+    mvmod <- mvMORPH::mvgls(tips_scores ~ 1, tree = tree, model = evmodel)
+    nodes_scores <- mvMORPH::ancestral(mvmod)
+  }
   phylo_scores <- rbind(tips_scores, nodes_scores)
 
   if(.Device != "null device") {
