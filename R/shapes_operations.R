@@ -829,6 +829,7 @@ correct_efourier<-function(ef, index = NULL) {
 ax_transformation <- function(obj, axis = 1, mag = 1) {
 
   if(any(class(obj) == c("pls2b", "phy_pls2b"))) stop("pls2b objects are not allowed; use pls_shapes instead")
+
   if(any(class(obj)[1] %in% c("prcomp", "bg_prcomp", "phy_prcomp", "phyalign_comp",
                               "pls_shapes", "phy_pls_shapes", "burnaby", "phy_burnaby",
                               "gm.prcomp", "pls2B", "bgPCA", "phyl.pca", "mvgls.pca", "PCA", "pls"))) {
@@ -851,8 +852,11 @@ ax_transformation <- function(obj, axis = 1, mag = 1) {
                     cent + (halfdif * mag))
 
       coefs <- obj$coefs
-      designmat <- cbind(1, newrange)
+      designmat <- if(any(grepl(x = rownames(coefs),
+                                pattern = "Intercept"))) cbind(1, newrange) else cbind(newrange)
       extshapes_mat <- rbind(designmat %*% coefs)
+      if(!any(grepl(x = rownames(coefs),
+                    pattern = "Intercept"))) extshapes_mat <- sweep(extshapes_mat, 2, -c(obj$grandmean))
     }
 
     if(is.factor(x)) {
