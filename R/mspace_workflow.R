@@ -998,7 +998,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 
   mspace$projected$phylo_scores <- phylo_scores
   mspace$projected$phylo <- tree
-  mspace$projected$phylo_evmodel <- mvmod$model
+  mspace$projected$phylo_evmodel <- evmodel
 
   if(is.null(args$col)) args$col <- 1
 

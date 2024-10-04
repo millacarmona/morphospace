@@ -187,7 +187,7 @@ pareto_front <- function(performance,
   if(length(optimality) != nvars)
     stop("Length of optimality vector doesn't match the number of performance variables")
 
-  #reverse optimality direction selected variables
+  #reverse optimality direction of selected variables
   input <- performance
   for(i in seq_len(nvars)) {
     if(!optimality[i]) input[,i] <- input[,i] * -1
@@ -206,9 +206,9 @@ pareto_front <- function(performance,
     while(isOpt & j <  nobs) {
       j <- j + 1
       if(i != j) { # Avoid self-comparison
-        # If observation i is worse than observation j in all variables...
+        # If observation i is worse than observation j for all variables...
         subopti <- NULL
-        for(k in 1:nvars) subopti[k] <- if(input[i,k] < input[j,k]) TRUE else FALSE
+        for(k in seq_len(nvars)) subopti[k] <- if(input[i,k] < input[j,k]) TRUE else FALSE
 
         # ... then observation i is not optimal
         isOpt <- sum(subopti) != nvars
