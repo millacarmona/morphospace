@@ -1335,8 +1335,8 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
                   to = max(landscape$z, na.rm = TRUE),
                   length.out = nlevels)
 
-      morphospace:::plot_biv_landscape(landscape = landscape, display = display, levels = levs, col = cols,
-                                       lwd = lwd, lty = lty, drawlabels = drawlabels, alpha = alpha, type = type)
+      plot_biv_landscape(landscape = landscape, display = display, levels = levs, col = cols,
+                         lwd = lwd, lty = lty, drawlabels = drawlabels, alpha = alpha, type = type)
     } else {
 
       cols <- palette(n = length(landscape$z))[order(order(landscape$z))]

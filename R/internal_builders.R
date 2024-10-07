@@ -2062,11 +2062,11 @@ plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, 
   }
 
   if(display == "filled.contour") {
-    if(type == "theoretical") {
+    if("theoretical" %in% type) {
       graphics::.filled.contour(landscape$x, landscape$y, landscape$z, levels = levels,
                                 col = grDevices::adjustcolor(col = col, alpha = alpha))
     }
-    if(type == "empirical") {
+    if("empirical" %in% type) {
       graphics::image(landscape$x, landscape$y, landscape$z, add = TRUE,
                       col = grDevices::adjustcolor(col = col, alpha = alpha))
     }
