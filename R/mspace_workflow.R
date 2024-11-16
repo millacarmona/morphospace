@@ -1266,9 +1266,11 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
   } else {
 
     if(is.null(dim(X))) {
-      if(length(X) != nrow(data2d)) stop("The amount of values in X does not match the number of shapes")
+
+      if(length(X) != nrow(data2d)) stop("The amount of values in X do not match the number of shapes")
+
     } else {
-      if(nrow(X) != nrow(data2d)) stop("The number of rows of X does not match the number of shapes")
+      if(nrow(X) != nrow(data2d)) stop("The number of rows of X do not match the number of shapes")
 
       if(ncol(X) > 1) {
         if(is.null(optimality)) stop("Provide values for the 'optimality' argument")
@@ -2318,7 +2320,11 @@ plot_mspace <- function(mspace,
       if(length(args$pch.nodes) == 1) args$pch.nodes <- rep(args$pch.nodes, length(tips) - 1)
       if(length(args$cex.nodes) == 1) args$cex.nodes <- rep(args$cex.nodes, length(tips) - 1)
 
-      maptips <- order(match(rownames(mspace$projected$phylo_scores[tips,]), tree$tip.label))
+      maptips <- if(ncol(mspace$projected$phylo_scores) == 1) {
+        order(match(names(mspace$projected$phylo_scores[tips,]), tree$tip.label))
+      } else {
+        order(match(rownames(mspace$projected$phylo_scores[tips,]), tree$tip.label))
+      }
 
       plot_phenogram(x = x, y = y, tree = tree, phylo_scores = mspace$projected$phylo_scores,
                      axis = args$axes, points = points, labels.tips = args$labels.tips,
