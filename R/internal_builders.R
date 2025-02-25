@@ -779,6 +779,52 @@ adapt_model <- function(model) {
   return(adapted)
 }
 
+################################################################################
+
+#' Adapt format of Morphoscape objects
+#'
+#' @description Extract surface information from landscapes created
+#'   with \code{Morphoscape} and adapt format to be used by
+#'   [graphics::contour()] and [graphics::image()].
+#'
+#' @param obj An object of class \code{"kriged_surfaces"},
+#'   \code{"wtd_lscp"}, \code{"poly_surf"} or \code{"multi_poly"}.
+#'
+#' @return A list containing the x and y values of the grid, and a matrix
+#'   with the z values of each combination of x and y.
+#'
+#' @keywords internal
+adapt_Morphoscape <- function(obj) {
+
+  if(class(obj) == "kriged_surfaces") {
+    grid <- obj$dataframes$grid[,1:3]
+
+    if(ncol(obj$dataframes$grid) > 3)
+      cat(paste("Only", colnames(obj$dataframes$grid)[3]), "landscape is plotted")
+  }
+
+  if(class(obj) == "wtd_lscp") {
+    grid <- obj$Wprime$grid[,c("x", "y", "Z")]
+  }
+
+  if(class(obj) == "poly_surf") {
+    grid <- obj$grid[,1:3]
+  }
+
+  if(class(obj) == "multi_poly") {
+    grid <- obj[[1]]$grid[,1:3]
+    if(names(multi_poly)[1] > 1)
+      cat(paste("Only", names(multi_poly)[1], "landscape is plotted"))
+  }
+
+
+  x <- unique(grid[,1])
+  y <- unique(grid[,2])
+  z <- matrix(grid[,3], nrow = length(y), ncol = length(x))
+
+  return(list(x = x, y= y, z = z))
+}
+
 
 ################################################################################
 
@@ -1508,7 +1554,6 @@ plot_morphogrid3d <- function(x = NULL,
 
 ################################################################################
 
-
 #' Rotate Fourier shape 180 degrees
 #'
 #' @description Correct 180-degrees spurious rotation in closed outline shapes.
@@ -2040,10 +2085,11 @@ plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
 #'   [graphics::.filled.contour()] /  [graphics::image()]. Used internally for
 #'   projecting landscapes into bivariate morphospaces.
 #'
-#' @param landscape A list containing the results of [akima::interp()].
+#' @param landscape A list containing the results of [akima::interp()] or .
+#'   [adapt_Morphoscape()]
 #' @param display Either \code{"contour"} or \code{"filled.contour"}.
 #' @param type Type of landscape to be plotted. Options are \code{"theoretical"}
-#'   or \code{"empirical"}.
+#'   \code{"empirical"}, or \code{"Morphoscape"}.
 #' @param levels Levels to be used to create the contours.
 #' @param lty Integer; type of the lines depicting contours.
 #' @param lwd Integer; width of the lines depicting contours.
@@ -2062,7 +2108,7 @@ plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, 
   }
 
   if(display == "filled.contour") {
-    if("theoretical" %in% type) {
+    if(any(c("theoretical", "Morphoscape") %in% type)) {
       graphics::.filled.contour(landscape$x, landscape$y, landscape$z, levels = levels,
                                 col = grDevices::adjustcolor(col = col, alpha = alpha))
     }
