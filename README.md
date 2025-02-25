@@ -30,7 +30,7 @@ You can install the development and CRAN versions of `morphospace` from
 devtools::install_github("millacarmona/morphospace")
 
 # CRAN version
-install.packages("morphospace")
+# install.packages("morphospace") #not yet ready
 ```
 
 ## Concept
@@ -302,9 +302,25 @@ as a couple of new features:
 - Tip and node labels can now be included in phylomorphospaces,
   phenograms and hybrid phylomorphospaces.
 
-## Update 3 (February 2025)
+## Update 4 (February 2025)
 
-- changes
+A few relevant changes:
+
+- `morphospace` can now generate Pareto rank ratio surfaces (Deakin et
+  al. 2022), thanks to the code provided by Will Deakin.
+  `proj_landscape` has been modified accordingly and can now take either
+  two or more functions or two or more functional metrics (arguments
+  `FUN` and `X`, respectively; see `?proj_landscape`).
+
+- new `proj_pfront` function for projecting Pareto fronts (i.e., the
+  subset of shapes optimizing two or more antagonistic measures of
+  performance).
+
+- `proj_landscape` can now accept surfaces created with `Morphoscape`
+  (Dickson et al. 2023) through the argument `obj`.
+
+- options for controlling the aspect ratio of morphospaces have been
+  included (argument `asp` in `mspace`).
 
 If you find any bugs please send me an email at `pablomillac@gmail.com`.
 Thanks!!
@@ -331,6 +347,16 @@ Methods in Ecology and Evolution, 6(11), 1311-1319.
 Collyer, M. L., & Adams, D. (2021). *Phylogenetically aligned component
 analysis*. Methods in Ecology and Evolution, 12(2), 359-372.
 <https://doi.org/10.1111/2041-210X.13515>.
+
+Deakin, W. J., Anderson, P. S., den Boer, W., Smith, T. J., Hill, J. J.,
+Rücklin, M., Donoghue, P. C. J. & Rayfield, E. J. (2022). *Increasing
+morphological disparity and decreasing optimality for jaw speed and
+strength during the radiation of jawed vertebrates*. Science Advances,
+8(11), eabl3644. <https://doi.org/10.1126/sciadv.abl3644>.
+
+Dickson, B. V., Pierce, S., & Greifer, N. 2023. *Morphoscape:
+computation and visualization of adaptive landscapes*. version 1.0.2.
+<https://CRAN.R-project.org/package=Morphoscape>
 
 Dryden, I.L. (2019). *shapes: statistical shape analysis*. R package
 version 1.2.5. <https://CRAN.R-project.org/package=shapes>.
