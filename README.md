@@ -4,8 +4,6 @@
 # morphospace <img src="man/figures/morphosp_hex.png" align="right" width="200"/>
 
 <!-- badges: start -->
-
-[![R-CMD-check](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of `morphospace` is to enhance representation and heuristic
@@ -13,7 +11,7 @@ exploration of multivariate ordinations of shape data. This package can
 handle the most common types of shape data working in integration with
 other widely used R packages such as `Morpho` (Schlager 2017),
 `geomorph` (Adams et al. 2021), `shapes` (Dryden 2019), `Momocs`
-(Bonhome et al. 2014) and `mvMORPH` (Clavel et al.2015), which cover
+(Bonhomme et al. 2014) and `mvMORPH` (Clavel et al.2015), which cover
 other more essential steps in the geometric morphometrics pipeline
 (e.g. importation, normalization, statistical analysis, phylogenetic
 modeling).
@@ -44,7 +42,7 @@ The basic idea behind `morphospace` is to build empirical morphospaces
 using multivariate ordination methods, then use the resulting ordination
 as a reference frame in which elements representing different aspects of
 morphometric variation are projected. These elements are added to both
-graphic representations and objects as consecutive 'layers' and list
+graphic representations and objects as consecutive ‘layers’ and list
 slots, respectively, using the `%>%` pipe operator from `magrittr`
 (Bache & Wickham 2022).
 
@@ -106,7 +104,7 @@ msp <- mspace(shapes = shapes, links = wf, cex.ldm = 5) %>%
 Once the `"mspace"` object has been created, the `plot_mspace` function
 can be used to either regenerate/modify the plot, add a legend, or to
 combine morphometric axes with other non-shape variables to produce
-'hybrid' morphospaces. For example, PC1 can be plotted against size to
+‘hybrid’ morphospaces. For example, PC1 can be plotted against size to
 explore allometric patterns.
 
 ``` r
@@ -181,6 +179,7 @@ mspace(shapes, mag = 1, bg.model = "gray", cex.ldm = 0, template = meanmesh,
   proj_groups(shapes = shapes, groups = spp, alpha = 0.3)
 #> Preparing for snapshot: rotate mean shape to the desired orientation
 #>  (don't close or minimize the rgl device).Press <Enter> in the console to continue:
+#> 
 #> This can take a few seconds...
 #> DONE.
 ```
@@ -247,7 +246,7 @@ examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.ht
   `"mspace"` objects (background shape models, shapes along ordination
   axes, or specific coordinates selected interactively).
 
-- New `burnaby` function, implementing Burnaby's approach for
+- New `burnaby` function, implementing Burnaby’s approach for
   standardization of morphometric data by computing a shape subspace
   orthogonal to an arbitrary vector or variable
 
@@ -306,6 +305,10 @@ as a couple of new features:
 - Tip and node labels can now be included in phylomorphospaces,
   phenograms and hybrid phylomorphospaces.
 
+## Update 3 (February 2025)
+
+- changes
+
 If you find any bugs please send me an email at `pablomillac@gmail.com`.
 Thanks!!
 
@@ -326,11 +329,11 @@ Analysis Using R*. Journal of Statistical Software, 56(13), 1-24.
 Clavel, J., Escarguel, G., & Merceron, G. (2015). *mvMORPH: an R package
 for fitting multivariate evolutionary models to morphometric data*.
 Methods in Ecology and Evolution, 6(11), 1311-1319.
-https://doi.org/10.1111/2041-210X.12420.
+<https://doi.org/10.1111/2041-210X.12420>.
 
 Collyer, M. L., & Adams, D. (2021). *Phylogenetically aligned component
 analysis*. Methods in Ecology and Evolution, 12(2), 359-372.
-https://doi.org/10.1111/2041-210X.13515.
+<https://doi.org/10.1111/2041-210X.13515>.
 
 Dryden, I.L. (2019). *shapes: statistical shape analysis*. R package
 version 1.2.5. <https://CRAN.R-project.org/package=shapes>.

@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 # morphospace <img src="man/figures/morphosp_hex.png" align="right" width="200"/>
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml)
+
 <!-- badges: end -->
 
 
@@ -226,6 +226,10 @@ Significant changes aimed at enhancing integration with other GM/MV R packages a
 - Introduction of boxplots and violin plots for combining shape ordination axes with categorical variables via `plot_mspace`.
 
 - Tip and node labels can now be included in phylomorphospaces, phenograms and hybrid phylomorphospaces.
+
+## Update 3 (February 2025)
+
+- changes
 
 
 If you find any bugs please send me an email at `pablomillac@gmail.com`. Thanks!!
