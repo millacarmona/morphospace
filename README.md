@@ -3,11 +3,6 @@
 
 # morphospace <img src="man/figures/morphosp_hex.png" align="right" width="200"/>
 
-<!-- badges: start -->
-
-[![R-CMD-check](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/millacarmona/morphospace/actions/workflows/R-CMD-check.yaml)
-<!-- badges: end -->
-
 The goal of `morphospace` is to enhance representation and heuristic
 exploration of multivariate ordinations of shape data. This package can
 handle the most common types of shape data working in integration with
