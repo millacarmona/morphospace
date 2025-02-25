@@ -716,6 +716,7 @@ adapt_model <- function(model) {
   if(any(class(model)[1] == c("mvgls", "mvols"))) {
     rnames <- rownames(stats::model.matrix(model))
     coefs <- model$coefficients
+    rownames(coefs) <- colnames(model$variables$X)
     y <- model$variables$Y
 
     resptype <- attr(model$terms, "dataClasses")[-1]
