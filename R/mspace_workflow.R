@@ -634,7 +634,7 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
           hulls_by_group_2D(data2d[, mspace$plotinfo$axes], fac = groups, ...)
         } else {
           ellipses_by_group_2D(data2d[, mspace$plotinfo$axes], fac = groups,
-                                conflev = conflev, ...)
+                               conflev = conflev, ...)
         }
       } else {
         if(density == TRUE) {
@@ -1034,6 +1034,9 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'   existing morphospace.
 #'
 #' @param mspace An \code{"mspace"} object.
+#' @param obj An optional object containing a landscape created using
+#'   \code{Morphoscape}. If provided, arguments \code{shapes}, \code{FUN}
+#'   or \code{X} are ignored.
 #' @param shapes Optional shape data. If provided, a landscape will be computed
 #'   for the region of the morphospace encompassing that sample of shapes
 #'   ("empirical landscape"). If \code{NULL}, the landscape will be computed for
@@ -1052,7 +1055,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'   with two or more columns (representing functional metrics) is provided, the
 #'   individual landscapes are combined into an optimality trade-off landscape
 #'   (see \code{details}).
-#' @param optimality Logical vector of length \code{o} (where \code{o} is the
+#' @param opt.increases Logical vector of length \code{o} (where \code{o} is the
 #'   number of \emph{ad hoc} functions or variables provided in \code{FUN} or
 #'   \code{X}, respectively) indicating optimality direction of each performance
 #'   variable. Ignored unless projection of an optimality trade-off landscape is
@@ -1111,21 +1114,28 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'
 #'   If more than one \emph{ad hoc} function or set of values are provided,
 #'   the multiple landscapes generated are combined into a single optimality
-#'   trade-off landscape by computing their Pareto rank ratio (Deakin et al.
-#'   2022).
+#'   trade-off landscape by computing their Pareto rank ratio, following the
+#'   procedures described in Deakin et al. (2022).
+#'
+#'   Alternatively, a landscape generated using \code{Morphoscape} can be
+#'   provided through the argument \code{obj}, to be projected into morphospace.
 #'
 #' @return If a plot device with a morphospace is open, the landscape surface is
-#'   projected into it as a contour map using [akima::interp()]. If
-#'   \code{pipe = FALSE}, a list containing the x, y and z values used to plot
-#'   the landscape (x and z for univariate morphospaces) is returned invisibly.
-#'   If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified
-#'   by appending a \code{$landsc} slot to \code{$projected}, as well as by
-#'   adding some graphical parameters (stored into the \code{$plotinfo} slot),
-#'   and returned invisibly.
+#'   projected into it as a contour map using [akima::interp()] (alternatively,
+#'   an object containing a landscape created with  \code{Morphoscape} can be
+#'   projected). If \code{pipe = FALSE}, a list containing the x, y and z values
+#'   used to plot the landscape (x and z for univariate morphospaces) is
+#'   returned invisibly. If \code{pipe = TRUE} the supplied \code{"mspace"}
+#'   object will be modified by appending a \code{$landsc} slot to
+#'   \code{$projected}, as well as by adding some graphical parameters (stored
+#'   into the \code{$plotinfo} slot), and returned invisibly. If two or more
+#'   variables or functions are provided, additional \code{$pfront} and
+#'   \code{$opt.increases} slots will be appended to \code{$projected}.
 #'
 #' @seealso \code{\link{morphogrid}}, \code{\link{mspace}},
 #'   \code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}},
-#'   \code{\link{extract_shapes}}, \code{\link{pareto_rank_ratio}}
+#'   \code{\link{extract_shapes}}, \code{\link{pareto_rank_ratio}},
+#'   \code{\link{proj_pfront}}
 #'
 #' @references
 #' Deakin, W. J., Anderson, P. S., den Boer, W., Smith, T. J., Hill, J. J.,
@@ -1159,14 +1169,14 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'        cex.ldm = 0) %>%
 #'   proj_shapes(shapes, pch = 16) %>%
 #'   proj_landscape(nlevels = 60, FUN = morphospace:::computeLD, expand = 1.2,
-#'                  lwd = 2)
+#'                  lwd = 2, display = "contour")
 #'
 #' ##Using the X argument
 #'
 #' #first, create morphospace and extract background shapes without plotting
 #' msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
 #'               cex.ldm = 0, plot = FALSE)
-#' shapemodels2d <- two.d.array(extract_shapes(msp)$shapes)
+#' shapemodels2d <- two.d.array(extract_shapes(msp, keep.template = FALSE)$shapes)
 #'
 #' #run computeLD through the "two-dimensional" matrix of shapes models (this is
 #' #the same thing the proj_landscape function is doing internally when FUN is
@@ -1178,8 +1188,30 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #' msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
 #'               cex.ldm = 0) %>%
 #'   proj_shapes(shapes, pch = 16) %>%
-#'   proj_landscape(nlevels = 20, X = LDs, expand = 1.2,
+#'   proj_landscape(X = LDs, nlevels = 20, expand = 1.2,
 #'                  palette = terrain.colors, display = "filled.contour")
+#'
+#' #if the shapes argument is specified and it matches the values provided in X,
+#' #the landscape becomes independent of the background shapes being displayed.
+#' msp <- mspace(shapes, links = links, nh = 7, nv = 5, size.model = 1,
+#'               cex.ldm = 0) %>%
+#'   proj_shapes(shapes, pch = 16) %>%
+#'   proj_landscape(shapes = shapemodels2d, X = LDs, nlevels = 50, expand = 1.2,
+#'                  palette = terrain.colors, display = "filled.contour")
+#'
+#' #in this case, the edges of the landscape can be expanded if the initial sample
+#' #of shapes covers a larger area of the morphospace
+#' msp <- mspace(shapes, links = links, nh = 8, nv = 8, plot = FALSE,
+#'               xlim = c(-.6, .2), ylim = c(-.3, .2))
+#' shapemodels2d <- two.d.array(extract_shapes(msp, keep.template = FALSE)$shapes)
+#' LDs <- apply(X = shapemodels2d, FUN = morphospace:::computeLD, MARGIN = 1)
+#'
+#' msp <- mspace(shapes, links = links, nh = 7, nv = 5, size.model = 1,
+#'               cex.ldm = 0) %>%
+#'   proj_shapes(shapes, pch = 16) %>%
+#'   proj_landscape(shapes = shapemodels2d, X = LDs, nlevels = 50, expand = 1.2,
+#'                  palette = terrain.colors, display = "filled.contour")
+#'
 #'
 #' #add scalebar using plot_mspace()
 #' plot_mspace(msp, scalebar = TRUE)
@@ -1193,6 +1225,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'   proj_shapes(shapes, pch = 16) %>%
 #'   proj_landscape(nlevels = 20, X = LDs, expand = 1.2,
 #'                  palette = terrain.colors, display = "filled.contour")
+#'
 #'
 #' ###"Empirical" landscapes
 #'
@@ -1216,110 +1249,203 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'                  linear = TRUE, resolution = 200,
 #'                  FUN = morphospace:::computeLD, expand = 1.2,
 #'                  display = "filled.contour")
-proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear = FALSE,
+#'
+#'
+#' ##Pareto landscapes
+#'
+#' #Pareto landscapes are created when providing two or more separate surfaces,
+#' #either using a list fed to FUN containing multuple functions, or a matrix with
+#' #multiple columns.
+#' msp <- mspace(shapes, links = links, nh = 8, nv = 8, plot = FALSE)
+#' shapemodels2d <- two.d.array(extract_shapes(msp, keep.template = FALSE)$shapes)
+#' LDs <- apply(X = shapemodels2d, FUN = morphospace:::computeLD, MARGIN = 1)
+#' MDs <- apply(X = shapemodels2d, FUN = morphospace:::computeMD, MARGIN = 1)
+#'
+#' #visualize lift/drag landscape (aerodynamic efficiency)
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+#'        cex.ldm = 0) %>%
+#'   proj_landscape(shapes = shapemodels2d, X = LDs,
+#'                  nlevels = 20, expand = 1.2, lwd = 3,
+#'                  palette = terrain.colors, display = "contour")
+#'
+#' #visualize moment/drag landscape (maneuverability)
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+#'        cex.ldm = 0) %>%
+#'   proj_landscape(shapes = shapemodels2d, X = MDs,
+#'                  nlevels = 20, expand = 1.2, lwd = 3,
+#'                  palette = terrain.colors, display = "contour")
+#'
+#' #visualize combined Pareto landscape (trade-off)
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+#'        cex.ldm = 0) %>%
+#'   proj_landscape(shapes = shapemodels2d, X = cbind(LDs, MDs),
+#'                  opt.increases = c(TRUE, TRUE),
+#'                  nlevels = 20, expand = 1.2, lwd = 3,
+#'                  palette = terrain.colors, display = "contour")
+#'
+#'
+#' #Integration with Morphoscape
+#'
+#' #Morphoscape objects can be fed to proj_landscape, meaning that
+#' #functionalities such as kriging or weighted combinations of surfaces can be
+#' #used to create landscapes. For example, let's apply kriging to the Pareto
+#' #surface plotted above.
+#' require(Morphoscape)
+#'
+#' #first, let's calculate the Pareto surface (Pareto rank ratio) for LD and MD
+#' pareto.vals <- pareto_rank_ratio(performance = cbind(LDs, MDs),
+#'                                  opt.increases = c(TRUE, TRUE))$PRR
+#'
+#' #get scores for background shape models
+#' scores <- proj_eigen(shapemodels2d,
+#'                      vectors = msp$ordination$rotation,
+#'                      center = msp$ordination$center)
+#'
+#' #store scores and Pareto values in Morphoscape format
+#' dat <- data.frame(x = scores[,1],
+#'                   y = scores[,2],
+#'                   flight = c(pareto.vals))
+#' dat_fnc <- as_fnc_df(dat, func.names = c("flight"))
+#'
+#' # Create alpha-hulled grid for kriging
+#' grid <- resample_grid(dat_fnc, hull = "concaveman", alpha = 3)
+#' kr_surf <- krige_surf(dat_fnc, grid = grid)
+#' plot(kr_surf)
+#'
+#' #visualise landscape in morphospace using the argument 'obj'
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+#'        cex.ldm = 0) %>%
+#'   proj_landscape(obj = kr_surf,
+#'                  nlevels = 20, expand = 1.2, lwd = 3,
+#'                  palette = terrain.colors, display = "contour")
+proj_landscape <- function(mspace, shapes = NULL, obj = NULL, FUN = NULL, X = NULL, linear = FALSE,
                            resolution = 50, expand = 1, display = "contour", nlevels = 50,
                            palette = grDevices::heat.colors, alpha = 0.5, lwd = 1, lty = 1,
-                           drawlabels = FALSE, spar = 0.5, pipe = TRUE, optimality = NULL, ...) {
+                           drawlabels = FALSE, spar = 0.5, pipe = TRUE, opt.increases = NULL, ...) {
 
   args <- c(as.list(environment()), list(...))
 
-  if(is.null(shapes)) {
-    extrap <- TRUE
-    type <- "theoretical"
+  if(is.null(obj)) {
+    if(is.null(shapes)) {
+      extrap <- TRUE
+      type <- "theoretical"
 
-    data2d <- shapes_mat(mspace$projected$shapemodels)$data2d
-
-  } else {
-    extrap <- FALSE
-    type <- "empirical"
-
-    dat <- shapes_mat(shapes)
-    data2d <- dat$data2d
-    datype <- dat$datype
-
-    if(mspace$ordination$datype != datype) stop("shapes and mspace types are not compatible")
-  }
-
-  gridcoords <- proj_eigen(x = data2d,
-                           vectors = mspace$ordination$rotation[, mspace$plotinfo$axes],
-                           center = mspace$ordination$center)
-
-
-
-  if(is.null(X)) {
-
-    if(is.list(FUN) & length(FUN) > 1) {
-
-      XX <- vector(mode = "list", length = length(FUN))
-      for(i in seq_len(length(FUN)))
-        XX[[i]] <- apply(X = data2d, FUN = FUN[[i]], MARGIN = 1, ...)
-
-      XX <- abind::abind(XX, along = 2)
-
-      if(is.null(optimality)) stop("Provide values for the 'optimality' argument")
-      X <- c(pareto_rank_ratio(performance = XX, optimality = optimality))
-      cat("\nTwo or more functions have been provided; combining individual landscapes into an optimality trade-off landscape")
-
-      type <- c(type, "Pareto optimality")
-
-    } else X <- apply(X = data2d, FUN = FUN, MARGIN = 1, ...)
-  } else {
-
-    if(is.null(dim(X))) {
-
-      if(length(X) != nrow(data2d)) stop("The amount of values in X do not match the number of shapes")
+      data2d <- shapes_mat(mspace$projected$shapemodels)$data2d
 
     } else {
-      if(nrow(X) != nrow(data2d)) stop("The number of rows of X do not match the number of shapes")
+      extrap <- FALSE
+      type <- "empirical"
 
-      if(ncol(X) > 1) {
-        if(is.null(optimality)) stop("Provide values for the 'optimality' argument")
-        X <- c(pareto_rank_ratio(performance = X, optimality = optimality))
-        cat("\nTwo or more variables have been provided; combining individual landscapes into an optimality trade-off landscape")
+      dat <- shapes_mat(shapes)
+      data2d <- dat$data2d
+      datype <- dat$datype
+
+      if(mspace$ordination$datype != datype) stop("shapes and mspace types are not compatible")
+    }
+
+    gridcoords <- proj_eigen(x = data2d,
+                             vectors = mspace$ordination$rotation[, mspace$plotinfo$axes],
+                             center = mspace$ordination$center)
+
+    pfront <- NULL
+
+    if(is.null(X)) {
+
+      if(is.list(FUN) & length(FUN) > 1) {
+
+        XX <- vector(mode = "list", length = length(FUN))
+        for(i in seq_len(length(FUN)))
+          XX[[i]] <- apply(X = data2d, FUN = FUN[[i]], MARGIN = 1, ...)
+
+        XX <- abind::abind(XX, along = 2)
+
+        if(is.null(opt.increases)) stop("Provide values for the 'opt.increases' argument")
+        Pareto <- pareto_rank_ratio(performance = XX, opt.increases = opt.increases)
+        X <- c(Pareto$PRR)
+        cat("\nTwo or more functions have been provided; combining individual landscapes into an optimality trade-off landscape")
 
         type <- c(type, "Pareto optimality")
+        pfront <- Pareto$pfront
+
+      } else X <- apply(X = data2d, FUN = FUN, MARGIN = 1, ...)
+    } else {
+
+      if(is.null(dim(X))) {
+
+        if(length(X) != nrow(data2d)) stop("The amount of values in X do not match the number of shapes")
+
+      } else {
+        if(nrow(X) != nrow(data2d)) stop("The number of rows of X do not match the number of shapes")
+
+        if(ncol(X) > 1) {
+          if(is.null(opt.increases)) stop("Provide values for the 'opt.increases' argument")
+          Pareto <- pareto_rank_ratio(performance = X, opt.increases = opt.increases)
+          X <- c(Pareto$PRR)
+          cat("\nTwo or more variables have been provided; combining individual landscapes into an optimality trade-off landscape")
+
+          type <- c(type, "Pareto optimality")
+          pfront <- Pareto$pfront
+        }
       }
     }
-  }
 
 
 
-  if("theoretical" %in% type) {
+    if("theoretical" %in% type) {
+      frame <- list(xlim = graphics::par("usr")[1:2], ylim = graphics::par("usr")[3:4])
+    } else {
+      frame <- list(xlim = range(gridcoords[,1]))
+      if(length(mspace$plotinfo$axes) > 1) frame$ylim <- range(gridcoords[,2])
+    }
+
+    xlim <- frame$xlim * expand
+    xo <- seq(from = xlim[1], to = xlim[2], length.out = resolution)
+
+    if(length(mspace$plotinfo$axes) == 1) {
+      gridcoords <- expand.grid(gridcoords, 0:(mspace$plotinfo$nh - 1))
+      X <- rep(X, times = mspace$plotinfo$nh)
+
+      yo <- 0
+    } else {
+      ylim <- frame$ylim * expand
+      yo <- seq(from = ylim[1], to = ylim[2], length.out = resolution)
+
+      xo[which.x0 <- which.min(abs(xo))] <- 0
+      yo[which.y0 <- which.min(abs(yo))] <- 0
+    }
+
+
+    landscape <- suppressWarnings({akima::interp(x = gridcoords[, 1], y = gridcoords[, 2],
+                                                 z = X, extrap = extrap, linear = linear,
+                                                 xo = xo, yo = yo)})
+
+
+    if("empirical" %in% type & length(mspace$plotinfo$axes) == 1) {
+      spline <- stats::smooth.spline(x = landscape$x[!is.na(landscape$z)],
+                                     y = landscape$z[!is.na(landscape$z)], spar = spar)
+      smoothed_landsc <- Morpho::equidistantCurve(x = cbind(spline$x, spline$y), n = resolution)
+
+      landscape$x <- smoothed_landsc[,1]
+      landscape$z <- smoothed_landsc[,2]
+    }
+
+  } else {
+
+    if(!is.null(shapes) | !is.null(X) | !is.null(FUN)) warning("'Morphoscape' object provided, overriding 'shapes', 'X' and 'FUN' arguments")
+
+    landscape <- adapt_Morphoscape(obj)
+    extrap <- TRUE
+    type <- "Morphoscape"
+
+
     frame <- list(xlim = graphics::par("usr")[1:2], ylim = graphics::par("usr")[3:4])
-  } else {
-    frame <- list(xlim = range(gridcoords[,1]))
-    if(length(mspace$plotinfo$axes) > 1) frame$ylim <- range(gridcoords[,2])
-  }
-
-  xlim <- frame$xlim * expand
-  xo <- seq(from = xlim[1], to = xlim[2], length.out = resolution)
-
-  if(length(mspace$plotinfo$axes) == 1) {
-    gridcoords <- expand.grid(gridcoords, 0:(mspace$plotinfo$nh - 1))
-    X <- rep(X, times = mspace$plotinfo$nh)
-
-    yo <- 0
-  } else {
+    xlim <- frame$xlim * expand
     ylim <- frame$ylim * expand
+    xo <- seq(from = xlim[1], to = xlim[2], length.out = resolution)
     yo <- seq(from = ylim[1], to = ylim[2], length.out = resolution)
 
     xo[which.x0 <- which.min(abs(xo))] <- 0
     yo[which.y0 <- which.min(abs(yo))] <- 0
-  }
-
-
-  landscape <- suppressWarnings({akima::interp(x = gridcoords[, 1], y = gridcoords[, 2],
-                                               z = X, extrap = extrap, linear = linear,
-                                               xo = xo, yo = yo)})
-
-
-  if("empirical" %in% type & length(mspace$plotinfo$axes) == 1) {
-    spline <- stats::smooth.spline(x = landscape$x[!is.na(landscape$z)],
-                                   y = landscape$z[!is.na(landscape$z)], spar = spar)
-    smoothed_landsc <- Morpho::equidistantCurve(x = cbind(spline$x, spline$y), n = resolution)
-
-    landscape$x <- smoothed_landsc[,1]
-    landscape$z <- smoothed_landsc[,2]
   }
 
   if(length(mspace$plotinfo$axes) > 1) {
@@ -1350,6 +1476,10 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
 
   mspace$projected$landsc <- landscape
   mspace$projected$landsc$type <- type
+  if("Pareto optimality" %in% type) {
+    mspace$projected$opt.increases <- opt.increases
+    mspace$projected$pfront <- data2d[pfront,]
+  }
 
   mspace$plotinfo$palette.landsc <- args$palette
   mspace$plotinfo$display.landsc <- args$display
@@ -1366,6 +1496,175 @@ proj_landscape <- function(mspace, shapes = NULL, FUN = NULL, X = NULL, linear =
   } else {
     return(invisible(mspace))
   }
+}
+
+################################################################################
+
+#' Project Pareto front optimizing multiple functions
+#'
+#' @description Project the Pareto front, representing the subset of shapes that
+#'   achieve the optimal balance between two antagonistic functional variables,
+#'   into morphospace.
+#'
+#' @param mspace An \code{"mspace"} object.
+#' @param shapes Optional shape data. If provided, the associated variables
+#'   must be specified using \code{X}.
+#' @param X An optional matrix with at least 2 columns, containing the values
+#'   assigned to each shape (if provided) in the functional variables the Pareto
+#'   is calculated from (vector length / number of rows and their order must
+#'   match those from the shapes provided in \code{shapes}).
+#' @param opt.increases Logical vector of length \code{o} (where \code{o} is the
+#'   number of \emph{ad hoc} functions or variables provided in \code{FUN} or
+#'   \code{X}, respectively) indicating optimality direction of each performance
+#'   variable. Ignored unless projection of an optimality trade-off landscape is
+#'   attempted.
+#' @param lwd Numerical, specifying the width of the line used to mark
+#'   the Pareto front.
+#' @param pipe Logical; is the function being included in a pipe?
+#' @param ... Further arguments passed to [graphics::lines()].
+#'
+#' @details This function projects the Pareto front, formed by the subset of
+#'   shapes that achieve a better balance between two or more functional metrics
+#'   engaged in a trade-off that cannot be maximised independently, following
+#'   Deakin et al. (2022)
+#'
+#' @return If a plot device with a morphospace is open, the Pareto front is
+#'   projected into it. If \code{pipe = FALSE}, a matrix containing the shapes
+#'   forming the Pareto front in its "two dimensional" format is returned
+#'   invisibly. If \code{pipe = TRUE} the supplied \code{"mspace"} object will
+#'   be modified by appending \code{$pfront} and \code{$optimality} slots to
+#'   \code{$projected}, as well as by adding some graphical parameters (stored
+#'   into the \code{$plotinfo} slot), and returned invisibly.
+#'
+#' @seealso \code{\link{pareto_front}}, \code{\link{proj_landscape}}
+#'
+#' @references
+#' Deakin, W. J., Anderson, P. S., den Boer, W., Smith, T. J., Hill, J. J.,
+#'   Rücklin, M., Donoghue, P. C. J.  & Rayfield, E. J. (2022). \emph{Increasing
+#'   morphological disparity and decreasing optimality for jaw speed and
+#'   strength during the radiation of jawed vertebrates}. Science Advances,
+#'   8(11), eabl3644.
+#'
+#' @export
+#'
+#' @examples
+#' #load data and packages
+#' library(geomorph)
+#'
+#' data("tails")
+#' shapes <- tails$shapes
+#' links <- tails$links
+#'
+#'
+#' #Pareto landscapes are created when providing two or more separate surfaces,
+#' #either using a list fed to FUN containing multuple functions, or a matrix with
+#' #multiple columns.
+#' msp <- mspace(shapes, links = links, nh = 8, nv = 8, plot = FALSE)
+#' shapemodels2d <- two.d.array(extract_shapes(msp, keep.template = FALSE)$shapes)
+#' LDs <- apply(X = shapemodels2d, FUN = morphospace:::computeLD, MARGIN = 1)
+#'
+#' #create fake functional variable with the opposite pattern to LD
+#' antiLDs <- jitter(rev(LDs), factor = 10)
+#'
+#' #visualize lift/drag landscape (aerodynamic efficiency)
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+#'        cex.ldm = 0) %>%
+#'   proj_landscape(shapes = shapemodels2d, X = LDs,
+#'                  nlevels = 20, expand = 1.2, lwd = 3,
+#'                  palette = terrain.colors, display = "contour")
+#'
+#' #visualize antiLD surface
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+#'        cex.ldm = 0) %>%
+#'   proj_landscape(shapes = shapemodels2d, X = antiLDs,
+#'                  nlevels = 20, expand = 1.2, lwd = 3,
+#'                  palette = terrain.colors, display = "contour")
+#'
+#' #visualize combined Pareto landscape (trade-off)
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+#'        cex.ldm = 0) %>%
+#'   proj_landscape(shapes = shapemodels2d, X = cbind(LDs, antiLDs),
+#'                  opt.increases = c(TRUE, TRUE),
+#'                  nlevels = 50, expand = 1.2, lwd = 3,
+#'                  palette = terrain.colors, display = "contour")
+#'
+#'
+#' #there are two ways in which proj_pfront can be used:
+#'
+#' #1. downstream to a proj_landscape instance in which a Pareto
+#' #surface was computed
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+#'        cex.ldm = 0) %>%
+#'   proj_landscape(shapes = shapemodels2d, X = cbind(LDs, antiLDs),
+#'                  opt.increases = c(TRUE, TRUE),
+#'                  nlevels = 50, expand = 1.2, lwd = 3,
+#'                  palette = terrain.colors, display = "contour") %>%
+#'   proj_shapes(shapemodels2d) %>%
+#'   proj_pfront(col = "red")
+#'
+#' #2. without previous computation of a Pareto surface. In this case,
+#' #the shapes, functional values and directions of optimality must be
+#' #provided
+#' mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+#'        cex.ldm = 0) %>%
+#'   proj_pfront(shapes = shapemodels2d, X = cbind(LDs, antiLDs),
+#'               opt.increases = c(TRUE, TRUE), bg = "red", type = "b",
+#'               pch = 21)
+proj_pfront <- function(mspace, shapes = NULL, X = NULL, opt.increases = NULL,
+                        lwd = 2, pipe = TRUE, ...) {
+
+
+  args <- c(as.list(environment()), list(...))
+
+  if(is.null(X) & is.null(opt.increases)) {
+
+    if(is.null(mspace$projected$pfront)) {
+      stop("Either provide values for 'X' and 'opt.increases' or project front downstream to a Pareto optimality surface")
+    } else {
+      pfront.scores <- proj_eigen(x = mspace$projected$pfront,
+                                  vectors = mspace$ordination$rotation,
+                                  center = mspace$ordination$center)
+    }
+
+  } else {
+
+    dat <- shapes_mat(shapes)
+    data2d <- dat$data2d
+    datype <- dat$datype
+
+    pfront <- pareto_front(performance = X, opt.increases = opt.increases)
+    pfront.scores <- proj_eigen(x = data2d[pfront,],
+                                vectors = mspace$ordination$rotation,
+                                center = mspace$ordination$center)
+
+  }
+
+
+  if(.Device != "null device") {
+
+    if(length(mspace$plotinfo$axes) > 1) {
+      graphics::lines(pfront.scores, lwd = lwd, ...)
+
+    } else {
+      cat("\nPareto fronts are not projected into univariate morphospaces")
+    }
+  }
+
+  if(!is.null(X) & !is.null(opt.increases)) {
+    mspace$projected$opt.increases <- opt.increases
+    mspace$projected$pfront <- data2d[pfront,]
+  }
+
+  mspace$plotinfo$lwd.pfront <- args$lwd
+  mspace$plotinfo$lty.pfront <- args$lty
+  mspace$plotinfo$col.pfront <- args$col
+
+  if(!pipe) {
+    return(invisible(pfront))
+  } else {
+    return(invisible(mspace))
+  }
+
 }
 
 
