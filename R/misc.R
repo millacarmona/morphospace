@@ -300,13 +300,13 @@ flight_performance <- function(model, metric = "LD", center = TRUE) {
   #2.1 - points at the outer margin marking the MCS, and the distance bw them
   mcs_points <- rbind(find_intersection(cbind(mcsx, range(rotmodel[,2])), rotmodel[c(4,9),]),
                       find_intersection(cbind(mcsx, range(rotmodel[,2])), rotmodel[c(3,5),]))
-  mcs_dist <- dist(mcs_points)
+  mcs_dist <- stats::dist(mcs_points)
 
   #2.2 - get chordwise points ( )
   cw_points <- rbind(find_intersection(mcs_points,
                                        rbind(colMeans(rotmodel[1:4,]), rotmodel[7,])),
                      colMeans(rotmodel[1:4,]))
-  cw_dist <- dist(cw_points)
+  cw_dist <- stats::dist(cw_points)
 
 
   #3. calculate aerodynamic parameters (From Thomas & Balmford 1995)

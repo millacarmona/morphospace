@@ -33,8 +33,7 @@ Imports:
     mvMORPH,
     phytools,
     png,
-    rgl,
-    Morphoscape
+    rgl
 Depends: 
     R (>= 2.10)
 LazyData: true
@@ -43,6 +42,7 @@ Suggests:
     caper,
     rmarkdown,
     RRPP,
-    spelling
+    spelling,
+    Morphoscape
 Config/testthat/edition: 3
 Language: en-US

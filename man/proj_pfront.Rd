@@ -55,7 +55,7 @@ into morphospace.
 \details{
 This function projects the Pareto front, formed by the subset of
 shapes that achieve a better balance between two or more functional metrics
-engaged in a trade-off that cannot be maximised independently, following
+engaged in a trade-off that cannot be maximized independently, following
 Deakin et al. (2022)
 }
 \examples{

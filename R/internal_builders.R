@@ -796,25 +796,25 @@ adapt_model <- function(model) {
 #' @keywords internal
 adapt_Morphoscape <- function(obj) {
 
-  if(class(obj) == "kriged_surfaces") {
+  if(inherits(obj, "kriged_surfaces")) {
     grid <- obj$dataframes$grid[,1:3]
 
     if(ncol(obj$dataframes$grid) > 3)
       cat(paste("Only", colnames(obj$dataframes$grid)[3]), "landscape is plotted")
   }
 
-  if(class(obj) == "wtd_lscp") {
+  if(inherits(obj, "wtd_lscp")) {
     grid <- obj$Wprime$grid[,c("x", "y", "Z")]
   }
 
-  if(class(obj) == "poly_surf") {
+  if(inherits(obj, "poly_surf")) {
     grid <- obj$grid[,1:3]
   }
 
-  if(class(obj) == "multi_poly") {
+  if(inherits(obj, "multi_poly")) {
     grid <- obj[[1]]$grid[,1:3]
-    if(names(multi_poly)[1] > 1)
-      cat(paste("Only", names(multi_poly)[1], "landscape is plotted"))
+    if(names(obj$dataframes$grid)[1] > 1)
+      cat(paste("Only", names(obj$dataframes$grid)[1], "landscape is plotted"))
   }
 
 
@@ -2164,8 +2164,8 @@ add_labels <- function(xy, labels = NULL) {
 #' @noRd
 adjust_asp <- function(xlim, ylim, asp) {
 
-  plotw <- par("pin")[1]
-  ploth <- par("pin")[2]
+  plotw <- graphics::par("pin")[1]
+  ploth <- graphics::par("pin")[2]
 
   asp0 <- asp
   asp <- if(plotw > ploth) asp else (1 / asp)
