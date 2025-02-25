@@ -7,6 +7,7 @@
 proj_landscape(
   mspace,
   shapes = NULL,
+  obj = NULL,
   FUN = NULL,
   X = NULL,
   linear = FALSE,
@@ -21,6 +22,7 @@ proj_landscape(
   drawlabels = FALSE,
   spar = 0.5,
   pipe = TRUE,
+  opt.increases = NULL,
   ...
 )
 }
@@ -32,14 +34,25 @@ for the region of the morphospace encompassing that sample of shapes
 ("empirical landscape"). If \code{NULL}, the landscape will be computed for
 the set of background shape models ("theoretical landscape").}
 
-\item{FUN}{An optional \emph{ad hoc} function to be applied to a set of
-shapes, stored in "two-dimensional" format, along its first margin (i.e.
-rows), and returning a single numeric value from each.}
+\item{obj}{An optional object containing a landscape created using
+\code{Morphoscape}. If provided, arguments \code{shapes}, \code{FUN}
+or \code{X} are ignored.}
 
-\item{X}{An optional vector containing the values assigned to each shape
-(vector length and order must match those from the shapes provided in
-\code{shapes} or from the background shape models, depending on whether or
-not \code{shapes} have been provided).}
+\item{FUN}{An optional \emph{ad hoc} function, or a list containing two or
+more \emph{ad hoc} functions, to be applied to a set of shapes stored in
+"two-dimensional" format. The function/s is/are applied along the first
+margin (i.e. to each row) of the set of shapes, and must return a single
+numeric value from each. If two or more \emph{ad hoc} functions are
+provided, the individual landscapes are combined into an optimality
+trade-off landscape (see \code{details}).}
+
+\item{X}{An optional vector or matrix containing the values assigned to each
+shape (vector length / number of rows and their order must match those from
+the shapes provided in \code{shapes} or from the background shape models,
+depending on whether or not \code{shapes} have been provided). If a matrix
+with two or more columns (representing functional metrics) is provided, the
+individual landscapes are combined into an optimality trade-off landscape
+(see \code{details}).}
 
 \item{linear}{Logical; whether to use linear interpolation (if \code{FALSE},
 a cubic spline interpolation is used instead. See \code{\link[akima:interp]{akima::interp()}}.}
@@ -73,17 +86,26 @@ univariate representations.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
+\item{opt.increases}{Logical vector of length \code{o} (where \code{o} is the
+number of \emph{ad hoc} functions or variables provided in \code{FUN} or
+\code{X}, respectively) indicating optimality direction of each performance
+variable. Ignored unless projection of an optimality trade-off landscape is
+attempted.}
+
 \item{...}{Further arguments passed to \code{FUN}.}
 }
 \value{
 If a plot device with a morphospace is open, the landscape surface is
-projected into it as a contour map using \code{\link[akima:interp]{akima::interp()}}. If
-\code{pipe = FALSE}, a list containing the x, y and z values used to plot
-the landscape (x and z for univariate morphospaces) is returned invisibly.
-If \code{pipe = TRUE} the supplied \code{"mspace"} object will be modified
-by appending a \code{$landsc} slot to \code{$projected}, as well as by
-adding some graphical parameters (stored into the \code{$plotinfo} slot),
-and returned invisibly.
+projected into it as a contour map using \code{\link[akima:interp]{akima::interp()}} (alternatively,
+an object containing a landscape created with  \code{Morphoscape} can be
+projected). If \code{pipe = FALSE}, a list containing the x, y and z values
+used to plot the landscape (x and z for univariate morphospaces) is
+returned invisibly. If \code{pipe = TRUE} the supplied \code{"mspace"}
+object will be modified by appending a \code{$landsc} slot to
+\code{$projected}, as well as by adding some graphical parameters (stored
+into the \code{$plotinfo} slot), and returned invisibly. If two or more
+variables or functions are provided, additional \code{$pfront} and
+\code{$opt.increases} slots will be appended to \code{$projected}.
 }
 \description{
 Compute and project a landscape surface as a contour map over an
@@ -97,12 +119,11 @@ of shapes projected into an existing morphospace. These can be a sample of
 shapes specified by the user, producing a surface for a specific region of
 the morphospace ("empirical landscapes"). Alternatively, the set of
 background shape models can be used to generate a surface for the entire
-observed morphospace ("theoretical morphospace"). Generally, the values
-that are interpolated will represent a variable measuring functional
-performance (although it can be any kind of continuous variable), and can
-be either provided directly through the \code{X} argument or computed
-automatically using an \emph{ad hoc} function through the \code{FUN}
-argument.
+morphospace ("theoretical morphospace"). Generally, the values that are
+interpolated will represent a variable measuring functional performance
+(although it can be any kind of continuous variable), and can be either
+provided directly through the \code{X} argument or computed automatically
+using an \emph{ad hoc} function through the \code{FUN} argument.
 
 If the \code{FUN} argument is used, the function supplied must include a
 \code{model} argument feeding the \emph{ad hoc} function with a single
@@ -120,6 +141,14 @@ useful when importing variables obtained using other software or pipelines.
 If the user desires to compute those variables for the background shape
 models, they can be extracted using \code{\link{extract_shapes}}) prior to
 exporting or feeding them to their preferred analytical protocol.
+
+If more than one \emph{ad hoc} function or set of values are provided,
+the multiple landscapes generated are combined into a single optimality
+trade-off landscape by computing their Pareto rank ratio, following the
+procedures described in Deakin et al. (2022).
+
+Alternatively, a landscape generated using \code{Morphoscape} can be
+provided through the argument \code{obj}, to be projected into morphospace.
 }
 \examples{
 #load data and packages
@@ -144,14 +173,14 @@ mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
        cex.ldm = 0) \%>\%
   proj_shapes(shapes, pch = 16) \%>\%
   proj_landscape(nlevels = 60, FUN = morphospace:::computeLD, expand = 1.2,
-                 lwd = 2)
+                 lwd = 2, display = "contour")
 
 ##Using the X argument
 
 #first, create morphospace and extract background shapes without plotting
 msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
               cex.ldm = 0, plot = FALSE)
-shapemodels2d <- two.d.array(extract_shapes(msp)$shapes)
+shapemodels2d <- two.d.array(extract_shapes(msp, keep.template = FALSE)$shapes)
 
 #run computeLD through the "two-dimensional" matrix of shapes models (this is
 #the same thing the proj_landscape function is doing internally when FUN is
@@ -163,8 +192,30 @@ LDs <- apply(X = shapemodels2d, FUN = morphospace:::computeLD, MARGIN = 1)
 msp <- mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
               cex.ldm = 0) \%>\%
   proj_shapes(shapes, pch = 16) \%>\%
-  proj_landscape(nlevels = 20, X = LDs, expand = 1.2,
+  proj_landscape(X = LDs, nlevels = 20, expand = 1.2,
                  palette = terrain.colors, display = "filled.contour")
+
+#if the shapes argument is specified and it matches the values provided in X,
+#the landscape becomes independent of the background shapes being displayed.
+msp <- mspace(shapes, links = links, nh = 7, nv = 5, size.model = 1,
+              cex.ldm = 0) \%>\%
+  proj_shapes(shapes, pch = 16) \%>\%
+  proj_landscape(shapes = shapemodels2d, X = LDs, nlevels = 50, expand = 1.2,
+                 palette = terrain.colors, display = "filled.contour")
+
+#in this case, the edges of the landscape can be expanded if the initial sample
+#of shapes covers a larger area of the morphospace
+msp <- mspace(shapes, links = links, nh = 8, nv = 8, plot = FALSE,
+              xlim = c(-.6, .2), ylim = c(-.3, .2))
+shapemodels2d <- two.d.array(extract_shapes(msp, keep.template = FALSE)$shapes)
+LDs <- apply(X = shapemodels2d, FUN = morphospace:::computeLD, MARGIN = 1)
+
+msp <- mspace(shapes, links = links, nh = 7, nv = 5, size.model = 1,
+              cex.ldm = 0) \%>\%
+  proj_shapes(shapes, pch = 16) \%>\%
+  proj_landscape(shapes = shapemodels2d, X = LDs, nlevels = 50, expand = 1.2,
+                 palette = terrain.colors, display = "filled.contour")
+
 
 #add scalebar using plot_mspace()
 plot_mspace(msp, scalebar = TRUE)
@@ -178,6 +229,7 @@ mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
   proj_shapes(shapes, pch = 16) \%>\%
   proj_landscape(nlevels = 20, X = LDs, expand = 1.2,
                  palette = terrain.colors, display = "filled.contour")
+
 
 ###"Empirical" landscapes
 
@@ -201,9 +253,86 @@ mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
                  linear = TRUE, resolution = 200,
                  FUN = morphospace:::computeLD, expand = 1.2,
                  display = "filled.contour")
+
+
+##Pareto landscapes
+
+#Pareto landscapes are created when providing two or more separate surfaces,
+#either using a list fed to FUN containing multuple functions, or a matrix with
+#multiple columns.
+msp <- mspace(shapes, links = links, nh = 8, nv = 8, plot = FALSE)
+shapemodels2d <- two.d.array(extract_shapes(msp, keep.template = FALSE)$shapes)
+LDs <- apply(X = shapemodels2d, FUN = morphospace:::computeLD, MARGIN = 1)
+MDs <- apply(X = shapemodels2d, FUN = morphospace:::computeMD, MARGIN = 1)
+
+#visualize lift/drag landscape (aerodynamic efficiency)
+mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+       cex.ldm = 0) \%>\%
+  proj_landscape(shapes = shapemodels2d, X = LDs,
+                 nlevels = 20, expand = 1.2, lwd = 3,
+                 palette = terrain.colors, display = "contour")
+
+#visualize moment/drag landscape (maneuverability)
+mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+       cex.ldm = 0) \%>\%
+  proj_landscape(shapes = shapemodels2d, X = MDs,
+                 nlevels = 20, expand = 1.2, lwd = 3,
+                 palette = terrain.colors, display = "contour")
+
+#visualize combined Pareto landscape (trade-off)
+mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+       cex.ldm = 0) \%>\%
+  proj_landscape(shapes = shapemodels2d, X = cbind(LDs, MDs),
+                 opt.increases = c(TRUE, TRUE),
+                 nlevels = 20, expand = 1.2, lwd = 3,
+                 palette = terrain.colors, display = "contour")
+
+
+#Integration with Morphoscape
+
+#Morphoscape objects can be fed to proj_landscape, meaning that
+#functionalities such as kriging or weighted combinations of surfaces can be
+#used to create landscapes. For example, let's apply kriging to the Pareto
+#surface plotted above.
+require(Morphoscape)
+
+#first, let's calculate the Pareto surface (Pareto rank ratio) for LD and MD
+pareto.vals <- pareto_rank_ratio(performance = cbind(LDs, MDs),
+                                 opt.increases = c(TRUE, TRUE))$PRR
+
+#get scores for background shape models
+scores <- proj_eigen(shapemodels2d,
+                     vectors = msp$ordination$rotation,
+                     center = msp$ordination$center)
+
+#store scores and Pareto values in Morphoscape format
+dat <- data.frame(x = scores[,1],
+                  y = scores[,2],
+                  flight = c(pareto.vals))
+dat_fnc <- as_fnc_df(dat, func.names = c("flight"))
+
+# Create alpha-hulled grid for kriging
+grid <- resample_grid(dat_fnc, hull = "concaveman", alpha = 3)
+kr_surf <- krige_surf(dat_fnc, grid = grid)
+plot(kr_surf)
+
+#visualise landscape in morphospace using the argument 'obj'
+mspace(shapes, links = links, nh = 8, nv = 8, size.model = 1.5,
+       cex.ldm = 0) \%>\%
+  proj_landscape(obj = kr_surf,
+                 nlevels = 20, expand = 1.2, lwd = 3,
+                 palette = terrain.colors, display = "contour")
+}
+\references{
+Deakin, W. J., Anderson, P. S., den Boer, W., Smith, T. J., Hill, J. J.,
+Rücklin, M., Donoghue, P. C. J.  & Rayfield, E. J. (2022). \emph{Increasing
+morphological disparity and decreasing optimality for jaw speed and
+strength during the radiation of jawed vertebrates}. Science Advances,
+8(11), eabl3644.
 }
 \seealso{
 \code{\link{morphogrid}}, \code{\link{mspace}},
 \code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}},
-\code{\link{extract_shapes}}
+\code{\link{extract_shapes}}, \code{\link{pareto_rank_ratio}},
+\code{\link{proj_pfront}}
 }

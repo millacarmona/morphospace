@@ -33,7 +33,8 @@ Imports:
     mvMORPH,
     phytools,
     png,
-    rgl
+    rgl,
+    Morphoscape
 Depends: 
     R (>= 2.10)
 LazyData: true

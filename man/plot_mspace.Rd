@@ -326,6 +326,7 @@ the 3D landscape projected into a bivariate morphospace into a 2D landscape
 projected into a univariate one.
 }
 \examples{
+\dontrun{
 #load and extract relevant data, packages and information
 library(magrittr)
 data("tails")
@@ -437,4 +438,5 @@ plot_mspace(msp, x = tree,  axes = 2, links = links, col.points = species,
             col.groups = 1:nlevels(species), pch.points = 16,
             ylab = "Branch lengths", pch.tips = 21, bg.tips = "red",
             pch.nodes = 21, bg.nodes = "blue")
+}
 }
