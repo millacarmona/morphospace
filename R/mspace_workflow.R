@@ -374,9 +374,24 @@ mspace <- function(shapes = NULL,
 
   if(ncol(ordination$x) == 1) axes <- 1
 
-  rotation_matrix <- NULL
+
+  #####################################start
+  #rotation_matrix <- NULL
+  if(!is.null(dim(rot.models))) { #if rot.models is a matrix,
+    rotation_matrix <- rot.models
+    rot.models <- 0
+  } else { #if rot.models is not a matrix
+    rotation_matrix <- NULL
+  }
+  #####################################end
 
   if(k == 3 & datype == "landm") {
+
+    #####################################start
+    if(is.null(rotation_matrix)) {
+      if(rot.models != 0) stop("Angles are not allowed for 3D shapes; please provide a rotation matrix (see 'set_rotation3D')")
+    }
+    #####################################end
 
     shapemodels <- morphogrid(ordination = ordination, axes = axes, datype = datype, template = NULL,
                               x = NULL, y = y, p = p, k = k, nh = nh, nv = nv, mag = mag,
@@ -385,12 +400,21 @@ mspace <- function(shapes = NULL,
 
     refshape <- expected_shapes(shapes)
 
+    #####################################start
+    rgl::par3d(userMatrix = rotation_matrix)
+    ####################################end
+
     plot_morphogrid3d(x = NULL, y = y, morphogrid = shapemodels, refshape = refshape,
                       template = template, links = links, ordtype = ordination$ordtype,
                       adj_frame = adj_frame, axes = axes, xlim = xlim, ylim = ylim, xlab = xlab,
                       ylab = ylab, cex.ldm = cex.ldm, col.ldm = col.ldm, col.models = col.models,
                       lwd.models = lwd.models, bg.models = bg.models, size.models = size.models,
-                      asp.models = asp.models, alpha.models = alpha.models, plot = plot, models = models)
+                      asp.models = asp.models, alpha.models = alpha.models, plot = plot,
+                      ###################start
+                      rotmat = rotation_matrix,
+                      ###################end
+                      models = models
+                      )
 
     rotation_matrix <- rgl::par3d()$userMatrix
 
@@ -2270,7 +2294,7 @@ plot_mspace <- function(mspace,
                         xlab = args$xlab, ylab = args$ylab, cex.ldm = args$cex.ldm,
                         col.ldm = args$col.ldm, col.models = args$col.models,
                         lwd.models = args$lwd.models, bg.models = args$bg.models,
-                        models = args$models, )
+                        models = args$models)
     }
 
 
@@ -2522,6 +2546,10 @@ plot_mspace <- function(mspace,
     args$xlim <- xlim
     args$ylim <- ylim
 
+    ###################start
+    args$asp <- NA
+    ###################end
+
     #3.1 - prepare ground ----------------------------------------------------------------
 
     #3.1.1 - if either x or y is a factor, prepare ground for violin/box plot
@@ -2619,6 +2647,10 @@ plot_mspace <- function(mspace,
 
       if(is.null(x)) xlim <- range(ordination$x[,args$axes[1]])
       if(is.null(y)) ylim <- range(ordination$x[,args$axes[1]])
+
+      ######################start
+      rgl::par3d(userMatrix = args$rotation_matrix)
+      ######################end
 
       plot_morphogrid3d(x = x, y = y, morphogrid = shapemodels, refshape = refshape,
                         template = args$template, links = args$links, ordtype = mspace$ordination$ordtype,
