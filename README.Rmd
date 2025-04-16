@@ -166,7 +166,7 @@ mspace(shapes, mag = 1, bg.model = "gray", cex.ldm = 0, template = meanmesh,
 ```
 
 
-Aside from working with these types of morphometric data, `morphospace` provides functions to perform some useful shape operations, use TPS interpolation of curves/meshes to improve visualizations, and supports a variety of multivariate methods (bgPCA, phylogenetic PCA, PLS, phylogenetic PLS) to produce ordinations. For these and other options and details, go to [General usage](https://millacarmona.github.io/morphospace/articles/General-usage.html) and [Worked examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
+Aside from working with these types of morphometric data, `morphospace` provides functions to perform some useful shape operations, use TPS interpolation of curves/meshes to improve visualizations, and supports a variety of multivariate methods (bgPCA, phylogenetic PCA, PLS, phylogenetic PLS) to produce ordinations. Integration with linear models and ordinations generated with other packages (`geomorph`, `Morpho`, `Momocs`, `mvMORPH`, `RRPP`, `phytools`) is also possible. For these and other options and details, go to [General usage](https://millacarmona.github.io/morphospace/articles/General-usage.html) and [Worked examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
 
 
 ## Update 1 (August 2022)
@@ -254,7 +254,7 @@ Collyer, M. L., & Adams, D. (2021). *Phylogenetically aligned component analysis
 
 Deakin, W. J., Anderson, P. S., den Boer, W., Smith, T. J., Hill, J. J., Rücklin, M., Donoghue, P. C. J.  & Rayfield, E. J. (2022). *Increasing morphological disparity and decreasing optimality for jaw speed and strength during the radiation of jawed vertebrates*. Science Advances, 8(11), eabl3644. <https://doi.org/10.1126/sciadv.abl3644>.
 
-Dickson, B. V., Pierce, S., & Greifer, N. 2023. *Morphoscape: computation and visualization of adaptive landscapes*. version 1.0.2. <https://CRAN.R-project.org/package=Morphoscape>
+Dickson, B. V., Pierce, S., & Greifer, N. 2023. *Morphoscape: computation and visualization of adaptive landscapes*. R package version 1.0.2. <https://CRAN.R-project.org/package=Morphoscape>
 
 Dryden, I.L. (2019). *shapes: statistical shape analysis*. R package version 1.2.5. <https://CRAN.R-project.org/package=shapes>.
 

@@ -187,8 +187,10 @@ Aside from working with these types of morphometric data, `morphospace`
 provides functions to perform some useful shape operations, use TPS
 interpolation of curves/meshes to improve visualizations, and supports a
 variety of multivariate methods (bgPCA, phylogenetic PCA, PLS,
-phylogenetic PLS) to produce ordinations. For these and other options
-and details, go to [General
+phylogenetic PLS) to produce ordinations. Integration with linear models
+and ordinations generated with other packages (`geomorph`, `Morpho`,
+`Momocs`, `mvMORPH`, `RRPP`, `phytools`) is also possible. For these and
+other options and details, go to [General
 usage](https://millacarmona.github.io/morphospace/articles/General-usage.html)
 and [Worked
 examples](https://millacarmona.github.io/morphospace/articles/Worked-examples.html).
@@ -355,8 +357,8 @@ strength during the radiation of jawed vertebrates*. Science Advances,
 8(11), eabl3644. <https://doi.org/10.1126/sciadv.abl3644>.
 
 Dickson, B. V., Pierce, S., & Greifer, N. 2023. *Morphoscape:
-computation and visualization of adaptive landscapes*. version 1.0.2.
-<https://CRAN.R-project.org/package=Morphoscape>
+computation and visualization of adaptive landscapes*. R package version
+1.0.2. <https://CRAN.R-project.org/package=Morphoscape>
 
 Dryden, I.L. (2019). *shapes: statistical shape analysis*. R package
 version 1.2.5. <https://CRAN.R-project.org/package=shapes>.
