@@ -45,6 +45,8 @@
 #' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
 #'    factors for the width and height of the frame, respectively.
 #' @param rot.models  Numeric; angle (in degrees) to rotate shape models.
+#'    Alternatively, a pre-defined rotation matrix for 3D landmark data
+#'    can be provided.
 #' @param size.models Numeric; size factor for shape models.
 #' @param asp.models Numeric; the y/x aspect ratio of shape models.
 #' @param col.models Color for wireframes/outlines.
