@@ -291,7 +291,7 @@ mspace <- function(shapes = NULL,
                    nv = 4,
                    mag = 1,
                    invax = NULL,
-                   asp = NA,
+                   asp = 1,
                    rescale = TRUE,
                    xlim = NULL,
                    ylim = NULL,
@@ -446,6 +446,9 @@ mspace <- function(shapes = NULL,
 #' @param mspace An \code{"mspace"} object.
 #' @param shapes Shape data.
 #' @param density Logical; whether to add density distribution for points
+#' @param labels Either logical, indicating whether to include all point labels,
+#'   or a character string with the exact names of the points whose labels
+#'   should be included.
 #'   (univariate ordinations only).
 #' @param pipe Logical; is the function being included in a pipe?
 #' @param ... Further arguments passed to [graphics::points()].
@@ -484,7 +487,7 @@ mspace <- function(shapes = NULL,
 #'               pch = c(1,16)[cactus[species == "Db"]]) %>%
 #'   proj_shapes(shapes = shapes[,,species == "Dk"],  col = c("blue"),
 #'               pch = c(1,16)[cactus[species == "Dk"]])
-proj_shapes <- function(mspace, shapes, density = TRUE, pipe = TRUE, ...) {
+proj_shapes <- function(mspace, shapes, density = TRUE, labels = NULL, pipe = TRUE, ...) {
 
   args <- c(as.list(environment()), list(...))
 
@@ -502,12 +505,17 @@ proj_shapes <- function(mspace, shapes, density = TRUE, pipe = TRUE, ...) {
     if(ncol(mspace$ordination$x) > 1) {
       if(length(mspace$plotinfo$axes) > 1) {
         plot_biv_scatter(scores = scores[, mspace$plotinfo$axes], ...)
+        add_labels(scores[, mspace$plotinfo$axes], labels)
       } else {
         plot_univ_scatter(scores = cbind(scores[, mspace$plotinfo$axes[1]]),
                           density = density, ...)
+        add_labels(cbind(scores[, mspace$plotinfo$axes[1]], 0), labels,
+                   srt = 90, adj = c(0,0))
       }
     } else {
       plot_univ_scatter(scores = scores, density = density, ...)
+      add_labels(cbind(scores[, 1], 0), labels, srt = 90,
+                 srt = 90, adj = c(0,0))
     }
   }
 
@@ -557,6 +565,9 @@ proj_shapes <- function(mspace, shapes, density = TRUE, pipe = TRUE, ...) {
 #' @param conflev Numeric; confidence level used for confidence ellipse(s).
 #' @param density Logical; whether to add density distribution for groups
 #'   (univariate ordinations only).
+#' @param labels Either logical, indicating whether to include all group labels,
+#'   or a character string with the exact names of the groups whose labels
+#'   should be included.
 #' @param pipe Logical; is the function being included in a pipe?
 #' @param ... Further arguments passed to [hulls_by_group_2D()] or
 #'   [ellipses_by_group_2D()].
@@ -602,7 +613,7 @@ proj_shapes <- function(mspace, shapes, density = TRUE, pipe = TRUE, ...) {
 #' #add legend using plot_mspace()
 #' plot_mspace(msp, legend = TRUE, cex.legend = 2, pch.groups = 16)
 proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
-                        conflev = 0.95, density = TRUE, pipe = TRUE, ...) {
+                        conflev = 0.95, density = TRUE, labels = NULL, pipe = TRUE, ...) {
 
   args <- c(as.list(environment()), list(...))
 
@@ -625,26 +636,67 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
 
   if(is.null(groups)) groups <- factor(rep(1, nrow(data2d)))
 
+  if(is.null(args$col)) args$col <- sort(unique(as.numeric(groups)))
+  args$col <- if(length(args$col) == 1) rep(args$col, nlevels(groups)) else {
+    if(nlevels(groups) > length(args$col)) {
+      c(rep(NA, nlevels(groups) - length(unique(args$col))),
+        unique(args$col))[order(c((1:nlevels(groups))[-which(levels(groups) %in% unique(groups))],
+                                  which(levels(groups) %in% unique(groups))))]
+    } else args$col
+  }
+  if(is.factor(args$col)) args$col <- as.numeric(args$col)
+
   if(.Device != "null device") {
+
+    mshapes <- expected_shapes(shapes = data2d, x = groups, returnarray = FALSE)
+    gcols <- setNames(col2hex(args$col), levels(groups))
 
     if(ncol(mspace$ordination$x) > 1) {
       if(length(mspace$plotinfo$axes) > 1) {
 
-        if(ellipse == FALSE) {
+        if(ellipse) {
           hulls_by_group_2D(data2d[, mspace$plotinfo$axes], fac = groups, ...)
         } else {
           ellipses_by_group_2D(data2d[, mspace$plotinfo$axes], fac = groups,
                                conflev = conflev, ...)
         }
+        add_labels(xy = mshapes[, mspace$plotinfo$axes],
+                   labels = labels, col = gcols)
       } else {
-        if(density == TRUE) {
-          density_by_group_2D(data2d, groups, ax = mspace$plotinfo$axes[1], ...)
+        if(density) {
+          dens <- density_by_group_2D(data2d, groups, ax = mspace$plotinfo$axes[1], ...)
+
+          gymax <- lapply(dens$dens, function(x){
+            if(is.null(x$y)) x$y <- 0
+            max(x$y) / dens$ymax
+          })
+          gxmax <- lapply(dens$dens, function(x){
+            if(!is.null(x$x)) x$x[which.max(x$y)] else NA
+          })
+          gxmax[is.na(gxmax)] <- mshapes[is.na(gxmax), mspace$plotinfo$axes[1]]
+          xy <- cbind(gxmax, gymax)
+          rownames(xy) <- levels(groups)
+
+          add_labels2(xy = xy, labels = labels, col = gcols, pos = 3)
         }
       }
 
     } else {
-      if(density == TRUE) {
-        density_by_group_2D(data2d, groups, ax = 1, ...)
+      if(density) {
+        dens <- density_by_group_2D(data2d, groups, ax = 1, ...)
+
+        gymax <- lapply(dens$dens, function(x){
+          if(is.null(x$y)) x$y <- 0
+          max(x$y) / dens$ymax
+        })
+        gxmax <- lapply(dens$dens, function(x){
+          if(!is.null(x$x)) x$x[which.max(x$y)] else NA
+        })
+        gxmax[is.na(gxmax)] <- mshapes[is.na(gxmax), 1]
+        xy <- cbind(gxmax, gymax)
+        rownames(xy) <- levels(groups)
+
+        add_labels2(xy = xy, labels = labels, col = gcols, pos = 3)
       }
     }
   }
@@ -657,17 +709,6 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
     } else c(mspace$projected$gr_class, groups)
   }
   mspace$projected$gr_scores <- rbind(cbind(mspace$projected$gr_scores), cbind(data2d))
-
-
-  if(is.null(args$col)) args$col <- sort(unique(as.numeric(groups)))
-  args$col <- if(length(args$col) == 1) rep(args$col, nlevels(groups)) else {
-    if(nlevels(groups) > length(args$col)) {
-      c(rep(NA, nlevels(groups) - length(unique(args$col))),
-        unique(args$col))[order(c((1:nlevels(groups))[-which(levels(groups) %in% unique(groups))],
-                                  which(levels(groups) %in% unique(groups))))]
-    } else args$col
-  }
-  if(is.factor(args$col)) args$col <- as.numeric(args$col)
 
   if(is.null(args$lty)) args$lty <- 1
   args$lty <- if(length(args$lty) == 1) rep(args$lty, nlevels(groups)) else
@@ -2071,7 +2112,7 @@ plot_mspace <- function(mspace,
                         legend = FALSE,
                         scalebar = FALSE,
                         cex.legend = 1,
-                        asp = NA,
+                        asp = 1,
                         xlab,
                         ylab,
                         xlim = NULL,

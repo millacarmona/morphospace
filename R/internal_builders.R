@@ -1969,9 +1969,8 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1, plot
       graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
                         lty = lty[i], col = grDevices::adjustcolor(col[i], alpha.f = alpha))
     }
-  } else {
-    return(list(ymax = ymax, dens = dens))
   }
+  return(invisible(list(ymax = ymax, dens = dens)))
 }
 
 
@@ -2131,19 +2130,21 @@ plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, 
 #' @param labels Either logical, indicating whether to add labels to all the
 #'   points in the scatter plot (taken from row names), or character string
 #'   containing specific names to be added.
+#' @col Either numeric or character, specifying the color(s) to be used.
+#' @... Further arguments passed to [graphics::text()].
 #'
 #' @noRd
-add_labels <- function(xy, labels = NULL) {
+add_labels <- function (xy, labels = NULL, col = 1, ...) {
   if(!is.null(labels)) {
     if(is.character(labels)) {
-      label.scores <- xy[labels,]
+      label.scores <- xy[labels, ]
       label.text <- labels
-      graphics::text(rbind(label.scores), label.text, pos = 1)
+      graphics::text(rbind(label.scores), label.text, col = col[labels], ...)
     } else {
       if(labels) {
         label.scores <- xy
         label.text <- rownames(xy)
-        graphics::text(rbind(label.scores), label.text, pos = 1)
+        graphics::text(rbind(label.scores), label.text, col = col, ...)
       }
     }
   }

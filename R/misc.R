@@ -65,7 +65,7 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
   if(dat$datype == "landm") {
 
     if(ncol(shapes_coord) == 2) {
-      plot(longlist, type = "n", axes = FALSE, xlab = "", ylab = "")
+      plot(longlist, type = "n", axes = FALSE, xlab = "", ylab = "", asp = 1)
 
       if(!is.null(links)) {
         for(i in seq_len(dim(shapes_coord)[3])) {
@@ -85,7 +85,7 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
 
     } else {
       rgl::plot3d(longlist, aspect = FALSE, axes = FALSE, col = "#708095",
-                  xlab = "", ylab = "", zlab = "", size = 5)
+                  xlab = "", ylab = "", zlab = "", size = 5, aspect = FALSE)
 
       if(!is.null(links)) {
         for(i in seq_len(dim(shapes_coord)[3])) {
