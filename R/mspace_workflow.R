@@ -377,23 +377,18 @@ mspace <- function(shapes = NULL,
   if(ncol(ordination$x) == 1) axes <- 1
 
 
-  #####################################start
-  #rotation_matrix <- NULL
-  if(!is.null(dim(rot.models))) { #if rot.models is a matrix,
+  if(!is.null(dim(rot.models))) {
     rotation_matrix <- rot.models
     rot.models <- 0
-  } else { #if rot.models is not a matrix
+  } else {
     rotation_matrix <- NULL
   }
-  #####################################end
 
   if(k == 3 & datype == "landm") {
 
-    #####################################start
     if(is.null(rotation_matrix)) {
       if(rot.models != 0) stop("Angles are not allowed for 3D shapes; please provide a rotation matrix (see 'set_rotation3D')")
     }
-    #####################################end
 
     shapemodels <- morphogrid(ordination = ordination, axes = axes, datype = datype, template = NULL,
                               x = NULL, y = y, p = p, k = k, nh = nh, nv = nv, mag = mag,
@@ -402,9 +397,7 @@ mspace <- function(shapes = NULL,
 
     refshape <- expected_shapes(shapes)
 
-    #####################################start
     rgl::par3d(userMatrix = rotation_matrix)
-    ####################################end
 
     plot_morphogrid3d(x = NULL, y = y, morphogrid = shapemodels, refshape = refshape,
                       template = template, links = links, ordtype = ordination$ordtype,
@@ -412,11 +405,7 @@ mspace <- function(shapes = NULL,
                       ylab = ylab, cex.ldm = cex.ldm, col.ldm = col.ldm, col.models = col.models,
                       lwd.models = lwd.models, bg.models = bg.models, size.models = size.models,
                       asp.models = asp.models, alpha.models = alpha.models, plot = plot,
-                      ###################start
-                      rotmat = rotation_matrix,
-                      ###################end
-                      models = models
-                      )
+                      rotmat = rotation_matrix, models = models)
 
     rotation_matrix <- rgl::par3d()$userMatrix
 
@@ -513,6 +502,16 @@ mspace <- function(shapes = NULL,
 #'               pch = c(1,16)[cactus[species == "Db"]]) %>%
 #'   proj_shapes(shapes = shapes[,,species == "Dk"],  col = c("blue"),
 #'               pch = c(1,16)[cactus[species == "Dk"]])
+#'
+#' #add labels for all the points (needs a named 'shapes' object)
+#' mspace(shapes, template = template, mag = 0.7, axes = c(1,2)) %>%
+#'   proj_shapes(shapes = shapes, labels = TRUE)
+#'
+#' #add labels for selected points (needs a named 'shapes' object)
+#' mspace(shapes, template = template, mag = 0.7, axes = c(1,2)) %>%
+#'   proj_shapes(shapes = shapes) %>%
+#'   proj_shapes(shapes = shapes[,,c("Dk M Op 8 Ad_02", "Dk H Tr 11 Ad_03")],
+#'               pch = 16, col = 2, labels = c("Dk M Op 8 Ad_02", "Dk H Tr 11 Ad_03"))
 proj_shapes <- function(mspace, shapes, density = TRUE, labels = NULL, pipe = TRUE, ...) {
 
   args <- c(as.list(environment()), list(...))
@@ -674,13 +673,14 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
 
   if(.Device != "null device") {
 
-    mshapes <- expected_shapes(shapes = data2d, x = groups, returnarray = FALSE)
+    #mshapes <- expected_shapes(shapes = data2d, x = groups, returnarray = FALSE)
+    mshapes <- apply(X = data2d, MARGIN = 2, FUN = tapply, groups, mean)
     gcols <- setNames(col2hex(args$col), levels(groups))
 
     if(ncol(mspace$ordination$x) > 1) {
       if(length(mspace$plotinfo$axes) > 1) {
 
-        if(ellipse) {
+        if(!ellipse) {
           hulls_by_group_2D(data2d[, mspace$plotinfo$axes], fac = groups, ...)
         } else {
           ellipses_by_group_2D(data2d[, mspace$plotinfo$axes], fac = groups,
@@ -2548,9 +2548,7 @@ plot_mspace <- function(mspace,
     args$xlim <- xlim
     args$ylim <- ylim
 
-    ###################start
     args$asp <- NA
-    ###################end
 
     #3.1 - prepare ground ----------------------------------------------------------------
 
@@ -2650,9 +2648,7 @@ plot_mspace <- function(mspace,
       if(is.null(x)) xlim <- range(ordination$x[,args$axes[1]])
       if(is.null(y)) ylim <- range(ordination$x[,args$axes[1]])
 
-      ######################start
       rgl::par3d(userMatrix = args$rotation_matrix)
-      ######################end
 
       plot_morphogrid3d(x = x, y = y, morphogrid = shapemodels, refshape = refshape,
                         template = args$template, links = args$links, ordtype = mspace$ordination$ordtype,
@@ -3021,7 +3017,6 @@ plot_mspace <- function(mspace,
         stop("Landscape values ($landsc) is necessary to generate a scalebar")
       } else {
 
-        #graphics::par(mar = c(5.1, 1, 4.1, 10))
         graphics::par(mar = c(5.1, 4, 4.1, 6))
         plot(0, type = "n", axes = FALSE, xlab = "", ylab = "",
              ylim = range(levs.landsc), xlim = c(0.2,0.8), xaxs = "i", yaxs = "i")
