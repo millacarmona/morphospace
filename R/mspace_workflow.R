@@ -439,7 +439,7 @@ mspace <- function(shapes = NULL,
                    asp.models = asp.models, rot.models = rot.models, size.models = size.models,
                    lwd.models = lwd.models, bg.models = bg.models, col.models = col.models,
                    alpha.models = alpha.models, cex.ldm = cex.ldm, col.ldm = col.ldm,
-                   models = models, rotation_matrix = rotation_matrix)
+                   models = models, rotation_matrix = rotation_matrix, plot = plot)
 
   results <- list(ordination = ordination,
                   projected = list(shapemodels = shapemodels),
@@ -525,7 +525,7 @@ proj_shapes <- function(mspace, shapes, density = TRUE, labels = NULL, pipe = TR
   scores <- proj_eigen(x = data2d, vectors = mspace$ordination$rotation,
                        center = mspace$ordination$center)
 
-  if(.Device != "null device") {
+  if(mspace$plotinfo$plot) {
 
     if(ncol(mspace$ordination$x) > 1) {
       if(length(mspace$plotinfo$axes) > 1) {
@@ -671,9 +671,8 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
   }
   if(is.factor(args$col)) args$col <- as.numeric(args$col)
 
-  if(.Device != "null device") {
+  if(mspace$plotinfo$plot) {
 
-    #mshapes <- expected_shapes(shapes = data2d, x = groups, returnarray = FALSE)
     mshapes <- apply(X = data2d, MARGIN = 2, FUN = tapply, groups, mean)
     gcols <- setNames(col2hex(args$col), levels(groups))
 
@@ -886,7 +885,7 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
   ext_scores <- proj_eigen(x = ext_shapes2d, vectors = mspace$ordination$rotation,
                            center = mspace$ordination$center)
 
-  if(.Device != "null device") {
+  if(mspace$plotinfo$plot) {
     if(length(mspace$plotinfo$axes) > 1) {
       graphics::arrows(x0 = ext_scores[1, mspace$plotinfo$axes[1]],
                        y0 = ext_scores[1, mspace$plotinfo$axes[2]],
@@ -1039,7 +1038,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
   }
   phylo_scores <- rbind(tips_scores, nodes_scores)
 
-  if(.Device != "null device") {
+  if(mspace$plotinfo$plot) {
 
     if(length(mspace$plotinfo$axes) > 1) {
       for(i in seq_len(nrow(tree$edge))) {
@@ -1521,7 +1520,7 @@ proj_landscape <- function(mspace, shapes = NULL, obj = NULL, FUN = NULL, X = NU
   }
 
 
-  if(.Device != "null device") {
+  if(mspace$plotinfo$plot) {
 
     if(length(mspace$plotinfo$axes) > 1) {
 
@@ -1707,7 +1706,7 @@ proj_pfront <- function(mspace, shapes = NULL, X = NULL, opt.increases = NULL,
   }
 
 
-  if(.Device != "null device") {
+  if(mspace$plotinfo$plot) {
 
     if(length(mspace$plotinfo$axes) > 1) {
       graphics::lines(pfront.scores, lwd = lwd, ...)
@@ -2204,6 +2203,9 @@ plot_mspace <- function(mspace,
   args$xname <- if(!is.null(x)) deparse(substitute(x)) else NULL
   args$yname <- if(!is.null(y)) deparse(substitute(y)) else NULL
 
+  oldpar <- graphics::par(no.readonly = TRUE)
+  if(any(legend, scalebar)) on.exit(graphics::par(oldpar))
+
   #1 - prepare data ##############################################################
 
   #invert orientation of variables and vectors
@@ -2225,19 +2227,8 @@ plot_mspace <- function(mspace,
 
   if(!is.null(x) & !is.null(y)) stop("Only one of x or y can be included")
 
-  #if legend and/or scalebar has been provided, set an adequate layout
-  if(any(legend, scalebar)) {
-
-    layout_mat <- matrix(c(rep(1, 4), 2), nrow = 1)
-    if(all(legend, scalebar)) layout_mat <- rbind(layout_mat, c(rep(1, 4), 3))
-
-    orig_par <- graphics::par(names(graphics::par())[-c(13, 19, 21:23, 54)])
-    on.exit(graphics::par(orig_par))
-
-    graphics::layout(layout_mat)
-    graphics::par(mar = c(5.1, 4.1, 4.1, 2.1))
-
-  }
+  layout <- set_layout(legend = legend, scalebar = scalebar)
+  par(layout$mainpar)
 
   #2 - if neither x nor y were provided, plot pure morphospace #######################################
   if(is.null(x) & is.null(y)) {
@@ -2592,6 +2583,7 @@ plot_mspace <- function(mspace,
 
       args$xlim <- range(dxvals)
       args$ylim <- range(dyvals)
+
     }
 
 
@@ -2707,8 +2699,10 @@ plot_mspace <- function(mspace,
 
     } else {
 
-    #3.3.2 - if either x or y is a regular variable, add typical elements
-    #hybrid morphospace -----------------------------------------------------------------
+      #3.3.2 - if either x or y is a regular variable, add typical elements
+      #hybrid morphospace -----------------------------------------------------------------
+
+      skip.phylo <- FALSE
 
       #3.3.2.1 - add scatterpoints and hulls / ellipses
       if(points | groups) {
@@ -2820,12 +2814,12 @@ plot_mspace <- function(mspace,
           if(landsc & !is.null(mspace$projected$landsc))
             cat("\nLandscape surfaces are not projected into violin/box plots")
 
-          return(invisible(NULL))
+          skip.phylo <- TRUE
         }
       }
 
       #3.3.2.2 - add phylogeny
-      if(phylo & !is.null(mspace$projected$phylo)) {
+      if(phylo & !is.null(mspace$projected$phylo) & !skip.phylo) {
 
         tree <- mspace$projected$phylo
         phylo_scores <- mspace$projected$phylo_scores
@@ -2930,23 +2924,30 @@ plot_mspace <- function(mspace,
         stop("Groups levels ($gr_class) are necessary to generate legend labels")
       } else {
 
-        graphics::par(mar = c(5.1, 0, 4.1, 0))
+        par(layout$legpar)
         plot(0, type = "n", axes = FALSE, xlab = "", ylab = "",
              ylim = c(0,1), xlim = c(0,1), xaxs = "i", yaxs = "i")
 
-
         gr_class <- mspace$projected$gr_class
         gr_scores <- mspace$projected$gr_scores
-        scores <- mspace$projected$scores
+        scores <- if(!is.null(mspace$projected$scores)) mspace$projected$scores else mspace$projected$gr_scores
 
-        index_sc_in_gr <- apply(scores, 1, \(x, y) {any(
-          apply(y, 1, \(z, x) {all(z == x)}, x))}, gr_scores)
+        # index_sc_in_gr <- apply(scores, 1, \(x, y) {any(
+        #   apply(y, 1, \(z, x) {all(z == x)}, x))}, gr_scores)
+        index_sc_in_gr <- sapply(seq_len(nrow(scores)), \(i) {
+          any(apply(gr_scores, 1, \(z) all(z == scores[i,])))
+        })
+
         if(length(index_sc_in_gr) == 0) index_sc_in_gr <- 1:nrow(scores)
 
-        index_gr_in_sc <- as.numeric(unlist
-                                     (apply(scores, 1, \(x, y) {
-                                       which(apply(y, 1, \(z, x){
-                                         all(z == x)}, x))}, gr_scores)))
+        # index_gr_in_sc <- as.numeric(unlist
+        #                              (apply(scores, 1, \(x, y) {
+        #                                which(apply(y, 1, \(z, x){
+        #                                  all(z == x)}, x))}, gr_scores)))
+        index_gr_in_sc <- sapply(seq_len(nrow(scores)), \(i) {
+          match(TRUE, apply(gr_scores, 1, \(z) all(z == scores[i,])), nomatch = NA)
+        })
+
         if(length(index_gr_in_sc) == 0) index_gr_in_sc <- 1:nrow(gr_scores)
 
         if(length(unique(args$cex.points)) > 1)
@@ -2961,6 +2962,9 @@ plot_mspace <- function(mspace,
             args$pch.points[index_sc_in_gr][i],
             args$cex.points[index_sc_in_gr][i]))
         }
+
+        if(ncol(pt_params) != 5) pt_params <- NULL
+
         gr_params <- data.frame(unique(pt_params))
         if(!is.null(pt_params)) colnames(gr_params) <- c("class", "col", "bg", "pch", "cex")
         gr_params <- gr_params[!gr_params$class %in% names(which(table(gr_params$class) > 1)),]
@@ -3014,10 +3018,10 @@ plot_mspace <- function(mspace,
     #4.2 - add scalebar for landscape ---------------------------------------------------------
     if(scalebar) {
       if(is.null(mspace$projected$landsc)) {
-        stop("Landscape values ($landsc) is necessary to generate a scalebar")
+        stop("Landscape values ($landsc) are necessary to generate a scalebar")
       } else {
 
-        graphics::par(mar = c(5.1, 4, 4.1, 6))
+        par(layout$scbpar)
         plot(0, type = "n", axes = FALSE, xlab = "", ylab = "",
              ylim = range(levs.landsc), xlim = c(0.2,0.8), xaxs = "i", yaxs = "i")
 
@@ -3037,6 +3041,5 @@ plot_mspace <- function(mspace,
 
       }
     }
-    graphics::layout(matrix(1, nrow=1))
   }
 }

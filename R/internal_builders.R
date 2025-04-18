@@ -2220,3 +2220,34 @@ adjust_asp <- function(xlim, ylim, asp) {
   return(list(xlim = newxlim, ylim = newylim))
 
 }
+
+
+################################################################################
+
+set_layout <- function(legend = TRUE, scalebar = TRUE) {
+
+  oldpar <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(oldpar))
+
+  mainpar <- legpar <- scbpar <- NULL
+
+
+  if(any(legend, scalebar)) {
+    plot(0, type = "n", axes = F, xlab = "", ylab = "")
+
+    mainpar <- list(fig = c(0, 0.7, 0, 1), mar = c(5, 4, 4, 1), new = TRUE)
+
+    if(legend & !scalebar) legpar <- list(fig = c(0.7, 1, 0, 1), mar = c(5, 1, 4, 2), new = TRUE)
+    if(!legend & scalebar) scbpar <- list(fig = c(0.7, 0.8, 0, 1), mar = c(5, 1, 4, 2), new = TRUE)
+
+    if(all(legend, scalebar)) {
+      legpar <- list(fig = c(0.7, 1, 0.5, 1), mar = c(1.5, 1, 4, 2), new = TRUE)
+      scbpar <- list(fig = c(0.7, 0.8, 0, 0.5), mar = c(5, 1, 1.5, 2), new = TRUE)
+    }
+
+  } else {
+    mainpar <- oldpar
+  }
+  return(invisible(list(mainpar = mainpar, legpar = legpar, scbpar = scbpar)))
+}
+
