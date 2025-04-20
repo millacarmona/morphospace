@@ -4,14 +4,18 @@
 \alias{proj_shapes}
 \title{Project shapes into morphospace}
 \usage{
-proj_shapes(mspace, shapes, density = TRUE, pipe = TRUE, ...)
+proj_shapes(mspace, shapes, density = TRUE, labels = NULL, pipe = TRUE, ...)
 }
 \arguments{
 \item{mspace}{An \code{"mspace"} object.}
 
 \item{shapes}{Shape data.}
 
-\item{density}{Logical; whether to add density distribution for points
+\item{density}{Logical; whether to add density distribution for points}
+
+\item{labels}{Either logical, indicating whether to include all point labels,
+or a character string with the exact names of the points whose labels
+should be included.
 (univariate ordinations only).}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
@@ -54,4 +58,14 @@ mspace(shapes, template = template, mag = 0.7, axes = c(1,2)) \%>\%
               pch = c(1,16)[cactus[species == "Db"]]) \%>\%
   proj_shapes(shapes = shapes[,,species == "Dk"],  col = c("blue"),
               pch = c(1,16)[cactus[species == "Dk"]])
+
+#add labels for all the points (needs a named 'shapes' object)
+mspace(shapes, template = template, mag = 0.7, axes = c(1,2)) \%>\%
+  proj_shapes(shapes = shapes, labels = TRUE)
+
+#add labels for selected points (needs a named 'shapes' object)
+mspace(shapes, template = template, mag = 0.7, axes = c(1,2)) \%>\%
+  proj_shapes(shapes = shapes) \%>\%
+  proj_shapes(shapes = shapes[,,c("Dk M Op 8 Ad_02", "Dk H Tr 11 Ad_03")],
+              pch = 16, col = 2, labels = c("Dk M Op 8 Ad_02", "Dk H Tr 11 Ad_03"))
 }

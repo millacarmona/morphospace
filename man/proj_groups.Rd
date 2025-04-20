@@ -11,6 +11,7 @@ proj_groups(
   ellipse = FALSE,
   conflev = 0.95,
   density = TRUE,
+  labels = NULL,
   pipe = TRUE,
   ...
 )
@@ -32,6 +33,10 @@ convex hulls will be used instead).}
 
 \item{density}{Logical; whether to add density distribution for groups
 (univariate ordinations only).}
+
+\item{labels}{Either logical, indicating whether to include all group labels,
+or a character string with the exact names of the groups whose labels
+should be included.}
 
 \item{pipe}{Logical; is the function being included in a pipe?}
 
@@ -72,14 +77,28 @@ mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
 
 #generate basic morphospace, add sampled shapes and 95\% confidence for
 #species
-msp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
-              bg.model = "light gray") \%>\%
+mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
+       bg.model = "light gray") \%>\%
   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) \%>\%
   proj_groups(groups = species, col = 1:4, lwd = 2, ellipse = TRUE,
               conflev = 0.95, alpha = 0.1)
 
+#add labels for all the groups
+mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
+       bg.model = "light gray") \%>\%
+  proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) \%>\%
+  proj_groups(groups = species, col = 1:4, lwd = 2, ellipse = TRUE,
+              conflev = 0.95, alpha = 0.1, labels = TRUE)
+
+#add labels for selected the groups
+msp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
+              bg.model = "light gray") \%>\%
+  proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) \%>\%
+  proj_groups(groups = species, col = 1:4, lwd = 2, ellipse = TRUE,
+              conflev = 0.95, alpha = 0.1, labels = c("coihuicoensis", "esbelta"))
+
 #add legend using plot_mspace()
-plot_mspace(msp, legend = TRUE, cex.legend = 2, pch.groups = 16)
+plot_mspace(msp, legend = TRUE, cex.legend = 1, pch.groups = 16)
 }
 \seealso{
 \code{\link{hulls_by_group_2D}}, \code{\link{ellipses_by_group_2D}}

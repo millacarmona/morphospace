@@ -18,7 +18,7 @@ mspace(
   nv = 4,
   mag = 1,
   invax = NULL,
-  asp = NA,
+  asp = 1,
   rescale = TRUE,
   xlim = NULL,
   ylim = NULL,
@@ -98,7 +98,9 @@ function.}
 \item{adj_frame}{Numeric of length 2, providing \emph{a posteriori} scaling
 factors for the width and height of the frame, respectively.}
 
-\item{rot.models}{Numeric; angle (in degrees) to rotate shape models.}
+\item{rot.models}{Numeric; angle (in degrees) to rotate shape models.
+Alternatively, a pre-defined rotation matrix for 3D landmark data
+can be provided.}
 
 \item{size.models}{Numeric; size factor for shape models.}
 

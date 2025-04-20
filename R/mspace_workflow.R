@@ -384,6 +384,8 @@ mspace <- function(shapes = NULL,
     rotation_matrix <- NULL
   }
 
+  if(length(axes) == 1) asp <- NA
+
   if(k == 3 & datype == "landm") {
 
     if(is.null(rotation_matrix)) {
@@ -566,6 +568,9 @@ proj_shapes <- function(mspace, shapes, density = TRUE, labels = NULL, pipe = TR
 
   mspace$plotinfo$density.points <- args$density
 
+  mspace$plotinfo$labels.groups <- args$labels
+  mspace$plotinfo$labels.points <- c(mspace$plotinfo$labels.points, labels)
+
   if(pipe == FALSE) return(invisible(scores))
   if(pipe == TRUE) return(invisible(mspace))
 
@@ -629,14 +634,28 @@ proj_shapes <- function(mspace, shapes, density = TRUE, labels = NULL, pipe = TR
 #'
 #' #generate basic morphospace, add sampled shapes and 95% confidence for
 #' #species
-#' msp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
-#'               bg.model = "light gray") %>%
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
+#'        bg.model = "light gray") %>%
 #'   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) %>%
 #'   proj_groups(groups = species, col = 1:4, lwd = 2, ellipse = TRUE,
 #'               conflev = 0.95, alpha = 0.1)
 #'
+#' #add labels for all the groups
+#' mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
+#'        bg.model = "light gray") %>%
+#'   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) %>%
+#'   proj_groups(groups = species, col = 1:4, lwd = 2, ellipse = TRUE,
+#'               conflev = 0.95, alpha = 0.1, labels = TRUE)
+#'
+#' #add labels for selected the groups
+#' msp <- mspace(shapes, links = links, mag = 0.7, axes = c(1,2),
+#'               bg.model = "light gray") %>%
+#'   proj_shapes(shapes = shapes, col = c(1:4)[species], pch = 1) %>%
+#'   proj_groups(groups = species, col = 1:4, lwd = 2, ellipse = TRUE,
+#'               conflev = 0.95, alpha = 0.1, labels = c("coihuicoensis", "esbelta"))
+#'
 #' #add legend using plot_mspace()
-#' plot_mspace(msp, legend = TRUE, cex.legend = 2, pch.groups = 16)
+#' plot_mspace(msp, legend = TRUE, cex.legend = 1, pch.groups = 16)
 proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
                         conflev = 0.95, density = TRUE, labels = NULL, pipe = TRUE, ...) {
 
@@ -674,7 +693,7 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
   if(mspace$plotinfo$plot) {
 
     mshapes <- apply(X = data2d, MARGIN = 2, FUN = tapply, groups, mean)
-    gcols <- setNames(col2hex(args$col), levels(groups))
+    gcols <- stats::setNames(col2hex(args$col), levels(groups))
 
     if(ncol(mspace$ordination$x) > 1) {
       if(length(mspace$plotinfo$axes) > 1) {
@@ -702,7 +721,7 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
           xy <- cbind(gxmax, gymax)
           rownames(xy) <- levels(groups)
 
-          add_labels2(xy = xy, labels = labels, col = gcols, pos = 3)
+          add_labels(xy = xy, labels = labels, col = gcols, pos = 3)
         }
       }
 
@@ -721,7 +740,7 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
         xy <- cbind(gxmax, gymax)
         rownames(xy) <- levels(groups)
 
-        add_labels2(xy = xy, labels = labels, col = gcols, pos = 3)
+        add_labels(xy = xy, labels = labels, col = gcols, pos = 3)
       }
     }
   }
@@ -753,6 +772,7 @@ proj_groups <- function(mspace, shapes = NULL, groups = NULL, ellipse = FALSE,
   mspace$plotinfo$lty.groups <- c(mspace$plotinfo$lty.groups, args$lty)
   mspace$plotinfo$density.groups <- args$density
   mspace$plotinfo$ellipse.groups <- args$ellipse
+  mspace$plotinfo$labels.groups <- args$labels
   mspace$plotinfo$conflev.groups <- args$conflev
   mspace$plotinfo$lwd.groups <- args$lwd
   mspace$plotinfo$alpha.groups <- args$alpha
@@ -1867,6 +1887,9 @@ print.mspace <- function(mspace, ...) {
 #' @param density.points Logical; whether to add density distribution for
 #'      points (univariate ordinations only). Overriden by
 #'      \code{density.groups = TRUE}
+#' @param labels.points Either logical, indicating whether to include all point
+#'      labels, or a character string with the exact names of the points whose
+#'      labels should be included.
 #'
 #'
 #' @param groups Logical; whether to plot the convex hulls/confidence
@@ -1895,6 +1918,9 @@ print.mspace <- function(mspace, ...) {
 #'      groups (univariate ordinations only).
 #' @param legend Logical; whether to show legend for groups.
 #' @param cex.legend Numeric; size of legend labels/symbols.
+#' @param labels.groups Either logical, indicating whether to include all group
+#'      labels, or a character string with the exact names of the groups whose
+#'      labels should be included.
 #'
 #'
 #' @param phylo Logical; whether to plot phylogenetic relationships stored
@@ -2156,6 +2182,7 @@ plot_mspace <- function(mspace,
                         bg.points = 1,
                         cex.points = 1,
                         density.points = TRUE,
+                        labels.points,
                         col.groups = 1,
                         bg.groups = 1,
                         pch.groups = 16,
@@ -2167,6 +2194,7 @@ plot_mspace <- function(mspace,
                         alpha.groups = 0,
                         boxplot.groups = FALSE,
                         density.groups = TRUE,
+                        labels.groups,
                         col.phylo = 1,
                         lwd.phylo = 1,
                         lty.phylo = 1,
@@ -2228,7 +2256,9 @@ plot_mspace <- function(mspace,
   if(!is.null(x) & !is.null(y)) stop("Only one of x or y can be included")
 
   layout <- set_layout(legend = legend, scalebar = scalebar)
-  par(layout$mainpar)
+  graphics::par(layout$mainpar)
+
+  if(length(args$axes) == 1) args$asp <- NA
 
   #2 - if neither x nor y were provided, plot pure morphospace #######################################
   if(is.null(x) & is.null(y)) {
@@ -2311,9 +2341,16 @@ plot_mspace <- function(mspace,
           if(length(index_sc_in_gr) == 0) index_sc_in_gr <- 1:nrow(scores)
         } else index_sc_in_gr <- 1:nrow(scores <- gr_scores)
 
+        mshapes <- apply(X = gr_scores, MARGIN = 2, FUN = tapply, gr_class, mean)
+        gcols <- stats::setNames(col2hex(args$col.groups), levels(gr_class))
+
       } else {
         index_sc_in_gr <- if(!is.null(scores)) -c(1:nrow(scores)) else NULL
         gr_class <- NULL
+
+        mshapes <- NULL
+        gcols <- NULL
+
       }
 
       if(length(args$col.groups) == 1) {
@@ -2336,6 +2373,7 @@ plot_mspace <- function(mspace,
         gr_cex.points <- rep(args$cex.points, nrow(mspace$projected$scores))
       } else gr_cex.points <- args$cex.points
 
+      dens <- NULL
 
       if(ncol(mspace$ordination$x) > 1) { #if there are more than 1 dimensions
         if(length(args$axes) > 1) { #...and more than 1 dimension is specified
@@ -2371,6 +2409,10 @@ plot_mspace <- function(mspace,
               }
             }
           }
+
+          add_labels(scores[, args$axes], args$labels.points)
+          add_labels(xy = mshapes[, args$axes], labels = args$labels.groups, col = gcols)
+
         } else { #...but less than one dimension is specified
           if(!is.null(gr_class)) { #...and there are groups
             if(args$density.groups) {
@@ -2378,8 +2420,8 @@ plot_mspace <- function(mspace,
                 args$density.points <- FALSE
                 cat("\nBoth density.points and density.groups are TRUE; only the latter will be displayed")
               }
-              density_by_group_2D(gr_scores, gr_class, ax = args$axes[1], alpha = args$alpha.groups,
-                                  lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
+              dens <- density_by_group_2D(gr_scores, gr_class, ax = args$axes[1], alpha = args$alpha.groups,
+                                          lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
             }
             if(points) {
               plot_univ_scatter(scores = cbind(scores[index_sc_in_gr, args$axes[1]]), density = args$density.points,
@@ -2394,6 +2436,21 @@ plot_mspace <- function(mspace,
                                 cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
             )
           }
+
+          add_labels(cbind(scores[, args$axes[1]], 0), args$labels.points, srt = 90, adj = c(0,0))
+
+          gymax <- lapply(dens$dens, function(x){
+            if(is.null(x$y)) x$y <- 0
+            max(x$y) / dens$ymax
+          })
+          gxmax <- lapply(dens$dens, function(x){
+            if(!is.null(x$x)) x$x[which.max(x$y)] else NA
+          })
+          gxmax[is.na(gxmax)] <- mshapes[is.na(gxmax), args$axes[1]]
+          xy <- cbind(gxmax, gymax)
+          rownames(xy) <- levels(gr_class)
+
+          add_labels(xy = xy, labels = args$labels.groups, col = gcols, pos = 3)
         }
       } else {
         if(!is.null(gr_class)) {
@@ -2402,8 +2459,8 @@ plot_mspace <- function(mspace,
               args$density.points <- FALSE
               cat("\nBoth density.points and density.groups are TRUE; only the latter will be displayed")
             }
-            density_by_group_2D(gr_scores, gr_class, ax = 1, alpha = args$alpha.groups,
-                                lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
+            dens <- density_by_group_2D(gr_scores, gr_class, ax = 1, alpha = args$alpha.groups,
+                                        lwd = args$lwd.groups, lty = args$lty.groups, col = args$col.groups)
           }
           if(points) {
             plot_univ_scatter(scores = cbind(scores[index_sc_in_gr,]), density = args$density.points,
@@ -2418,6 +2475,21 @@ plot_mspace <- function(mspace,
                               cex = gr_cex.points[-index_sc_in_gr], bg = gr_bg.points[-index_sc_in_gr])
           )
         }
+
+        add_labels(cbind(scores[, 1], 0), args$labels.points, srt = 90, adj = c(0,0))
+
+        gymax <- lapply(dens$dens, function(x){
+          if(is.null(x$y)) x$y <- 0
+          max(x$y) / dens$ymax
+        })
+        gxmax <- lapply(dens$dens, function(x){
+          if(!is.null(x$x)) x$x[which.max(x$y)] else NA
+        })
+        gxmax[is.na(gxmax)] <- mshapes[is.na(gxmax), 1]
+        xy <- cbind(gxmax, gymax)
+        rownames(xy) <- levels(gr_class)
+
+        add_labels(xy = xy, labels = args$labels.groups, col = gcols, pos = 3)
       }
     }
 
@@ -2924,7 +2996,7 @@ plot_mspace <- function(mspace,
         stop("Groups levels ($gr_class) are necessary to generate legend labels")
       } else {
 
-        par(layout$legpar)
+        graphics::par(layout$legpar)
         plot(0, type = "n", axes = FALSE, xlab = "", ylab = "",
              ylim = c(0,1), xlim = c(0,1), xaxs = "i", yaxs = "i")
 
@@ -3021,7 +3093,7 @@ plot_mspace <- function(mspace,
         stop("Landscape values ($landsc) are necessary to generate a scalebar")
       } else {
 
-        par(layout$scbpar)
+        graphics::par(layout$scbpar)
         plot(0, type = "n", axes = FALSE, xlab = "", ylab = "",
              ylim = range(levs.landsc), xlim = c(0.2,0.8), xaxs = "i", yaxs = "i")
 

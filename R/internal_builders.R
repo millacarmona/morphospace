@@ -2130,8 +2130,8 @@ plot_biv_landscape <- function(landscape, display, type, levels, lwd, lty, col, 
 #' @param labels Either logical, indicating whether to add labels to all the
 #'   points in the scatter plot (taken from row names), or character string
 #'   containing specific names to be added.
-#' @col Either numeric or character, specifying the color(s) to be used.
-#' @... Further arguments passed to [graphics::text()].
+#' @param col Either numeric or character, specifying the color(s) to be used.
+#' @param ... Further arguments passed to [graphics::text()].
 #'
 #' @noRd
 add_labels <- function (xy, labels = NULL, col = 1, ...) {
@@ -2156,6 +2156,7 @@ add_labels <- function (xy, labels = NULL, col = 1, ...) {
 #' Adjust aspect ratio of morphospaces
 #'
 #' @description Adjusts xlim and ylim so they reflect the desired aspect ratio.
+#'   Used internally.
 #'
 #' @param xlim A vector of length 2 indicating the negative and positive
 #'   extremes of values along the x axis.
@@ -2224,6 +2225,15 @@ adjust_asp <- function(xlim, ylim, asp) {
 
 ################################################################################
 
+#' Set layout for morphospaces
+#'
+#' @description Sets distribution of morphospaces, legends and scale bars when
+#'   using \code{\link{plot_mspace}}. Used internally.
+#'
+#' @param legend Logical; whether to include legend for groups.
+#' @param scalebar Logical; whether to include scale bars for landscapes.
+#'
+#' @noRd
 set_layout <- function(legend = TRUE, scalebar = TRUE) {
 
   oldpar <- graphics::par(no.readonly = TRUE)

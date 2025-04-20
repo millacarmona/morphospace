@@ -26,7 +26,7 @@ plot_mspace(
   legend = FALSE,
   scalebar = FALSE,
   cex.legend = 1,
-  asp = NA,
+  asp = 1,
   xlab,
   ylab,
   xlim = NULL,
@@ -45,6 +45,7 @@ plot_mspace(
   bg.points = 1,
   cex.points = 1,
   density.points = TRUE,
+  labels.points,
   col.groups = 1,
   bg.groups = 1,
   pch.groups = 16,
@@ -56,6 +57,7 @@ plot_mspace(
   alpha.groups = 0,
   boxplot.groups = FALSE,
   density.groups = TRUE,
+  labels.groups,
   col.phylo = 1,
   lwd.phylo = 1,
   lty.phylo = 1,
@@ -176,6 +178,10 @@ models.}
 points (univariate ordinations only). Overriden by
 \code{density.groups = TRUE}}
 
+\item{labels.points}{Either logical, indicating whether to include all point
+labels, or a character string with the exact names of the points whose
+labels should be included.}
+
 \item{col.groups}{Color of the hulls/ellipses and/or scatterpoints
 corresponding to groups' mean shapes.}
 
@@ -207,6 +213,10 @@ Used only if \code{x} or \code{y} are provided.}
 
 \item{density.groups}{Logical; whether to add density distribution for
 groups (univariate ordinations only).}
+
+\item{labels.groups}{Either logical, indicating whether to include all group
+labels, or a character string with the exact names of the groups whose
+labels should be included.}
 
 \item{col.phylo}{Color of the lines depicting phylogenetic
 branches.}
