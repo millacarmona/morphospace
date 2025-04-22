@@ -592,8 +592,6 @@ proj_shapes <- function(mspace, shapes, density = TRUE, labels = NULL, pipe = TR
   mspace$plotinfo$cex.points <- c(mspace$plotinfo$cex.points, args$cex)
 
   mspace$plotinfo$density.points <- args$density
-
-  mspace$plotinfo$labels.groups <- args$labels
   mspace$plotinfo$labels.points <- c(mspace$plotinfo$labels.points, labels)
 
   if(pipe == FALSE) return(invisible(scores))
@@ -1077,6 +1075,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 
   if(evmodel == "BM") {
     nodes_scores <- apply(tips_scores, 2, phytools::fastAnc, tree = tree)
+    rownames(nodes_scores) <- paste0("node_", rownames(nodes_scores))
   } else {
     mvmod <- mvMORPH::mvgls(tips_scores ~ 1, tree = tree, model = evmodel)
     nodes_scores <- mvMORPH::ancestral(mvmod)
@@ -2287,6 +2286,9 @@ plot_mspace <- function(mspace,
 
   if(length(args$axes) == 1) args$asp <- NA
 
+  if(is.null(args$density.points)) args$density.points <- FALSE
+  if(is.null(args$density.groups)) args$density.groups <- FALSE
+
   #2 - if neither x nor y were provided, plot pure morphospace #######################################
   if(is.null(x) & is.null(y)) {
 
@@ -2352,7 +2354,8 @@ plot_mspace <- function(mspace,
 
     #2.3.1 - add scatterpoints and hulls/ellipses (intercalated if there are
     #groups present)
-    if(points | groups) {
+    if(any(points | groups) &
+       any(!is.null(mspace$projected$scores), !is.null(mspace$projected$gr_scores))) {
 
       scores <- mspace$projected$scores
 
@@ -2798,7 +2801,7 @@ plot_mspace <- function(mspace,
 
     } else {
 
-      #3.3.2 - if either x or y is a regular variable, add typical elements
+      #3.3.2 - if either x or y is a regular variable, add typical elements to
       #hybrid morphospace -----------------------------------------------------------------
 
       skip.phylo <- FALSE
@@ -2819,6 +2822,10 @@ plot_mspace <- function(mspace,
                                              all(z == x)}, x))}, scores)))
             if(length(index_sc_in_gr) == 0) index_sc_in_gr <- 1:nrow(scores)
           } else index_sc_in_gr <- 1:nrow(scores <- gr_scores)
+
+          meanxy <- apply(X = cbind(x, gr_scores[,args$axes[1]], y), MARGIN = 2,
+                          FUN = tapply, gr_class, mean)
+          gcols <- stats::setNames(col2hex(args$col.groups), levels(gr_class))
 
         } else {
           index_sc_in_gr <- if(!is.null(scores)) -c(1:nrow(scores)) else NULL
@@ -2884,6 +2891,9 @@ plot_mspace <- function(mspace,
             }
           }
         }
+
+        add_labels(xy, args$labels.points)
+        add_labels(xy = meanxy, labels = args$labels.groups, col = gcols)
 
         if(is.factor(x) | is.factor(y))  {
 

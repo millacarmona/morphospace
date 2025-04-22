@@ -494,7 +494,7 @@ find_intersection <- function(line1, line2) {
 #'   # plot morphospace
 #'   mspace(shapes, template = template, rot.models = rotmat2)
 #' }
-set_rotation3d <- function(shape, template = NULL, links = NULL, ...) {
+set_rotation3d <- function(shape = NULL, template = NULL, links = NULL, ...) {
 
   enter <- NULL
 

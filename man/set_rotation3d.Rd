@@ -4,7 +4,7 @@
 \alias{set_rotation3d}
 \title{Orient 3D shapes and get rotation matrix}
 \usage{
-set_rotation3d(shape, template = NULL, links = NULL, ...)
+set_rotation3d(shape = NULL, template = NULL, links = NULL, ...)
 }
 \arguments{
 \item{shape}{An matrix containing the (x,y,z) values of a 3D landmark and/or

@@ -1968,6 +1968,7 @@ density_by_group_2D <- function(xy, fac, ax, alpha = 0.2, lwd = 1, lty = 1, plot
     for(i in seq_len(nlevels(fac))) {
       graphics::polygon(dens[[i]]$x, dens[[i]]$y / ymax, lwd = lwd, border = col[i],
                         lty = lty[i], col = grDevices::adjustcolor(col[i], alpha.f = alpha))
+      graphics::abline(h = 0)
     }
   }
   return(invisible(list(ymax = ymax, dens = dens)))
@@ -2053,6 +2054,7 @@ plot_biv_scatter <- function(scores, col = 1, bg = 1, pch = 1, cex = 1, ...) {
 #'
 #' @noRd
 plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
+
   if(drawlabels) {
     w.transp <-round(stats::quantile(x = 1:length(landscape$z), probs = c(0.25, 0.5, 0.75)))
     w.transp <- sort(c(w.transp - 1, w.transp, w.transp + 1))
@@ -2061,6 +2063,7 @@ plot_univ_landscape <- function(landscape, drawlabels, col, lwd) {
     col[w.transp] <- NA
   }
 
+  landscape$z <- landscape$z / max(landscape$z)
   for(i in 1:(length(landscape$x) - 1)) {
     graphics::lines(rbind(c(landscape$x[i], landscape$z[i]),
                           c(landscape$x[i + 1], landscape$z[i + 1])),
