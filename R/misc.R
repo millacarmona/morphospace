@@ -430,3 +430,83 @@ find_intersection <- function(line1, line2) {
   return(c(x, y))
 
 }
+
+
+################################################################################
+
+#' Orient 3D shapes and get rotation matrix
+#'
+#' @description Interactively rotate 3D landmark configuration and/or meshes to
+#'   a desired orientation.
+#'
+#' @param shape An matrix containing the (x,y,z) values of a 3D landmark and/or
+#'   semilandmark configuration.
+#' @param template An optional \code{"mesh3d"} object containing the geometry of
+#'   the structure the 3D landmarks were placed on.
+#' @param links A list with the indices of the coordinates defining the
+#'    (following the format used in \code{Morpho}).
+#' @param ... Further arguments passed to  [rgl::plot3d()]
+#'
+#' @details This function can be used to manually set a fixed orientation for 3D
+#'   background shape models depicted by \code{mspace} (argument
+#'   \code{rot.models}), to avoid manual rotation at each \code{mspace}
+#'   instance.
+#'
+#' @returns A rotation matrix.
+#'
+#' @export
+#'
+#' @seealso \code{\link{plot_morphogrid3d}}, \code{\link{mspace}}
+#'
+#' @examples
+#' # load packages
+#' library(geomorph)
+#' library(Morpho)
+#' library(morphospace)
+#'
+#' # load data
+#' data("shells3D")
+#' shapes <- shells3D$shapes
+#' mspec_mesh <- shells3D$mesh_meanspec
+#'
+#' # get shape of the specimen closest to the mean shape
+#' shape <- shapes[,,geomorph::findMeanSpec(shapes)]
+#'
+#' if (interactive()) {
+#'   # set rotation matrix using a landmark configuration
+#'   rotmat1 <- set_rotation3d(shape)
+#'
+#'   # plot morphospace
+#'   mspace(shapes, template = template, rot.models = rotmat1)
+#'
+#'   # set rotation matrix using a landmark configuration
+#'   rotmat2 <- set_rotation3d(mspec_mesh)
+#'
+#'   # plot morphospace
+#'   mspace(shapes, template = template, rot.models = rotmat2)
+#' }
+set_rotation3d <- function(shape, template = NULL, links = NULL, ...) {
+
+  enter <- NULL
+
+  if(!is.null(template)) {
+    add <- TRUE
+    rgl::plot3d(template, specular = "black", axes = FALSE, aspect = FALSE,
+                xlab = "", ylab = "", zlab = "", ...)
+  } else add <- FALSE
+
+  rgl::plot3d(shape, specular = "black", axes = FALSE, aspect = FALSE,
+              xlab = "", ylab = "", zlab = "", type = "s", add = add)
+
+  for(l in seq_len(length(links))) rgl::lines3d(shape[links[[l]],])
+
+  while(is.null(enter)) {
+    cat("Rotate shape to the desired orientation")
+    enter <- readline("Press <Enter> in the console to continue:")
+  }
+  if(rgl::rgl.cur() == 0) stop("The rgl device window was closed before capturing the rotation matrix")
+
+  rotmat <- rgl::par3d()$userMatrix
+  return(rotmat)
+
+}
