@@ -5,8 +5,10 @@
 #' @description Superimpose all the shapes in the sample.
 #'
 #' @param shapes Shape data.
-#' @param links An optional list with the indices of the coordinates defining
-#'   the wireframe (following the format used in \code{Morpho}).
+#' @param links A list with the indices of the coordinates defining a wireframe
+#'   connecting landmarks (following the format used in \code{Morpho}), or a
+#'   2-columns matrix indicating the pairs of landmarks that should be linked
+#'    (following the format used in \code{geomorph}).
 #' @param mshape Logical; whether to plot the mean configuration.
 #' @param ... Additional arguments passed to \code{\link[graphics]{lines}} or
 #'   \code{\link[rgl]{lines3d}}.

@@ -9,8 +9,10 @@ pile_shapes(shapes, links = NULL, mshape = TRUE, ...)
 \arguments{
 \item{shapes}{Shape data.}
 
-\item{links}{An optional list with the indices of the coordinates defining
-the wireframe (following the format used in \code{Morpho}).}
+\item{links}{A list with the indices of the coordinates defining a wireframe
+connecting landmarks (following the format used in \code{Morpho}), or a
+2-columns matrix indicating the pairs of landmarks that should be linked
+(following the format used in \code{geomorph}).}
 
 \item{mshape}{Logical; whether to plot the mean configuration.}
 

@@ -14,8 +14,10 @@
 #'    used instead of the \code{shapes} argument.
 #' @param axes Numeric of length 1 (univariate morphospace) or 2 (bivariate
 #'    morphospace), indicating the axes to be plotted.
-#' @param links A list with the indices of the coordinates defining the
-#'    wireframe (following the format used in \code{Morpho}).
+#' @param links A list with the indices of the coordinates defining a wireframe
+#'   connecting landmarks (following the format used in \code{Morpho}), or a
+#'   2-columns matrix indicating the pairs of landmarks that should be linked
+#'    (following the format used in \code{geomorph}).
 #' @param template Either a 2-column matrix with landmarks/semilandmarks and
 #'    template curves coordinates (for 2D shape data) or a \code{"mesh3d"}
 #'    object \strong{representing the mean shape of the sample} (for 3D shape
@@ -1864,8 +1866,10 @@ print.mspace <- function(mspace, ...) {
 #' @param mspace An \code{"mspace"} object created using the
 #'   \code{\link{mspace}} %>% \code{proj_*} pipeline.
 #' @param axes Numeric of length 1 or 2, indicating the axes to be plotted.
-#' @param links A list with the indices of the coordinates defining the
-#'   wireframe (following the format used in \code{Morpho}).
+#' @param links A list with the indices of the coordinates defining a wireframe
+#'   connecting landmarks (following the format used in \code{Morpho}), or a
+#'   2-columns matrix indicating the pairs of landmarks that should be linked
+#'    (following the format used in \code{geomorph}).
 #' @param template Either a 2-column matrix with landmarks/semilandmarks and
 #'   template curves coordinates (for 2D shape data) or a \code{"mesh3d"}
 #'   object representing the mean shape of the sample (for 3D shape data).

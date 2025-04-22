@@ -53,8 +53,10 @@ used instead of the \code{shapes} argument.}
 \item{axes}{Numeric of length 1 (univariate morphospace) or 2 (bivariate
 morphospace), indicating the axes to be plotted.}
 
-\item{links}{A list with the indices of the coordinates defining the
-wireframe (following the format used in \code{Morpho}).}
+\item{links}{A list with the indices of the coordinates defining a wireframe
+connecting landmarks (following the format used in \code{Morpho}), or a
+2-columns matrix indicating the pairs of landmarks that should be linked
+(following the format used in \code{geomorph}).}
 
 \item{template}{Either a 2-column matrix with landmarks/semilandmarks and
 template curves coordinates (for 2D shape data) or a \code{"mesh3d"}
