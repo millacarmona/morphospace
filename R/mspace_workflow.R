@@ -44,7 +44,7 @@
 #'    variation is shown more clearly.
 #' @param adj_frame Numeric of length 2, providing \emph{a posteriori} scaling
 #'    factors for the width and height of the frame, respectively.
-#' @param rot.models  Numeric; angle (in degrees) to rotate shape models.
+#' @param rot.models Numeric; angle (in degrees) to rotate shape models.
 #'    Alternatively, a pre-defined rotation matrix for 3D landmark data
 #'    can be provided.
 #' @param size.models Numeric; size factor for shape models.
@@ -314,9 +314,10 @@ mspace <- function(shapes = NULL,
                    models = TRUE,
                    ...) {
 
-
+  # ensure only one of the two approaches to entry the data is being used
   if(is.null(shapes) & is.null(ord)) stop("Either (1) shapes (and optionally FUN), or (2) ord and datype must be provided")
 
+  # if shapes are provided, get them into '2D' formar and perform ordination
   if(!is.null(shapes)) {
 
     if(!is.null(ord)) stop("Drop one of shapes or ord; cannot be used simultaneously")
@@ -332,6 +333,7 @@ mspace <- function(shapes = NULL,
     ordination$datype <- datype
   }
 
+  # if an ordination is provided, get data2d and shapes
   if(!is.null(ord)) {
 
     if(is.null(datype)) stop("provide a value for datype ('landm' or 'fcoef')")
@@ -348,6 +350,8 @@ mspace <- function(shapes = NULL,
 
   }
 
+  # if shape data is landmark data, register their number and dimensions; else,
+  # prepare grounds for using inv_efourier further down
   if(datype == "landm") {
     if(is.null(p) | is.null(k)) {
       if(length(dim(shapes)) == 3){
@@ -361,11 +365,14 @@ mspace <- function(shapes = NULL,
     k <- 2
   }
 
+  # invert axes if requested
   if(!is.null(invax)) {
     ordination$x[,axes[invax]] <- ordination$x[,axes[invax]] * -1
     ordination$rotation[,axes[invax]] <- ordination$rotation[,axes[invax]] * -1
   }
 
+  # if only one axis was requested and/or resulted from ordination, prepare
+  # ground for univariate morphospace
   if(ncol(ordination$x) == 1 | length(axes) == 1) {
     y <- rep(1, nrow(ordination$x))
     ylim <- c(0, 1)
@@ -374,9 +381,14 @@ mspace <- function(shapes = NULL,
     y <- NULL
   }
 
+  # if only one axis is requested, override default aspect ratio for univariate
+  # morphospace
+  if(length(axes) == 1) asp <- NA
+
+  # axes is set to == 1 when there is only one ordination axis
   if(ncol(ordination$x) == 1) axes <- 1
 
-
+  # prepare rotation matrix introduction for 3D data
   if(!is.null(dim(rot.models))) {
     rotation_matrix <- rot.models
     rot.models <- 0
@@ -384,8 +396,16 @@ mspace <- function(shapes = NULL,
     rotation_matrix <- NULL
   }
 
-  if(length(axes) == 1) asp <- NA
+  # if links were provided in geomorph format, adapt them to Morpho's
+  if(!is.null(links)) {
+    if(!is.null(dim(links))) {
+      links0 <- links
+      links <- split(links0, row(links0))
+      links <- lapply(1:nrow(links0), function(i) {links0[i, ]})
+    }
+  }
 
+  # plot 2D / 3D morphospaces
   if(k == 3 & datype == "landm") {
 
     if(is.null(rotation_matrix)) {
@@ -426,8 +446,10 @@ mspace <- function(shapes = NULL,
 
   }
 
+  # plot points if requested
   if(points) graphics::points(ordination$x[,axes])
 
+  # prepare shape models for appending
   if(length(axes) == 1) {
     if(datype == "landm") shapemodels <- shapemodels$shapemodels[,,1:nh]
     if(datype == "fcoef") shapemodels <- shapemodels$shapemodels[1:nh,]
@@ -435,7 +457,7 @@ mspace <- function(shapes = NULL,
     shapemodels <- shapemodels$shapemodels
   }
 
-
+  # save plot's graphical parameters
   plotinfo <- list(p = p, k = k, links = links, template = template, axes = axes, nh = nh, nv = nv, mag = mag,
                    xlim = xlim, ylim = ylim, asp = asp, rescale = rescale, adj_frame = adj_frame,
                    asp.models = asp.models, rot.models = rot.models, size.models = size.models,
@@ -443,6 +465,7 @@ mspace <- function(shapes = NULL,
                    alpha.models = alpha.models, cex.ldm = cex.ldm, col.ldm = col.ldm,
                    models = models, rotation_matrix = rotation_matrix, plot = plot)
 
+  # prepare output
   results <- list(ordination = ordination,
                   projected = list(shapemodels = shapemodels),
                   plotinfo = plotinfo)

@@ -57,6 +57,13 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
     shapes_coord <- abind::abind(coords_l, along = 3)
   } else {
     shapes_coord <- shapes
+    if(!is.null(links)) {
+      if(!is.null(dim(links))) {
+        links0 <- links
+        links <- split(links0, row(links0))
+        links <- lapply(1:nrow(links0), function(i) links0[i, ])
+      }
+    }
   }
 
   longlist <- NULL
@@ -103,7 +110,7 @@ pile_shapes <- function(shapes, links = NULL, mshape = TRUE, ...) {
     }
 
   } else {
-    plot(longlist, axes = FALSE, xlab = "", ylab = "", type = "n")
+    plot(longlist, axes = FALSE, xlab = "", ylab = "", type = "n", asp = 1)
 
     for(i in seq_len(dim(shapes_coord)[3])) graphics::lines(shapes_coord[,,i], col = "#708095", ...)
 
