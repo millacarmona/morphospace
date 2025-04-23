@@ -203,6 +203,10 @@ svd_block <- function(x, y, tree = NULL, evmodel) {
 #'
 #' @seealso \code{\link[Momocs]{efourier_i}}
 #'
+#' @references
+#' Bonhomme, V., Picq, S., Gaucherel, C., & Claude, J. (2014). \emph{Momocs:
+#'   outline analysis using R}. 56(13). <https://www.jstatsoft.org/v56/i13/>.
+#'
 #' @examples
 #' #load data and extract the first outline
 #' data("shells")

@@ -329,10 +329,12 @@ Rücklin, M., Donoghue, P. C. J.  & Rayfield, E. J. (2022). \emph{Increasing
 morphological disparity and decreasing optimality for jaw speed and
 strength during the radiation of jawed vertebrates}. Science Advances,
 8(11), eabl3644.
+Akima, H., Gebhardt, A. (2022). \emph{akima: interpolation of irregularly and
+regularly spaced data}. \url{https://CRAN.R-project.org/package=akima}
 }
 \seealso{
 \code{\link{morphogrid}}, \code{\link{mspace}},
 \code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}},
 \code{\link{extract_shapes}}, \code{\link{pareto_rank_ratio}},
-\code{\link{proj_pfront}}
+\code{\link{proj_pfront}}, \code{\link[akima]{interp}}
 }

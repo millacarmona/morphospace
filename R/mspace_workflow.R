@@ -967,9 +967,10 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
 #'   from \code{tree}.
 #' @param tree A \code{"phylo"} object containing a phylogenetic tree.
 #' @param evmodel Character, specifying an evolutionary model to perform
-#'   ancestral character reconstruction; options are "BM" (Brownian motion),
-#'   "EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-#'   \code{\link[mvMORPH]{mvgls}} for more details).
+#'   ancestral character reconstruction; options are "BM" (Brownian motion;
+#'   implemented through \code{\link[phytools]{fastAnc}}), "EB" (Early burst),
+#'   "OU" (Ornstein-Uhlenbeck) and "lambda" (Pagel's lambda transformation)
+#'   (implemented using \code{\link[mvMORPH]{mvgls}}).
 #' @param labels.tips Either logical, indicating whether to include tip labels,
 #'   or a character string with the exact names of the tips whose labels
 #'   should be included.
@@ -1006,7 +1007,9 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
 #'   used to compute the node shapes using \code{\link{extract_shapes}}. The
 #'   position of these shapes in morphospace is estimated using
 #'   \code{\link[mvMORPH]{mvgls}} which allows specification of different
-#'   phenotypic evolutionary models, passed through the \code{evmodel} argument.
+#'   phenotypic evolutionary models, passed through the \code{evmodel} argument
+#'   (with the exception of the default model, Brownian motion, estimated
+#'   using \code{\link[phytools]{fastAnc}}).
 #'
 #' @return If a plot device with a morphospace is open, shapes representing the
 #'   tips and nodes of the phylogenetic tree, as well as the lines connecting
@@ -1017,7 +1020,7 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
 #'   slots to \code{$projected}, as well as by adding some graphical parameters
 #'   (stored into the \code{$plotinfo} slot), and returned invisibly.
 #'
-#' @seealso \code{\link[mvMORPH]{mvgls}}
+#' @seealso \code{\link[mvMORPH]{mvgls}}, \code{\link[phytools]{fastAnc}}
 #'
 #' @export
 #'
@@ -1025,6 +1028,9 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
 #' Clavel, J., Escarguel, G., & Merceron, G. (2015). \emph{mvMORPH: an R package
 #'    for fitting multivariate evolutionary models to morphometric data}.
 #'    Methods in Ecology and Evolution, 6(11), 1311-1319.
+#' Revell, L.J. (2012). \emph{phytools: an R package for phylogenetic
+#'    comparative biology (and other things)}. Methods in Ecology and Evolution,
+#'    3, 217-223.
 #'
 #' @examples
 #' #load and extract relevant data, packages and information
@@ -1245,7 +1251,7 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #' @seealso \code{\link{morphogrid}}, \code{\link{mspace}},
 #'   \code{\link{plot_morphogrid2d}}, \code{\link{plot_morphogrid3d}},
 #'   \code{\link{extract_shapes}}, \code{\link{pareto_rank_ratio}},
-#'   \code{\link{proj_pfront}}
+#'   \code{\link{proj_pfront}}, \code{\link[akima]{interp}}
 #'
 #' @references
 #' Deakin, W. J., Anderson, P. S., den Boer, W., Smith, T. J., Hill, J. J.,
@@ -1253,6 +1259,8 @@ proj_phylogeny <- function(mspace, shapes = NULL, tree, evmodel = "BM", labels.t
 #'   morphological disparity and decreasing optimality for jaw speed and
 #'   strength during the radiation of jawed vertebrates}. Science Advances,
 #'   8(11), eabl3644.
+#' Akima, H., Gebhardt, A. (2022). \emph{akima: interpolation of irregularly and
+#'   regularly spaced data}. <https://CRAN.R-project.org/package=akima>
 #'
 #' @export
 #'

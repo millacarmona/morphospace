@@ -33,6 +33,10 @@ plot(shape_xy)
 shape_xy <- inv_efourier(shape_coe, nb.pts = 100)
 plot(shape_xy)
 }
+\references{
+Bonhomme, V., Picq, S., Gaucherel, C., & Claude, J. (2014). \emph{Momocs:
+outline analysis using R}. 56(13). \url{https://www.jstatsoft.org/v56/i13/}.
+}
 \seealso{
 \code{\link[Momocs]{efourier_i}}
 }

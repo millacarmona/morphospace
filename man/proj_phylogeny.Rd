@@ -32,9 +32,10 @@ from \code{tree}.}
 \item{tree}{A \code{"phylo"} object containing a phylogenetic tree.}
 
 \item{evmodel}{Character, specifying an evolutionary model to perform
-ancestral character reconstruction; options are "BM" (Brownian motion),
-"EB" (Early burst) and "lambda" (Pagel's lambda transformation) (see
-\code{\link[mvMORPH]{mvgls}} for more details).}
+ancestral character reconstruction; options are "BM" (Brownian motion;
+implemented through \code{\link[phytools]{fastAnc}}), "EB" (Early burst),
+"OU" (Ornstein-Uhlenbeck) and "lambda" (Pagel's lambda transformation)
+(implemented using \code{\link[mvMORPH]{mvgls}}).}
 
 \item{labels.tips}{Either logical, indicating whether to include tip labels,
 or a character string with the exact names of the tips whose labels
@@ -99,7 +100,9 @@ the phylogenetic tree (\code{$projected$phylo_scores}, which can then be
 used to compute the node shapes using \code{\link{extract_shapes}}. The
 position of these shapes in morphospace is estimated using
 \code{\link[mvMORPH]{mvgls}} which allows specification of different
-phenotypic evolutionary models, passed through the \code{evmodel} argument.
+phenotypic evolutionary models, passed through the \code{evmodel} argument
+(with the exception of the default model, Brownian motion, estimated
+using \code{\link[phytools]{fastAnc}}).
 }
 \examples{
 #load and extract relevant data, packages and information
@@ -122,7 +125,10 @@ mspace(shapes, links = links, mag = 0.7, axes = c(1,2), cex.ldm = 0) \%>\%
 Clavel, J., Escarguel, G., & Merceron, G. (2015). \emph{mvMORPH: an R package
 for fitting multivariate evolutionary models to morphometric data}.
 Methods in Ecology and Evolution, 6(11), 1311-1319.
+Revell, L.J. (2012). \emph{phytools: an R package for phylogenetic
+comparative biology (and other things)}. Methods in Ecology and Evolution,
+3, 217-223.
 }
 \seealso{
-\code{\link[mvMORPH]{mvgls}}
+\code{\link[mvMORPH]{mvgls}}, \code{\link[phytools]{fastAnc}}
 }
