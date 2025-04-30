@@ -1904,7 +1904,7 @@ ellipses_by_group_2D <- function(xy, fac, col = seq_len(nlevels(fac)),
     vcv <- stats::var(xy[fac == levels(fac)[i], 1:2])
     if(any(!is.na(vcv))) {
       ell <- car::ellipse(center = cent, shape = vcv,
-                          radius = stats::qnorm((1 - conflev) / 2, lower.tail = F),
+                          radius = sqrt(stats::qchisq(conflev, df = 2)),
                           draw = FALSE)
       graphics::polygon(ell, border = col[i],
                         col = grDevices::adjustcolor(col[i], alpha.f = alpha), lty = lty[i], ...)
