@@ -1,0 +1,14 @@
+citHeader("To cite the 'morphospace' package in publications, please use:")
+
+bibentry(
+  "Manual",
+  title  = "morphospace: Build and Visualize Multivariate Ordinations of Shape Data",
+  author = person(given = "Pablo", family = "Milla Carmona", role = c("aut", "cre")),
+  year   = "2025",
+  note   = "R package version 0.0.2",
+  url    = c("https://github.com/millacarmona/morphospace", "https://millacarmona.github.io/morphospace/")
+)
+
+citFooter("If you used proj_landscape to create phylomorphospaces, cite 'phytools' (if you used the default 'BM' model) or 'mvMORPH' (if you used 'OU' or 'EB' models); use citation(\"phytools\") or citation(\"mvMORPH\"), respectively, for citation details.
+
+If you used proj_landscape, cite 'akima'; use citation(\"akima\") for citation details.")
