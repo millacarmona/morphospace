@@ -539,18 +539,25 @@ mspace <- function(shapes = NULL,
 #'   proj_shapes(shapes = shapes) %>%
 #'   proj_shapes(shapes = shapes[,,c("Dk M Op 8 Ad_02", "Dk H Tr 11 Ad_03")],
 #'               pch = 16, col = 2, labels = c("Dk M Op 8 Ad_02", "Dk H Tr 11 Ad_03"))
-proj_shapes <- function(mspace, shapes, density = TRUE, labels = NULL, pipe = TRUE, ...) {
+proj_shapes <- function(mspace, shapes = NULL, density = TRUE,
+                        labels = NULL, pipe = TRUE, ...) {
+
 
   args <- c(as.list(environment()), list(...))
 
-  dat <- shapes_mat(shapes)
-  data2d <- dat$data2d
-  datype <- dat$datype
+  if(is.null(shapes)) {
+    scores <- mspace$ordination$x
+  } else {
+    dat <- shapes_mat(shapes)
+    data2d <- dat$data2d
+    datype <- dat$datype
 
-  if(mspace$ordination$datype != datype) stop("shapes and mspace types are not compatible")
+    if(mspace$ordination$datype != datype) stop("shapes and mspace types are not compatible")
 
-  scores <- proj_eigen(x = data2d, vectors = mspace$ordination$rotation,
-                       center = mspace$ordination$center)
+    scores <- proj_eigen(x = data2d, vectors = mspace$ordination$rotation,
+                         center = mspace$ordination$center)
+  }
+
 
   if(mspace$plotinfo$plot) {
 
