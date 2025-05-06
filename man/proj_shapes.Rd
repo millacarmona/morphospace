@@ -4,7 +4,14 @@
 \alias{proj_shapes}
 \title{Project shapes into morphospace}
 \usage{
-proj_shapes(mspace, shapes, density = TRUE, labels = NULL, pipe = TRUE, ...)
+proj_shapes(
+  mspace,
+  shapes = NULL,
+  density = TRUE,
+  labels = NULL,
+  pipe = TRUE,
+  ...
+)
 }
 \arguments{
 \item{mspace}{An \code{"mspace"} object.}

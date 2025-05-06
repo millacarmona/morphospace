@@ -1805,6 +1805,7 @@ proj_pfront <- function(mspace, shapes = NULL, X = NULL, opt.increases = NULL,
 #' @param ... Further arguments passed to or from other methods.
 #'
 #' @noRd
+#' @export
 print.mspace <- function(mspace, ...) {
 
   if(any(c("prcomp", "mvgls.pca", "PCA") %in% mspace$ordination$ordtype)) ordtype <- "Principal Component Analysis"
@@ -1835,8 +1836,8 @@ print.mspace <- function(mspace, ...) {
   if(ncol(mspace$ordination$rotation) > 1) nax <- " axes" else nax <- " axis"
 
   cat("An mspace object containing")
-  cat(paste0("\n* an ordination space made out of ", ncol(mspace$ordination$rotation),
-             nax, " built using:"))
+  cat(paste0("\n* an ordination space consisting of ", ncol(mspace$ordination$rotation),
+             nax, ", built using:"))
   cat(paste0("\n   - ", ordtype))
   cat(paste0("\n   - ", datype))
 
