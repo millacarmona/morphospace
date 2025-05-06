@@ -1801,12 +1801,14 @@ proj_pfront <- function(mspace, shapes = NULL, X = NULL, opt.increases = NULL,
 #'
 #' @description Print contents of \code{"mspace"} objects in a friendly way :)
 #'
-#' @param mspace An \code{"mspace"} object.
+#' @param x An \code{"mspace"} object.
 #' @param ... Further arguments passed to or from other methods.
 #'
 #' @noRd
 #' @export
-print.mspace <- function(mspace, ...) {
+print.mspace <- function(x, ...) {
+
+  mspace <- x
 
   if(any(c("prcomp", "mvgls.pca", "PCA") %in% mspace$ordination$ordtype)) ordtype <- "Principal Component Analysis"
   if(mspace$ordination$ordtype == "gm.prcomp") {
@@ -3171,17 +3173,3 @@ plot_mspace <- function(mspace,
   }
 }
 
-
-################################################################################
-
-#' Plot \code{"mspace"} objects
-#'
-#' @description Regenerate morphospaces, generic S3 method (to replace
-#'   \code{plot_mspace})
-#'
-#' @param mspace An \code{"mspace"} object.
-#' @param ... Further arguments passed to or from other methods.
-#'
-#' @noRd
-#' @export
-plot.mspace <- plot_mspace
