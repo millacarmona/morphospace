@@ -952,6 +952,8 @@ proj_axis <- function(mspace, obj, axis = 1, mag = 1, pipe = TRUE, type = 3, ...
   mspace$plotinfo$type.axis <- c(mspace$plotinfo$type.axis, args$type)
   mspace$plotinfo$lwd.axis <- c(mspace$plotinfo$lwd.axis, args$lwd)
   mspace$plotinfo$lty.axis <- c(mspace$plotinfo$lty.axis, args$lty)
+
+  if(is.null(args$col)) args$col <- 1
   mspace$plotinfo$col.axis <- c(mspace$plotinfo$col.axis, col2hex(args$col))
 
   if(pipe == FALSE) return(invisible(ext_scores))
