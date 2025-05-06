@@ -3170,3 +3170,18 @@ plot_mspace <- function(mspace,
     }
   }
 }
+
+
+################################################################################
+
+#' Plot \code{"mspace"} objects
+#'
+#' @description Regenerate morphospaces, generic S3 method (to replace
+#'   \code{plot_mspace})
+#'
+#' @param mspace An \code{"mspace"} object.
+#' @param ... Further arguments passed to or from other methods.
+#'
+#' @noRd
+#' @export
+plot.mspace <- plot_mspace
