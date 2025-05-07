@@ -2843,9 +2843,14 @@ plot_mspace <- function(mspace,
             if(length(index_sc_in_gr) == 0) index_sc_in_gr <- 1:nrow(scores)
           } else index_sc_in_gr <- 1:nrow(scores <- gr_scores)
 
-          meanxy <- apply(X = cbind(x, gr_scores[,args$axes[1]], y), MARGIN = 2,
-                          FUN = tapply, gr_class, mean)
-          gcols <- stats::setNames(col2hex(args$col.groups), levels(gr_class))
+          if(length(c(x,y)) == nrow(gr_scores)) {
+            meanxy <- apply(X = cbind(x, gr_scores[,args$axes[1]], y), MARGIN = 2,
+                            FUN = tapply, gr_class, mean)
+            gcols <- stats::setNames(col2hex(args$col.groups), levels(gr_class))
+          } else {
+            meanxy <- NULL
+            cat("The number of shapes used for grouping is not the same than the length of x/y; group labels won't be displayed")
+          }
 
         } else {
           index_sc_in_gr <- if(!is.null(scores)) -c(1:nrow(scores)) else NULL
@@ -2913,7 +2918,7 @@ plot_mspace <- function(mspace,
         }
 
         add_labels(xy, args$labels.points)
-        add_labels(xy = meanxy, labels = args$labels.groups, col = gcols)
+        if(!is.null(meanxy)) add_labels(xy = meanxy, labels = args$labels.groups, col = gcols)
 
         if(is.factor(x) | is.factor(y))  {
 
