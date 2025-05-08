@@ -2830,6 +2830,7 @@ plot_mspace <- function(mspace,
       if(points | groups) {
 
         scores <- mspace$projected$scores
+        meanxy <- NULL
 
         if(!is.null(mspace$projected$gr_class)){
           gr_class <- mspace$projected$gr_class
@@ -2847,9 +2848,6 @@ plot_mspace <- function(mspace,
             meanxy <- apply(X = cbind(x, gr_scores[,args$axes[1]], y), MARGIN = 2,
                             FUN = tapply, gr_class, mean)
             gcols <- stats::setNames(col2hex(args$col.groups), levels(gr_class))
-          } else {
-            meanxy <- NULL
-            cat("The number of shapes used for grouping is not the same than the length of x/y; group labels won't be displayed")
           }
 
         } else {
