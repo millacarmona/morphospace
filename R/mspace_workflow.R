@@ -385,7 +385,7 @@ mspace <- function(shapes = NULL,
 
   # if only one axis is requested, override default aspect ratio for univariate
   # morphospace
-  if(length(axes) == 1 | nrow(ordination$x) == 1) asp <- NA
+  if(length(axes) == 1 | ncol(ordination$x) == 1) asp <- NA
 
 
   # axes is set to == 1 when there is only one ordination axis
